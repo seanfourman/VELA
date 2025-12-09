@@ -61,6 +61,12 @@ function MapView({ location, isVisible, isLoading }) {
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
         attributionControl={false}
+        minZoom={4}
+        maxBounds={[
+          [-85, -180],
+          [85, 180],
+        ]}
+        maxBoundsViscosity={1.0}
       >
         {/* CARTO Dark Matter - slightly brightened */}
         <TileLayer
@@ -70,6 +76,7 @@ function MapView({ location, isVisible, isLoading }) {
           keepBuffer={4}
           updateWhenIdle={true}
           updateWhenZooming={false}
+          noWrap={true}
         />
 
         {location && <MapAnimator location={location} />}
