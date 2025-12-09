@@ -59,9 +59,10 @@ function MapView({ location, isVisible, isLoading }) {
         center={defaultCenter}
         zoom={defaultZoom}
         style={{ height: "100%", width: "100%" }}
-        zoomControl={true}
+        zoomControl={false}
+        attributionControl={false}
       >
-        {/* CARTO Dark Matter - reliable free tiles with no strict rate limits */}
+        {/* CARTO Dark Matter - slightly brightened */}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
