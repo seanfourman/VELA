@@ -90,11 +90,6 @@
   font-family: inherit;
 }
 
-/* Brighten dark tiles slightly */
-.leaflet-tile-pane {
-  filter: brightness(1.75) contrast(1);
-}
-
 .leaflet-control-attribution {
   display: none !important;
 }
@@ -218,4 +213,81 @@
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   letter-spacing: 0.02em;
+}
+
+/* Map type switcher */
+.map-type-switcher {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  z-index: 1000;
+}
+
+.map-type-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.map-type-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.map-type-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+/* Light mode adjustments */
+.map-container.light .location-indicator,
+.map-container.light .map-type-switcher {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.map-container.light .indicator-text {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.map-container.light .map-type-btn {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.map-container.light .map-type-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.map-container.light .map-type-btn.active {
+  background: rgba(0, 0, 0, 0.15);
+  color: #000;
+}
+
+.map-container.light .indicator-dot.active {
+  background: #16a34a;
+  box-shadow: 0 0 8px #16a34a;
+}
+
+.map-container.light .indicator-dot.off {
+  background: #9ca3af;
+}
+
+/* Remove brightness filter for light/satellite modes */
+.map-container.light .leaflet-tile-pane,
+.map-container.satellite .leaflet-tile-pane {
+  filter: none;
 }
