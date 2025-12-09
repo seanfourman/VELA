@@ -48,13 +48,13 @@ function MapAnimator({ location }) {
   return null;
 }
 
-function MapView({ location, isVisible, isLoading }) {
+function MapView({ location, locationStatus }) {
   // Default center (world view) when no location yet
   const defaultCenter = [20, 0];
   const defaultZoom = 2;
 
   return (
-    <div className={`map-container ${isVisible ? "visible" : ""}`}>
+    <div className="map-container visible">
       <MapContainer
         center={defaultCenter}
         zoom={defaultZoom}
@@ -89,14 +89,15 @@ function MapView({ location, isVisible, isLoading }) {
         )}
       </MapContainer>
 
-      {isLoading && (
-        <div className="loading-overlay">
-          <div className="loading-content">
-            <div className="loading-spinner"></div>
-            <p>Getting your location...</p>
-          </div>
-        </div>
-      )}
+      {/* Location status indicator */}
+      <div className="location-indicator">
+        <div className={`indicator-dot ${locationStatus}`}></div>
+        <span className="indicator-text">
+          {locationStatus === "active" && "Live Location"}
+          {locationStatus === "searching" && "Searching..."}
+          {locationStatus === "off" && "Location Off"}
+        </span>
+      </div>
     </div>
   );
 }

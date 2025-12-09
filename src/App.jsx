@@ -5,33 +5,42 @@ import "./App.css";
 
 function App() {
   const [location, setLocation] = useState(null);
+  // "searching" | "active" | "off"
+  const [locationStatus, setLocationStatus] = useState("searching");
 
-  // Try to get location silently in the background
+  // Watch position for live location updates
   useEffect(() => {
     if (!navigator.geolocation) {
-      return; // Exit if geolocation is not supported
+      setLocationStatus("off");
+      return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    const watchId = navigator.geolocation.watchPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
-        setLocation({ lat: latitude, lng: longitude });
+        const { latitude, longitude, accuracy } = position.coords;
+        setLocation({ lat: latitude, lng: longitude, accuracy });
+        setLocationStatus("active");
       },
       (error) => {
-        // Location denied or unavailable - that's fine, map will show world view
+        // Location denied or unavailable
+        setLocationStatus("off");
       },
       {
         enableHighAccuracy: true,
-        timeout: 10000,
+        timeout: 15000,
         maximumAge: 0,
       }
     );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, []);
 
   return (
     <div className="app">
       <Navbar />
-      <MapView location={location} isVisible={true} isLoading={false} />
+      <MapView location={location} locationStatus={locationStatus} />
     </div>
   );
 }
