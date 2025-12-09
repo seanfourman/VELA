@@ -145,3 +145,48 @@
     height: 28px;
   }
 }
+
+/* Light mode styles */
+.navbar-blur.light {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.navbar.light .nav-link {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.navbar.light .nav-link:hover {
+  color: #000;
+}
+
+.navbar.light .auth-button {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.9);
+}
+
+.navbar.light .auth-button::before {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.1) 25%,
+    rgba(0, 0, 0, 0.05) 50%,
+    rgba(0, 0, 0, 0.1) 75%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+}
+
+.navbar.light .auth-button:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.navbar.light .auth-button:hover::before {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.15) 25%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.15) 75%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}

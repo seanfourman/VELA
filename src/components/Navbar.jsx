@@ -1,11 +1,14 @@
 import "./Navbar.css";
 import velaLogo from "../assets/vela.svg";
+import velaLogoBlack from "../assets/vela-black.svg";
 
-function Navbar() {
+function Navbar({ mapType }) {
+  const isLight = mapType === "light";
+
   return (
     <>
-      <div className="navbar-blur" />
-      <nav className="navbar">
+      <div className={`navbar-blur ${isLight ? "light" : ""}`} />
+      <nav className={`navbar ${isLight ? "light" : ""}`}>
         <div className="navbar-left">
           <a href="#" className="nav-link">
             Explore
@@ -16,7 +19,7 @@ function Navbar() {
         </div>
 
         <a href="/" className="navbar-logo">
-          <img src={velaLogo} alt="VELA" className="logo-img" />
+          <img src={isLight ? velaLogoBlack : velaLogo} alt="VELA" className="logo-img" />
         </a>
 
         <div className="navbar-right">

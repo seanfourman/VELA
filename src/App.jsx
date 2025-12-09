@@ -5,8 +5,8 @@ import "./App.css";
 
 function App() {
   const [location, setLocation] = useState(null);
-  // "searching" | "active" | "off"
   const [locationStatus, setLocationStatus] = useState("searching");
+  const [mapType, setMapType] = useState("dark");
 
   // Watch position for live location updates
   useEffect(() => {
@@ -39,8 +39,13 @@ function App() {
 
   return (
     <div className="app">
-      <Navbar />
-      <MapView location={location} locationStatus={locationStatus} />
+      <Navbar mapType={mapType} />
+      <MapView
+        location={location}
+        locationStatus={locationStatus}
+        mapType={mapType}
+        setMapType={setMapType}
+      />
     </div>
   );
 }

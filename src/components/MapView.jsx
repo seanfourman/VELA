@@ -66,9 +66,7 @@ function MapAnimator({ location }) {
   return null;
 }
 
-function MapView({ location, locationStatus }) {
-  const [mapType, setMapType] = useState("dark");
-
+function MapView({ location, locationStatus, mapType, setMapType }) {
   // Default center (world view) when no location yet
   const defaultCenter = [20, 0];
   const defaultZoom = 2;
