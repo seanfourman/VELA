@@ -7,12 +7,8 @@ import App from "./App.jsx";
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("/sw.js").then(
-      (registration) => {
-        console.log("SW registered for tile caching:", registration.scope);
-      },
-      (error) => {
-        console.log("SW registration failed:", error);
-      }
+      (registration) => {},
+      (error) => {}
     );
   });
 }
