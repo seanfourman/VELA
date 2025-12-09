@@ -1,3 +1,19 @@
+/* Gradient blur overlay that fades from top */
+.navbar-blur {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: transparent;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 999;
+}
+
 .navbar {
   position: fixed;
   top: 0;
@@ -8,78 +24,107 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 40px;
-  background: rgba(22, 22, 28, 0.92);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: none;
   z-index: 1000;
 }
 
-.navbar-brand {
+.navbar-left,
+.navbar-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 32px;
+  flex: 1;
 }
 
-.logo-text {
-  font-size: 1.8rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  letter-spacing: 3px;
+.navbar-left {
+  justify-content: flex-start;
 }
 
-.navbar-links {
+.navbar-right {
+  justify-content: flex-end;
+}
+
+.navbar-logo {
   display: flex;
-  gap: 40px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.navbar-logo:hover {
+  opacity: 0.8;
+  transform: scale(1.02);
+}
+
+.logo-img {
+  height: 32px;
+  width: auto;
 }
 
 .nav-link {
   color: rgba(255, 255, 255, 0.7);
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  transition: color 0.3s ease;
-  position: relative;
+  transition: color 0.2s ease;
+  padding: 8px 0;
 }
 
-.nav-link:hover,
-.nav-link.active {
+.nav-link:hover {
   color: #fff;
 }
 
-.nav-link.active::after {
-  content: "";
-  position: absolute;
-  bottom: -5px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 2px;
-}
-
-.navbar-actions {
-  display: flex;
-  align-items: center;
-}
-
-.nav-button {
+.auth-button {
+  position: relative;
   padding: 10px 24px;
   border: none;
-  border-radius: 25px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: all 0.2s ease;
+  overflow: hidden;
 }
 
-.nav-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+/* Shiny border effect */
+.auth-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.1) 75%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.auth-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.auth-button:hover::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.15) 25%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    rgba(255, 255, 255, 0.6) 100%
+  );
 }
 
 @media (max-width: 768px) {
@@ -87,7 +132,16 @@
     padding: 0 20px;
   }
 
-  .navbar-links {
+  .navbar-left,
+  .navbar-right {
+    gap: 16px;
+  }
+
+  .nav-link {
     display: none;
+  }
+
+  .logo-img {
+    height: 28px;
   }
 }
