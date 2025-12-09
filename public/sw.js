@@ -1,8 +1,9 @@
-const CACHE_NAME = "vela-map-tiles-v1";
-const TILE_CACHE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+const CACHE_NAME = "vela-map-tiles-v2";
+const TILE_CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 // Tile URL patterns to cache
 const TILE_PATTERNS = [
+  /api\.maptiler\.com/,
   /basemaps\.cartocdn\.com/,
   /tile\.openstreetmap\.org/,
   /tiles\.stadiamaps\.com/,
@@ -27,6 +28,30 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+// Fetch with retry and exponential backoff
+async function fetchWithRetry(request, retries = 3, delay = 1000) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(request.clone());
+      if (response.ok) {
+        return response;
+      }
+      // If rate limited (429), wait longer before retry
+      if (response.status === 429) {
+        const waitTime = delay * Math.pow(2, i);
+        await new Promise((resolve) => setTimeout(resolve, waitTime));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await new Promise((resolve) =>
+        setTimeout(resolve, delay * Math.pow(2, i))
+      );
+    }
+  }
+}
+
 self.addEventListener("fetch", (event) => {
   const url = event.request.url;
 
@@ -35,29 +60,36 @@ self.addEventListener("fetch", (event) => {
 
   if (isTileRequest) {
     event.respondWith(
-      caches.open(CACHE_NAME).then((cache) => {
-        return cache.match(event.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            // Return cached tile
-            return cachedResponse;
-          }
+      caches.open(CACHE_NAME).then(async (cache) => {
+        // Always try cache first
+        const cachedResponse = await cache.match(event.request);
+        if (cachedResponse) {
+          return cachedResponse;
+        }
 
-          // Fetch and cache the tile
-          return fetch(event.request)
-            .then((networkResponse) => {
-              if (networkResponse.ok) {
-                cache.put(event.request, networkResponse.clone());
-              }
-              return networkResponse;
-            })
-            .catch(() => {
-              // Return a placeholder or empty response on network failure
-              return new Response("", {
-                status: 503,
-                statusText: "Tile unavailable",
-              });
-            });
-        });
+        // Not in cache, fetch with retry
+        try {
+          const networkResponse = await fetchWithRetry(event.request);
+          if (networkResponse.ok) {
+            // Clone and cache the response
+            cache.put(event.request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch (error) {
+          // Return transparent 1x1 PNG on failure
+          return new Response(
+            Uint8Array.from(
+              atob(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+              ),
+              (c) => c.charCodeAt(0)
+            ),
+            {
+              status: 200,
+              headers: { "Content-Type": "image/png" },
+            }
+          );
+        }
       })
     );
   }

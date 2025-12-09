@@ -6,7 +6,14 @@ import "./App.css";
 function App() {
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState("searching");
-  const [mapType, setMapType] = useState("dark");
+  const [mapType, setMapType] = useState(() => {
+    return localStorage.getItem("mapType") || "dark";
+  });
+
+  // Save mapType to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem("mapType", mapType);
+  }, [mapType]);
 
   // Watch position for live location updates
   useEffect(() => {
