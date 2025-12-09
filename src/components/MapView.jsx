@@ -82,26 +82,12 @@ function MapView({ location, isVisible, isLoading }) {
         {location && <MapAnimator location={location} />}
 
         {location && (
-          <Marker position={[location.lat, location.lng]} icon={customIcon}>
-            <Popup className="custom-popup">
-              <div className="popup-content">
-                <h4>📍 Your Location</h4>
-                <p>Lat: {location.lat.toFixed(4)}</p>
-                <p>Lng: {location.lng.toFixed(4)}</p>
-              </div>
-            </Popup>
-          </Marker>
+          <Marker
+            position={[location.lat, location.lng]}
+            icon={customIcon}
+          ></Marker>
         )}
       </MapContainer>
-
-      {location && (
-        <div className="map-overlay">
-          <div className="location-badge">
-            <span className="badge-dot"></span>
-            <span>Live Location</span>
-          </div>
-        </div>
-      )}
 
       {isLoading && (
         <div className="loading-overlay">
