@@ -552,6 +552,15 @@
   transition: all 0.25s ease;
   z-index: 960;
   pointer-events: auto;
+  padding: 0px;
+  outline: none;
+  box-shadow: none;
+}
+
+.planet-panel-toggle:focus,
+.planet-panel-toggle:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .planet-panel-toggle.active {
