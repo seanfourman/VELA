@@ -18,13 +18,23 @@ function Navbar({ mapType }) {
           </a>
         </div>
 
-        <div className="navbar-logo">
-          <img
-            src={isLight ? velaLogoBlack : velaLogo}
-            alt="VELA"
-            className="logo-img"
-          />
-        </div>
+        {window.location.pathname === "/" ? (
+          <div className="navbar-logo disabled">
+            <img
+              src={isLight ? velaLogoBlack : velaLogo}
+              alt="VELA"
+              className="logo-img"
+            />
+          </div>
+        ) : (
+          <a href="/" className="navbar-logo">
+            <img
+              src={isLight ? velaLogoBlack : velaLogo}
+              alt="VELA"
+              className="logo-img"
+            />
+          </a>
+        )}
 
         <div className="navbar-right">
           <a href="#" className="nav-link">
