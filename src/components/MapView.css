@@ -327,7 +327,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
   z-index: 950;
   pointer-events: auto;
 }
@@ -339,36 +338,33 @@
   justify-content: center;
   height: 100%;
   width: 100%;
-  gap: 6px;
+  position: relative;
 }
 
 .planet-scroll-btn {
   width: 36px;
   height: 36px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
+  background: none;
+  border: none;
   color: #fff;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.planet-scroll-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  border-color: rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.16);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .map-container.light .planet-scroll-btn {
-  border-color: rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.05);
   color: #0f172a;
 }
 
-.map-container.light .planet-scroll-btn:hover:not(:disabled) {
-  border-color: rgba(0, 0, 0, 0.12);
-  background: rgba(0, 0, 0, 0.08);
+.planet-scroll-btn.prev {
+  top: 0;
+}
+
+.planet-scroll-btn.next {
+  bottom: 0;
 }
 
 .planet-cards {
@@ -460,12 +456,14 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 10px;
     height: auto;
     width: 100%;
+    padding: 0;
   }
 
   .planet-scroll-btn {
+    position: static;
+    transform: none;
     width: 34px;
     height: 34px;
   }

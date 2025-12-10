@@ -325,7 +325,7 @@ function Planetarium({ planets, loading, error, mapType }) {
       <div className="planet-stack">
         {canScrollPrev && (
           <button
-            className="planet-scroll-btn"
+            className="planet-scroll-btn prev"
             onClick={() => handlePage(-1)}
             aria-label="Previous planets"
           >
@@ -353,7 +353,7 @@ function Planetarium({ planets, loading, error, mapType }) {
 
         {canScrollNext && (
           <button
-            className="planet-scroll-btn"
+            className="planet-scroll-btn next"
             onClick={() => handlePage(1)}
             aria-label="Next planets"
           >
