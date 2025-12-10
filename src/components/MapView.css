@@ -405,8 +405,9 @@
 /* Visible planets shelf */
 .planet-float-row {
   position: absolute;
-  top: 100px;
-  left: 16px;
+  top: 50%;
+  left: 135px;
+  transform: translate(-50%, -50%);
   width: 380px;
   height: calc(100% - 160px);
   display: flex;
