@@ -222,13 +222,16 @@ function PlanetGlobe({ textureUrl, name }) {
       </mesh>
       {isSaturn && ringTexture && (
         <mesh rotation={[Math.PI / 2.1, 0, 0]}>
-          <ringGeometry ref={ringGeoRef} args={[innerRadius, outerRadius, 128]} />
+          <ringGeometry
+            ref={ringGeoRef}
+            args={[innerRadius, outerRadius, 128]}
+          />
           <meshStandardMaterial
             map={ringTexture}
             alphaMap={ringTexture}
             color="#ffffff"
             emissive="#b3a89a"
-            emissiveIntensity={0.15}
+            emissiveIntensity={5}
             side={DoubleSide}
             transparent
             depthWrite={false}
