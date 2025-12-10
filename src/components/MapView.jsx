@@ -282,7 +282,7 @@ function PlanetCard({ planet, cardRef }) {
   );
 }
 
-function Planetarium({ planets, loading, error, mapType }) {
+function Planetarium({ planets, loading, error, mapType, panelVisible }) {
   const [page, setPage] = useState(0);
   const firstCardRef = useRef(null);
   const [cardHeight, setCardHeight] = useState(null);
@@ -340,7 +340,11 @@ function Planetarium({ planets, loading, error, mapType }) {
       : "translateY(0)";
 
   return (
-    <div className={`planet-float-row ${mapType}`}>
+    <div
+      className={`planet-float-row ${mapType} ${
+        panelVisible ? "open" : "collapsed"
+      }`}
+    >
       <div className="planet-stack">
         {canScrollPrev && (
           <button
@@ -469,6 +473,10 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const [planetsLoading, setPlanetsLoading] = useState(false);
   const [planetsError, setPlanetsError] = useState(null);
   const [planetQuery, setPlanetQuery] = useState(null);
+  const [planetPanelVisible, setPlanetPanelVisible] = useState(true);
+  const [hasShownPanelToggle, setHasShownPanelToggle] = useState(false);
+  const planetPanelTimerRef = useRef(null);
+  const initialAutoHideScheduled = useRef(false);
 
   // Default center (world view) when no location yet
   const defaultCenter = [20, 0];
@@ -513,6 +521,38 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     []
   );
 
+  const revealPlanetPanel = useCallback((autoHide = false) => {
+    if (planetPanelTimerRef.current) {
+      clearTimeout(planetPanelTimerRef.current);
+      planetPanelTimerRef.current = null;
+    }
+    setPlanetPanelVisible(true);
+    if (autoHide) {
+      planetPanelTimerRef.current = setTimeout(() => {
+        setPlanetPanelVisible(false);
+        setHasShownPanelToggle(true);
+        planetPanelTimerRef.current = null;
+      }, 3000);
+    }
+  }, []);
+
+  const hidePlanetPanel = useCallback(() => {
+    if (planetPanelTimerRef.current) {
+      clearTimeout(planetPanelTimerRef.current);
+      planetPanelTimerRef.current = null;
+    }
+    setPlanetPanelVisible(false);
+    setHasShownPanelToggle(true);
+  }, []);
+
+  const togglePlanetPanel = useCallback(() => {
+    if (planetPanelVisible) {
+      hidePlanetPanel();
+    } else {
+      revealPlanetPanel(false);
+    }
+  }, [planetPanelVisible, hidePlanetPanel, revealPlanetPanel]);
+
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
       mapRef.current.flyTo([location.lat, location.lng], 15, {
@@ -531,6 +571,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   const handleGetVisiblePlanets = async () => {
     if (contextMenu) {
+      revealPlanetPanel(true);
       fetchPlanetsForLocation(
         contextMenu.lat,
         contextMenu.lng,
@@ -567,14 +608,75 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     );
   }, [location, planetQuery?.source, fetchPlanetsForLocation]);
 
+  useEffect(() => {
+    const hasPlanets =
+      Array.isArray(visiblePlanets) && visiblePlanets.length > 0;
+    if (
+      !hasShownPanelToggle &&
+      !initialAutoHideScheduled.current &&
+      (hasPlanets || location)
+    ) {
+      initialAutoHideScheduled.current = true;
+      revealPlanetPanel(true);
+    }
+  }, [visiblePlanets, location, hasShownPanelToggle, revealPlanetPanel]);
+
+  useEffect(() => {
+    return () => {
+      if (planetPanelTimerRef.current) {
+        clearTimeout(planetPanelTimerRef.current);
+        planetPanelTimerRef.current = null;
+      }
+    };
+  }, []);
+
+  const showPlanetPanelToggle =
+    hasShownPanelToggle &&
+    (location || (Array.isArray(visiblePlanets) && visiblePlanets.length > 0));
+
   return (
     <div className={`map-container visible ${mapType}`}>
-      <Planetarium
-        planets={visiblePlanets}
-        loading={planetsLoading}
-        error={planetsError}
-        mapType={mapType}
-      />
+      <div
+        className={`planet-panel-wrapper ${
+          planetPanelVisible ? "open" : "collapsed"
+        }`}
+      >
+        <Planetarium
+          planets={visiblePlanets}
+          loading={planetsLoading}
+          error={planetsError}
+          mapType={mapType}
+          panelVisible={planetPanelVisible}
+        />
+
+        {showPlanetPanelToggle && (
+          <button
+            className={`planet-panel-toggle ${
+              planetPanelVisible ? "active" : ""
+            }`}
+            onClick={togglePlanetPanel}
+            aria-label={
+              planetPanelVisible
+                ? "Hide visible planets panel"
+                : "Show visible planets panel"
+            }
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              style={{
+                transform: planetPanelVisible ? "rotate(180deg)" : "none",
+              }}
+            >
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+        )}
+      </div>
 
       <MapContainer
         center={defaultCenter}

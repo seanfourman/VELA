@@ -316,17 +316,32 @@
 }
 
 /* Visible planets shelf */
-.planet-float-row {
+.planet-panel-wrapper {
   position: absolute;
   top: 50%;
   left: 160px;
   transform: translate(-50%, -50%);
+  z-index: 950;
+  pointer-events: none;
+}
+
+.planet-float-row {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 950;
   pointer-events: auto;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+  will-change: transform;
+}
+
+.planet-float-row.collapsed {
+  transform: translate3d(-130%, 0, 0);
+  opacity: 1;
+  pointer-events: none;
 }
 
 .planet-stack {
@@ -336,15 +351,17 @@
   justify-content: center;
   position: relative;
   padding: 18px 16px;
-  min-width: 260px;
-  max-width: 280px;
+  height: 750px;
+  width: 250px;
   min-height: 440px;
   border-radius: 26px;
   isolation: isolate;
   backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: none;
+  will-change: backdrop-filter, transform;
 }
 
 .planet-stack::before {
@@ -465,6 +482,8 @@
 .planet-canvas canvas {
   width: 100% !important;
   height: 100% !important;
+  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.15))
+    drop-shadow(0 6px 14px rgba(0, 0, 0, 0.05));
 }
 
 .planet-empty {
@@ -511,17 +530,87 @@
   opacity: 0.8;
 }
 
+.planet-panel-toggle {
+  position: absolute;
+  top: 50%;
+  left: -6px;
+  transform: translateY(-50%);
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  z-index: 960;
+  pointer-events: auto;
+}
+
+.planet-panel-toggle.active {
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.planet-panel-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.planet-panel-toggle:active {
+  transform: translateY(-50%) scale(0.97);
+}
+
+.map-container.light .planet-panel-toggle {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #0f172a;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.planet-panel-wrapper.open .planet-panel-toggle {
+  left: calc(100% + 14px);
+}
+
+.planet-panel-wrapper.collapsed .planet-panel-toggle {
+  left: -6px;
+}
+
 @media (max-width: 768px) {
-  .planet-float-row {
+  .planet-panel-wrapper {
     top: auto;
     bottom: 86px;
     left: 12px;
     right: 12px;
-    width: auto;
+    transform: none;
+  }
+
+  .planet-float-row {
     flex-direction: row;
     align-items: flex-end;
     justify-content: center;
     height: auto;
+    transform: none;
+  }
+
+  .planet-float-row.open {
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .planet-float-row.collapsed {
+    transform: translateX(-130%);
+    opacity: 1;
   }
 
   .planet-stack {
@@ -563,5 +652,34 @@
   .planet-card {
     min-height: 240px;
     max-width: 250px;
+  }
+
+  .planet-panel-toggle {
+    top: auto;
+    bottom: 120px;
+    left: 12px;
+    right: auto;
+    transform: none;
+    width: 44px;
+    height: 44px;
+  }
+
+  .planet-panel-wrapper.open .planet-panel-toggle {
+    left: auto;
+    right: -8px;
+    top: 50%;
+    bottom: auto;
+    transform: translate(50%, -50%);
+  }
+
+  .planet-panel-wrapper.collapsed .planet-panel-toggle {
+    left: 12px;
+    right: auto;
+    bottom: 120px;
+    transform: none;
+  }
+
+  .planet-panel-toggle:active {
+    transform: scale(0.97);
   }
 }
