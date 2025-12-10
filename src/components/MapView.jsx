@@ -1,4 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { useTexture } from "@react-three/drei";
 import {
   MapContainer,
   TileLayer,
@@ -9,6 +18,12 @@ import {
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import {
+  LinearFilter,
+  LinearMipmapLinearFilter,
+  DoubleSide,
+  SRGBColorSpace,
+} from "three";
 import "./MapView.css";
 
 const MAPTILER_KEY = "QvyjnqdnkmG5VtE3d2xS";
@@ -29,6 +44,30 @@ const MAP_TILES = {
     url: `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`,
     attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>',
   },
+};
+
+const planetTexture = (fileName) =>
+  new URL(`../assets/planets/${fileName}`, import.meta.url).href;
+
+const PLANET_TEXTURES = {
+  sun: planetTexture("2k_sun.jpg"),
+  moon: planetTexture("2k_moon.jpg"),
+  mercury: planetTexture("2k_mercury.jpg"),
+  venus: planetTexture("2k_venus_atmosphere.jpg"),
+  earth: planetTexture("2k_stars_milky_way.jpg"),
+  mars: planetTexture("2k_mars.jpg"),
+  jupiter: planetTexture("2k_jupiter.jpg"),
+  saturn: planetTexture("2k_saturn.jpg"),
+  saturnRing: planetTexture("2k_saturn_ring_alpha.png"),
+  uranus: planetTexture("2k_uranus.jpg"),
+  neptune: planetTexture("2k_neptune.jpg"),
+  pluto: planetTexture("2k_makemake_fictional.jpg"),
+  ceres: planetTexture("2k_ceres_fictional.jpg"),
+  eris: planetTexture("2k_eris_fictional.jpg"),
+  haumea: planetTexture("2k_haumea_fictional.jpg"),
+  makemake: planetTexture("2k_makemake_fictional.jpg"),
+  stars: planetTexture("2k_stars_milky_way.jpg"),
+  default: planetTexture("2k_stars_milky_way.jpg"),
 };
 
 // Fix for default marker icon
@@ -101,6 +140,212 @@ async function fetchVisiblePlanets(lat, lng) {
   }
 }
 
+const resolvePlanetTexture = (name) => {
+  if (!name) return PLANET_TEXTURES.default;
+  const key = name.toLowerCase();
+
+  if (PLANET_TEXTURES[key]) return PLANET_TEXTURES[key];
+  if (key.includes("venus")) return PLANET_TEXTURES.venus;
+  if (key.includes("saturn")) return PLANET_TEXTURES.saturn;
+  if (key.includes("moon")) return PLANET_TEXTURES.moon;
+
+  return PLANET_TEXTURES.default;
+};
+
+function PlanetGlobe({ textureUrl, name }) {
+  const isSaturn = !!name && name.toLowerCase().includes("saturn");
+  const [baseTexture, baseRingTexture] = useTexture(
+    isSaturn ? [textureUrl, PLANET_TEXTURES.saturnRing] : [textureUrl]
+  );
+  const texture = useMemo(() => {
+    if (!baseTexture) return baseTexture;
+
+    const cloned = baseTexture.clone();
+    cloned.colorSpace = SRGBColorSpace;
+    cloned.minFilter = LinearMipmapLinearFilter;
+    cloned.magFilter = LinearFilter;
+    cloned.anisotropy = 4;
+    cloned.needsUpdate = true;
+
+    return cloned;
+  }, [baseTexture]);
+  const ringTexture = useMemo(() => {
+    if (!baseRingTexture) return baseRingTexture;
+    const cloned = baseRingTexture.clone();
+    cloned.colorSpace = SRGBColorSpace;
+    cloned.minFilter = LinearMipmapLinearFilter;
+    cloned.magFilter = LinearFilter;
+    cloned.anisotropy = 4;
+    cloned.needsUpdate = true;
+    return cloned;
+  }, [baseRingTexture]);
+  const meshRef = useRef();
+
+  useFrame((_, delta) => {
+    if (meshRef.current) {
+      meshRef.current.rotation.y += 0.35 * delta;
+      meshRef.current.rotation.x = Math.sin(Date.now() * 0.0003) * 0.08;
+    }
+  });
+
+  return (
+    <>
+      <mesh ref={meshRef} castShadow receiveShadow>
+        <sphereGeometry args={[1.05, 64, 64]} />
+        <meshStandardMaterial map={texture} roughness={0.85} metalness={0.08} />
+      </mesh>
+      {isSaturn && ringTexture && (
+        <mesh rotation={[Math.PI / 2.1, 0, 0]}>
+          <ringGeometry args={[1.35, 2.2, 90]} />
+          <meshStandardMaterial
+            map={ringTexture}
+            side={DoubleSide}
+            transparent
+            depthWrite={false}
+            opacity={0.92}
+            roughness={0.8}
+            metalness={0.05}
+          />
+        </mesh>
+      )}
+    </>
+  );
+}
+
+function PlanetCard({ planet }) {
+  const textureUrl = useMemo(
+    () => resolvePlanetTexture(planet?.name),
+    [planet?.name]
+  );
+
+  const altitude =
+    planet?.altitude !== undefined && planet?.altitude !== null
+      ? `${planet.altitude.toFixed(1)}°`
+      : "—";
+  const azimuth =
+    planet?.azimuth !== undefined && planet?.azimuth !== null
+      ? `${planet.azimuth.toFixed(1)}°`
+      : "—";
+  const magnitude =
+    planet?.magnitude !== undefined && planet?.magnitude !== null
+      ? planet.magnitude.toFixed(1)
+      : null;
+
+  return (
+    <div className="planet-card">
+      <div className="planet-canvas">
+        <Canvas
+          dpr={[1, 1.5]}
+          camera={{ position: [0, 0, 3.2], fov: 38 }}
+          gl={{ antialias: true, powerPreference: "high-performance" }}
+        >
+          <ambientLight intensity={1.1} />
+          <directionalLight position={[2.5, 2.5, 2.5]} intensity={1.2} />
+          <directionalLight position={[-2, -1, -1]} intensity={0.35} />
+          <Suspense fallback={null}>
+            <PlanetGlobe textureUrl={textureUrl} name={planet?.name} />
+          </Suspense>
+        </Canvas>
+      </div>
+      <div className="planet-meta">
+        <div className="planet-name">{planet?.name}</div>
+        <div className="planet-sub">
+          {planet?.constellation
+            ? `in ${planet.constellation}`
+            : "above horizon"}
+        </div>
+        <div className="planet-stat">
+          <span>Alt</span>
+          <span>{altitude}</span>
+        </div>
+        <div className="planet-stat">
+          <span>Az</span>
+          <span>{azimuth}</span>
+        </div>
+        {magnitude && (
+          <div className="planet-stat">
+            <span>Mag</span>
+            <span>{magnitude}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Planetarium({
+  planets,
+  loading,
+  error,
+  sourceLabel,
+  onRefresh,
+  mapType,
+  isPinnedView,
+  onUseMySky,
+  hasLocation,
+}) {
+  const planetsToShow = useMemo(
+    () =>
+      (Array.isArray(planets) ? planets : []).filter(
+        (planet) => planet.aboveHorizon !== false
+      ),
+    [planets]
+  );
+
+  return (
+    <div className={`planets-panel ${mapType}`}>
+      <div className="planet-header">
+        <div className="planet-header-text">
+          <div className="planet-title">Visible planets</div>
+          <div className="planet-subtitle">{sourceLabel}</div>
+        </div>
+        <div className="planet-actions">
+          {isPinnedView && hasLocation && (
+            <button
+              className="planet-secondary"
+              onClick={onUseMySky}
+              disabled={loading}
+            >
+              My sky
+            </button>
+          )}
+          <button
+            className="planet-refresh"
+            onClick={onRefresh}
+            disabled={loading || !onRefresh}
+          >
+            {loading ? "Loading..." : "Refresh"}
+          </button>
+        </div>
+      </div>
+
+      <div className="planet-cards">
+        {loading && (
+          <>
+            <div className="planet-card skeleton" />
+            <div className="planet-card skeleton" />
+            <div className="planet-card skeleton" />
+          </>
+        )}
+
+        {!loading && error && <div className="planet-empty error">{error}</div>}
+
+        {!loading && !error && planetsToShow.length === 0 && (
+          <div className="planet-empty">
+            No planets above the horizon right now.
+          </div>
+        )}
+
+        {!loading &&
+          !error &&
+          planetsToShow.map((planet) => (
+            <PlanetCard planet={planet} key={planet.name} />
+          ))}
+      </div>
+    </div>
+  );
+}
+
 // Component to handle map animations
 function MapAnimator({ location }) {
   const map = useMap();
@@ -145,12 +390,56 @@ function DoubleClickHandler({ onDoubleClick }) {
 
 function MapView({ location, locationStatus, mapType, setMapType }) {
   const mapRef = useRef(null);
+  const lastPlanetKey = useRef(null);
   const [placedMarker, setPlacedMarker] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [visiblePlanets, setVisiblePlanets] = useState([]);
+  const [planetsLoading, setPlanetsLoading] = useState(false);
+  const [planetsError, setPlanetsError] = useState(null);
+  const [planetQuery, setPlanetQuery] = useState(null);
 
   // Default center (world view) when no location yet
   const defaultCenter = [20, 0];
   const defaultZoom = 2;
+
+  const fetchPlanetsForLocation = useCallback(
+    async (lat, lng, label, { force = false, source = "location" } = {}) => {
+      if (lat === undefined || lng === undefined) return;
+      const roundedKey = `${lat.toFixed(2)}_${lng.toFixed(2)}`;
+
+      if (!force && lastPlanetKey.current === roundedKey) {
+        return;
+      }
+
+      setPlanetsLoading(true);
+      setPlanetsError(null);
+
+      try {
+        const data = await fetchVisiblePlanets(lat, lng);
+
+        if (!data) {
+          throw new Error("No visible planets data returned");
+        }
+
+        const planetList = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data)
+          ? data
+          : [];
+
+        setVisiblePlanets(planetList);
+        setPlanetQuery({ lat, lng, label, source });
+        lastPlanetKey.current = roundedKey;
+      } catch (error) {
+        setVisiblePlanets([]);
+        setPlanetsError("Could not load visible planets right now.");
+        console.error("Failed to fetch visible planets:", error);
+      } finally {
+        setPlanetsLoading(false);
+      }
+    },
+    []
+  );
 
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
@@ -170,11 +459,12 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   const handleGetVisiblePlanets = async () => {
     if (contextMenu) {
-      const data = await fetchVisiblePlanets(contextMenu.lat, contextMenu.lng);
-      console.log("Visible planets at location:", {
-        coordinates: { lat: contextMenu.lat, lng: contextMenu.lng },
-        planets: data,
-      });
+      fetchPlanetsForLocation(
+        contextMenu.lat,
+        contextMenu.lng,
+        "Visible from pinned spot",
+        { force: true, source: "pin" }
+      );
     }
   };
 
@@ -193,8 +483,78 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     setPlacedMarker(null);
   };
 
+  const handleRefreshPlanets = () => {
+    if (planetQuery) {
+      fetchPlanetsForLocation(
+        planetQuery.lat,
+        planetQuery.lng,
+        planetQuery.label,
+        { force: true, source: planetQuery.source || "location" }
+      );
+    } else if (location) {
+      fetchPlanetsForLocation(
+        location.lat,
+        location.lng,
+        "Visible from your sky",
+        { force: true, source: "location" }
+      );
+    }
+  };
+
+  const handleUseMySky = () => {
+    if (!location) return;
+    fetchPlanetsForLocation(
+      location.lat,
+      location.lng,
+      "Visible from your sky",
+      { force: true, source: "location" }
+    );
+  };
+
+  useEffect(() => {
+    if (!location) return;
+    if (planetQuery?.source === "pin") return;
+
+    fetchPlanetsForLocation(
+      location.lat,
+      location.lng,
+      "Visible from your sky",
+      { force: false, source: "location" }
+    );
+  }, [location, planetQuery?.source, fetchPlanetsForLocation]);
+
+  const planetSourceLabel = useMemo(() => {
+    if (planetQuery) {
+      return `${planetQuery.label} \u2022 ${planetQuery.lat.toFixed(
+        2
+      )}, ${planetQuery.lng.toFixed(2)}`;
+    }
+
+    if (locationStatus === "searching") {
+      return "Waiting for location lock to fetch the sky around you.";
+    }
+
+    if (locationStatus === "off") {
+      return "Turn on location or drop a pin to see visible planets.";
+    }
+
+    return "Pick a spot to see what is overhead.";
+  }, [planetQuery, locationStatus]);
+
   return (
     <div className={`map-container visible ${mapType}`}>
+      <Planetarium
+        planets={visiblePlanets}
+        loading={planetsLoading}
+        error={planetsError}
+        sourceLabel={planetSourceLabel}
+        onRefresh={handleRefreshPlanets}
+        mapType={mapType}
+        isPinnedView={planetQuery?.source === "pin"}
+        onUseMySky={handleUseMySky}
+        hasLocation={!!location}
+      />
+
       <MapContainer
         center={defaultCenter}
         zoom={defaultZoom}
