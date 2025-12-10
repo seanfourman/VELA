@@ -297,10 +297,20 @@ function Planetarium({ planets, loading, error, mapType }) {
   const safePage = Math.min(page, totalPages - 1);
   const start = safePage * PAGE_SIZE;
   const visiblePlanets = planetsToShow.slice(start, start + PAGE_SIZE);
+  const hasPlanets = planetsToShow.length > 0;
 
   useEffect(() => {
     setPage(0);
   }, [planetsToShow.length]);
+
+  const canScrollPrev =
+    !loading && !error && totalPages > 1 && safePage > 0 && hasPlanets;
+  const canScrollNext =
+    !loading && !error && totalPages > 1 && safePage < totalPages - 1 && hasPlanets;
+
+  if (!loading && !error && !hasPlanets) {
+    return null;
+  }
 
   const handlePage = (direction) => {
     setPage((prev) => {
@@ -313,14 +323,15 @@ function Planetarium({ planets, loading, error, mapType }) {
   return (
     <div className={`planet-float-row ${mapType}`}>
       <div className="planet-stack">
-        <button
-          className="planet-scroll-btn"
-          onClick={() => handlePage(-1)}
-          disabled={loading || safePage === 0}
-          aria-label="Previous planets"
-        >
-          ↑
-        </button>
+        {canScrollPrev && (
+          <button
+            className="planet-scroll-btn"
+            onClick={() => handlePage(-1)}
+            aria-label="Previous planets"
+          >
+            ↑
+          </button>
+        )}
 
         <div className="planet-cards">
           {loading && (
@@ -333,12 +344,6 @@ function Planetarium({ planets, loading, error, mapType }) {
 
           {!loading && error && <div className="planet-empty error">{error}</div>}
 
-          {!loading && !error && planetsToShow.length === 0 && (
-            <div className="planet-empty">
-              No planets above the horizon right now.
-            </div>
-          )}
-
           {!loading &&
             !error &&
             visiblePlanets.map((planet) => (
@@ -346,14 +351,15 @@ function Planetarium({ planets, loading, error, mapType }) {
             ))}
         </div>
 
-        <button
-          className="planet-scroll-btn"
-          onClick={() => handlePage(1)}
-          disabled={loading || safePage >= totalPages - 1}
-          aria-label="Next planets"
-        >
-          ↓
-        </button>
+        {canScrollNext && (
+          <button
+            className="planet-scroll-btn"
+            onClick={() => handlePage(1)}
+            aria-label="Next planets"
+          >
+            ↓
+          </button>
+        )}
       </div>
     </div>
   );
