@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
+import { OrbitControls, useTexture } from "@react-three/drei";
 import {
   MapContainer,
   TileLayer,
@@ -123,6 +123,7 @@ async function fetchVisiblePlanets(lat, lng) {
 
   try {
     const response = await fetch(
+      //`https://8gvuiadil2.execute-api.us-east-1.amazonaws.com/planets?lat=${lat}&lon=${lng}`
       `https://api.visibleplanets.dev/v3?latitude=${lat}&longitude=${lng}`
     );
     const data = await response.json();
@@ -191,12 +192,12 @@ function PlanetGlobe({ textureUrl, name }) {
   return (
     <>
       <mesh ref={meshRef} castShadow receiveShadow>
-        <sphereGeometry args={[1.05, 64, 64]} />
+        <sphereGeometry args={[0.45, 64, 64]} />
         <meshStandardMaterial map={texture} roughness={0.85} metalness={0.08} />
       </mesh>
       {isSaturn && ringTexture && (
         <mesh rotation={[Math.PI / 2.1, 0, 0]}>
-          <ringGeometry args={[1.35, 2.2, 90]} />
+          <ringGeometry args={[0.7, 1.05, 90]} />
           <meshStandardMaterial
             map={ringTexture}
             side={DoubleSide}
@@ -217,19 +218,7 @@ function PlanetCard({ planet }) {
     () => resolvePlanetTexture(planet?.name),
     [planet?.name]
   );
-
-  const altitude =
-    planet?.altitude !== undefined && planet?.altitude !== null
-      ? `${planet.altitude.toFixed(1)}°`
-      : "—";
-  const azimuth =
-    planet?.azimuth !== undefined && planet?.azimuth !== null
-      ? `${planet.azimuth.toFixed(1)}°`
-      : "—";
-  const magnitude =
-    planet?.magnitude !== undefined && planet?.magnitude !== null
-      ? planet.magnitude.toFixed(1)
-      : null;
+  const [autoSpin, setAutoSpin] = useState(true);
 
   return (
     <div className="planet-card">
@@ -245,29 +234,16 @@ function PlanetCard({ planet }) {
           <Suspense fallback={null}>
             <PlanetGlobe textureUrl={textureUrl} name={planet?.name} />
           </Suspense>
+          <OrbitControls
+            enableZoom={false}
+            enablePan={false}
+            autoRotate={autoSpin}
+            autoRotateSpeed={0.55}
+            rotateSpeed={1}
+            onStart={() => setAutoSpin(false)}
+            onEnd={() => setAutoSpin(true)}
+          />
         </Canvas>
-      </div>
-      <div className="planet-meta">
-        <div className="planet-name">{planet?.name}</div>
-        <div className="planet-sub">
-          {planet?.constellation
-            ? `in ${planet.constellation}`
-            : "above horizon"}
-        </div>
-        <div className="planet-stat">
-          <span>Alt</span>
-          <span>{altitude}</span>
-        </div>
-        <div className="planet-stat">
-          <span>Az</span>
-          <span>{azimuth}</span>
-        </div>
-        {magnitude && (
-          <div className="planet-stat">
-            <span>Mag</span>
-            <span>{magnitude}</span>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -277,12 +253,7 @@ function Planetarium({
   planets,
   loading,
   error,
-  sourceLabel,
-  onRefresh,
   mapType,
-  isPinnedView,
-  onUseMySky,
-  hasLocation,
 }) {
   const planetsToShow = useMemo(
     () =>
@@ -293,32 +264,7 @@ function Planetarium({
   );
 
   return (
-    <div className={`planets-panel ${mapType}`}>
-      <div className="planet-header">
-        <div className="planet-header-text">
-          <div className="planet-title">Visible planets</div>
-          <div className="planet-subtitle">{sourceLabel}</div>
-        </div>
-        <div className="planet-actions">
-          {isPinnedView && hasLocation && (
-            <button
-              className="planet-secondary"
-              onClick={onUseMySky}
-              disabled={loading}
-            >
-              My sky
-            </button>
-          )}
-          <button
-            className="planet-refresh"
-            onClick={onRefresh}
-            disabled={loading || !onRefresh}
-          >
-            {loading ? "Loading..." : "Refresh"}
-          </button>
-        </div>
-      </div>
-
+    <div className={`planet-float-row ${mapType}`}>
       <div className="planet-cards">
         {loading && (
           <>
@@ -483,34 +429,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     setPlacedMarker(null);
   };
 
-  const handleRefreshPlanets = () => {
-    if (planetQuery) {
-      fetchPlanetsForLocation(
-        planetQuery.lat,
-        planetQuery.lng,
-        planetQuery.label,
-        { force: true, source: planetQuery.source || "location" }
-      );
-    } else if (location) {
-      fetchPlanetsForLocation(
-        location.lat,
-        location.lng,
-        "Visible from your sky",
-        { force: true, source: "location" }
-      );
-    }
-  };
-
-  const handleUseMySky = () => {
-    if (!location) return;
-    fetchPlanetsForLocation(
-      location.lat,
-      location.lng,
-      "Visible from your sky",
-      { force: true, source: "location" }
-    );
-  };
-
   useEffect(() => {
     if (!location) return;
     if (planetQuery?.source === "pin") return;
@@ -523,36 +441,13 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     );
   }, [location, planetQuery?.source, fetchPlanetsForLocation]);
 
-  const planetSourceLabel = useMemo(() => {
-    if (planetQuery) {
-      return `${planetQuery.label} \u2022 ${planetQuery.lat.toFixed(
-        2
-      )}, ${planetQuery.lng.toFixed(2)}`;
-    }
-
-    if (locationStatus === "searching") {
-      return "Waiting for location lock to fetch the sky around you.";
-    }
-
-    if (locationStatus === "off") {
-      return "Turn on location or drop a pin to see visible planets.";
-    }
-
-    return "Pick a spot to see what is overhead.";
-  }, [planetQuery, locationStatus]);
-
   return (
     <div className={`map-container visible ${mapType}`}>
       <Planetarium
         planets={visiblePlanets}
         loading={planetsLoading}
         error={planetsError}
-        sourceLabel={planetSourceLabel}
-        onRefresh={handleRefreshPlanets}
         mapType={mapType}
-        isPinnedView={planetQuery?.source === "pin"}
-        onUseMySky={handleUseMySky}
-        hasLocation={!!location}
       />
 
       <MapContainer
