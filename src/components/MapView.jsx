@@ -246,7 +246,7 @@ function PlanetGlobe({ textureUrl, name }) {
   );
 }
 
-function PlanetCard({ planet }) {
+function PlanetCard({ planet, cardRef }) {
   const textureUrl = useMemo(
     () => resolvePlanetTexture(planet?.name),
     [planet?.name]
@@ -254,7 +254,7 @@ function PlanetCard({ planet }) {
   const [autoSpin, setAutoSpin] = useState(true);
 
   return (
-    <div className="planet-card">
+    <div className="planet-card" ref={cardRef}>
       <div className="planet-canvas">
         <Canvas
           dpr={[1, 1.5]}
@@ -284,6 +284,8 @@ function PlanetCard({ planet }) {
 
 function Planetarium({ planets, loading, error, mapType }) {
   const [page, setPage] = useState(0);
+  const firstCardRef = useRef(null);
+  const [cardHeight, setCardHeight] = useState(null);
   const planetsToShow = useMemo(
     () =>
       (Array.isArray(planets) ? planets : []).filter(
@@ -295,13 +297,20 @@ function Planetarium({ planets, loading, error, mapType }) {
   const PAGE_SIZE = 3;
   const totalPages = Math.max(1, Math.ceil(planetsToShow.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages - 1);
-  const start = safePage * PAGE_SIZE;
-  const visiblePlanets = planetsToShow.slice(start, start + PAGE_SIZE);
   const hasPlanets = planetsToShow.length > 0;
 
   useEffect(() => {
     setPage(0);
   }, [planetsToShow.length]);
+
+  useLayoutEffect(() => {
+    if (firstCardRef.current) {
+      const rect = firstCardRef.current.getBoundingClientRect();
+      if (rect?.height) {
+        setCardHeight(rect.height);
+      }
+    }
+  }, [planetsToShow.length, mapType, loading]);
 
   const canScrollPrev =
     !loading && !error && totalPages > 1 && safePage > 0 && hasPlanets;
@@ -323,6 +332,12 @@ function Planetarium({ planets, loading, error, mapType }) {
       return next;
     });
   };
+
+  const pageHeight = cardHeight ? cardHeight * PAGE_SIZE : null;
+  const trackTransform =
+    !loading && !error && pageHeight
+      ? `translateY(-${safePage * pageHeight}px)`
+      : "translateY(0)";
 
   return (
     <div className={`planet-float-row ${mapType}`}>
@@ -346,24 +361,38 @@ function Planetarium({ planets, loading, error, mapType }) {
           </button>
         )}
 
-        <div className="planet-cards">
-          {loading && (
-            <>
-              <div className="planet-card skeleton" />
-              <div className="planet-card skeleton" />
-              <div className="planet-card skeleton" />
-            </>
-          )}
+        <div
+          className="planet-cards-viewport"
+          style={pageHeight ? { height: pageHeight } : {}}
+        >
+          <div
+            className="planet-cards"
+            style={{ transform: trackTransform }}
+          >
+            {loading && (
+              <>
+                <div className="planet-card skeleton" ref={firstCardRef} />
+                <div className="planet-card skeleton" />
+                <div className="planet-card skeleton" />
+              </>
+            )}
 
-          {!loading && error && (
-            <div className="planet-empty error">{error}</div>
-          )}
+            {!loading && error && (
+              <div className="planet-empty error" ref={firstCardRef}>
+                {error}
+              </div>
+            )}
 
-          {!loading &&
-            !error &&
-            visiblePlanets.map((planet) => (
-              <PlanetCard planet={planet} key={planet.name} />
-            ))}
+            {!loading &&
+              !error &&
+              planetsToShow.map((planet, idx) => (
+                <PlanetCard
+                  planet={planet}
+                  key={planet.name}
+                  cardRef={idx === 0 ? firstCardRef : undefined}
+                />
+              ))}
+          </div>
         </div>
 
         {canScrollNext && (

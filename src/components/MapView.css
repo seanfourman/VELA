@@ -384,9 +384,18 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: visible;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.planet-cards-viewport {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  min-height: 420px;
 }
 
 .planet-card {
@@ -488,6 +497,14 @@
     overflow-y: hidden;
     flex: initial;
     align-items: center;
+    transform: none !important;
+    transition: none;
+  }
+
+  .planet-cards-viewport {
+    height: auto !important;
+    overflow: visible;
+    min-height: 0;
   }
 
   .planet-card {
