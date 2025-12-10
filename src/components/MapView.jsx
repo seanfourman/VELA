@@ -283,6 +283,7 @@ function PlanetCard({ planet }) {
 }
 
 function Planetarium({ planets, loading, error, mapType }) {
+  const [page, setPage] = useState(0);
   const planetsToShow = useMemo(
     () =>
       (Array.isArray(planets) ? planets : []).filter(
@@ -291,30 +292,68 @@ function Planetarium({ planets, loading, error, mapType }) {
     [planets]
   );
 
+  const PAGE_SIZE = 3;
+  const totalPages = Math.max(1, Math.ceil(planetsToShow.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages - 1);
+  const start = safePage * PAGE_SIZE;
+  const visiblePlanets = planetsToShow.slice(start, start + PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(0);
+  }, [planetsToShow.length]);
+
+  const handlePage = (direction) => {
+    setPage((prev) => {
+      const next = prev + direction;
+      if (next < 0 || next > totalPages - 1) return prev;
+      return next;
+    });
+  };
+
   return (
     <div className={`planet-float-row ${mapType}`}>
-      <div className="planet-cards">
-        {loading && (
-          <>
-            <div className="planet-card skeleton" />
-            <div className="planet-card skeleton" />
-            <div className="planet-card skeleton" />
-          </>
-        )}
+      <div className="planet-stack">
+        <button
+          className="planet-scroll-btn"
+          onClick={() => handlePage(-1)}
+          disabled={loading || safePage === 0}
+          aria-label="Previous planets"
+        >
+          ↑
+        </button>
 
-        {!loading && error && <div className="planet-empty error">{error}</div>}
+        <div className="planet-cards">
+          {loading && (
+            <>
+              <div className="planet-card skeleton" />
+              <div className="planet-card skeleton" />
+              <div className="planet-card skeleton" />
+            </>
+          )}
 
-        {!loading && !error && planetsToShow.length === 0 && (
-          <div className="planet-empty">
-            No planets above the horizon right now.
-          </div>
-        )}
+          {!loading && error && <div className="planet-empty error">{error}</div>}
 
-        {!loading &&
-          !error &&
-          planetsToShow.map((planet) => (
-            <PlanetCard planet={planet} key={planet.name} />
-          ))}
+          {!loading && !error && planetsToShow.length === 0 && (
+            <div className="planet-empty">
+              No planets above the horizon right now.
+            </div>
+          )}
+
+          {!loading &&
+            !error &&
+            visiblePlanets.map((planet) => (
+              <PlanetCard planet={planet} key={planet.name} />
+            ))}
+        </div>
+
+        <button
+          className="planet-scroll-btn"
+          onClick={() => handlePage(1)}
+          disabled={loading || safePage >= totalPages - 1}
+          aria-label="Next planets"
+        >
+          ↓
+        </button>
       </div>
     </div>
   );

@@ -408,23 +408,68 @@
   top: 100px;
   left: 16px;
   width: 380px;
-  max-height: calc(100% - 160px);
+  height: calc(100% - 160px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 6px;
   z-index: 950;
   pointer-events: auto;
+}
+
+.planet-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  gap: 6px;
+}
+
+.planet-scroll-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.planet-scroll-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.planet-scroll-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.map-container.light .planet-scroll-btn {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+
+.map-container.light .planet-scroll-btn:hover:not(:disabled) {
+  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .planet-cards {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-  padding-right: 6px;
-  scrollbar-width: thin;
+  gap: 4px;
+  overflow: hidden;
+  align-items: center;
+  justify-content: center;
 }
 
 .planet-cards::-webkit-scrollbar {
@@ -442,14 +487,15 @@
 
 .planet-card {
   width: 100%;
-  min-height: 320px;
+  flex: 0 0 140px;
+  max-width: 250px;
   background: transparent;
   border: none;
-  border-radius: 16px;
-  padding: 4px 4px 10px;
+  border-radius: 12px;
+  padding: 4px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   box-shadow: none;
   transition: transform 0.2s ease, filter 0.2s ease;
   backdrop-filter: none;
@@ -469,6 +515,7 @@
   overflow: visible;
   background: transparent;
   border: none;
+  flex: 1;
 }
 
 .map-container.light .planet-canvas {
@@ -578,17 +625,34 @@
     flex-direction: row;
     align-items: flex-end;
     justify-content: center;
+    height: auto;
+  }
+
+  .planet-stack {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: auto;
+    width: 100%;
+  }
+
+  .planet-scroll-btn {
+    width: 34px;
+    height: 34px;
   }
 
   .planet-cards {
     flex-direction: row;
-    gap: 10px;
+    gap: 4px;
     overflow-x: auto;
     overflow-y: hidden;
+    flex: initial;
+    align-items: center;
   }
 
   .planet-card {
     min-height: 240px;
-    max-width: 260px;
+    max-width: 250px;
   }
 }
