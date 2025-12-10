@@ -2,6 +2,7 @@ import {
   Suspense,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -23,6 +24,7 @@ import {
   LinearMipmapLinearFilter,
   DoubleSide,
   SRGBColorSpace,
+  Vector3,
 } from "three";
 import "./MapView.css";
 
@@ -155,6 +157,8 @@ const resolvePlanetTexture = (name) => {
 
 function PlanetGlobe({ textureUrl, name }) {
   const isSaturn = !!name && name.toLowerCase().includes("saturn");
+  const innerRadius = 0.7;
+  const outerRadius = 1.05;
   const [baseTexture, baseRingTexture] = useTexture(
     isSaturn ? [textureUrl, PLANET_TEXTURES.saturnRing] : [textureUrl]
   );
@@ -176,11 +180,12 @@ function PlanetGlobe({ textureUrl, name }) {
     cloned.colorSpace = SRGBColorSpace;
     cloned.minFilter = LinearMipmapLinearFilter;
     cloned.magFilter = LinearFilter;
-    cloned.anisotropy = 4;
+    cloned.anisotropy = 8;
     cloned.needsUpdate = true;
     return cloned;
   }, [baseRingTexture]);
   const meshRef = useRef();
+  const ringGeoRef = useRef();
 
   useFrame((_, delta) => {
     if (meshRef.current) {
@@ -188,6 +193,26 @@ function PlanetGlobe({ textureUrl, name }) {
       meshRef.current.rotation.x = Math.sin(Date.now() * 0.0003) * 0.08;
     }
   });
+
+  useLayoutEffect(() => {
+    if (!isSaturn || !ringGeoRef.current) return;
+
+    const geo = ringGeoRef.current;
+    const pos = geo.attributes.position;
+    const uv = geo.attributes.uv;
+    const v3 = new Vector3();
+
+    for (let i = 0; i < pos.count; i += 1) {
+      v3.fromBufferAttribute(pos, i);
+      const radius = Math.sqrt(v3.x * v3.x + v3.y * v3.y);
+      const u = (radius - innerRadius) / (outerRadius - innerRadius);
+      const theta = Math.atan2(v3.y, v3.x);
+      const v = (theta + Math.PI) / (2 * Math.PI);
+      uv.setXY(i, u, v);
+    }
+
+    uv.needsUpdate = true;
+  }, [isSaturn, innerRadius, outerRadius]);
 
   return (
     <>
@@ -197,15 +222,20 @@ function PlanetGlobe({ textureUrl, name }) {
       </mesh>
       {isSaturn && ringTexture && (
         <mesh rotation={[Math.PI / 2.1, 0, 0]}>
-          <ringGeometry args={[0.7, 1.05, 90]} />
+          <ringGeometry ref={ringGeoRef} args={[innerRadius, outerRadius, 128]} />
           <meshStandardMaterial
             map={ringTexture}
+            alphaMap={ringTexture}
+            color="#ffffff"
+            emissive="#b3a89a"
+            emissiveIntensity={0.15}
             side={DoubleSide}
             transparent
             depthWrite={false}
-            opacity={0.92}
-            roughness={0.8}
-            metalness={0.05}
+            opacity={1}
+            roughness={0.35}
+            metalness={0.02}
+            alphaTest={0.02}
           />
         </mesh>
       )}
@@ -249,12 +279,7 @@ function PlanetCard({ planet }) {
   );
 }
 
-function Planetarium({
-  planets,
-  loading,
-  error,
-  mapType,
-}) {
+function Planetarium({ planets, loading, error, mapType }) {
   const planetsToShow = useMemo(
     () =>
       (Array.isArray(planets) ? planets : []).filter(
