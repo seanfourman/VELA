@@ -53,8 +53,7 @@
 }
 
 .navbar-logo:hover {
-  opacity: 0.8;
-  transform: scale(1.02);
+  opacity: 0.75;
 }
 
 .logo-img {
