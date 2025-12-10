@@ -473,10 +473,11 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const [planetsLoading, setPlanetsLoading] = useState(false);
   const [planetsError, setPlanetsError] = useState(null);
   const [planetQuery, setPlanetQuery] = useState(null);
-  const [planetPanelVisible, setPlanetPanelVisible] = useState(true);
+  const [planetPanelVisible, setPlanetPanelVisible] = useState(false);
   const [hasShownPanelToggle, setHasShownPanelToggle] = useState(false);
   const planetPanelTimerRef = useRef(null);
   const initialAutoHideScheduled = useRef(false);
+  const initialRevealDelayRef = useRef(null);
 
   // Default center (world view) when no location yet
   const defaultCenter = [20, 0];
@@ -617,7 +618,10 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       (hasPlanets || location)
     ) {
       initialAutoHideScheduled.current = true;
-      revealPlanetPanel(true);
+      initialRevealDelayRef.current = setTimeout(() => {
+        revealPlanetPanel(true);
+        initialRevealDelayRef.current = null;
+      }, 3000);
     }
   }, [visiblePlanets, location, hasShownPanelToggle, revealPlanetPanel]);
 
@@ -626,6 +630,10 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       if (planetPanelTimerRef.current) {
         clearTimeout(planetPanelTimerRef.current);
         planetPanelTimerRef.current = null;
+      }
+      if (initialRevealDelayRef.current) {
+        clearTimeout(initialRevealDelayRef.current);
+        initialRevealDelayRef.current = null;
       }
     };
   }, []);

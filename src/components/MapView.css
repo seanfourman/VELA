@@ -354,7 +354,7 @@
   height: 750px;
   width: 250px;
   min-height: 440px;
-  border-radius: 26px;
+  border-radius: 350px;
   isolation: isolate;
   backdrop-filter: blur(18px) saturate(140%);
   -webkit-backdrop-filter: blur(18px) saturate(140%);
