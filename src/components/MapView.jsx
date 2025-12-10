@@ -1,10 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import "./MapView.css";
 
 const MAPTILER_KEY = "QvyjnqdnkmG5VtE3d2xS";
+const PLANETS_API_CACHE_KEY = "visiblePlanetsCache";
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in ms
 
 // Map tile configurations - all MapTiler
 const MAP_TILES = {
@@ -46,6 +55,52 @@ const customIcon = new L.DivIcon({
   iconAnchor: [15, 15],
 });
 
+// Custom marker for double-click placed pins
+const pinIcon = new L.DivIcon({
+  className: "custom-marker placed-pin",
+  html: `
+    <div class="marker-pin placed">
+      <div class="marker-dot placed"></div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
+// Fetch visible planets with caching
+async function fetchVisiblePlanets(lat, lng) {
+  const cacheKey = `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(
+    2
+  )}`;
+  const cached = localStorage.getItem(cacheKey);
+
+  if (cached) {
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp < CACHE_DURATION) {
+      console.log("Using cached planets data:", data);
+      return data;
+    }
+  }
+
+  try {
+    const response = await fetch(
+      `https://api.visibleplanets.dev/v3?latitude=${lat}&longitude=${lng}`
+    );
+    const data = await response.json();
+    console.log("Fetched visible planets:", data);
+
+    localStorage.setItem(
+      cacheKey,
+      JSON.stringify({ data, timestamp: Date.now() })
+    );
+
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch visible planets:", error);
+    return null;
+  }
+}
+
 // Component to handle map animations
 function MapAnimator({ location }) {
   const map = useMap();
@@ -77,8 +132,21 @@ function MapController({ mapRef }) {
   return null;
 }
 
+// Component to handle double-click events
+function DoubleClickHandler({ onDoubleClick }) {
+  useMapEvents({
+    dblclick: (e) => {
+      L.DomEvent.stopPropagation(e);
+      onDoubleClick(e.latlng);
+    },
+  });
+  return null;
+}
+
 function MapView({ location, locationStatus, mapType, setMapType }) {
   const mapRef = useRef(null);
+  const [placedMarker, setPlacedMarker] = useState(null);
+  const [contextMenu, setContextMenu] = useState(null);
 
   // Default center (world view) when no location yet
   const defaultCenter = [20, 0];
@@ -92,6 +160,39 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     }
   };
 
+  const handleDoubleClick = (latlng) => {
+    setPlacedMarker(latlng);
+    setContextMenu({
+      lat: latlng.lat,
+      lng: latlng.lng,
+    });
+  };
+
+  const handleGetVisiblePlanets = async () => {
+    if (contextMenu) {
+      const data = await fetchVisiblePlanets(contextMenu.lat, contextMenu.lng);
+      console.log("Visible planets at location:", {
+        coordinates: { lat: contextMenu.lat, lng: contextMenu.lng },
+        planets: data,
+      });
+    }
+  };
+
+  const handleGetDirections = () => {
+    if (contextMenu && location) {
+      const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${contextMenu.lat},${contextMenu.lng}`;
+      console.log("Directions URL:", url);
+      window.open(url, "_blank");
+    } else if (contextMenu) {
+      console.log("Location not available for directions");
+    }
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+    setPlacedMarker(null);
+  };
+
   return (
     <div className={`map-container visible ${mapType}`}>
       <MapContainer
@@ -100,6 +201,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
         attributionControl={false}
+        doubleClickZoom={false}
         minZoom={4}
         maxBounds={[
           [-85, -180],
@@ -119,6 +221,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         />
 
         <MapController mapRef={mapRef} />
+        <DoubleClickHandler onDoubleClick={handleDoubleClick} />
         {location && <MapAnimator location={location} />}
 
         {location && (
@@ -126,6 +229,37 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
             position={[location.lat, location.lng]}
             icon={customIcon}
           ></Marker>
+        )}
+
+        {placedMarker && (
+          <Marker
+            position={[placedMarker.lat, placedMarker.lng]}
+            icon={pinIcon}
+          >
+            <Popup>
+              <div className="context-menu-popup">
+                <div className="popup-coords">
+                  {placedMarker.lat.toFixed(4)}, {placedMarker.lng.toFixed(4)}
+                </div>
+                <button className="popup-btn" onClick={handleGetVisiblePlanets}>
+                  🔭 Visible Planets
+                </button>
+                <button
+                  className="popup-btn"
+                  onClick={handleGetDirections}
+                  disabled={!location}
+                >
+                  🧭 Get Directions
+                </button>
+                <button
+                  className="popup-btn close"
+                  onClick={handleCloseContextMenu}
+                >
+                  ✕ Close
+                </button>
+              </div>
+            </Popup>
+          </Marker>
         )}
       </MapContainer>
 
