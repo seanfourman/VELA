@@ -306,7 +306,11 @@ function Planetarium({ planets, loading, error, mapType }) {
   const canScrollPrev =
     !loading && !error && totalPages > 1 && safePage > 0 && hasPlanets;
   const canScrollNext =
-    !loading && !error && totalPages > 1 && safePage < totalPages - 1 && hasPlanets;
+    !loading &&
+    !error &&
+    totalPages > 1 &&
+    safePage < totalPages - 1 &&
+    hasPlanets;
 
   if (!loading && !error && !hasPlanets) {
     return null;
@@ -329,8 +333,15 @@ function Planetarium({ planets, loading, error, mapType }) {
             onClick={() => handlePage(-1)}
             aria-label="Previous planets"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M2 18L12 6M22 18L12 6"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M2 18L12 6M22 18L12 6" />
             </svg>
           </button>
         )}
@@ -344,7 +355,9 @@ function Planetarium({ planets, loading, error, mapType }) {
             </>
           )}
 
-          {!loading && error && <div className="planet-empty error">{error}</div>}
+          {!loading && error && (
+            <div className="planet-empty error">{error}</div>
+          )}
 
           {!loading &&
             !error &&
@@ -359,8 +372,15 @@ function Planetarium({ planets, loading, error, mapType }) {
             onClick={() => handlePage(1)}
             aria-label="Next planets"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M2 6L12 18M22 6L12 18"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M2 6L12 18M22 6L12 18" />
             </svg>
           </button>
         )}
