@@ -357,6 +357,12 @@
   z-index: 1000;
 }
 
+.planet-scroll-btn:focus,
+.planet-scroll-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .map-container.light .planet-scroll-btn {
   color: #0f172a;
 }
