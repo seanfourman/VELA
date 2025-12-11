@@ -712,6 +712,68 @@
 }
 
 /* ========================================
+   RESPONSIVE - LAPTOP / SMALLER SCREENS
+   ======================================== */
+
+@media (max-height: 850px), (max-width: 1440px) {
+  .planet-stack {
+    width: 190px;
+    padding: 14px 12px;
+    min-height: 380px;
+  }
+
+  .planet-card {
+    flex: 0 0 110px;
+    max-width: 190px;
+  }
+
+  .planet-cards-viewport {
+    min-height: 360px;
+  }
+
+  .planet-scroll-btn {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .planet-scroll-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Adjust info card positioning for smaller stack width (190px) */
+  .planet-info-card {
+    left: 210px; /* 190px stack + 20px gap */
+    min-width: 200px;
+    max-width: 240px;
+  }
+
+  /* 46px toggle button width + ~10px gap from button */
+  .planet-info-card.middle-offset {
+    left: 260px; /* 210px base + 50px extra */
+  }
+
+  .planet-info-card.no-arrow,
+  .planet-info-card.no-arrow.middle-offset {
+    left: 210px;
+  }
+  
+  .planet-panel-wrapper {
+    left: 130px; /* Adjust wrapper position slightly */
+  }
+  
+  .planet-panel-toggle {
+    width: 40px;
+    height: 40px;
+    left: -4px;
+  }
+  
+  .planet-panel-wrapper.open .planet-panel-toggle {
+    left: calc(100% + 10px);
+  }
+}
+
+/* ========================================
    RESPONSIVE - MOBILE
    ======================================== */
 
