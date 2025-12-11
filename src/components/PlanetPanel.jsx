@@ -166,14 +166,14 @@ function PlanetCard({ planet, cardRef, onHover, reducedMotion = false }) {
   );
 }
 
-export default function PlanetPanel({ 
-  planets, 
-  loading, 
-  error, 
-  mapType, 
-  panelVisible, 
-  hasArrow = true, 
-  reducedMotion = false 
+export default function PlanetPanel({
+  planets,
+  loading,
+  error,
+  mapType,
+  panelVisible,
+  hasArrow = true,
+  reducedMotion = false,
 }) {
   const [page, setPage] = useState(0);
   const firstCardRef = useRef(null);
