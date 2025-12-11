@@ -107,6 +107,7 @@ export default function PlanetCard({ planet, cardRef, onHover, reducedMotion }) 
     () => resolvePlanetTexture(planet?.name),
     [planet?.name]
   );
+  const safeTextureUrl = textureUrl || PLANET_TEXTURES.default;
   const [autoSpin, setAutoSpin] = useState(true);
 
   if (reducedMotion) {
@@ -114,7 +115,7 @@ export default function PlanetCard({ planet, cardRef, onHover, reducedMotion }) 
       <div className="planet-card" ref={cardRef} onMouseEnter={onHover}>
         <div className="planet-canvas planet-static">
           <img
-            src={textureUrl}
+            src={safeTextureUrl}
             alt={planet?.name || "Planet"}
             style={{
               width: "100%",
@@ -141,7 +142,7 @@ export default function PlanetCard({ planet, cardRef, onHover, reducedMotion }) 
           <directionalLight position={[2.5, 2.5, 2.5]} intensity={1.2} />
           <directionalLight position={[-2, -1, -1]} intensity={0.35} />
           <Suspense fallback={null}>
-            <PlanetGlobe textureUrl={textureUrl} name={planet?.name} />
+            <PlanetGlobe textureUrl={safeTextureUrl} name={planet?.name} />
           </Suspense>
           <OrbitControls
             enableZoom={false}

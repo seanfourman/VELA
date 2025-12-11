@@ -104,7 +104,8 @@
   width: 100%;
   overflow: hidden;
   position: relative;
-  min-height: 420px;
+  min-height: 0;
+  transition: height 0.35s ease;
 }
 
 .planet-cards {

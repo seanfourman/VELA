@@ -106,6 +106,7 @@ export default function PlanetPanel({
   };
 
   const pageHeight = cardHeight ? cardHeight * PAGE_SIZE : null;
+  const viewportHeight = pageHeight || 0;
   const trackTransform =
     !loading && !error && pageHeight
       ? `translateY(-${safePage * pageHeight}px)`
@@ -143,7 +144,7 @@ export default function PlanetPanel({
 
         <div
           className="planet-cards-viewport"
-          style={pageHeight ? { height: pageHeight } : {}}
+          style={{ height: viewportHeight }}
         >
           <div className="planet-cards" style={{ transform: trackTransform }}>
             {loading && (
