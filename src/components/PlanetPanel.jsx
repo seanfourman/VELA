@@ -64,6 +64,10 @@ export default function PlanetPanel({
       if (hoverBlocked) return;
       if (!planet) return;
 
+      const pageStart = safePage * PAGE_SIZE;
+      const pageEnd = pageStart + PAGE_SIZE - 1;
+      if (idx < pageStart || idx > pageEnd) return;
+
       if (!planetStackRef.current || !event?.currentTarget) {
         setHoveredCard({
           planet,
