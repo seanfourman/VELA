@@ -86,17 +86,19 @@
 .auth-button {
   position: relative;
   padding: 10px 24px;
-  border: none;
+  border: 1px solid var(--glass-border-strong);
   border-radius: var(--radius-pill);
   background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur-light);
-  -webkit-backdrop-filter: var(--glass-blur-light);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  box-shadow: var(--glass-shadow-elevated);
   color: var(--surface-text);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
   overflow: hidden;
+  isolation: isolate;
 }
 
 /* Shiny Border Effect */

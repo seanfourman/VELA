@@ -52,6 +52,7 @@
   color: var(--surface-text);
   isolation: isolate;
   overflow: hidden;
+  animation: glass-fade-in-simple var(--glass-appear-duration) var(--glass-appear-timing);
 }
 
 /* Liquid Glass Highlight */
@@ -402,17 +403,19 @@
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
   border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-elevated);
   will-change: backdrop-filter, transform;
+  overflow: hidden;
 }
 
+/* Liquid Glass Highlight */
 .planet-stack::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: var(--glass-inner-glow);
-  opacity: 0.9;
+  background: var(--glass-highlight);
   z-index: 1;
 }
 
@@ -521,32 +524,18 @@
   transition: transform 0.2s ease, opacity 0.2s ease;
   isolation: isolate;
   overflow: hidden;
+  animation: glass-fade-in-simple var(--glass-appear-duration) var(--glass-appear-timing);
 }
 
-/* Liquid Glass Highlight Effect */
+/* Liquid Glass Highlight */
 .planet-info-card::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: var(--glass-inner-glow);
-  opacity: 0.85;
-  z-index: 1;
-}
-
-/* Top shine effect */
-.planet-info-card::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-  border-radius: inherit;
-  pointer-events: none;
   background: var(--glass-highlight);
-  z-index: 2;
+  z-index: 1;
 }
 
 .planet-info-card.middle-offset {
