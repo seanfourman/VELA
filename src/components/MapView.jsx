@@ -186,7 +186,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   // Reveal panel - source determines behavior
   // 'manual': show with arrow immediately, stays until closed
-  // 'auto': show without arrow, hide on hover-out after 3s
+  // 'auto': show without arrow, hide after 3s (or on hover-out)
   const revealPlanetPanel = useCallback((source = 'manual') => {
     // Clear any pending timers
     if (planetPanelTimerRef.current) {
@@ -230,6 +230,22 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     }
   }, [planetPanelVisible, hidePlanetPanel, revealPlanetPanel]);
 
+  // Schedule auto-hide for auto-revealed panels (3s after reveal/hover-out)
+  const scheduleAutoHide = useCallback(() => {
+    if (panelSource !== 'auto' || hasShownPanelToggle || !planetPanelVisible) {
+      return;
+    }
+
+    if (hoverHideTimeoutRef.current) {
+      clearTimeout(hoverHideTimeoutRef.current);
+    }
+
+    hoverHideTimeoutRef.current = setTimeout(() => {
+      hidePlanetPanel();
+      hoverHideTimeoutRef.current = null;
+    }, 3000);
+  }, [panelSource, hasShownPanelToggle, planetPanelVisible, hidePlanetPanel]);
+
   // Hover handlers for auto-reveal mode
   const handlePanelMouseEnter = useCallback(() => {
     setIsHoveringPanel(true);
@@ -238,20 +254,16 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       clearTimeout(hoverHideTimeoutRef.current);
       hoverHideTimeoutRef.current = null;
     }
+    if (planetPanelTimerRef.current) {
+      clearTimeout(planetPanelTimerRef.current);
+      planetPanelTimerRef.current = null;
+    }
   }, []);
 
   const handlePanelMouseLeave = useCallback(() => {
     setIsHoveringPanel(false);
-    // Only auto-hide if panel was auto-revealed and toggle arrow not yet shown
-    if (panelSource === 'auto' && !hasShownPanelToggle && planetPanelVisible) {
-      hoverHideTimeoutRef.current = setTimeout(() => {
-        setPlanetPanelVisible(false);
-        setHasShownPanelToggle(true);
-        setPanelSource(null);
-        hoverHideTimeoutRef.current = null;
-      }, 3000);
-    }
-  }, [panelSource, hasShownPanelToggle, planetPanelVisible]);
+    scheduleAutoHide();
+  }, [scheduleAutoHide]);
 
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
@@ -351,6 +363,13 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
        }
     }
   }, [location, planetPanelVisible, hasShownPanelToggle, visiblePlanets, revealPlanetPanel]);
+
+  // Auto-hide guard when panel was opened automatically (even if user never hovered)
+  useEffect(() => {
+    if (panelSource === 'auto' && planetPanelVisible && !isHoveringPanel) {
+      scheduleAutoHide();
+    }
+  }, [panelSource, planetPanelVisible, isHoveringPanel, scheduleAutoHide]);
 
   // Cleanup timers
   useEffect(() => {
