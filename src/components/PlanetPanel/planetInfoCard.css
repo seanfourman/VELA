@@ -18,7 +18,8 @@
   transition: transform 0.2s ease, opacity 0.2s ease;
   isolation: isolate;
   overflow: hidden;
-  animation: glass-fade-in-simple var(--glass-appear-duration) var(--glass-appear-timing);
+  animation: glass-fade-in-simple var(--glass-appear-duration)
+    var(--glass-appear-timing);
 }
 
 .planet-info-card::before {
@@ -73,6 +74,7 @@
   color: var(--surface-text);
   background: var(--glass-bg);
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .planet-info-visibility.naked-eye {
