@@ -1,15 +1,10 @@
 .map-container {
   position: fixed;
-  top: 0px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 10;
-  opacity: 1;
-}
-
-.map-container.visible {
-  opacity: 1;
 }
 
 /* Custom marker styles */
@@ -240,11 +235,7 @@
 }
 
 .marker-dot.placed {
-  width: 14px;
-  height: 14px;
   background: #3b82f6;
-  border-radius: 50%;
-  border: 1px solid #fff;
   box-shadow: 0 2px 10px rgba(59, 130, 246, 0.5);
 }
 
@@ -334,13 +325,11 @@
   pointer-events: auto;
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
   transform: translate3d(0, 0, 0);
-  opacity: 1;
   will-change: transform;
 }
 
 .planet-float-row.collapsed {
   transform: translate3d(-130%, 0, 0);
-  opacity: 1;
   pointer-events: none;
 }
 
@@ -360,7 +349,6 @@
   -webkit-backdrop-filter: blur(18px) saturate(140%);
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.28);
-  box-shadow: none;
   will-change: backdrop-filter, transform;
 }
 
@@ -449,19 +437,9 @@
   width: 100%;
   flex: 0 0 140px;
   max-width: 250px;
-  background: transparent;
-  border: none;
   display: flex;
   flex-direction: column;
-  box-shadow: none;
   transition: transform 0.2s ease, filter 0.2s ease;
-  backdrop-filter: none;
-  pointer-events: auto;
-}
-
-.map-container.light .planet-card {
-  background: transparent;
-  box-shadow: none;
 }
 
 .planet-canvas {
@@ -469,14 +447,7 @@
   width: 100%;
   aspect-ratio: 1;
   border-radius: 14px;
-  overflow: visible;
-  background: transparent;
-  border: none;
   flex: 1;
-}
-
-.map-container.light .planet-canvas {
-  background: transparent;
 }
 
 .planet-canvas canvas {
@@ -642,7 +613,6 @@
 .map-container.light .planet-stack {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(0, 0, 0, 0.12);
-  box-shadow: none;
 }
 
 .map-container.light .planet-stack::before {
@@ -679,7 +649,7 @@
   transition: all 0.25s ease;
   z-index: 960;
   pointer-events: auto;
-  padding: 0px;
+  padding: 0;
   outline: none;
   box-shadow: none;
 }
@@ -715,10 +685,6 @@
   left: calc(100% + 14px);
 }
 
-.planet-panel-wrapper.collapsed .planet-panel-toggle {
-  left: -6px;
-}
-
 @media (max-width: 768px) {
   .planet-panel-wrapper {
     top: auto;
@@ -734,17 +700,6 @@
     justify-content: center;
     height: auto;
     transform: none;
-  }
-
-  .planet-float-row.open {
-    transform: none;
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .planet-float-row.collapsed {
-    transform: translateX(-130%);
-    opacity: 1;
   }
 
   .planet-stack {
