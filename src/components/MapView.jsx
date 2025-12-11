@@ -197,8 +197,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${contextMenu.lat},${contextMenu.lng}`;
       console.log("Directions URL:", url);
       window.open(url, "_blank");
-    } else if (contextMenu) {
-      console.log("Location not available for directions");
     }
   };
 
@@ -305,9 +303,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
               <ContextMenuPopup
                 coords={placedMarker}
                 onGetVisiblePlanets={handleGetVisiblePlanets}
-                onGetDirections={handleGetDirections}
+                onGetDirections={location ? handleGetDirections : null}
                 onRemovePin={handleCloseContextMenu}
-                disableDirections={!location}
               />
             </Popup>
           </Marker>

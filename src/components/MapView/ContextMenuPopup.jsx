@@ -15,13 +15,11 @@ export default function ContextMenuPopup({
       <button className="popup-btn" onClick={onGetVisiblePlanets}>
         Visible Planets
       </button>
-      <button
-        className="popup-btn"
-        onClick={onGetDirections}
-        disabled={disableDirections}
-      >
-        Get Directions
-      </button>
+      {onGetDirections && !disableDirections && (
+        <button className="popup-btn" onClick={onGetDirections}>
+          Get Directions
+        </button>
+      )}
       <button className="popup-btn" onClick={onRemovePin}>
         Remove Pin
       </button>
