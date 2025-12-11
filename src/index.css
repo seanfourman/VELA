@@ -22,6 +22,13 @@ div {
   will-change: width, height, max-width, max-height, flex-basis;
 }
 
+/* Remove default blue focus outline across the site */
+*:focus,
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* ========================================
    DESIGN TOKENS - Liquid Glass System
    ======================================== */

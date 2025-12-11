@@ -124,3 +124,19 @@
   background: #3b82f6;
   box-shadow: 0 2px 10px rgba(59, 130, 246, 0.5);
 }
+
+/* Popup buttons - remove blue focus/hover outline and use white border */
+.leaflet-popup-content-wrapper .popup-btn {
+  border-color: var(--glass-border);
+}
+
+.leaflet-popup-content-wrapper .popup-btn:hover {
+  border-color: #ffffff;
+}
+
+.leaflet-popup-content-wrapper .popup-btn:focus,
+.leaflet-popup-content-wrapper .popup-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-color: #ffffff;
+}
