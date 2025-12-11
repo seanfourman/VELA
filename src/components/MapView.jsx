@@ -765,8 +765,20 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
       mapRef.current.flyTo([location.lat, location.lng], 15, {
-        duration: 1,
+        duration: 2.5,
+        easeLinearity: 0.25,
       });
+
+      // Only refresh/reopen if we aren't already viewing the location panel
+      if (planetQuery?.source !== "location" || !hasShownPanelToggle) {
+        revealPlanetPanel("manual");
+        fetchPlanetsForLocation(
+          location.lat,
+          location.lng,
+          "Visible from your sky",
+          { force: true, source: "location" }
+        );
+      }
     }
   };
 
@@ -780,7 +792,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   const handleGetVisiblePlanets = async () => {
     if (contextMenu) {
-      revealPlanetPanel('manual');
+      revealPlanetPanel("manual");
       fetchPlanetsForLocation(
         contextMenu.lat,
         contextMenu.lng,
@@ -803,6 +815,23 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const handleCloseContextMenu = () => {
     setContextMenu(null);
     setPlacedMarker(null);
+
+    // If we have a live location, return to its data but REMOVE the panel completely
+    if (location) {
+      hidePlanetPanel();
+      setHasShownPanelToggle(false); // Helper to completely remove toggle button
+      
+      fetchPlanetsForLocation(
+        location.lat,
+        location.lng,
+        "Visible from your sky",
+        { force: true, source: "location" }
+      );
+    } else {
+      // No live location, close panel completely
+      hidePlanetPanel();
+      setHasShownPanelToggle(false);
+    }
   };
 
   useEffect(() => {
