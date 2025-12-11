@@ -246,12 +246,33 @@ function PlanetGlobe({ textureUrl, name }) {
   );
 }
 
-function PlanetCard({ planet, cardRef, onHover }) {
+function PlanetCard({ planet, cardRef, onHover, reducedMotion = false }) {
   const textureUrl = useMemo(
     () => resolvePlanetTexture(planet?.name),
     [planet?.name]
   );
   const [autoSpin, setAutoSpin] = useState(true);
+
+  // WIP: Need to change this completely.
+  if (reducedMotion) {
+    return (
+      <div className="planet-card" ref={cardRef} onMouseEnter={onHover}>
+        <div className="planet-canvas planet-static">
+          <img
+            src={textureUrl}
+            alt={planet?.name || "Planet"}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              borderRadius: "50%",
+              filter: "drop-shadow(0 18px 26px rgba(0, 0, 0, 0.15))",
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="planet-card" ref={cardRef} onMouseEnter={onHover}>
@@ -282,7 +303,7 @@ function PlanetCard({ planet, cardRef, onHover }) {
   );
 }
 
-function Planetarium({ planets, loading, error, mapType, panelVisible }) {
+function Planetarium({ planets, loading, error, mapType, panelVisible, hasArrow = true, reducedMotion = false }) {
   const [page, setPage] = useState(0);
   const firstCardRef = useRef(null);
   const planetStackRef = useRef(null);
@@ -467,6 +488,7 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
                   key={planet.name}
                   cardRef={idx === 0 ? firstCardRef : undefined}
                   onHover={(event) => handlePlanetHover(planet, idx, event)}
+                  reducedMotion={reducedMotion}
                 />
               ))}
           </div>
@@ -497,7 +519,7 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
         <div
           className={`planet-info-card ${
             hoveredCard.isMiddle ? "middle-offset" : ""
-          }`}
+          } ${!hasArrow ? "no-arrow" : ""}`}
           style={{ top: hoveredCard.top || 0 }}
         >
           <div className="planet-info-header">
@@ -612,9 +634,20 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const [planetQuery, setPlanetQuery] = useState(null);
   const [planetPanelVisible, setPlanetPanelVisible] = useState(false);
   const [hasShownPanelToggle, setHasShownPanelToggle] = useState(false);
+  // 'manual' = user clicked "Visible Planets", 'auto' = auto-location reveal
+  const [panelSource, setPanelSource] = useState(null);
+  const [isHoveringPanel, setIsHoveringPanel] = useState(false);
   const planetPanelTimerRef = useRef(null);
+  const hoverHideTimeoutRef = useRef(null);
   const initialAutoHideScheduled = useRef(false);
   const initialRevealDelayRef = useRef(null);
+  
+  // Detect if user prefers reduced motion or has low-end hardware
+  const reducedMotion = useMemo(() => {
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+    const lowCores = navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
+    return prefersReducedMotion || lowCores;
+  }, []);
 
   // Default center (world view) when no location yet
   const defaultCenter = [20, 0];
@@ -659,19 +692,28 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     []
   );
 
-  const revealPlanetPanel = useCallback((autoHide = false) => {
+  // Reveal panel - source determines behavior
+  // 'manual': show with arrow immediately, stays until closed
+  // 'auto': show without arrow, hide on hover-out after 3s
+  const revealPlanetPanel = useCallback((source = 'manual') => {
+    // Clear any pending timers
     if (planetPanelTimerRef.current) {
       clearTimeout(planetPanelTimerRef.current);
       planetPanelTimerRef.current = null;
     }
-    setPlanetPanelVisible(true);
-    if (autoHide) {
-      planetPanelTimerRef.current = setTimeout(() => {
-        setPlanetPanelVisible(false);
-        setHasShownPanelToggle(true);
-        planetPanelTimerRef.current = null;
-      }, 3000);
+    if (hoverHideTimeoutRef.current) {
+      clearTimeout(hoverHideTimeoutRef.current);
+      hoverHideTimeoutRef.current = null;
     }
+    
+    setPanelSource(source);
+    setPlanetPanelVisible(true);
+    
+    if (source === 'manual') {
+      // Manual source: show toggle arrow immediately
+      setHasShownPanelToggle(true);
+    }
+    // Auto source: don't show toggle arrow yet, wait for hover-out cycle
   }, []);
 
   const hidePlanetPanel = useCallback(() => {
@@ -679,17 +721,45 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       clearTimeout(planetPanelTimerRef.current);
       planetPanelTimerRef.current = null;
     }
+    if (hoverHideTimeoutRef.current) {
+      clearTimeout(hoverHideTimeoutRef.current);
+      hoverHideTimeoutRef.current = null;
+    }
     setPlanetPanelVisible(false);
     setHasShownPanelToggle(true);
+    setPanelSource(null);
   }, []);
 
   const togglePlanetPanel = useCallback(() => {
     if (planetPanelVisible) {
       hidePlanetPanel();
     } else {
-      revealPlanetPanel(false);
+      revealPlanetPanel('manual');
     }
   }, [planetPanelVisible, hidePlanetPanel, revealPlanetPanel]);
+
+  // Hover handlers for auto-reveal mode
+  const handlePanelMouseEnter = useCallback(() => {
+    setIsHoveringPanel(true);
+    // Cancel any pending hide timer
+    if (hoverHideTimeoutRef.current) {
+      clearTimeout(hoverHideTimeoutRef.current);
+      hoverHideTimeoutRef.current = null;
+    }
+  }, []);
+
+  const handlePanelMouseLeave = useCallback(() => {
+    setIsHoveringPanel(false);
+    // Only auto-hide if panel was auto-revealed and toggle arrow not yet shown
+    if (panelSource === 'auto' && !hasShownPanelToggle && planetPanelVisible) {
+      hoverHideTimeoutRef.current = setTimeout(() => {
+        setPlanetPanelVisible(false);
+        setHasShownPanelToggle(true);
+        setPanelSource(null);
+        hoverHideTimeoutRef.current = null;
+      }, 3000);
+    }
+  }, [panelSource, hasShownPanelToggle, planetPanelVisible]);
 
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
@@ -709,7 +779,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   const handleGetVisiblePlanets = async () => {
     if (contextMenu) {
-      revealPlanetPanel(true);
+      revealPlanetPanel('manual');
       fetchPlanetsForLocation(
         contextMenu.lat,
         contextMenu.lng,
@@ -756,7 +826,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     ) {
       initialAutoHideScheduled.current = true;
       initialRevealDelayRef.current = setTimeout(() => {
-        revealPlanetPanel(true);
+        revealPlanetPanel('auto');
         initialRevealDelayRef.current = null;
       }, 3000);
     }
@@ -772,6 +842,10 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         clearTimeout(initialRevealDelayRef.current);
         initialRevealDelayRef.current = null;
       }
+      if (hoverHideTimeoutRef.current) {
+        clearTimeout(hoverHideTimeoutRef.current);
+        hoverHideTimeoutRef.current = null;
+      }
     };
   }, []);
 
@@ -785,6 +859,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         className={`planet-panel-wrapper ${
           planetPanelVisible ? "open" : "collapsed"
         }`}
+        onMouseEnter={handlePanelMouseEnter}
+        onMouseLeave={handlePanelMouseLeave}
       >
         <Planetarium
           planets={visiblePlanets}
@@ -792,6 +868,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           error={planetsError}
           mapType={mapType}
           panelVisible={planetPanelVisible}
+          hasArrow={showPlanetPanelToggle}
+          reducedMotion={reducedMotion}
         />
 
         {showPlanetPanelToggle && (

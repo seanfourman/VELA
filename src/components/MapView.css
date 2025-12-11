@@ -394,7 +394,8 @@
   align-items: center;
   justify-content: center;
   padding: 18px 16px;
-  height: 750px;
+  height: auto;
+  max-height: 80vh;
   width: 250px;
   min-height: 440px;
   border-radius: 350px;
@@ -538,8 +539,18 @@
   z-index: 1;
 }
 
+/* When arrow exists, middle card needs extra offset to avoid arrow button */
 .planet-info-card.middle-offset {
   left: 325px; /* 250px stack width + 75px offset for middle card */
+}
+
+/* When no arrow exists (auto-reveal mode), all cards at same distance */
+.planet-info-card.no-arrow {
+  left: 270px; /* 250px stack width + 20px gap - same for all cards */
+}
+
+.planet-info-card.no-arrow.middle-offset {
+  left: 270px; /* Override middle-offset when no arrow */
 }
 
 .planet-info-header {
