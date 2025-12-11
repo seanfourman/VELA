@@ -692,8 +692,6 @@
 
 .planet-panel-toggle.active {
   border-color: rgba(255, 255, 255, 0.4);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .planet-panel-toggle:hover {
