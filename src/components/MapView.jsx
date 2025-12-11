@@ -433,6 +433,7 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
+              stroke-width="2"
             >
               <path d="M2 18L12 6M22 18L12 6" />
             </svg>
@@ -546,6 +547,7 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
+              stroke-width="2"
             >
               <path d="M2 6L12 18M22 6L12 18" />
             </svg>
