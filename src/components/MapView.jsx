@@ -418,6 +418,7 @@ function Planetarium({ planets, loading, error, mapType, panelVisible, hasArrow 
   }
 
   const handlePage = (direction) => {
+    setHoveredCard(null);
     setPage((prev) => {
       const next = prev + direction;
       if (next < 0 || next > totalPages - 1) return prev;
