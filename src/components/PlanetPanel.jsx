@@ -151,11 +151,7 @@ export default function PlanetPanel({
         >
           <div className="planet-cards" style={{ transform: trackTransform }}>
             {loading && (
-              <>
-                <div className="planet-card skeleton" ref={firstCardRef} />
-                <div className="planet-card skeleton" />
-                <div className="planet-card skeleton" />
-              </>
+              null
             )}
 
             {!loading && error && (
