@@ -27,7 +27,6 @@ export default function PlanetPanel({
   const [cardHeight, setCardHeight] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoverBlocked, setHoverBlocked] = useState(false);
-  const hoverBlockTimeoutRef = useRef(null);
 
   const planetsToShow = useMemo(
     () =>
@@ -106,13 +105,7 @@ export default function PlanetPanel({
   const handlePage = (direction) => {
     setHoveredCard(null);
     setHoverBlocked(true);
-    if (hoverBlockTimeoutRef.current) {
-      clearTimeout(hoverBlockTimeoutRef.current);
-    }
-    hoverBlockTimeoutRef.current = setTimeout(() => {
-      setHoverBlocked(false);
-      hoverBlockTimeoutRef.current = null;
-    }, 250);
+    setTimeout(() => setHoverBlocked(false), 250);
     setPage((prev) => {
       const next = prev + direction;
       if (next < 0 || next > totalPages - 1) return prev;
