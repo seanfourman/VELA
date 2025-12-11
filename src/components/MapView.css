@@ -500,13 +500,14 @@
 }
 
 /* Planet Info Card - Glass Card with Liquid Effect */
+/* Now positioned OUTSIDE planet-stack so backdrop-filter works */
 .planet-info-card {
   position: absolute;
   min-width: 230px;
   max-width: 260px;
   padding: 12px 14px;
-  left: calc(100% + 20px);
-  top: 0;
+  left: 270px; /* 250px stack width + 20px gap */
+  /* top is set dynamically via inline style */
   transform: translateY(-50%);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur-heavy);
@@ -549,7 +550,7 @@
 }
 
 .planet-info-card.middle-offset {
-  left: calc(100% + 75px);
+  left: 325px; /* 250px stack width + 75px offset for middle card */
 }
 
 .planet-info-header {

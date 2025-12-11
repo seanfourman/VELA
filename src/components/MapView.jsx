@@ -472,69 +472,6 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
           </div>
         </div>
 
-        {hoveredCard && (
-          <div
-            className={`planet-info-card ${
-              hoveredCard.isMiddle ? "middle-offset" : ""
-            }`}
-            style={{ top: hoveredCard.top || 0 }}
-          >
-            <div className="planet-info-header">
-              <div>
-                <div className="planet-info-name">
-                  {hoveredCard.planet?.name || "Planet"}
-                </div>
-                <div className="planet-info-constellation">
-                  {hoveredCard.planet?.constellation || "Constellation unknown"}
-                </div>
-              </div>
-              <div
-                className={`planet-info-visibility ${
-                  hoveredCard.planet?.nakedEyeObject ? "naked-eye" : "dimmed"
-                }`}
-              >
-                {hoveredCard.planet?.nakedEyeObject
-                  ? "Naked eye"
-                  : "Needs optics"}
-              </div>
-            </div>
-
-            <div className="planet-info-grid">
-              <div>
-                <span className="planet-info-label">Altitude</span>
-                <span className="planet-info-value">
-                  {formatDegrees(hoveredCard.planet?.altitude)}
-                </span>
-              </div>
-              <div>
-                <span className="planet-info-label">Azimuth</span>
-                <span className="planet-info-value">
-                  {formatDegrees(hoveredCard.planet?.azimuth)}
-                </span>
-              </div>
-              <div>
-                <span className="planet-info-label">Magnitude</span>
-                <span className="planet-info-value">
-                  {formatMagnitude(hoveredCard.planet?.magnitude)}
-                </span>
-              </div>
-              <div>
-                <span className="planet-info-label">RA / Dec</span>
-                <span className="planet-info-value">
-                  {formatRightAscension(hoveredCard.planet?.rightAscension)} /{" "}
-                  {formatDeclination(hoveredCard.planet?.declination)}
-                </span>
-              </div>
-            </div>
-
-            <div className="planet-info-footnote">
-              {hoveredCard.planet?.aboveHorizon === false
-                ? "Below horizon right now"
-                : "Above the horizon"}
-            </div>
-          </div>
-        )}
-
         {canScrollNext && (
           <button
             className="planet-scroll-btn next"
@@ -554,6 +491,70 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
           </button>
         )}
       </div>
+
+      {/* Planet info card - OUTSIDE planet-stack so backdrop-filter works */}
+      {hoveredCard && (
+        <div
+          className={`planet-info-card ${
+            hoveredCard.isMiddle ? "middle-offset" : ""
+          }`}
+          style={{ top: hoveredCard.top || 0 }}
+        >
+          <div className="planet-info-header">
+            <div>
+              <div className="planet-info-name">
+                {hoveredCard.planet?.name || "Planet"}
+              </div>
+              <div className="planet-info-constellation">
+                {hoveredCard.planet?.constellation || "Constellation unknown"}
+              </div>
+            </div>
+            <div
+              className={`planet-info-visibility ${
+                hoveredCard.planet?.nakedEyeObject ? "naked-eye" : "dimmed"
+              }`}
+            >
+              {hoveredCard.planet?.nakedEyeObject
+                ? "Naked eye"
+                : "Needs optics"}
+            </div>
+          </div>
+
+          <div className="planet-info-grid">
+            <div>
+              <span className="planet-info-label">Altitude</span>
+              <span className="planet-info-value">
+                {formatDegrees(hoveredCard.planet?.altitude)}
+              </span>
+            </div>
+            <div>
+              <span className="planet-info-label">Azimuth</span>
+              <span className="planet-info-value">
+                {formatDegrees(hoveredCard.planet?.azimuth)}
+              </span>
+            </div>
+            <div>
+              <span className="planet-info-label">Magnitude</span>
+              <span className="planet-info-value">
+                {formatMagnitude(hoveredCard.planet?.magnitude)}
+              </span>
+            </div>
+            <div>
+              <span className="planet-info-label">RA / Dec</span>
+              <span className="planet-info-value">
+                {formatRightAscension(hoveredCard.planet?.rightAscension)} /{" "}
+                {formatDeclination(hoveredCard.planet?.declination)}
+              </span>
+            </div>
+          </div>
+
+          <div className="planet-info-footnote">
+            {hoveredCard.planet?.aboveHorizon === false
+              ? "Below horizon right now"
+              : "Above the horizon"}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
