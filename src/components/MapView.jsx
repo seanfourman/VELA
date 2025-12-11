@@ -334,8 +334,12 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
 
   const formatRightAscension = (ra) => {
     if (!ra) return "-";
-    const hours = Number.isFinite(ra.hours) ? ra.hours.toString().padStart(2, "0") : "00";
-    const minutes = Number.isFinite(ra.minutes) ? ra.minutes.toString().padStart(2, "0") : "00";
+    const hours = Number.isFinite(ra.hours)
+      ? ra.hours.toString().padStart(2, "0")
+      : "00";
+    const minutes = Number.isFinite(ra.minutes)
+      ? ra.minutes.toString().padStart(2, "0")
+      : "00";
     return `${hours}h ${minutes}m`;
   };
 
@@ -343,7 +347,9 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
     if (!dec) return "-";
     const sign = dec.negative ? "-" : "+";
     const degrees = Number.isFinite(dec.degrees) ? Math.abs(dec.degrees) : 0;
-    const arcminutes = Number.isFinite(dec.arcminutes) ? Math.abs(dec.arcminutes) : 0;
+    const arcminutes = Number.isFinite(dec.arcminutes)
+      ? Math.abs(dec.arcminutes)
+      : 0;
     return `${sign}${degrees}\u00b0 ${arcminutes}'`;
   };
 
@@ -355,20 +361,19 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
         setHoveredCard({
           planet,
           top: 0,
-          isMiddle: (idx - safePage * PAGE_SIZE) === 1,
+          isMiddle: idx - safePage * PAGE_SIZE === 1,
         });
         return;
       }
 
       const stackRect = planetStackRef.current.getBoundingClientRect();
       const cardRect = event.currentTarget.getBoundingClientRect();
-      const relativeTop =
-        cardRect.top - stackRect.top + cardRect.height / 2;
+      const relativeTop = cardRect.top - stackRect.top + cardRect.height / 2;
 
       setHoveredCard({
         planet,
         top: relativeTop,
-        isMiddle: (idx - safePage * PAGE_SIZE) === 1,
+        isMiddle: idx - safePage * PAGE_SIZE === 1,
       });
     },
     [safePage, PAGE_SIZE]
@@ -411,7 +416,11 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
         panelVisible ? "open" : "collapsed"
       }`}
     >
-      <div className="planet-stack" ref={planetStackRef} onMouseLeave={clearHover}>
+      <div
+        className="planet-stack"
+        ref={planetStackRef}
+        onMouseLeave={clearHover}
+      >
         {canScrollPrev && (
           <button
             className="planet-scroll-btn prev"
@@ -424,7 +433,6 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
             >
               <path d="M2 18L12 6M22 18L12 6" />
             </svg>
@@ -435,10 +443,7 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
           className="planet-cards-viewport"
           style={pageHeight ? { height: pageHeight } : {}}
         >
-          <div
-            className="planet-cards"
-            style={{ transform: trackTransform }}
-          >
+          <div className="planet-cards" style={{ transform: trackTransform }}>
             {loading && (
               <>
                 <div className="planet-card skeleton" ref={firstCardRef} />
@@ -541,7 +546,6 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              stroke-width="2"
             >
               <path d="M2 6L12 18M22 6L12 18" />
             </svg>
