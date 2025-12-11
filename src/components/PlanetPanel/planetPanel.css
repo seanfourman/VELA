@@ -156,7 +156,11 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+  opacity: 1;
+  transition:
+    all 0.25s ease,
+    opacity 0.3s ease,
+    transform 0.25s ease;
   z-index: 960;
   pointer-events: auto;
   padding: 0;
@@ -194,15 +198,18 @@
   transform: translateY(-50%) scale(0.97);
 }
 
+.planet-panel-wrapper .planet-panel-toggle {
+  animation: toggle-fade-in 0.25s ease forwards;
+}
+
 .planet-panel-wrapper.open .planet-panel-toggle {
   left: calc(100% + 14px);
 }
 
 /* Only hide toggle when explicitly forced (e.g., pin removal) */
 .planet-panel-wrapper[data-force-hide-toggle="true"] .planet-panel-toggle {
-  opacity: 0;
   pointer-events: none;
-  transform: translate(-140%, -50%);
+  animation: toggle-force-hide 0.35s ease forwards;
 }
 
 /* Responsive - laptop/smaller */
@@ -242,9 +249,8 @@
   }
 
   .planet-panel-wrapper[data-force-hide-toggle="true"] .planet-panel-toggle {
-    opacity: 0;
     pointer-events: none;
-    transform: translate(-140%, -50%);
+    animation: toggle-force-hide 0.35s ease forwards;
   }
 }
 
@@ -292,5 +298,25 @@
 
   .planet-panel-toggle:active {
     transform: scale(0.97);
+  }
+}
+
+@keyframes toggle-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes toggle-force-hide {
+  from {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-140%, -50%);
   }
 }

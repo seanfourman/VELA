@@ -96,10 +96,6 @@ export default function PlanetPanel({
     safePage < totalPages - 1 &&
     hasPlanets;
 
-  if (!loading && !error && !hasPlanets) {
-    return null;
-  }
-
   const handlePage = (direction) => {
     setHoveredCard(null);
     setPage((prev) => {
