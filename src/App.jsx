@@ -51,9 +51,9 @@ function App() {
   useEffect(() => {
     if (!isProbablyHardwareAccelerated()) {
       showPopup(
-        "Hardware acceleration seems off. 3D planets may stutter.",
+        "Hardware acceleration appears to be disabled. Performance and visuals may be affected.",
         "failure",
-        { duration: 4000 }
+        { duration: 6000 }
       );
     }
   }, []);
