@@ -246,7 +246,7 @@ function PlanetGlobe({ textureUrl, name }) {
   );
 }
 
-function PlanetCard({ planet, cardRef }) {
+function PlanetCard({ planet, cardRef, onHover }) {
   const textureUrl = useMemo(
     () => resolvePlanetTexture(planet?.name),
     [planet?.name]
@@ -254,7 +254,7 @@ function PlanetCard({ planet, cardRef }) {
   const [autoSpin, setAutoSpin] = useState(true);
 
   return (
-    <div className="planet-card" ref={cardRef}>
+    <div className="planet-card" ref={cardRef} onMouseEnter={onHover}>
       <div className="planet-canvas">
         <Canvas
           dpr={[1, 1.5]}
@@ -285,7 +285,9 @@ function PlanetCard({ planet, cardRef }) {
 function Planetarium({ planets, loading, error, mapType, panelVisible }) {
   const [page, setPage] = useState(0);
   const firstCardRef = useRef(null);
+  const planetStackRef = useRef(null);
   const [cardHeight, setCardHeight] = useState(null);
+  const [hoveredCard, setHoveredCard] = useState(null);
   const planetsToShow = useMemo(
     () =>
       (Array.isArray(planets) ? planets : []).filter(
@@ -311,6 +313,70 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
       }
     }
   }, [planetsToShow.length, mapType, loading]);
+
+  useEffect(() => {
+    setHoveredCard(null);
+  }, [safePage, loading, error, panelVisible, planetsToShow.length]);
+
+  const formatDegrees = (value) => {
+    if (value === undefined || value === null || Number.isNaN(value)) {
+      return "-";
+    }
+    return `${value.toFixed(1)}\u00b0`;
+  };
+
+  const formatMagnitude = (value) => {
+    if (value === undefined || value === null || Number.isNaN(value)) {
+      return "-";
+    }
+    return value.toFixed(1);
+  };
+
+  const formatRightAscension = (ra) => {
+    if (!ra) return "-";
+    const hours = Number.isFinite(ra.hours) ? ra.hours.toString().padStart(2, "0") : "00";
+    const minutes = Number.isFinite(ra.minutes) ? ra.minutes.toString().padStart(2, "0") : "00";
+    return `${hours}h ${minutes}m`;
+  };
+
+  const formatDeclination = (dec) => {
+    if (!dec) return "-";
+    const sign = dec.negative ? "-" : "+";
+    const degrees = Number.isFinite(dec.degrees) ? Math.abs(dec.degrees) : 0;
+    const arcminutes = Number.isFinite(dec.arcminutes) ? Math.abs(dec.arcminutes) : 0;
+    return `${sign}${degrees}\u00b0 ${arcminutes}'`;
+  };
+
+  const handlePlanetHover = useCallback(
+    (planet, idx, event) => {
+      if (!planet) return;
+
+      if (!planetStackRef.current || !event?.currentTarget) {
+        setHoveredCard({
+          planet,
+          top: 0,
+          isMiddle: (idx - safePage * PAGE_SIZE) === 1,
+        });
+        return;
+      }
+
+      const stackRect = planetStackRef.current.getBoundingClientRect();
+      const cardRect = event.currentTarget.getBoundingClientRect();
+      const relativeTop =
+        cardRect.top - stackRect.top + cardRect.height / 2;
+
+      setHoveredCard({
+        planet,
+        top: relativeTop,
+        isMiddle: (idx - safePage * PAGE_SIZE) === 1,
+      });
+    },
+    [safePage, PAGE_SIZE]
+  );
+
+  const clearHover = useCallback(() => {
+    setHoveredCard(null);
+  }, []);
 
   const canScrollPrev =
     !loading && !error && totalPages > 1 && safePage > 0 && hasPlanets;
@@ -345,7 +411,7 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
         panelVisible ? "open" : "collapsed"
       }`}
     >
-      <div className="planet-stack">
+      <div className="planet-stack" ref={planetStackRef} onMouseLeave={clearHover}>
         {canScrollPrev && (
           <button
             className="planet-scroll-btn prev"
@@ -394,10 +460,74 @@ function Planetarium({ planets, loading, error, mapType, panelVisible }) {
                   planet={planet}
                   key={planet.name}
                   cardRef={idx === 0 ? firstCardRef : undefined}
+                  onHover={(event) => handlePlanetHover(planet, idx, event)}
                 />
               ))}
           </div>
         </div>
+
+        {hoveredCard && (
+          <div
+            className={`planet-info-card ${
+              hoveredCard.isMiddle ? "middle-offset" : ""
+            }`}
+            style={{ top: hoveredCard.top || 0 }}
+          >
+            <div className="planet-info-header">
+              <div>
+                <div className="planet-info-name">
+                  {hoveredCard.planet?.name || "Planet"}
+                </div>
+                <div className="planet-info-constellation">
+                  {hoveredCard.planet?.constellation || "Constellation unknown"}
+                </div>
+              </div>
+              <div
+                className={`planet-info-visibility ${
+                  hoveredCard.planet?.nakedEyeObject ? "naked-eye" : "dimmed"
+                }`}
+              >
+                {hoveredCard.planet?.nakedEyeObject
+                  ? "Naked eye"
+                  : "Needs optics"}
+              </div>
+            </div>
+
+            <div className="planet-info-grid">
+              <div>
+                <span className="planet-info-label">Altitude</span>
+                <span className="planet-info-value">
+                  {formatDegrees(hoveredCard.planet?.altitude)}
+                </span>
+              </div>
+              <div>
+                <span className="planet-info-label">Azimuth</span>
+                <span className="planet-info-value">
+                  {formatDegrees(hoveredCard.planet?.azimuth)}
+                </span>
+              </div>
+              <div>
+                <span className="planet-info-label">Magnitude</span>
+                <span className="planet-info-value">
+                  {formatMagnitude(hoveredCard.planet?.magnitude)}
+                </span>
+              </div>
+              <div>
+                <span className="planet-info-label">RA / Dec</span>
+                <span className="planet-info-value">
+                  {formatRightAscension(hoveredCard.planet?.rightAscension)} /{" "}
+                  {formatDeclination(hoveredCard.planet?.declination)}
+                </span>
+              </div>
+            </div>
+
+            <div className="planet-info-footnote">
+              {hoveredCard.planet?.aboveHorizon === false
+                ? "Below horizon right now"
+                : "Above the horizon"}
+            </div>
+          </div>
+        )}
 
         {canScrollNext && (
           <button
