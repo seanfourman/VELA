@@ -1,4 +1,9 @@
-/* Gradient blur overlay that fades from top */
+/* ========================================
+   NAVBAR COMPONENT STYLES
+   Uses global glass design system from index.css
+   ======================================== */
+
+/* Gradient Blur Overlay */
 .navbar-blur {
   position: fixed;
   top: 0;
@@ -14,6 +19,7 @@
   z-index: 999;
 }
 
+/* Main Navbar */
 .navbar {
   position: fixed;
   top: 0;
@@ -44,6 +50,7 @@
   justify-content: flex-end;
 }
 
+/* Logo */
 .navbar-logo {
   display: flex;
   align-items: center;
@@ -61,8 +68,9 @@
   width: auto;
 }
 
+/* Navigation Links */
 .nav-link {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--surface-text-muted);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
@@ -71,18 +79,19 @@
 }
 
 .nav-link:hover {
-  color: #fff;
+  color: var(--surface-text);
 }
 
+/* Auth Button - Using Glass Button System */
 .auth-button {
   position: relative;
   padding: 10px 24px;
   border: none;
-  border-radius: 50px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  color: rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  color: var(--surface-text);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -90,20 +99,20 @@
   overflow: hidden;
 }
 
-/* Shiny border effect */
+/* Shiny Border Effect */
 .auth-button::before {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 50px;
+  border-radius: var(--radius-pill);
   padding: 1px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 25%,
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.1) 75%,
-    rgba(255, 255, 255, 0.4) 100%
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.08) 25%,
+    rgba(255, 255, 255, 0.04) 50%,
+    rgba(255, 255, 255, 0.08) 75%,
+    rgba(255, 255, 255, 0.35) 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -112,19 +121,46 @@
 }
 
 .auth-button:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--glass-bg-hover);
 }
 
 .auth-button:hover::before {
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.6) 0%,
-    rgba(255, 255, 255, 0.15) 25%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 255, 255, 0.15) 75%,
-    rgba(255, 255, 255, 0.6) 100%
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.12) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.12) 75%,
+    rgba(255, 255, 255, 0.5) 100%
   );
 }
+
+/* Light Mode - Auth Button */
+.navbar.light .auth-button::before {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.22) 0%,
+    rgba(0, 0, 0, 0.06) 25%,
+    rgba(0, 0, 0, 0.04) 50%,
+    rgba(0, 0, 0, 0.06) 75%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+}
+
+.navbar.light .auth-button:hover::before {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(0, 0, 0, 0.10) 25%,
+    rgba(0, 0, 0, 0.06) 50%,
+    rgba(0, 0, 0, 0.10) 75%,
+    rgba(0, 0, 0, 0.32) 100%
+  );
+}
+
+/* ========================================
+   RESPONSIVE - MOBILE
+   ======================================== */
 
 @media (max-width: 768px) {
   .navbar {
@@ -143,49 +179,4 @@
   .logo-img {
     height: 28px;
   }
-}
-
-/* Light mode styles */
-.navbar-blur.light {
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.navbar.light .nav-link {
-  color: rgba(0, 0, 0, 0.6);
-}
-
-.navbar.light .nav-link:hover {
-  color: #000;
-}
-
-.navbar.light .auth-button {
-  background: rgba(0, 0, 0, 0.08);
-  color: rgba(0, 0, 0, 0.9);
-}
-
-.navbar.light .auth-button::before {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.3) 0%,
-    rgba(0, 0, 0, 0.1) 25%,
-    rgba(0, 0, 0, 0.05) 50%,
-    rgba(0, 0, 0, 0.1) 75%,
-    rgba(0, 0, 0, 0.3) 100%
-  );
-}
-
-.navbar.light .auth-button:hover {
-  background: rgba(0, 0, 0, 0.12);
-}
-
-.navbar.light .auth-button:hover::before {
-  background: linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.4) 0%,
-    rgba(0, 0, 0, 0.15) 25%,
-    rgba(0, 0, 0, 0.1) 50%,
-    rgba(0, 0, 0, 0.15) 75%,
-    rgba(0, 0, 0, 0.4) 100%
-  );
 }

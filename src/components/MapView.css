@@ -1,3 +1,12 @@
+/* ========================================
+   MAPVIEW COMPONENT STYLES
+   Uses global glass design system from index.css
+   ======================================== */
+
+/* ========================================
+   MAP CONTAINER
+   ======================================== */
+
 .map-container {
   position: fixed;
   top: 0;
@@ -5,26 +14,73 @@
   right: 0;
   bottom: 0;
   z-index: 10;
-  --surface-bg: rgba(255, 255, 255, 0.08);
-  --surface-border: rgba(255, 255, 255, 0.28);
-  --surface-hover: rgba(255, 255, 255, 0.12);
-  --surface-active: rgba(255, 255, 255, 0.16);
-  --surface-text: rgba(255, 255, 255, 0.92);
-  --surface-shadow: 0 18px 32px rgba(0, 0, 0, 0.24);
-  --surface-blur: blur(18px) saturate(140%);
 }
 
-.map-container.light {
-  --surface-bg: rgba(255, 255, 255, 0.9);
-  --surface-border: rgba(0, 0, 0, 0.1);
-  --surface-hover: rgba(0, 0, 0, 0.06);
-  --surface-active: rgba(0, 0, 0, 0.1);
-  --surface-text: #0f172a;
-  --surface-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
-  --surface-blur: blur(14px) saturate(120%);
+/* ========================================
+   LEAFLET OVERRIDES
+   ======================================== */
+
+.leaflet-container {
+  background: #1e1e24;
+  font-family: inherit;
 }
 
-/* Custom marker styles */
+.leaflet-grab {
+  cursor: default !important;
+}
+
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive {
+  cursor: move !important;
+}
+
+/* Remove brightness filter for light/satellite modes */
+.map-container.light .leaflet-tile-pane,
+.map-container.satellite .leaflet-tile-pane {
+  filter: none;
+}
+
+/* Leaflet Popup - Glass Style */
+.leaflet-popup-content-wrapper {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow-elevated);
+  color: var(--surface-text);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Liquid Glass Highlight */
+.leaflet-popup-content-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glass-highlight);
+  z-index: 1;
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.leaflet-popup-tip {
+  box-shadow: none;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-strong);
+}
+
+/* ========================================
+   CUSTOM MARKERS
+   ======================================== */
+
 .custom-marker {
   background: transparent;
   border: none;
@@ -43,10 +99,10 @@
 .marker-dot {
   width: 14px;
   height: 14px;
-  background: #22c55e;
+  background: var(--accent-success);
   border-radius: 50%;
   border: 1px solid #fff;
-  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.5);
+  box-shadow: 0 2px 10px var(--accent-success-glow);
   z-index: 2;
 }
 
@@ -70,22 +126,20 @@
   }
 }
 
-/* Override Leaflet styles for gray mode */
-.leaflet-container {
-  background: #1e1e24;
-  font-family: inherit;
+/* Placed Marker */
+.marker-pin.placed {
+  cursor: pointer;
 }
 
-.leaflet-grab {
-  cursor: default !important;
+.marker-dot.placed {
+  background: #3b82f6;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.5);
 }
 
-.leaflet-dragging .leaflet-grab,
-.leaflet-dragging .leaflet-grab .leaflet-interactive {
-  cursor: move !important;
-}
+/* ========================================
+   LOCATION INDICATOR (Glass Pill)
+   ======================================== */
 
-/* Location status indicator */
 .location-indicator {
   position: absolute;
   bottom: 20px;
@@ -94,15 +148,28 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  border-radius: 20px;
-  background: var(--surface-bg);
-  border: 1px solid var(--surface-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-shadow-elevated);
   color: var(--surface-text);
-  box-shadow: var(--surface-shadow);
-  backdrop-filter: var(--surface-blur);
-  -webkit-backdrop-filter: var(--surface-blur);
   z-index: 1000;
   transition: background 0.2s ease, transform 0.1s ease;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Liquid Glass Highlight */
+.location-indicator::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glass-highlight);
+  z-index: 1;
 }
 
 .location-indicator.clickable {
@@ -110,7 +177,7 @@
 }
 
 .location-indicator.clickable:hover {
-  background: var(--surface-hover);
+  background: var(--glass-bg-hover);
 }
 
 .location-indicator.clickable:active {
@@ -125,23 +192,22 @@
 }
 
 .indicator-dot.active {
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
+  background: var(--accent-success);
+  box-shadow: 0 0 8px var(--accent-success);
   animation: pulse-dot 2s infinite;
 }
 
 .indicator-dot.searching {
-  background: #f59e0b;
+  background: var(--accent-warning);
   animation: blink 1s infinite;
 }
 
 .indicator-dot.off {
-  background: #6b7280;
+  background: var(--accent-muted);
 }
 
 @keyframes pulse-dot {
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
   }
   50% {
@@ -150,8 +216,7 @@
 }
 
 @keyframes blink {
-  0%,
-  100% {
+  0%, 100% {
     opacity: 1;
   }
   50% {
@@ -166,7 +231,10 @@
   letter-spacing: 0.02em;
 }
 
-/* Map type switcher */
+/* ========================================
+   MAP TYPE SWITCHER (Glass Switcher)
+   ======================================== */
+
 .map-type-switcher {
   position: absolute;
   bottom: 20px;
@@ -174,13 +242,26 @@
   display: flex;
   gap: 4px;
   padding: 4px;
-  border-radius: 12px;
-  background: var(--surface-bg);
-  border: 1px solid var(--surface-border);
-  box-shadow: var(--surface-shadow);
-  backdrop-filter: var(--surface-blur);
-  -webkit-backdrop-filter: var(--surface-blur);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow-elevated);
   z-index: 1000;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Liquid Glass Highlight */
+.map-type-switcher::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glass-highlight);
+  z-index: 1;
 }
 
 .map-type-btn {
@@ -189,9 +270,9 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--surface-border);
-  border-radius: 8px;
-  background: var(--surface-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
@@ -207,70 +288,18 @@
 }
 
 .map-type-btn:hover {
-  border-color: var(--surface-hover);
+  border-color: var(--glass-border-strong);
 }
 
 .map-type-btn.active {
   border-color: var(--surface-text);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 1px var(--glass-border);
 }
 
-/* Light mode adjustments */
-.map-container.light .location-indicator,
-.map-container.light .map-type-switcher {
-  background: var(--surface-bg);
-  border-color: var(--surface-border);
-  color: var(--surface-text);
-}
+/* ========================================
+   CONTEXT MENU POPUP
+   ======================================== */
 
-.map-container.light .location-indicator.clickable:hover {
-  background: var(--surface-hover);
-}
-
-.map-container.light .indicator-text {
-  color: var(--surface-text);
-}
-
-.map-container.light .map-type-btn {
-  background: var(--surface-bg);
-  border-color: var(--surface-border);
-}
-
-.map-container.light .map-type-btn:hover {
-  border-color: var(--surface-hover);
-}
-
-.map-container.light .map-type-btn.active {
-  border-color: var(--surface-text);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
-}
-
-.map-container.light .indicator-dot.active {
-  background: #16a34a;
-  box-shadow: 0 0 8px #16a34a;
-}
-
-.map-container.light .indicator-dot.off {
-  background: #9ca3af;
-}
-
-/* Remove brightness filter for light/satellite modes */
-.map-container.light .leaflet-tile-pane,
-.map-container.satellite .leaflet-tile-pane {
-  filter: none;
-}
-
-/* Placed marker styles */
-.marker-pin.placed {
-  cursor: pointer;
-}
-
-.marker-dot.placed {
-  background: #3b82f6;
-  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.5);
-}
-
-/* Context menu popup styles */
 .context-menu-popup {
   display: flex;
   flex-direction: column;
@@ -281,10 +310,9 @@
 
 .popup-coords {
   font-size: 0.75rem;
-  color: var(--surface-text);
-  opacity: 0.75;
+  color: var(--surface-text-muted);
   padding-bottom: 4px;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--glass-border);
   margin-bottom: 4px;
 }
 
@@ -293,20 +321,20 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border: 1px solid var(--surface-border);
+  border: 1px solid var(--glass-border);
   border-radius: 6px;
-  background: var(--surface-bg);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
   color: var(--surface-text);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s ease;
-  backdrop-filter: var(--surface-blur);
-  -webkit-backdrop-filter: var(--surface-blur);
 }
 
 .popup-btn:hover:not(:disabled) {
-  background: var(--surface-hover);
+  background: var(--glass-bg-hover);
 }
 
 .popup-btn:disabled {
@@ -324,31 +352,13 @@
 
 .popup-btn.close:hover {
   background: rgba(252, 165, 165, 0.12);
-  color: #dc2626;
+  color: var(--accent-danger);
 }
 
-/* Leaflet popup customization */
-.leaflet-popup-content-wrapper {
-  border-radius: 12px;
-  background: var(--surface-bg);
-  border: 1px solid var(--surface-border);
-  color: var(--surface-text);
-  box-shadow: var(--surface-shadow);
-  backdrop-filter: var(--surface-blur);
-  -webkit-backdrop-filter: var(--surface-blur);
-}
+/* ========================================
+   PLANET PANEL
+   ======================================== */
 
-.leaflet-popup-content {
-  margin: 12px;
-}
-
-.leaflet-popup-tip {
-  box-shadow: none;
-  background: var(--surface-bg);
-  border: 1px solid var(--surface-border);
-}
-
-/* Visible planets shelf */
 .planet-panel-wrapper {
   position: absolute;
   top: 50%;
@@ -375,22 +385,23 @@
   pointer-events: none;
 }
 
+/* Planet Stack - Main Glass Container */
 .planet-stack {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
   padding: 18px 16px;
   height: 750px;
   width: 250px;
   min-height: 440px;
   border-radius: 350px;
   isolation: isolate;
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border-strong);
   will-change: backdrop-filter, transform;
 }
 
@@ -400,26 +411,18 @@
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: radial-gradient(
-      circle at 12% 12%,
-      rgba(255, 255, 255, 0.32),
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 88% 88%,
-      rgba(255, 255, 255, 0.22),
-      transparent 48%
-    );
+  background: var(--glass-inner-glow);
   opacity: 0.9;
   z-index: 1;
 }
 
+/* Planet Scroll Buttons */
 .planet-scroll-btn {
   width: 36px;
   height: 36px;
   background: none;
   border: none;
-  color: #fff;
+  color: var(--surface-text);
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -445,16 +448,20 @@
   box-shadow: none;
 }
 
-.map-container.light .planet-scroll-btn {
-  color: #0f172a;
-}
-
 .planet-scroll-btn.prev {
   top: 0;
 }
 
 .planet-scroll-btn.next {
   bottom: 0;
+}
+
+/* Planet Cards */
+.planet-cards-viewport {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  min-height: 420px;
 }
 
 .planet-cards {
@@ -466,13 +473,6 @@
   justify-content: flex-start;
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
-}
-
-.planet-cards-viewport {
-  width: 100%;
-  overflow: hidden;
-  position: relative;
-  min-height: 420px;
 }
 
 .planet-card {
@@ -499,6 +499,7 @@
     drop-shadow(0 6px 14px rgba(0, 0, 0, 0.05));
 }
 
+/* Planet Info Card - Glass Card with Liquid Effect */
 .planet-info-card {
   position: absolute;
   min-width: 230px;
@@ -507,16 +508,44 @@
   left: calc(100% + 20px);
   top: 0;
   transform: translateY(-50%);
-  border-radius: 16px;
-  background: var(--surface-bg);
-  border: 1px solid var(--surface-border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow-elevated);
   color: var(--surface-text);
-  box-shadow: var(--surface-shadow);
-  backdrop-filter: var(--surface-blur);
-  -webkit-backdrop-filter: var(--surface-blur);
   z-index: 1200;
   pointer-events: auto;
   transition: transform 0.2s ease, opacity 0.2s ease;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Liquid Glass Highlight Effect */
+.planet-info-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glass-inner-glow);
+  opacity: 0.85;
+  z-index: 1;
+}
+
+/* Top shine effect */
+.planet-info-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glass-highlight);
+  z-index: 2;
 }
 
 .planet-info-card.middle-offset {
@@ -541,17 +570,17 @@
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--surface-text-muted);
   margin-top: 2px;
 }
 
 .planet-info-visibility {
   font-size: 0.75rem;
   padding: 4px 8px;
-  border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  color: #e2e8f0;
-  background: rgba(148, 163, 184, 0.14);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  color: var(--surface-text);
+  background: var(--glass-bg);
   white-space: nowrap;
 }
 
@@ -559,6 +588,12 @@
   background: rgba(34, 197, 94, 0.16);
   color: #bbf7d0;
   border-color: rgba(34, 197, 94, 0.4);
+}
+
+.light .planet-info-visibility.naked-eye {
+  background: rgba(22, 163, 74, 0.12);
+  color: #15803d;
+  border-color: rgba(22, 163, 74, 0.22);
 }
 
 .planet-info-grid {
@@ -572,20 +607,20 @@
   font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.68);
+  color: var(--surface-text-muted);
   margin-bottom: 2px;
 }
 
 .planet-info-value {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #f8fafc;
+  color: var(--surface-text);
 }
 
 .planet-info-footnote {
   margin-top: 8px;
   font-size: 0.75rem;
-  color: rgba(226, 232, 240, 0.76);
+  color: var(--surface-text-muted);
 }
 
 .planet-float-row.collapsed .planet-info-card {
@@ -593,40 +628,13 @@
   pointer-events: none;
 }
 
-.map-container.light .planet-info-constellation {
-  color: rgba(15, 23, 42, 0.65);
-}
-
-.map-container.light .planet-info-label {
-  color: rgba(15, 23, 42, 0.7);
-}
-
-.map-container.light .planet-info-value {
-  color: #0f172a;
-}
-
-.map-container.light .planet-info-visibility {
-  background: rgba(0, 0, 0, 0.04);
-  color: #0f172a;
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-.map-container.light .planet-info-visibility.naked-eye {
-  background: rgba(22, 163, 74, 0.12);
-  color: #15803d;
-  border-color: rgba(22, 163, 74, 0.22);
-}
-
-.map-container.light .planet-info-footnote {
-  color: rgba(15, 23, 42, 0.65);
-}
-
+/* Planet Empty State */
 .planet-empty {
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: none;
-  background: rgba(255, 255, 255, 0.04);
-  color: rgba(229, 231, 235, 0.85);
+  background: var(--glass-bg);
+  color: var(--surface-text-muted);
   font-size: 0.85rem;
 }
 
@@ -635,35 +643,12 @@
   color: #fecdd3;
 }
 
-.map-container.light .planet-empty {
-  background: rgba(0, 0, 0, 0.06);
-  color: rgba(30, 41, 59, 0.82);
-}
-
-.map-container.light .planet-empty.error {
+.light .planet-empty.error {
   color: #b91c1c;
   background: rgba(185, 28, 28, 0.12);
 }
 
-.map-container.light .planet-stack {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.map-container.light .planet-stack::before {
-  background: radial-gradient(
-      circle at 12% 12%,
-      rgba(255, 255, 255, 0.45),
-      transparent 42%
-    ),
-    radial-gradient(
-      circle at 88% 88%,
-      rgba(255, 255, 255, 0.28),
-      transparent 46%
-    );
-  opacity: 0.8;
-}
-
+/* Planet Panel Toggle - Glass Icon Button */
 .planet-panel-toggle {
   position: absolute;
   top: 50%;
@@ -671,11 +656,12 @@
   transform: translateY(-50%);
   width: 46px;
   height: 46px;
-  border-radius: 999px;
-  border: 2px solid var(--surface-border);
-  background: var(--surface-bg);
-  backdrop-filter: var(--surface-blur);
-  -webkit-backdrop-filter: var(--surface-blur);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 2px solid var(--glass-border-strong);
+  border-radius: var(--radius-round);
+  box-shadow: var(--glass-shadow-elevated);
   color: var(--surface-text);
   display: flex;
   align-items: center;
@@ -686,7 +672,19 @@
   pointer-events: auto;
   padding: 0;
   outline: none;
-  box-shadow: var(--surface-shadow);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Liquid Glass Highlight */
+.planet-panel-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glass-highlight);
+  z-index: 1;
 }
 
 .planet-panel-toggle:focus,
@@ -696,26 +694,25 @@
 }
 
 .planet-panel-toggle.active {
-  border-color: var(--surface-hover);
+  border-color: var(--glass-border-strong);
 }
 
 .planet-panel-toggle:hover {
-  border-color: var(--surface-hover);
-  background: var(--surface-hover);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-strong);
 }
 
 .planet-panel-toggle:active {
   transform: translateY(-50%) scale(0.97);
 }
 
-.map-container.light .planet-panel-toggle {
-  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
 .planet-panel-wrapper.open .planet-panel-toggle {
   left: calc(100% + 14px);
 }
+
+/* ========================================
+   RESPONSIVE - MOBILE
+   ======================================== */
 
 @media (max-width: 768px) {
   .planet-panel-wrapper {
