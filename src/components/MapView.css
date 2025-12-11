@@ -343,18 +343,7 @@
   cursor: not-allowed;
 }
 
-.popup-btn.close {
-  background: transparent;
-  color: var(--surface-text);
-  font-size: 0.75rem;
-  padding: 4px 8px;
-  margin-top: 4px;
-}
-
-.popup-btn.close:hover {
-  background: rgba(252, 165, 165, 0.12);
-  color: var(--accent-danger);
-}
+/* .popup-btn.close styles removed */
 
 /* ========================================
    PLANET PANEL

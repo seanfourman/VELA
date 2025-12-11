@@ -978,20 +978,20 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                   {placedMarker.lat.toFixed(4)}, {placedMarker.lng.toFixed(4)}
                 </div>
                 <button className="popup-btn" onClick={handleGetVisiblePlanets}>
-                  🔭 Visible Planets
+                  Visible Planets
                 </button>
                 <button
                   className="popup-btn"
                   onClick={handleGetDirections}
                   disabled={!location}
                 >
-                  🧭 Get Directions
+                  Get Directions
                 </button>
                 <button
-                  className="popup-btn close"
+                  className="popup-btn"
                   onClick={handleCloseContextMenu}
                 >
-                  ✕ Close
+                  Remove Pin
                 </button>
               </div>
             </Popup>
