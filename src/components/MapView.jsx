@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -200,7 +194,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const handleGetDirections = () => {
     if (contextMenu && location) {
       const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${contextMenu.lat},${contextMenu.lng}`;
-      console.log("Directions URL:", url);
       window.open(url, "_blank");
     }
   };
@@ -213,9 +206,12 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     skipAutoLocationRef.current = isShowingPinPlanets;
 
     if (isShowingPinPlanets) {
-      planetPanelRef.current?.resetPanel?.(() => {
-        clearPlanets();
-      }, { hideToggle: true });
+      planetPanelRef.current?.resetPanel?.(
+        () => {
+          clearPlanets();
+        },
+        { hideToggle: true }
+      );
       return;
     }
 
@@ -282,16 +278,16 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         {location && <MapAnimator location={location} />}
 
         {location && (
-          <Marker
-            position={[location.lat, location.lng]}
-            icon={customIcon}
-          >
+          <Marker position={[location.lat, location.lng]} icon={customIcon}>
             <Popup>
               <div className="context-menu-popup">
                 <div className="popup-coords">
                   {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
                 </div>
-                <button className="popup-btn" onClick={handleShowLocationPlanets}>
+                <button
+                  className="popup-btn"
+                  onClick={handleShowLocationPlanets}
+                >
                   Visible Planets
                 </button>
               </div>

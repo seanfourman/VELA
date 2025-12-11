@@ -49,7 +49,6 @@ export function usePlanets() {
       } catch (error) {
         setVisiblePlanets([]);
         setPlanetsError("Could not load visible planets right now.");
-        console.error("Failed to fetch visible planets:", error);
       } finally {
         setPlanetsLoading(false);
       }

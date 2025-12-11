@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import Navbar from "./components/Navbar";
 import MapView from "./components/MapView";
+import PopupPortal from "./components/PopupPortal";
+import { showPopup } from "./utils/popup";
+import { isProbablyHardwareAccelerated } from "./utils/hardwareUtils";
 import "./App.css";
 
 function App() {
@@ -44,6 +47,17 @@ function App() {
     };
   }, []);
 
+  // Warn if hardware acceleration/WebGL falls back to software
+  useEffect(() => {
+    if (!isProbablyHardwareAccelerated()) {
+      showPopup(
+        "Hardware acceleration seems off. 3D planets may stutter.",
+        "failure",
+        { duration: 4000 }
+      );
+    }
+  }, []);
+
   return (
     <div className="app">
       <Navbar mapType={mapType} />
@@ -53,6 +67,7 @@ function App() {
         mapType={mapType}
         setMapType={setMapType}
       />
+      <PopupPortal />
     </div>
   );
 }

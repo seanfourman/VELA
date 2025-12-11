@@ -107,7 +107,6 @@ export async function fetchVisiblePlanets(lat, lng) {
 
     return data;
   } catch (error) {
-    console.error("Failed to fetch visible planets:", error);
     return null;
   }
 }
