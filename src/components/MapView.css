@@ -314,7 +314,8 @@
 }
 
 .popup-coords {
-  font-size: 0.75rem;
+  font-size: 1rem;
+  text-align: center;
   color: var(--surface-text-muted);
   padding-bottom: 4px;
   border-bottom: 1px solid var(--glass-border);
