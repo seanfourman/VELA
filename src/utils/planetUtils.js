@@ -1,7 +1,3 @@
-import L from "leaflet"; // Needed if we were using L here, but actually we are not using L in utils currently based on the plan, 
-// wait, existing code uses `planetTexture` helper which uses `new URL(..., import.meta.url)`. 
-// I need to be careful about `planetTexture` dependency.
-
 const planetTexture = (fileName) =>
   new URL(`../assets/planets/${fileName}`, import.meta.url).href;
 
@@ -46,13 +42,22 @@ export async function fetchVisiblePlanets(lat, lng) {
   const cacheKey = `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(
     2
   )}`;
-  const cached = localStorage.getItem(cacheKey);
+  let cached;
+
+  try {
+    cached = localStorage.getItem(cacheKey);
+  } catch {
+    cached = null;
+  }
 
   if (cached) {
-    const { data, timestamp } = JSON.parse(cached);
-    if (Date.now() - timestamp < CACHE_DURATION) {
-      console.log("Using cached planets data:", data);
-      return data;
+    try {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_DURATION) {
+        return data;
+      }
+    } catch {
+      // Corrupt cache, ignore and refetch
     }
   }
 
@@ -60,13 +65,20 @@ export async function fetchVisiblePlanets(lat, lng) {
     const response = await fetch(
       `https://api.visibleplanets.dev/v3?latitude=${lat}&longitude=${lng}`
     );
-    const data = await response.json();
-    console.log("Fetched visible planets:", data);
+    if (!response.ok) {
+      throw new Error(`Visible planets API failed: ${response.status}`);
+    }
 
-    localStorage.setItem(
-      cacheKey,
-      JSON.stringify({ data, timestamp: Date.now() })
-    );
+    const data = await response.json();
+
+    try {
+      localStorage.setItem(
+        cacheKey,
+        JSON.stringify({ data, timestamp: Date.now() })
+      );
+    } catch {
+      // Storage may be unavailable (quota/permissions); continue without cache
+    }
 
     return data;
   } catch (error) {

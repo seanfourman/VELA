@@ -1,0 +1,114 @@
+/* Leaflet base styling */
+.leaflet-container {
+  background: #1e1e24;
+  font-family: inherit;
+}
+
+.leaflet-grab {
+  cursor: default !important;
+}
+
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive {
+  cursor: move !important;
+}
+
+.map-container.light .leaflet-tile-pane,
+.map-container.satellite .leaflet-tile-pane {
+  filter: none;
+}
+
+/* Leaflet Popup - Glass Style */
+.leaflet-popup-content-wrapper {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow-elevated);
+  color: var(--surface-text);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.leaflet-popup-content-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glass-highlight);
+  z-index: 1;
+}
+
+.leaflet-popup-close-button {
+  display: none;
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.leaflet-popup-tip {
+  box-shadow: none;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-strong);
+}
+
+/* Custom markers */
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+.marker-pin {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+}
+
+.marker-dot {
+  width: 14px;
+  height: 14px;
+  background: var(--accent-success);
+  border-radius: 50%;
+  border: 1px solid #fff;
+  box-shadow: 0 2px 10px var(--accent-success-glow);
+  z-index: 2;
+}
+
+.marker-pulse {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: rgba(34, 197, 94, 0.4);
+  border-radius: 50%;
+  animation: marker-pulse 2s infinite;
+}
+
+@keyframes marker-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
+.marker-pin.placed {
+  cursor: pointer;
+}
+
+.marker-dot.placed {
+  background: #3b82f6;
+  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.5);
+}
