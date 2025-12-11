@@ -20,6 +20,7 @@ const PlanetPanelContainer = forwardRef(
     const [hasShownPanelToggle, setHasShownPanelToggle] = useState(false);
     const [panelSource, setPanelSource] = useState(null); // 'manual' | 'auto'
     const [isHoveringPanel, setIsHoveringPanel] = useState(false);
+    const [forceHideToggle, setForceHideToggle] = useState(false);
 
     const hoverHideTimeoutRef = useRef(null);
     const initialAutoHideScheduled = useRef(false);
@@ -87,7 +88,7 @@ const PlanetPanelContainer = forwardRef(
       }
     };
 
-    const resetPanel = useCallback((afterClose) => {
+    const resetPanel = useCallback((afterClose, { hideToggle = false } = {}) => {
       if (hoverHideTimeoutRef.current) {
         clearTimeout(hoverHideTimeoutRef.current);
         hoverHideTimeoutRef.current = null;
@@ -107,10 +108,12 @@ const PlanetPanelContainer = forwardRef(
       setIsHoveringPanel(false);
       // Prevent auto-reveal until explicitly triggered again
       initialAutoHideScheduled.current = true;
+      setForceHideToggle(Boolean(hideToggle));
 
       // After animation completes, remove toggle and run callback
       closeTimeoutRef.current = setTimeout(() => {
         setHasShownPanelToggle(false);
+        setForceHideToggle(false);
         if (typeof afterClose === "function") afterClose();
         closeTimeoutRef.current = null;
       }, CLOSE_ANIMATION_MS);
@@ -172,6 +175,7 @@ const PlanetPanelContainer = forwardRef(
     return (
       <div
         className={`planet-panel-wrapper ${planetPanelVisible ? "open" : "collapsed"}`}
+        data-force-hide-toggle={forceHideToggle ? "true" : "false"}
         onMouseEnter={handlePanelMouseEnter}
         onMouseLeave={handlePanelMouseLeave}
       >

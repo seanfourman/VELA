@@ -198,7 +198,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     if (location) {
       planetPanelRef.current?.resetPanel?.(() => {
         clearPlanets();
-      });
+      }, { hideToggle: true });
     } else {
       planetPanelRef.current?.hidePanel();
       planetPanelRef.current?.resetToggle?.();

@@ -156,7 +156,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
   z-index: 960;
   pointer-events: auto;
   padding: 0;
@@ -198,6 +198,13 @@
   left: calc(100% + 14px);
 }
 
+/* Only hide toggle when explicitly forced (e.g., pin removal) */
+.planet-panel-wrapper[data-force-hide-toggle="true"] .planet-panel-toggle {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-140%, -50%);
+}
+
 /* Responsive - laptop/smaller */
 @media (max-height: 850px), (max-width: 1440px) {
   .planet-stack {
@@ -232,6 +239,12 @@
 
   .planet-panel-wrapper.open .planet-panel-toggle {
     left: calc(100% + 10px);
+  }
+
+  .planet-panel-wrapper[data-force-hide-toggle="true"] .planet-panel-toggle {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-140%, -50%);
   }
 }
 
@@ -272,10 +285,9 @@
   }
 
   .planet-panel-wrapper.collapsed .planet-panel-toggle {
-    left: 12px;
-    right: auto;
-    bottom: 120px;
-    transform: none;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(0, 20px);
   }
 
   .planet-panel-toggle:active {
