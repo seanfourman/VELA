@@ -126,6 +126,20 @@
   }
 }
 
+/* Slow fade for popups - blur snaps when nearly invisible, then slowly fades in */
+@keyframes glass-popup-reveal {
+  0% {
+    opacity: 0;
+  }
+  /* Stay invisible for first 15% while blur "snaps" */
+  15% {
+    opacity: 0.02;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 /* ========================================
    LIGHT MODE OVERRIDES
    ======================================== */

@@ -52,7 +52,7 @@
   color: var(--surface-text);
   isolation: isolate;
   overflow: hidden;
-  animation: glass-fade-in-simple var(--glass-appear-duration) var(--glass-appear-timing);
+  animation: glass-popup-reveal 1s var(--glass-appear-timing);
 }
 
 /* Liquid Glass Highlight */
