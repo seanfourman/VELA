@@ -11,14 +11,11 @@
 
 /* Global Size Transition - Smooth out layout shifts */
 div {
-  transition:
-    width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+  transition: width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
     height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
     max-width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
-    max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
-    padding 0.25s ease,
-    margin 0.25s ease,
-    flex-basis 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), padding 0.25s ease,
+    margin 0.25s ease, flex-basis 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
   will-change: width, height, max-width, max-height, flex-basis;
 }
 
@@ -57,12 +54,12 @@ div {
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-bg-hover: rgba(255, 255, 255, 0.12);
   --glass-bg-active: rgba(255, 255, 255, 0.16);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.10);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.1);
 
   /* Glass Borders */
   --glass-border: rgba(255, 255, 255, 0.18);
   --glass-border-strong: rgba(255, 255, 255, 0.28);
-  --glass-border-subtle: rgba(255, 255, 255, 0.10);
+  --glass-border-subtle: rgba(255, 255, 255, 0.1);
 
   /* Glass Blur Effects */
   --glass-blur: blur(20px) saturate(180%);
@@ -77,7 +74,7 @@ div {
   /* Glass Highlight (Apple liquid shine effect) */
   --glass-highlight: radial-gradient(
     ellipse 100% 60% at 50% -10%,
-    rgba(255, 255, 255, 0.20),
+    rgba(255, 255, 255, 0.2),
     transparent 60%
   );
   --glass-highlight-strong: radial-gradient(
@@ -85,9 +82,16 @@ div {
     rgba(255, 255, 255, 0.28),
     transparent 60%
   );
-  --glass-inner-glow: 
-    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.25), transparent 40%),
-    radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.18), transparent 45%);
+  --glass-inner-glow: radial-gradient(
+      circle at 12% 12%,
+      rgba(255, 255, 255, 0.25),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 88% 88%,
+      rgba(255, 255, 255, 0.18),
+      transparent 45%
+    );
 
   /* Surface Colors */
   --surface-text: rgba(255, 255, 255, 0.92);
@@ -181,7 +185,7 @@ div {
   --glass-border-subtle: rgba(0, 0, 0, 0.05);
 
   /* Glass Shadows - Light */
-  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.10);
+  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.1);
   --glass-shadow-elevated: 0 18px 48px rgba(15, 23, 42, 0.16);
   --glass-shadow-subtle: 0 4px 16px rgba(15, 23, 42, 0.08);
 
@@ -196,9 +200,16 @@ div {
     rgba(255, 255, 255, 0.65),
     transparent 60%
   );
-  --glass-inner-glow: 
-    radial-gradient(circle at 12% 12%, rgba(255, 255, 255, 0.55), transparent 38%),
-    radial-gradient(circle at 88% 88%, rgba(255, 255, 255, 0.35), transparent 42%);
+  --glass-inner-glow: radial-gradient(
+      circle at 12% 12%,
+      rgba(255, 255, 255, 0.55),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 88% 88%,
+      rgba(255, 255, 255, 0.35),
+      transparent 42%
+    );
 
   /* Surface Colors - Light */
   --surface-text: #0f172a;
