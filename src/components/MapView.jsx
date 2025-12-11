@@ -17,6 +17,7 @@ import LocationIndicator from "./MapView/LocationIndicator";
 import ContextMenuPopup from "./MapView/ContextMenuPopup";
 import usePlanets from "../hooks/usePlanets";
 import { preloadAllPlanetTextures } from "../utils/planetUtils";
+import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
 
 const MAPTILER_KEY = "QvyjnqdnkmG5VtE3d2xS";
 
@@ -129,9 +130,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     const prefersReducedMotion = window.matchMedia?.(
       "(prefers-reduced-motion: reduce)"
     )?.matches;
-    const lowCores =
-      navigator.hardwareConcurrency && navigator.hardwareConcurrency < 4;
-    return prefersReducedMotion || lowCores;
+    const hardwareOk = isProbablyHardwareAccelerated();
+    return prefersReducedMotion || !hardwareOk;
   }, []);
 
   const defaultCenter = [20, 0];
