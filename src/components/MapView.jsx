@@ -193,13 +193,19 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const handleCloseContextMenu = () => {
     setContextMenu(null);
     setPlacedMarker(null);
-    skipAutoLocationRef.current = true;
 
-    if (location) {
+    const isShowingPinPlanets = planetQuery?.source === "pin";
+    skipAutoLocationRef.current = isShowingPinPlanets;
+
+    if (isShowingPinPlanets) {
       planetPanelRef.current?.resetPanel?.(() => {
         clearPlanets();
       }, { hideToggle: true });
-    } else {
+      return;
+    }
+
+    // If we weren't showing pin planets, keep current panel (e.g., live location)
+    if (!location) {
       planetPanelRef.current?.hidePanel();
       planetPanelRef.current?.resetToggle?.();
     }
