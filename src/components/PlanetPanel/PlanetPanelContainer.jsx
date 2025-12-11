@@ -24,6 +24,8 @@ const PlanetPanelContainer = forwardRef(
     const hoverHideTimeoutRef = useRef(null);
     const initialAutoHideScheduled = useRef(false);
     const initialRevealDelayRef = useRef(null);
+    const closeTimeoutRef = useRef(null);
+    const CLOSE_ANIMATION_MS = 600;
 
     const showPlanetPanelToggle =
       hasShownPanelToggle &&
@@ -85,6 +87,35 @@ const PlanetPanelContainer = forwardRef(
       }
     };
 
+    const resetPanel = useCallback((afterClose) => {
+      if (hoverHideTimeoutRef.current) {
+        clearTimeout(hoverHideTimeoutRef.current);
+        hoverHideTimeoutRef.current = null;
+      }
+      if (initialRevealDelayRef.current) {
+        clearTimeout(initialRevealDelayRef.current);
+        initialRevealDelayRef.current = null;
+      }
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
+        closeTimeoutRef.current = null;
+      }
+
+      // Trigger close animation
+      setPlanetPanelVisible(false);
+      setPanelSource(null);
+      setIsHoveringPanel(false);
+      // Prevent auto-reveal until explicitly triggered again
+      initialAutoHideScheduled.current = true;
+
+      // After animation completes, remove toggle and run callback
+      closeTimeoutRef.current = setTimeout(() => {
+        setHasShownPanelToggle(false);
+        if (typeof afterClose === "function") afterClose();
+        closeTimeoutRef.current = null;
+      }, CLOSE_ANIMATION_MS);
+    }, []);
+
     const handlePanelMouseLeave = () => {
       setIsHoveringPanel(false);
       scheduleAutoHide();
@@ -121,30 +152,20 @@ const PlanetPanelContainer = forwardRef(
       }
     }, [panelSource, planetPanelVisible, isHoveringPanel, scheduleAutoHide]);
 
-    // Reset auto-show flags when switching back to live location after a pin
-    useEffect(() => {
-      if (planetQuery?.source === "location") {
-        initialAutoHideScheduled.current = false;
-        setHasShownPanelToggle(false);
-      }
-    }, [planetQuery?.source]);
-
     useImperativeHandle(ref, () => ({
       openPanel: (source = "manual") => revealPlanetPanel(source),
       hidePanel: () => hidePlanetPanel(),
       togglePanel: () => togglePlanetPanel(),
       markToggleSeen: () => setHasShownPanelToggle(true),
       resetToggle: () => setHasShownPanelToggle(false),
-      resetAutoReveal: () => {
-        initialAutoHideScheduled.current = false;
-        setHasShownPanelToggle(false);
-      },
+      resetPanel,
     }));
 
     useEffect(() => {
       return () => {
         if (hoverHideTimeoutRef.current) clearTimeout(hoverHideTimeoutRef.current);
         if (initialRevealDelayRef.current) clearTimeout(initialRevealDelayRef.current);
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
       };
     }, []);
 

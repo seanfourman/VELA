@@ -119,6 +119,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const planetPanelRef = useRef(null);
   const [placedMarker, setPlacedMarker] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const skipAutoLocationRef = useRef(false);
 
   const {
     visiblePlanets,
@@ -126,6 +127,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     planetsError,
     planetQuery,
     fetchPlanetsForLocation,
+    clearPlanets,
   } = usePlanets();
 
   const reducedMotion = useMemo(() => {
@@ -142,6 +144,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
+      skipAutoLocationRef.current = false;
       mapRef.current.flyTo([location.lat, location.lng], 15, {
         duration: 2.5,
         easeLinearity: 0.25,
@@ -190,16 +193,12 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const handleCloseContextMenu = () => {
     setContextMenu(null);
     setPlacedMarker(null);
+    skipAutoLocationRef.current = true;
 
     if (location) {
-      planetPanelRef.current?.hidePanel();
-      planetPanelRef.current?.resetAutoReveal?.();
-      fetchPlanetsForLocation(
-        location.lat,
-        location.lng,
-        "Visible from your sky",
-        { force: true, source: "location" }
-      );
+      planetPanelRef.current?.resetPanel?.(() => {
+        clearPlanets();
+      });
     } else {
       planetPanelRef.current?.hidePanel();
       planetPanelRef.current?.resetToggle?.();
@@ -209,6 +208,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   useEffect(() => {
     if (!location) return;
     if (planetQuery?.source === "pin") return;
+    if (skipAutoLocationRef.current) return;
 
     fetchPlanetsForLocation(
       location.lat,

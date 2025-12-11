@@ -11,6 +11,13 @@ export function usePlanets() {
   const [planetsError, setPlanetsError] = useState(null);
   const [planetQuery, setPlanetQuery] = useState(null);
 
+  const clearPlanets = useCallback(() => {
+    setVisiblePlanets([]);
+    setPlanetsError(null);
+    setPlanetQuery(null);
+    lastPlanetKey.current = null;
+  }, []);
+
   const fetchPlanetsForLocation = useCallback(
     async (lat, lng, label, { force = false, source = "location" } = {}) => {
       if (lat === undefined || lng === undefined) return;
@@ -56,6 +63,7 @@ export function usePlanets() {
     planetsError,
     planetQuery,
     fetchPlanetsForLocation,
+    clearPlanets,
   };
 }
 
