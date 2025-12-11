@@ -160,6 +160,18 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     }
   };
 
+  const handleShowLocationPlanets = () => {
+    if (!location) return;
+    skipAutoLocationRef.current = false;
+    planetPanelRef.current?.openPanel("manual");
+    fetchPlanetsForLocation(
+      location.lat,
+      location.lng,
+      "Visible from your sky",
+      { force: true, source: "location" }
+    );
+  };
+
   const handleDoubleClick = (latlng) => {
     setPlacedMarker(latlng);
     setContextMenu({
@@ -270,7 +282,18 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           <Marker
             position={[location.lat, location.lng]}
             icon={customIcon}
-          ></Marker>
+          >
+            <Popup>
+              <div className="context-menu-popup">
+                <div className="popup-coords">
+                  {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                </div>
+                <button className="popup-btn" onClick={handleShowLocationPlanets}>
+                  Visible Planets
+                </button>
+              </div>
+            </Popup>
+          </Marker>
         )}
 
         {placedMarker && (
