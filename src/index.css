@@ -9,6 +9,12 @@
   box-sizing: border-box;
 }
 
+/* Global Size Transition - Smooth out layout shifts */
+div {
+  transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: width, height;
+}
+
 /* ========================================
    DESIGN TOKENS - Liquid Glass System
    ======================================== */
