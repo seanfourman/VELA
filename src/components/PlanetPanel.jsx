@@ -26,6 +26,8 @@ export default function PlanetPanel({
   const planetStackRef = useRef(null);
   const [cardHeight, setCardHeight] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
+  const [hoverBlocked, setHoverBlocked] = useState(false);
+  const hoverBlockTimeoutRef = useRef(null);
 
   const planetsToShow = useMemo(
     () =>
@@ -59,6 +61,7 @@ export default function PlanetPanel({
 
   const handlePlanetHover = useCallback(
     (planet, idx, event) => {
+      if (hoverBlocked) return;
       if (!planet) return;
 
       if (!planetStackRef.current || !event?.currentTarget) {
@@ -80,7 +83,7 @@ export default function PlanetPanel({
         isMiddle: idx - safePage * PAGE_SIZE === 1,
       });
     },
-    [safePage]
+    [safePage, hoverBlocked]
   );
 
   const clearHover = useCallback(() => {
@@ -98,6 +101,14 @@ export default function PlanetPanel({
 
   const handlePage = (direction) => {
     setHoveredCard(null);
+    setHoverBlocked(true);
+    if (hoverBlockTimeoutRef.current) {
+      clearTimeout(hoverBlockTimeoutRef.current);
+    }
+    hoverBlockTimeoutRef.current = setTimeout(() => {
+      setHoverBlocked(false);
+      hoverBlockTimeoutRef.current = null;
+    }, 250);
     setPage((prev) => {
       const next = prev + direction;
       if (next < 0 || next > totalPages - 1) return prev;
@@ -147,9 +158,7 @@ export default function PlanetPanel({
           style={{ height: viewportHeight }}
         >
           <div className="planet-cards" style={{ transform: trackTransform }}>
-            {loading && (
-              null
-            )}
+            {loading && null}
 
             {!loading && error && (
               <div className="planet-empty error" ref={firstCardRef}>
