@@ -99,8 +99,8 @@ div {
   --surface-text-subtle: rgba(255, 255, 255, 0.45);
 
   /* Accent Colors */
-  --accent-primary: #667eea;
-  --accent-primary-hover: #764ba2;
+  --accent-primary: #fff;
+  --accent-primary-hover: #e5e5e5;
   --accent-success: #22c55e;
   --accent-success-glow: rgba(34, 197, 94, 0.5);
   --accent-warning: #f59e0b;
