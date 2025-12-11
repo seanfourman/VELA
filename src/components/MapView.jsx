@@ -22,6 +22,7 @@ import MapTypeSwitcher from "./MapView/MapTypeSwitcher";
 import LocationIndicator from "./MapView/LocationIndicator";
 import ContextMenuPopup from "./MapView/ContextMenuPopup";
 import usePlanets from "../hooks/usePlanets";
+import { preloadAllPlanetTextures } from "../utils/planetUtils";
 
 const MAPTILER_KEY = "QvyjnqdnkmG5VtE3d2xS";
 
@@ -141,6 +142,10 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   const defaultCenter = [20, 0];
   const defaultZoom = 2;
+
+  useEffect(() => {
+    preloadAllPlanetTextures();
+  }, []);
 
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {

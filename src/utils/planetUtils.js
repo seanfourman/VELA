@@ -37,6 +37,31 @@ export const resolvePlanetTexture = (name) => {
 const PLANETS_API_CACHE_KEY = "visiblePlanetsCache";
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in ms
 
+// Texture preloading helpers
+const texturePreloadCache = new Map();
+
+export function preloadPlanetTexture(url) {
+  if (!url) return Promise.resolve();
+  if (texturePreloadCache.has(url)) {
+    return texturePreloadCache.get(url);
+  }
+  const promise = new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(url);
+    img.onerror = reject;
+    img.src = url;
+  });
+  texturePreloadCache.set(url, promise);
+  return promise;
+}
+
+export function preloadAllPlanetTextures() {
+  const entries = Object.values(PLANET_TEXTURES);
+  return Promise.all(entries.map((url) => preloadPlanetTexture(url))).catch(
+    () => {}
+  );
+}
+
 // Fetch visible planets with caching
 export async function fetchVisiblePlanets(lat, lng) {
   const cacheKey = `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(
