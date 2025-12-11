@@ -5,6 +5,23 @@
   right: 0;
   bottom: 0;
   z-index: 10;
+  --surface-bg: rgba(255, 255, 255, 0.08);
+  --surface-border: rgba(255, 255, 255, 0.28);
+  --surface-hover: rgba(255, 255, 255, 0.12);
+  --surface-active: rgba(255, 255, 255, 0.16);
+  --surface-text: rgba(255, 255, 255, 0.92);
+  --surface-shadow: 0 18px 32px rgba(0, 0, 0, 0.24);
+  --surface-blur: blur(18px) saturate(140%);
+}
+
+.map-container.light {
+  --surface-bg: rgba(255, 255, 255, 0.9);
+  --surface-border: rgba(0, 0, 0, 0.1);
+  --surface-hover: rgba(0, 0, 0, 0.06);
+  --surface-active: rgba(0, 0, 0, 0.1);
+  --surface-text: #0f172a;
+  --surface-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+  --surface-blur: blur(14px) saturate(120%);
 }
 
 /* Custom marker styles */
@@ -77,9 +94,13 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
   border-radius: 20px;
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+  color: var(--surface-text);
+  box-shadow: var(--surface-shadow);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
   z-index: 1000;
   transition: background 0.2s ease, transform 0.1s ease;
 }
@@ -89,7 +110,7 @@
 }
 
 .location-indicator.clickable:hover {
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--surface-hover);
 }
 
 .location-indicator.clickable:active {
@@ -141,7 +162,7 @@
 .indicator-text {
   font-size: 0.75rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--surface-text);
   letter-spacing: 0.02em;
 }
 
@@ -153,9 +174,12 @@
   display: flex;
   gap: 4px;
   padding: 4px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(10px);
   border-radius: 12px;
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--surface-shadow);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
   z-index: 1000;
 }
 
@@ -165,9 +189,9 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 2px solid transparent;
+  border: 1px solid var(--surface-border);
   border-radius: 8px;
-  background: transparent;
+  background: var(--surface-bg);
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
@@ -183,34 +207,41 @@
 }
 
 .map-type-btn:hover {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: var(--surface-hover);
 }
 
 .map-type-btn.active {
-  border-color: #fff;
+  border-color: var(--surface-text);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2);
 }
 
 /* Light mode adjustments */
 .map-container.light .location-indicator,
 .map-container.light .map-type-switcher {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface-bg);
+  border-color: var(--surface-border);
+  color: var(--surface-text);
 }
 
 .map-container.light .location-indicator.clickable:hover {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--surface-hover);
 }
 
 .map-container.light .indicator-text {
-  color: rgba(0, 0, 0, 0.8);
+  color: var(--surface-text);
+}
+
+.map-container.light .map-type-btn {
+  background: var(--surface-bg);
+  border-color: var(--surface-border);
 }
 
 .map-container.light .map-type-btn:hover {
-  border-color: rgba(0, 0, 0, 0.4);
+  border-color: var(--surface-hover);
 }
 
 .map-container.light .map-type-btn.active {
-  border-color: #000;
+  border-color: var(--surface-text);
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
 }
 
@@ -245,13 +276,15 @@
   flex-direction: column;
   gap: 8px;
   min-width: 160px;
+  color: var(--surface-text);
 }
 
 .popup-coords {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: var(--surface-text);
+  opacity: 0.75;
   padding-bottom: 4px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--surface-border);
   margin-bottom: 4px;
 }
 
@@ -260,18 +293,20 @@
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border: none;
+  border: 1px solid var(--surface-border);
   border-radius: 6px;
-  background: #f3f4f6;
-  color: #1f2937;
+  background: var(--surface-bg);
+  color: var(--surface-text);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s ease;
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
 }
 
 .popup-btn:hover:not(:disabled) {
-  background: #e5e7eb;
+  background: var(--surface-hover);
 }
 
 .popup-btn:disabled {
@@ -281,21 +316,26 @@
 
 .popup-btn.close {
   background: transparent;
-  color: #6b7280;
+  color: var(--surface-text);
   font-size: 0.75rem;
   padding: 4px 8px;
   margin-top: 4px;
 }
 
 .popup-btn.close:hover {
-  background: #fee2e2;
+  background: rgba(252, 165, 165, 0.12);
   color: #dc2626;
 }
 
 /* Leaflet popup customization */
 .leaflet-popup-content-wrapper {
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+  color: var(--surface-text);
+  box-shadow: var(--surface-shadow);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
 }
 
 .leaflet-popup-content {
@@ -304,6 +344,8 @@
 
 .leaflet-popup-tip {
   box-shadow: none;
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
 }
 
 /* Visible planets shelf */
@@ -466,12 +508,12 @@
   top: 0;
   transform: translateY(-50%);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.34);
-  color: #f8fafc;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
-  backdrop-filter: blur(80px) saturate(240%);
-  -webkit-backdrop-filter: blur(80px) saturate(240%);
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+  color: var(--surface-text);
+  box-shadow: var(--surface-shadow);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
   z-index: 1200;
   pointer-events: auto;
   transition: transform 0.2s ease, opacity 0.2s ease;
@@ -549,13 +591,6 @@
 .planet-float-row.collapsed .planet-info-card {
   opacity: 0;
   pointer-events: none;
-}
-
-.map-container.light .planet-info-card {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  color: #0f172a;
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.14);
 }
 
 .map-container.light .planet-info-constellation {
@@ -637,11 +672,11 @@
   width: 46px;
   height: 46px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
-  color: #fff;
+  border: 2px solid var(--surface-border);
+  background: var(--surface-bg);
+  backdrop-filter: var(--surface-blur);
+  -webkit-backdrop-filter: var(--surface-blur);
+  color: var(--surface-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -651,7 +686,7 @@
   pointer-events: auto;
   padding: 0;
   outline: none;
-  box-shadow: none;
+  box-shadow: var(--surface-shadow);
 }
 
 .planet-panel-toggle:focus,
@@ -661,12 +696,12 @@
 }
 
 .planet-panel-toggle.active {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: var(--surface-hover);
 }
 
 .planet-panel-toggle:hover {
-  border-color: rgba(255, 255, 255, 0.5);
-  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--surface-hover);
+  background: var(--surface-hover);
 }
 
 .planet-panel-toggle:active {
@@ -674,9 +709,6 @@
 }
 
 .map-container.light .planet-panel-toggle {
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #0f172a;
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.18),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
