@@ -45,6 +45,7 @@ export default function PlanetPanelMobile({
   onToggle,
   reducedMotion = false,
   planetQuery,
+  toggleControl,
 }) {
   const planetsToShow = useMemo(
     () =>
@@ -90,6 +91,9 @@ export default function PlanetPanelMobile({
     <div
       className={`planet-panel-mobile ${panelVisible ? "open" : "collapsed"}`}
     >
+      {toggleControl && (
+        <div className="panel-mobile-toggle-slot">{toggleControl}</div>
+      )}
       <div className="panel-mobile-sheet">
         <div className="planet-mobile-card-row">
           <button

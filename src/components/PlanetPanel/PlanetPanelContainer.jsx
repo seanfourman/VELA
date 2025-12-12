@@ -217,23 +217,24 @@ const PlanetPanelContainer = forwardRef(
         )}
 
         {isMobile && (
-          <>
-            <PlanetPanelMobile
-              planets={planets}
-              loading={loading}
-              error={error}
-              panelVisible={planetPanelVisible}
-              onToggle={togglePlanetPanel}
-              reducedMotion={reducedMotion}
-              planetQuery={planetQuery}
-            />
-            {showPlanetPanelToggle && (
-              <PlanetPanelToggle
-                active={planetPanelVisible}
-                onClick={togglePlanetPanel}
-              />
-            )}
-          </>
+          <PlanetPanelMobile
+            planets={planets}
+            loading={loading}
+            error={error}
+            panelVisible={planetPanelVisible}
+            onToggle={togglePlanetPanel}
+            reducedMotion={reducedMotion}
+            planetQuery={planetQuery}
+            toggleControl={
+              showPlanetPanelToggle ? (
+                <PlanetPanelToggle
+                  active={planetPanelVisible}
+                  onClick={togglePlanetPanel}
+                  direction="vertical"
+                />
+              ) : null
+            }
+          />
         )}
       </>
     );

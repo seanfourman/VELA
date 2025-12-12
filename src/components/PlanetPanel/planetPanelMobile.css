@@ -10,6 +10,44 @@
   pointer-events: none;
 }
 
+.panel-mobile-toggle-slot {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1502;
+}
+
+.panel-mobile-toggle-slot .planet-panel-toggle {
+  position: static;
+  pointer-events: auto;
+  width: 48px;
+  height: 48px;
+  top: auto;
+  bottom: auto;
+  left: auto;
+  right: auto;
+  transform: none !important;
+  margin: 0;
+}
+
+.panel-mobile-toggle-slot .planet-panel-toggle:active {
+  transform: scale(0.97) !important;
+}
+
+.planet-panel-mobile.collapsed .panel-mobile-toggle-slot {
+  bottom: -78px;
+}
+
+.planet-panel-mobile.open .panel-mobile-toggle-slot {
+  bottom: calc(100% + 12px);
+}
+
 .panel-mobile-sheet {
   width: min(520px, 94vw);
   background: var(--glass-bg);
