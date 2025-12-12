@@ -51,7 +51,8 @@
 .planet-panel-mobile.collapsed
   .panel-mobile-toggle-slot.ready
   .planet-panel-toggle {
-  animation: mobile-toggle-bounce 2.4s cubic-bezier(0.28, 0.95, 0.42, 1.4) 0.12s 3;
+  animation: mobile-toggle-bounce 2.4s cubic-bezier(0.28, 0.95, 0.42, 1.4) 0.12s
+    2;
   will-change: transform;
 }
 
