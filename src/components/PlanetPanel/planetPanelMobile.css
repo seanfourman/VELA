@@ -1,0 +1,199 @@
+/* Mobile bottom sheet for planets */
+.planet-panel-mobile {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 90px;
+  display: flex;
+  justify-content: center;
+  z-index: 1400;
+  pointer-events: none;
+}
+
+.panel-mobile-sheet {
+  width: min(520px, 94vw);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: 20px;
+  box-shadow: var(--glass-shadow-elevated);
+  border: 1px solid var(--glass-border-strong);
+  padding: 10px 16px 16px;
+  transform: translateY(calc(100% + 140px));
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease;
+  pointer-events: none;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.planet-panel-mobile.open .panel-mobile-sheet {
+  transform: translateY(0);
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.5), 0 16px 32px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+}
+
+.panel-mobile-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: var(--glass-highlight);
+  z-index: 1;
+}
+
+.panel-mobile-label {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.panel-mobile-count {
+  font-size: 0.82rem;
+  color: var(--surface-text-muted);
+}
+
+.planet-mobile-card-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  position: relative;
+}
+
+.panel-mobile-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-round);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--surface-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: var(--glass-shadow-subtle);
+  transition: all 0.2s ease;
+}
+
+.panel-mobile-nav:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-strong);
+}
+
+.panel-mobile-nav:active {
+  transform: scale(0.97);
+}
+
+.panel-mobile-nav:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.panel-mobile-nav.prev {
+  left: 12px;
+}
+
+.panel-mobile-nav.next {
+  right: 12px;
+}
+
+.planet-mobile-card {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.planet-mobile-card .planet-card {
+  width: 100%;
+  height: auto;
+  max-width: none;
+  flex: 1 1 auto;
+}
+
+.planet-mobile-card .planet-canvas {
+  width: 100%;
+  max-height: 250px;
+  height: auto;
+}
+
+.mobile-placeholder {
+  width: 100%;
+  border-radius: 16px;
+  padding: 14px 16px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--surface-text-muted);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobile-placeholder.error {
+  color: #fecdd3;
+  background: rgba(248, 113, 113, 0.08);
+  border-color: rgba(248, 113, 113, 0.22);
+}
+
+.light .mobile-placeholder.error {
+  color: #b91c1c;
+  background: rgba(185, 28, 28, 0.12);
+  border-color: rgba(185, 28, 28, 0.2);
+}
+
+.planet-mobile-info {
+  padding: 2px;
+  padding-top: 0;
+  color: var(--surface-text);
+}
+
+.planet-mobile-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.planet-mobile-sub {
+  font-size: 0.82rem;
+  color: var(--surface-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.planet-mobile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 14px;
+  margin-top: 12px;
+}
+
+.planet-mobile-label {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--surface-text-muted);
+  margin-bottom: 4px;
+}
+
+.planet-mobile-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.planet-mobile-footnote {
+  margin-top: 10px;
+  font-size: 0.84rem;
+  color: var(--surface-text-muted);
+}
+
+@media (min-width: 769px) {
+  .planet-panel-mobile {
+    display: none;
+  }
+}

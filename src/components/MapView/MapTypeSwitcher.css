@@ -12,7 +12,7 @@
   border: 1px solid var(--glass-border-strong);
   border-radius: var(--radius-md);
   box-shadow: var(--glass-shadow-elevated);
-  z-index: 1000;
+  z-index: 1501;
   isolation: isolate;
   overflow: hidden;
 }

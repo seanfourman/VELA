@@ -1,5 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import PlanetPanel from "../PlanetPanel";
+import PlanetPanelMobile from "./PlanetPanelMobile";
 import PlanetPanelToggle from "./PlanetPanelToggle";
 import "./planetPanel.css";
 
@@ -21,12 +22,25 @@ const PlanetPanelContainer = forwardRef(
     const [panelSource, setPanelSource] = useState(null); // 'manual' | 'auto'
     const [isHoveringPanel, setIsHoveringPanel] = useState(false);
     const [forceHideToggle, setForceHideToggle] = useState(false);
+    const [isMobile, setIsMobile] = useState(() => {
+      if (typeof window === "undefined" || !window.matchMedia) return false;
+      return window.matchMedia("(max-width: 768px)").matches;
+    });
 
     const hoverHideTimeoutRef = useRef(null);
     const initialAutoHideScheduled = useRef(false);
     const initialRevealDelayRef = useRef(null);
     const closeTimeoutRef = useRef(null);
     const CLOSE_ANIMATION_MS = 600;
+
+    useEffect(() => {
+      if (typeof window === "undefined" || !window.matchMedia) return undefined;
+      const mql = window.matchMedia("(max-width: 768px)");
+      const handleChange = (event) => setIsMobile(event.matches);
+      setIsMobile(mql.matches);
+      mql.addEventListener("change", handleChange);
+      return () => mql.removeEventListener("change", handleChange);
+    }, []);
 
     const showPlanetPanelToggle =
       hasShownPanelToggle &&
@@ -173,29 +187,55 @@ const PlanetPanelContainer = forwardRef(
     }, []);
 
     return (
-      <div
-        className={`planet-panel-wrapper ${planetPanelVisible ? "open" : "collapsed"}`}
-        data-force-hide-toggle={forceHideToggle ? "true" : "false"}
-        onMouseEnter={handlePanelMouseEnter}
-        onMouseLeave={handlePanelMouseLeave}
-      >
-        <PlanetPanel
-          planets={planets}
-          loading={loading}
-          error={error}
-          mapType={mapType}
-          panelVisible={planetPanelVisible}
-          hasArrow={showPlanetPanelToggle}
-          reducedMotion={reducedMotion}
-        />
+      <>
+        {!isMobile && (
+          <div
+            className={`planet-panel-wrapper ${
+              planetPanelVisible ? "open" : "collapsed"
+            }`}
+            data-force-hide-toggle={forceHideToggle ? "true" : "false"}
+            onMouseEnter={handlePanelMouseEnter}
+            onMouseLeave={handlePanelMouseLeave}
+          >
+            <PlanetPanel
+              planets={planets}
+              loading={loading}
+              error={error}
+              mapType={mapType}
+              panelVisible={planetPanelVisible}
+              hasArrow={showPlanetPanelToggle}
+              reducedMotion={reducedMotion}
+            />
 
-        {showPlanetPanelToggle && (
-          <PlanetPanelToggle
-            active={planetPanelVisible}
-            onClick={togglePlanetPanel}
-          />
+            {showPlanetPanelToggle && (
+              <PlanetPanelToggle
+                active={planetPanelVisible}
+                onClick={togglePlanetPanel}
+              />
+            )}
+          </div>
         )}
-      </div>
+
+        {isMobile && (
+          <>
+            <PlanetPanelMobile
+              planets={planets}
+              loading={loading}
+              error={error}
+              panelVisible={planetPanelVisible}
+              onToggle={togglePlanetPanel}
+              reducedMotion={reducedMotion}
+              planetQuery={planetQuery}
+            />
+            {showPlanetPanelToggle && (
+              <PlanetPanelToggle
+                active={planetPanelVisible}
+                onClick={togglePlanetPanel}
+              />
+            )}
+          </>
+        )}
+      </>
     );
   }
 );

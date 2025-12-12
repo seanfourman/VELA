@@ -254,6 +254,32 @@
 
 /* Responsive - mobile */
 @media (max-width: 768px) {
+  .planet-panel-toggle {
+    position: fixed;
+    top: auto;
+    bottom: 20px;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, 0);
+    width: 48px;
+    height: 48px;
+    z-index: 1502;
+  }
+
+  .planet-panel-wrapper.open .planet-panel-toggle {
+    left: 50%;
+    right: auto;
+    top: auto;
+    bottom: 20px;
+    transform: translate(-50%, 0);
+  }
+
+  .planet-panel-wrapper.collapsed .planet-panel-toggle {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+  }
+
   .planet-panel-wrapper {
     top: auto;
     bottom: 86px;
