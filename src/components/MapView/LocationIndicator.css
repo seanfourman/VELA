@@ -65,7 +65,8 @@
 }
 
 @keyframes pulse-dot {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -74,7 +75,8 @@
 }
 
 @keyframes blink {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -87,4 +89,11 @@
   font-weight: 500;
   color: var(--surface-text);
   letter-spacing: 0.02em;
+}
+
+@media (max-width: 768px) {
+  .location-indicator {
+    bottom: 18px;
+    left: 15px;
+  }
 }
