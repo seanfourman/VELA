@@ -266,7 +266,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           key={mapType}
           attribution={MAP_TILES[mapType].attribution}
           url={MAP_TILES[mapType].url}
-          maxZoom={19}
+          subdomains={MAP_TILES[mapType].subdomains}
+          maxZoom={16}
           keepBuffer={4}
           updateWhenIdle={true}
           updateWhenZooming={false}
