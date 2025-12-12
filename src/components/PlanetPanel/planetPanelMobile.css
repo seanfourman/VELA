@@ -22,9 +22,8 @@
   pointer-events: none;
   z-index: 1502;
   bottom: -120px;
-  opacity: 0;
-  transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.35s ease, opacity 0.35s ease;
+  opacity: 1;
+  transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s ease;
 }
 
 .panel-mobile-toggle-slot .planet-panel-toggle {
@@ -46,13 +45,11 @@
 
 .panel-mobile-toggle-slot.ready {
   bottom: -78px;
-  opacity: 1;
   transform: translate(-50%, 0);
 }
 
 .planet-panel-mobile.open .panel-mobile-toggle-slot {
   bottom: calc(100% + 12px);
-  opacity: 1;
   transform: translate(-50%, 0);
 }
 
