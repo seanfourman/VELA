@@ -10,7 +10,7 @@ function App() {
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState("searching");
   const [mapType, setMapType] = useState(() => {
-    return localStorage.getItem("mapType") || "dark";
+    return localStorage.getItem("mapType") || "satellite";
   });
 
   // Save mapType to localStorage when it changes
