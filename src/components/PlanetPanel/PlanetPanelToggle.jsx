@@ -6,7 +6,7 @@ export default function PlanetPanelToggle({
   className = "",
   direction = "horizontal",
 }) {
-  const baseRotation = direction === "vertical" ? 90 : 0;
+  const baseRotation = direction === "vertical" ? -90 : 0;
   const rotation = active ? baseRotation + 180 : baseRotation;
 
   return (

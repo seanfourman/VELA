@@ -150,6 +150,14 @@ const PlanetPanelContainer = forwardRef(
           if (initialRevealDelayRef.current) clearTimeout(initialRevealDelayRef.current);
 
           initialRevealDelayRef.current = setTimeout(() => {
+            if (isMobile) {
+              // On mobile, just show the toggle without auto-opening the sheet
+              setHasShownPanelToggle(true);
+              setPlanetPanelVisible(false);
+              setPanelSource(null);
+              initialAutoHideScheduled.current = true;
+              return;
+            }
             revealPlanetPanel("auto");
             initialAutoHideScheduled.current = true;
           }, 3000);
@@ -160,6 +168,7 @@ const PlanetPanelContainer = forwardRef(
       planetPanelVisible,
       hasShownPanelToggle,
       planets,
+      isMobile,
     ]);
 
     // Auto-hide guard when panel was opened automatically (even if user never hovered)
