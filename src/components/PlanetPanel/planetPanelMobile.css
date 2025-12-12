@@ -21,6 +21,7 @@
   justify-content: center;
   pointer-events: none;
   z-index: 1502;
+  transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .panel-mobile-toggle-slot .planet-panel-toggle {
@@ -64,6 +65,7 @@
   border: none;
   position: relative;
   overflow: hidden;
+  will-change: transform;
 }
 
 .planet-panel-mobile.open .panel-mobile-sheet {
