@@ -20,6 +20,11 @@ import { preloadAllPlanetTextures } from "../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
+const LOCATION_ZOOM = 16;
+const DEFAULT_CENTER = [20, 0];
+const DEFAULT_ZOOM = 2;
+const MIN_ZOOM = 4;
+const MAX_ZOOM = 16;
 
 const MAP_TILES = {
   dark: {
@@ -80,7 +85,7 @@ function MapAnimator({ location }) {
     if (location && !hasAnimated.current) {
       hasAnimated.current = true;
 
-      map.flyTo([location.lat, location.lng], 15, {
+      map.flyTo([location.lat, location.lng], LOCATION_ZOOM, {
         duration: 2.5,
         easeLinearity: 0.25,
       });
@@ -134,9 +139,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     return prefersReducedMotion || !hardwareOk;
   }, []);
 
-  const defaultCenter = [20, 0];
-  const defaultZoom = 2;
-
   useEffect(() => {
     preloadAllPlanetTextures();
   }, []);
@@ -144,7 +146,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
       skipAutoLocationRef.current = false;
-      mapRef.current.flyTo([location.lat, location.lng], 15, {
+      mapRef.current.flyTo([location.lat, location.lng], LOCATION_ZOOM, {
         duration: 2.5,
         easeLinearity: 0.25,
       });
@@ -249,25 +251,25 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       />
 
       <MapContainer
-        center={defaultCenter}
-        zoom={defaultZoom}
+        center={DEFAULT_CENTER}
+        zoom={DEFAULT_ZOOM}
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
         attributionControl={false}
         doubleClickZoom={false}
-        minZoom={4}
+        minZoom={MIN_ZOOM}
         maxBounds={[
           [-85, -180],
           [85, 180],
         ]}
         maxBoundsViscosity={1.0}
+        maxZoom={MAX_ZOOM}
       >
         <TileLayer
           key={mapType}
           attribution={MAP_TILES[mapType].attribution}
           url={MAP_TILES[mapType].url}
-          subdomains={MAP_TILES[mapType].subdomains}
-          maxZoom={16}
+          maxZoom={MAX_ZOOM}
           keepBuffer={4}
           updateWhenIdle={true}
           updateWhenZooming={false}
