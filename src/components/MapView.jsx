@@ -19,7 +19,7 @@ import usePlanets from "../hooks/usePlanets";
 import { preloadAllPlanetTextures } from "../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
 
-const MAPTILER_KEY = "QvyjnqdnkmG5VtE3d2xS";
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
 
 const MAP_TILES = {
   dark: {
