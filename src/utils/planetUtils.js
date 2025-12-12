@@ -37,6 +37,68 @@ export const resolvePlanetTexture = (name) => {
 const PLANETS_API_CACHE_KEY = "visiblePlanetsCache";
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in ms
 
+// IndexedDB cache (with in-memory fallback)
+const DB_NAME = "VisiblePlanetsDB";
+const DB_VERSION = 1;
+const STORE_NAME = "cache";
+const memoryCache = new Map();
+let dbPromise = null;
+
+function openPlanetDb() {
+  if (dbPromise) return dbPromise;
+  if (typeof indexedDB === "undefined") {
+    dbPromise = Promise.reject(new Error("IndexedDB unavailable"));
+    return dbPromise;
+  }
+
+  dbPromise = new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME, { keyPath: "key" });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error || new Error("IndexedDB error"));
+  });
+
+  return dbPromise;
+}
+
+async function getCachedPlanets(key) {
+  try {
+    const db = await openPlanetDb();
+    const record = await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+    if (record) return record;
+  } catch {
+    if (memoryCache.has(key)) return memoryCache.get(key);
+  }
+  return null;
+}
+
+async function setCachedPlanets(key, data) {
+  const record = { key, data, timestamp: Date.now() };
+  try {
+    const db = await openPlanetDb();
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.put(record);
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  } catch {
+    memoryCache.set(key, record);
+  }
+}
+
 // Texture preloading helpers
 const texturePreloadCache = new Map();
 
@@ -67,23 +129,9 @@ export async function fetchVisiblePlanets(lat, lng) {
   const cacheKey = `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(
     2
   )}`;
-  let cached;
-
-  try {
-    cached = localStorage.getItem(cacheKey);
-  } catch {
-    cached = null;
-  }
-
-  if (cached) {
-    try {
-      const { data, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < CACHE_DURATION) {
-        return data;
-      }
-    } catch {
-      // Corrupt cache, ignore and refetch
-    }
+  const cached = await getCachedPlanets(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
   }
 
   try {
@@ -96,14 +144,7 @@ export async function fetchVisiblePlanets(lat, lng) {
 
     const data = await response.json();
 
-    try {
-      localStorage.setItem(
-        cacheKey,
-        JSON.stringify({ data, timestamp: Date.now() })
-      );
-    } catch {
-      // Storage may be unavailable (quota/permissions); continue without cache
-    }
+    setCachedPlanets(cacheKey, data);
 
     return data;
   } catch (error) {
