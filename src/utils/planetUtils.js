@@ -79,6 +79,12 @@ async function getCachedPlanets(key) {
     if (record) return record;
   } catch {
     if (memoryCache.has(key)) return memoryCache.get(key);
+    try {
+      const ls = localStorage.getItem(key);
+      if (ls) return JSON.parse(ls);
+    } catch {
+      // ignore
+    }
   }
   return null;
 }
@@ -95,7 +101,11 @@ async function setCachedPlanets(key, data) {
       req.onerror = () => reject(req.error);
     });
   } catch {
-    memoryCache.set(key, record);
+    try {
+      localStorage.setItem(key, JSON.stringify(record));
+    } catch {
+      memoryCache.set(key, record);
+    }
   }
 }
 
