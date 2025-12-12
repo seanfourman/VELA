@@ -55,6 +55,18 @@
   will-change: transform;
 }
 
+.planet-panel-mobile.bounce-disabled
+  .panel-mobile-toggle-slot.ready
+  .planet-panel-toggle {
+  animation: none !important;
+}
+
+.planet-panel-mobile.collapsed
+  .panel-mobile-toggle-slot.ready
+  .planet-panel-toggle.no-bounce {
+  animation: none !important;
+}
+
 .planet-panel-mobile.open .panel-mobile-toggle-slot {
   bottom: calc(100% + 12px);
   transform: translate(-50%, 0);

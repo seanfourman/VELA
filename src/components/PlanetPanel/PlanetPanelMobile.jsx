@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { cloneElement, useEffect, useMemo, useState } from "react";
 import PlanetCard from "./PlanetCard";
 import "./planetPanelMobile.css";
 
@@ -57,6 +57,7 @@ export default function PlanetPanelMobile({
   );
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [bounceDisabled, setBounceDisabled] = useState(false);
 
   useEffect(() => {
     setActiveIndex(0);
@@ -79,6 +80,12 @@ export default function PlanetPanelMobile({
     };
   }, [toggleReady]);
 
+  useEffect(() => {
+    if (!toggleReady) {
+      setBounceDisabled(false);
+    }
+  }, [toggleReady]);
+
   const handlePrev = () => {
     if (!hasPlanets) return;
     setActiveIndex((prev) =>
@@ -99,11 +106,20 @@ export default function PlanetPanelMobile({
     }
   };
 
+  const handleTogglePress = (eventHandler) => (event) => {
+    setBounceDisabled(true);
+    if (typeof eventHandler === "function") {
+      eventHandler(event);
+    }
+  };
+
   const headerLabel = planetQuery?.label || "Visible planets";
 
   return (
     <div
-      className={`planet-panel-mobile ${panelVisible ? "open" : "collapsed"}`}
+      className={`planet-panel-mobile ${panelVisible ? "open" : "collapsed"} ${
+        bounceDisabled ? "bounce-disabled" : ""
+      }`.trim()}
     >
       {toggleControl && (
         <div
@@ -111,7 +127,24 @@ export default function PlanetPanelMobile({
             slotReady ? "ready" : ""
           }`.trim()}
         >
-          {toggleControl}
+          {cloneElement(toggleControl, {
+            className: `${toggleControl.props.className || ""} ${
+              bounceDisabled ? "no-bounce" : ""
+            }`.trim(),
+            style: {
+              ...(toggleControl.props.style || {}),
+              animation: bounceDisabled
+                ? "none"
+                : toggleControl.props.style?.animation,
+              animationPlayState: bounceDisabled
+                ? "paused"
+                : toggleControl.props.style?.animationPlayState,
+            },
+            onPointerDown: handleTogglePress(toggleControl.props.onPointerDown),
+            onMouseDown: handleTogglePress(toggleControl.props.onMouseDown),
+            onTouchStart: handleTogglePress(toggleControl.props.onTouchStart),
+            onClick: handleTogglePress(toggleControl.props.onClick),
+          })}
         </div>
       )}
       <div className="panel-mobile-sheet">
