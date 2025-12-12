@@ -67,6 +67,10 @@ function openPlanetDb() {
 }
 
 async function getCachedPlanets(key) {
+  // In-memory first (fastest)
+  if (memoryCache.has(key)) return memoryCache.get(key);
+
+  // IndexedDB next
   try {
     const db = await openPlanetDb();
     const record = await new Promise((resolve, reject) => {
@@ -76,21 +80,32 @@ async function getCachedPlanets(key) {
       req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => reject(req.error);
     });
-    if (record) return record;
-  } catch {
-    if (memoryCache.has(key)) return memoryCache.get(key);
-    try {
-      const ls = localStorage.getItem(key);
-      if (ls) return JSON.parse(ls);
-    } catch {
-      // ignore
+    if (record) {
+      memoryCache.set(key, record);
+      return record;
     }
+  } catch {
+    // ignore, fall through to localStorage
   }
+
+  // LocalStorage fallback
+  try {
+    const ls = localStorage.getItem(key);
+    if (ls) {
+      const parsed = JSON.parse(ls);
+      memoryCache.set(key, parsed);
+      return parsed;
+    }
+  } catch {
+    // ignore
+  }
+
   return null;
 }
 
 async function setCachedPlanets(key, data) {
   const record = { key, data, timestamp: Date.now() };
+  memoryCache.set(key, record);
   try {
     const db = await openPlanetDb();
     await new Promise((resolve, reject) => {
@@ -104,7 +119,7 @@ async function setCachedPlanets(key, data) {
     try {
       localStorage.setItem(key, JSON.stringify(record));
     } catch {
-      memoryCache.set(key, record);
+      // already in memory
     }
   }
 }
