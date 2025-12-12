@@ -243,6 +243,7 @@ const PlanetPanelContainer = forwardRef(
                 />
               ) : null
             }
+            toggleReady={showPlanetPanelToggle}
           />
         )}
       </>

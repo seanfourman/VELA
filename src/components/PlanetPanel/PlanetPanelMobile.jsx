@@ -46,6 +46,7 @@ export default function PlanetPanelMobile({
   reducedMotion = false,
   planetQuery,
   toggleControl,
+  toggleReady = false,
 }) {
   const planetsToShow = useMemo(
     () =>
@@ -64,6 +65,19 @@ export default function PlanetPanelMobile({
   const currentPlanet = planetsToShow[activeIndex] || null;
   const hasPlanets = planetsToShow.length > 0;
   const canNavigate = !loading && !error && planetsToShow.length > 1;
+  const [slotReady, setSlotReady] = useState(false);
+
+  useEffect(() => {
+    let timeout;
+    if (toggleReady) {
+      timeout = setTimeout(() => setSlotReady(true), 40);
+    } else {
+      setSlotReady(false);
+    }
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [toggleReady]);
 
   const handlePrev = () => {
     if (!hasPlanets) return;
@@ -92,7 +106,13 @@ export default function PlanetPanelMobile({
       className={`planet-panel-mobile ${panelVisible ? "open" : "collapsed"}`}
     >
       {toggleControl && (
-        <div className="panel-mobile-toggle-slot">{toggleControl}</div>
+        <div
+          className={`panel-mobile-toggle-slot ${
+            slotReady ? "ready" : ""
+          }`.trim()}
+        >
+          {toggleControl}
+        </div>
       )}
       <div className="panel-mobile-sheet">
         <div className="planet-mobile-card-row">

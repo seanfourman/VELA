@@ -13,7 +13,7 @@
 .panel-mobile-toggle-slot {
   position: absolute;
   left: 50%;
-  transform: translate(-50%, 0);
+  transform: translate(-50%, 0) translateY(20px);
   width: 48px;
   height: 48px;
   display: flex;
@@ -21,7 +21,10 @@
   justify-content: center;
   pointer-events: none;
   z-index: 1502;
-  transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  bottom: -120px;
+  opacity: 0;
+  transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.35s ease, opacity 0.35s ease;
 }
 
 .panel-mobile-toggle-slot .planet-panel-toggle {
@@ -41,12 +44,16 @@
   transform: scale(0.97) !important;
 }
 
-.planet-panel-mobile.collapsed .panel-mobile-toggle-slot {
+.panel-mobile-toggle-slot.ready {
   bottom: -78px;
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .planet-panel-mobile.open .panel-mobile-toggle-slot {
   bottom: calc(100% + 12px);
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .panel-mobile-sheet {
