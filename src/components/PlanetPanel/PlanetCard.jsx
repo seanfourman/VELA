@@ -113,19 +113,13 @@ export default function PlanetCard({ planet, cardRef, onHover, reducedMotion }) 
   if (reducedMotion) {
     return (
       <div className="planet-card" ref={cardRef} onMouseEnter={onHover}>
-        <div className="planet-canvas planet-static">
-          <img
-            src={safeTextureUrl}
-            alt={planet?.name || "Planet"}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              borderRadius: "50%",
-              filter: "drop-shadow(0 18px 26px rgba(0, 0, 0, 0.15))",
-            }}
-          />
-        </div>
+      <div className="planet-canvas planet-static">
+        <img
+          src={safeTextureUrl}
+          alt={planet?.name || "Planet"}
+          className="planet-static-img"
+        />
+      </div>
       </div>
     );
   }
