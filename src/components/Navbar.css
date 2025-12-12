@@ -91,7 +91,6 @@
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
-  box-shadow: var(--glass-shadow-elevated);
   color: var(--surface-text);
   font-size: 0.875rem;
   font-weight: 500;
@@ -153,9 +152,9 @@
   background: linear-gradient(
     135deg,
     rgba(0, 0, 0, 0.32) 0%,
-    rgba(0, 0, 0, 0.10) 25%,
+    rgba(0, 0, 0, 0.1) 25%,
     rgba(0, 0, 0, 0.06) 50%,
-    rgba(0, 0, 0, 0.10) 75%,
+    rgba(0, 0, 0, 0.1) 75%,
     rgba(0, 0, 0, 0.32) 100%
   );
 }
