@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -246,7 +246,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         error={planetsError}
         mapType={mapType}
         reducedMotion={reducedMotion}
-        planetQuery={planetQuery}
         location={location}
       />
 

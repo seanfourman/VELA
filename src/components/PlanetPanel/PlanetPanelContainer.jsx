@@ -12,7 +12,6 @@ const PlanetPanelContainer = forwardRef(
       error,
       mapType,
       reducedMotion = false,
-      planetQuery,
       location,
     },
     ref
@@ -37,7 +36,6 @@ const PlanetPanelContainer = forwardRef(
       if (typeof window === "undefined" || !window.matchMedia) return undefined;
       const mql = window.matchMedia("(max-width: 768px)");
       const handleChange = (event) => setIsMobile(event.matches);
-      setIsMobile(mql.matches);
       mql.addEventListener("change", handleChange);
       return () => mql.removeEventListener("change", handleChange);
     }, []);
@@ -169,6 +167,7 @@ const PlanetPanelContainer = forwardRef(
       hasShownPanelToggle,
       planets,
       isMobile,
+      revealPlanetPanel,
     ]);
 
     // Auto-hide guard when panel was opened automatically (even if user never hovered)
@@ -231,9 +230,7 @@ const PlanetPanelContainer = forwardRef(
             loading={loading}
             error={error}
             panelVisible={planetPanelVisible}
-            onToggle={togglePlanetPanel}
             reducedMotion={reducedMotion}
-            planetQuery={planetQuery}
             toggleControl={
               showPlanetPanelToggle ? (
                 <PlanetPanelToggle

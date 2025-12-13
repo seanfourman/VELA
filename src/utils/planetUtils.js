@@ -106,7 +106,7 @@ export async function fetchVisiblePlanets(lat, lng) {
     }
 
     return data;
-  } catch (error) {
+  } catch {
     return null;
   }
 }

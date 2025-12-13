@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -41,10 +40,6 @@ export default function PlanetPanel({
   const safePage = Math.min(page, totalPages - 1);
   const hasPlanets = planetsToShow.length > 0;
 
-  useEffect(() => {
-    setPage(0);
-  }, [planetsToShow.length]);
-
   useLayoutEffect(() => {
     if (firstCardRef.current) {
       const rect = firstCardRef.current.getBoundingClientRect();
@@ -54,25 +49,24 @@ export default function PlanetPanel({
     }
   }, [planetsToShow.length, mapType, loading]);
 
-  useEffect(() => {
-    setHoveredCard(null);
-  }, [safePage, loading, error, panelVisible, planetsToShow.length]);
-
   const handlePlanetHover = useCallback(
     (planet, idx, event) => {
       if (hoverBlocked) return;
       if (!planet) return;
 
       const pageStart = safePage * PAGE_SIZE;
-      const pageEnd = pageStart + PAGE_SIZE - 1;
-      if (idx < pageStart || idx > pageEnd) return;
+      const indexWithinPage = idx - pageStart;
+      if (indexWithinPage < 0 || indexWithinPage > PAGE_SIZE - 1) return;
+
+      const baseHover = {
+        planet,
+        index: idx,
+        top: 0,
+        isMiddle: indexWithinPage === 1,
+      };
 
       if (!planetStackRef.current || !event?.currentTarget) {
-        setHoveredCard({
-          planet,
-          top: 0,
-          isMiddle: idx - safePage * PAGE_SIZE === 1,
-        });
+        setHoveredCard(baseHover);
         return;
       }
 
@@ -80,11 +74,7 @@ export default function PlanetPanel({
       const cardRect = event.currentTarget.getBoundingClientRect();
       const relativeTop = cardRect.top - stackRect.top + cardRect.height / 2;
 
-      setHoveredCard({
-        planet,
-        top: relativeTop,
-        isMiddle: idx - safePage * PAGE_SIZE === 1,
-      });
+      setHoveredCard({ ...baseHover, top: relativeTop });
     },
     [safePage, hoverBlocked]
   );
@@ -107,8 +97,9 @@ export default function PlanetPanel({
     setHoverBlocked(true);
     setTimeout(() => setHoverBlocked(false), 250);
     setPage((prev) => {
-      const next = prev + direction;
-      if (next < 0 || next > totalPages - 1) return prev;
+      const current = Math.min(prev, Math.max(totalPages - 1, 0));
+      const next = current + direction;
+      if (next < 0 || next > totalPages - 1) return current;
       return next;
     });
   };
@@ -119,6 +110,27 @@ export default function PlanetPanel({
     !loading && !error && pageHeight
       ? `translateY(-${safePage * pageHeight}px)`
       : "translateY(0)";
+
+  const displayedHoverCard = useMemo(() => {
+    if (!hoveredCard || loading || error || !panelVisible) return null;
+    if (!planetsToShow.length) return null;
+    if (hoveredCard.index >= planetsToShow.length) return null;
+
+    const pageStart = safePage * PAGE_SIZE;
+    const pageEnd = pageStart + PAGE_SIZE - 1;
+    if (hoveredCard.index < pageStart || hoveredCard.index > pageEnd) {
+      return null;
+    }
+
+    return hoveredCard;
+  }, [
+    error,
+    hoveredCard,
+    loading,
+    panelVisible,
+    planetsToShow.length,
+    safePage,
+  ]);
 
   return (
     <div
@@ -197,7 +209,7 @@ export default function PlanetPanel({
         )}
       </div>
 
-      <PlanetInfoCard hoveredCard={hoveredCard} hasArrow={hasArrow} />
+      <PlanetInfoCard hoveredCard={displayedHoverCard} hasArrow={hasArrow} />
     </div>
   );
 }

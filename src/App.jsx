@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import MapView from "./components/MapView";
 import PopupPortal from "./components/PopupPortal";
@@ -8,7 +8,9 @@ import "./App.css";
 
 function App() {
   const [location, setLocation] = useState(null);
-  const [locationStatus, setLocationStatus] = useState("searching");
+  const [locationStatus, setLocationStatus] = useState(() =>
+    navigator.geolocation ? "searching" : "off"
+  );
   const [mapType, setMapType] = useState(() => {
     return localStorage.getItem("mapType") || "satellite";
   });
@@ -21,7 +23,6 @@ function App() {
   // Watch position for live location updates
   useEffect(() => {
     if (!navigator.geolocation) {
-      setLocationStatus("off");
       return;
     }
 
@@ -31,7 +32,7 @@ function App() {
         setLocation({ lat: latitude, lng: longitude, accuracy });
         setLocationStatus("active");
       },
-      (error) => {
+      () => {
         // Location denied or unavailable
         setLocationStatus("off");
       },

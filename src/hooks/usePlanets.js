@@ -46,7 +46,7 @@ export function usePlanets() {
         setVisiblePlanets(planetList);
         setPlanetQuery({ lat, lng, label, source });
         lastPlanetKey.current = roundedKey;
-      } catch (error) {
+      } catch {
         setVisiblePlanets([]);
         setPlanetsError("Could not load visible planets right now.");
       } finally {

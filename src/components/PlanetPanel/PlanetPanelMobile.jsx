@@ -42,9 +42,7 @@ export default function PlanetPanelMobile({
   loading,
   error,
   panelVisible,
-  onToggle,
   reducedMotion = false,
-  planetQuery,
   toggleControl,
   toggleReady = false,
 }) {
@@ -58,52 +56,48 @@ export default function PlanetPanelMobile({
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [bounceDisabled, setBounceDisabled] = useState(false);
-
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [planetsToShow.length]);
-
-  const currentPlanet = planetsToShow[activeIndex] || null;
+  const [slotReady, setSlotReady] = useState(false);
+  const safeActiveIndex = Math.min(
+    activeIndex,
+    Math.max(planetsToShow.length - 1, 0)
+  );
+  const currentPlanet = planetsToShow[safeActiveIndex] || null;
   const hasPlanets = planetsToShow.length > 0;
   const canNavigate = !loading && !error && planetsToShow.length > 1;
-  const [slotReady, setSlotReady] = useState(false);
 
   useEffect(() => {
-    let timeout;
+    let readyTimer = null;
+    let resetTimer = null;
+
     if (toggleReady) {
-      timeout = setTimeout(() => setSlotReady(true), 40);
+      readyTimer = setTimeout(() => setSlotReady(true), 40);
     } else {
-      setSlotReady(false);
+      resetTimer = setTimeout(() => {
+        setSlotReady(false);
+        setBounceDisabled(false);
+      }, 0);
     }
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [toggleReady]);
 
-  useEffect(() => {
-    if (!toggleReady) {
-      setBounceDisabled(false);
-    }
+    return () => {
+      if (readyTimer) clearTimeout(readyTimer);
+      if (resetTimer) clearTimeout(resetTimer);
+    };
   }, [toggleReady]);
 
   const handlePrev = () => {
     if (!hasPlanets) return;
-    setActiveIndex((prev) =>
-      prev === 0 ? planetsToShow.length - 1 : prev - 1
-    );
+    setActiveIndex((prev) => {
+      const current = Math.min(prev, planetsToShow.length - 1);
+      return current === 0 ? planetsToShow.length - 1 : current - 1;
+    });
   };
 
   const handleNext = () => {
     if (!hasPlanets) return;
-    setActiveIndex((prev) =>
-      prev === planetsToShow.length - 1 ? 0 : prev + 1
-    );
-  };
-
-  const handleToggle = () => {
-    if (typeof onToggle === "function") {
-      onToggle();
-    }
+    setActiveIndex((prev) => {
+      const current = Math.min(prev, planetsToShow.length - 1);
+      return current === planetsToShow.length - 1 ? 0 : current + 1;
+    });
   };
 
   const handleTogglePress = (eventHandler) => (event) => {
@@ -113,14 +107,12 @@ export default function PlanetPanelMobile({
     }
   };
 
-  const headerLabel = planetQuery?.label || "Visible planets";
+  const panelClasses = `planet-panel-mobile ${
+    panelVisible ? "open" : "collapsed"
+  } ${bounceDisabled ? "bounce-disabled" : ""}`.trim();
 
   return (
-    <div
-      className={`planet-panel-mobile ${panelVisible ? "open" : "collapsed"} ${
-        bounceDisabled ? "bounce-disabled" : ""
-      }`.trim()}
-    >
+    <div className={panelClasses}>
       {toggleControl && (
         <div
           className={`panel-mobile-toggle-slot ${
@@ -128,22 +120,13 @@ export default function PlanetPanelMobile({
           }`.trim()}
         >
           {cloneElement(toggleControl, {
-            className: `${toggleControl.props.className || ""} ${
-              bounceDisabled ? "no-bounce" : ""
-            }`.trim(),
-            style: {
-              ...(toggleControl.props.style || {}),
-              animation: bounceDisabled
-                ? "none"
-                : toggleControl.props.style?.animation,
-              animationPlayState: bounceDisabled
-                ? "paused"
-                : toggleControl.props.style?.animationPlayState,
-            },
             onPointerDown: handleTogglePress(toggleControl.props.onPointerDown),
             onMouseDown: handleTogglePress(toggleControl.props.onMouseDown),
             onTouchStart: handleTogglePress(toggleControl.props.onTouchStart),
             onClick: handleTogglePress(toggleControl.props.onClick),
+            className: `${toggleControl.props.className || ""} ${
+              bounceDisabled ? "no-bounce" : ""
+            }`.trim(),
           })}
         </div>
       )}

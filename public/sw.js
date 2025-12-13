@@ -9,7 +9,7 @@ const TILE_PATTERNS = [
   /tiles\.stadiamaps\.com/,
 ];
 
-self.addEventListener("install", (event) => {
+self.addEventListener("install", () => {
   self.skipWaiting();
 });
 
@@ -75,7 +75,7 @@ self.addEventListener("fetch", (event) => {
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
-        } catch (error) {
+        } catch {
           // Return transparent 1x1 PNG on failure
           return new Response(
             Uint8Array.from(

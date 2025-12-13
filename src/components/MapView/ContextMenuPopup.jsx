@@ -5,7 +5,6 @@ export default function ContextMenuPopup({
   onGetVisiblePlanets,
   onGetDirections,
   onRemovePin,
-  disableDirections,
 }) {
   return (
     <div className="context-menu-popup">
@@ -15,7 +14,7 @@ export default function ContextMenuPopup({
       <button className="popup-btn" onClick={onGetVisiblePlanets}>
         Visible Planets
       </button>
-      {onGetDirections && !disableDirections && (
+      {onGetDirections && (
         <button className="popup-btn" onClick={onGetDirections}>
           Get Directions
         </button>
