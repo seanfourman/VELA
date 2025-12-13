@@ -56,7 +56,7 @@ export function preloadPlanetTexture(url) {
 export function preloadAllPlanetTextures() {
   const entries = Object.values(PLANET_TEXTURES);
   return Promise.all(entries.map((url) => preloadPlanetTexture(url))).catch(
-    () => {}
+    () => undefined
   );
 }
 
@@ -79,6 +79,7 @@ export async function fetchVisiblePlanets(lat, lng) {
         return data;
       }
     } catch {
+      cached = null;
     }
   }
 
@@ -98,6 +99,7 @@ export async function fetchVisiblePlanets(lat, lng) {
         JSON.stringify({ data, timestamp: Date.now() })
       );
     } catch {
+      // Storage unavailable; continue without cache
     }
 
     return data;

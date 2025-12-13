@@ -1,4 +1,4 @@
-import { cloneElement, useEffect, useMemo, useState } from "react";
+import { cloneElement, useEffect, useMemo, useRef, useState } from "react";
 import PlanetCard from "./PlanetCard";
 import "./planetPanelMobile.css";
 
@@ -57,6 +57,7 @@ export default function PlanetPanelMobile({
   const [activeIndex, setActiveIndex] = useState(0);
   const [bounceDisabled, setBounceDisabled] = useState(false);
   const [slotReady, setSlotReady] = useState(false);
+  const resetActiveTimeoutRef = useRef(null);
   const safeActiveIndex = Math.min(
     activeIndex,
     Math.max(planetsToShow.length - 1, 0)
@@ -64,6 +65,19 @@ export default function PlanetPanelMobile({
   const currentPlanet = planetsToShow[safeActiveIndex] || null;
   const hasPlanets = planetsToShow.length > 0;
   const canNavigate = !loading && !error && planetsToShow.length > 1;
+
+  useEffect(() => {
+    if (resetActiveTimeoutRef.current) {
+      clearTimeout(resetActiveTimeoutRef.current);
+    }
+    resetActiveTimeoutRef.current = setTimeout(() => setActiveIndex(0), 0);
+    return () => {
+      if (resetActiveTimeoutRef.current) {
+        clearTimeout(resetActiveTimeoutRef.current);
+        resetActiveTimeoutRef.current = null;
+      }
+    };
+  }, [planetsToShow.length]);
 
   useEffect(() => {
     let readyTimer = null;

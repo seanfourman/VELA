@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -26,6 +27,7 @@ export default function PlanetPanel({
   const [cardHeight, setCardHeight] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoverBlocked, setHoverBlocked] = useState(false);
+  const resetPageTimeoutRef = useRef(null);
 
   const planetsToShow = useMemo(
     () =>
@@ -39,6 +41,19 @@ export default function PlanetPanel({
   const totalPages = Math.max(1, Math.ceil(planetsToShow.length / PAGE_SIZE));
   const safePage = Math.min(page, totalPages - 1);
   const hasPlanets = planetsToShow.length > 0;
+
+  useEffect(() => {
+    if (resetPageTimeoutRef.current) {
+      clearTimeout(resetPageTimeoutRef.current);
+    }
+    resetPageTimeoutRef.current = setTimeout(() => setPage(0), 0);
+    return () => {
+      if (resetPageTimeoutRef.current) {
+        clearTimeout(resetPageTimeoutRef.current);
+        resetPageTimeoutRef.current = null;
+      }
+    };
+  }, [planetsToShow.length]);
 
   useLayoutEffect(() => {
     if (firstCardRef.current) {
