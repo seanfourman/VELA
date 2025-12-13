@@ -1,7 +1,5 @@
 const CACHE_NAME = "vela-map-tiles-v2";
-const TILE_CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1000; // 30 days
-
-// Tile URL patterns to cache
+const TILE_CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 const TILE_PATTERNS = [
   /api\.maptiler\.com/,
   /basemaps\.cartocdn\.com/,
@@ -28,7 +26,6 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch with retry and exponential backoff
 async function fetchWithRetry(request, retries = 3, delay = 1000) {
   for (let i = 0; i < retries; i++) {
     try {
@@ -36,7 +33,6 @@ async function fetchWithRetry(request, retries = 3, delay = 1000) {
       if (response.ok) {
         return response;
       }
-      // If rate limited (429), wait longer before retry
       if (response.status === 429) {
         const waitTime = delay * Math.pow(2, i);
         await new Promise((resolve) => setTimeout(resolve, waitTime));
@@ -55,28 +51,23 @@ async function fetchWithRetry(request, retries = 3, delay = 1000) {
 self.addEventListener("fetch", (event) => {
   const url = event.request.url;
 
-  // Check if this is a tile request
   const isTileRequest = TILE_PATTERNS.some((pattern) => pattern.test(url));
 
   if (isTileRequest) {
     event.respondWith(
       caches.open(CACHE_NAME).then(async (cache) => {
-        // Always try cache first
         const cachedResponse = await cache.match(event.request);
         if (cachedResponse) {
           return cachedResponse;
         }
 
-        // Not in cache, fetch with retry
         try {
           const networkResponse = await fetchWithRetry(event.request);
           if (networkResponse.ok) {
-            // Clone and cache the response
             cache.put(event.request, networkResponse.clone());
           }
           return networkResponse;
         } catch {
-          // Return transparent 1x1 PNG on failure
           return new Response(
             Uint8Array.from(
               atob(

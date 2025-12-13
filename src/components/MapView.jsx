@@ -41,7 +41,6 @@ const MAP_TILES = {
   },
 };
 
-// Fix for default marker icon
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -52,7 +51,6 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
 });
 
-// Custom marker icon
 const customIcon = new L.DivIcon({
   className: "custom-marker",
   html: `
@@ -65,7 +63,6 @@ const customIcon = new L.DivIcon({
   iconAnchor: [15, 15],
 });
 
-// Custom marker for double-click placed pins
 const pinIcon = new L.DivIcon({
   className: "custom-marker placed-pin",
   html: `
@@ -217,7 +214,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       return;
     }
 
-    // If we weren't showing pin planets, keep current panel (e.g., live location)
     if (!location) {
       planetPanelRef.current?.hidePanel();
       planetPanelRef.current?.resetToggle?.();

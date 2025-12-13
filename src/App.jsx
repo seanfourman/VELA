@@ -15,12 +15,10 @@ function App() {
     return localStorage.getItem("mapType") || "satellite";
   });
 
-  // Save mapType to localStorage when it changes
   useEffect(() => {
     localStorage.setItem("mapType", mapType);
   }, [mapType]);
 
-  // Watch position for live location updates
   useEffect(() => {
     if (!navigator.geolocation) {
       return;
@@ -33,7 +31,6 @@ function App() {
         setLocationStatus("active");
       },
       () => {
-        // Location denied or unavailable
         setLocationStatus("off");
       },
       {
@@ -48,7 +45,6 @@ function App() {
     };
   }, []);
 
-  // Warn if hardware acceleration/WebGL falls back to software
   useEffect(() => {
     if (!isProbablyHardwareAccelerated()) {
       showPopup(

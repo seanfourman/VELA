@@ -18,7 +18,7 @@ const PlanetPanelContainer = forwardRef(
   ) => {
     const [planetPanelVisible, setPlanetPanelVisible] = useState(false);
     const [hasShownPanelToggle, setHasShownPanelToggle] = useState(false);
-    const [panelSource, setPanelSource] = useState(null); // 'manual' | 'auto'
+    const [panelSource, setPanelSource] = useState(null);
     const [isHoveringPanel, setIsHoveringPanel] = useState(false);
     const [forceHideToggle, setForceHideToggle] = useState(false);
     const [isMobile, setIsMobile] = useState(() => {
@@ -76,7 +76,6 @@ const PlanetPanelContainer = forwardRef(
       }
     }, [planetPanelVisible, hidePlanetPanel, revealPlanetPanel]);
 
-    // Schedule auto-hide for auto-revealed panels (3s after reveal/hover-out)
     const scheduleAutoHide = useCallback(() => {
       if (panelSource !== "auto" || hasShownPanelToggle || !planetPanelVisible) {
         return;
@@ -114,15 +113,12 @@ const PlanetPanelContainer = forwardRef(
         closeTimeoutRef.current = null;
       }
 
-      // Trigger close animation
       setPlanetPanelVisible(false);
       setPanelSource(null);
       setIsHoveringPanel(false);
-      // Prevent auto-reveal until explicitly triggered again
       initialAutoHideScheduled.current = true;
       setForceHideToggle(Boolean(hideToggle));
 
-      // After animation completes, remove toggle and run callback
       closeTimeoutRef.current = setTimeout(() => {
         setHasShownPanelToggle(false);
         setForceHideToggle(false);
@@ -136,7 +132,6 @@ const PlanetPanelContainer = forwardRef(
       scheduleAutoHide();
     };
 
-    // Initial auto-reveal logic: once per location session
     useEffect(() => {
       if (
         location &&
@@ -149,7 +144,6 @@ const PlanetPanelContainer = forwardRef(
 
           initialRevealDelayRef.current = setTimeout(() => {
             if (isMobile) {
-              // On mobile, just show the toggle without auto-opening the sheet
               setHasShownPanelToggle(true);
               setPlanetPanelVisible(false);
               setPanelSource(null);
@@ -170,7 +164,6 @@ const PlanetPanelContainer = forwardRef(
       revealPlanetPanel,
     ]);
 
-    // Auto-hide guard when panel was opened automatically (even if user never hovered)
     useEffect(() => {
       if (panelSource === "auto" && planetPanelVisible && !isHoveringPanel) {
         scheduleAutoHide();

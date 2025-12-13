@@ -35,9 +35,7 @@ export const resolvePlanetTexture = (name) => {
 };
 
 const PLANETS_API_CACHE_KEY = "visiblePlanetsCache";
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in ms
-
-// Texture preloading helpers
+const CACHE_DURATION = 24 * 60 * 60 * 1000;
 const texturePreloadCache = new Map();
 
 export function preloadPlanetTexture(url) {
@@ -62,7 +60,6 @@ export function preloadAllPlanetTextures() {
   );
 }
 
-// Fetch visible planets with caching
 export async function fetchVisiblePlanets(lat, lng) {
   const cacheKey = `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(
     2
@@ -82,7 +79,6 @@ export async function fetchVisiblePlanets(lat, lng) {
         return data;
       }
     } catch {
-      // Corrupt cache, ignore and refetch
     }
   }
 
@@ -102,7 +98,6 @@ export async function fetchVisiblePlanets(lat, lng) {
         JSON.stringify({ data, timestamp: Date.now() })
       );
     } catch {
-      // Storage may be unavailable (quota/permissions); continue without cache
     }
 
     return data;

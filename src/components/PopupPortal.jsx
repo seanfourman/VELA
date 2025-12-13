@@ -32,14 +32,12 @@ export default function PopupPortal() {
       const popup = { id, message, type, show: false };
       setPopups((prev) => [...prev, popup]);
 
-      // Animate in on next tick
       setTimeout(() => {
         setPopups((prev) =>
           prev.map((p) => (p.id === id ? { ...p, show: true } : p))
         );
       }, 10);
 
-      // Schedule hide + removal
       setTimeout(() => {
         setPopups((prev) =>
           prev.map((p) => (p.id === id ? { ...p, show: false } : p))
