@@ -4,6 +4,7 @@ export default function ContextMenuPopup({
   coords,
   onGetVisiblePlanets,
   onGetDirections,
+  onFindDarkSpots,
   onRemovePin,
 }) {
   return (
@@ -19,6 +20,9 @@ export default function ContextMenuPopup({
           Get Directions
         </button>
       )}
+      <button className="popup-btn" onClick={onFindDarkSpots}>
+        Find Dark Spots
+      </button>
       <button className="popup-btn" onClick={onRemovePin}>
         Remove Pin
       </button>

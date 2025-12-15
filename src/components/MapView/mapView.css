@@ -7,3 +7,23 @@
   bottom: 0;
   z-index: 10;
 }
+
+/* Dark Spot Marker */
+.dark-spot-marker .marker-pin.dark-spot {
+  background: transparent; /* Remove square */
+  border: none; /* Remove border */
+}
+
+.dark-spot-marker .marker-pin.dark-spot::after {
+  display: none; /* Remove any pseudo-element square if present */
+}
+
+.dark-spot-marker .marker-dot.dark-spot {
+  background: #a855f7; /* Purple dot */
+  box-shadow: 0 0 12px #a855f7;
+  width: 16px;
+  height: 16px; 
+}
+
+/* Position SearchDistanceSelector to avoid overlap if needed, 
+   but for now it shares MapTypeSwitcher layout. */

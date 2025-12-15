@@ -18,6 +18,8 @@ import ContextMenuPopup from "./MapView/ContextMenuPopup";
 import usePlanets from "../hooks/usePlanets";
 import { preloadAllPlanetTextures } from "../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
+import { fetchDarkSpots } from "../utils/darkSpots";
+import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
 const LOCATION_ZOOM = 16;
@@ -74,6 +76,17 @@ const pinIcon = new L.DivIcon({
   iconAnchor: [15, 15],
 });
 
+const darkSpotIcon = new L.DivIcon({
+  className: "custom-marker dark-spot-marker",
+  html: `
+    <div class="marker-pin dark-spot">
+      <div class="marker-dot dark-spot"></div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
 function MapAnimator({ location }) {
   const map = useMap();
   const hasAnimated = useRef(false);
@@ -117,6 +130,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const planetPanelRef = useRef(null);
   const [placedMarker, setPlacedMarker] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [searchDistance, setSearchDistance] = useState(50);
+  const [darkSpots, setDarkSpots] = useState([]);
   const skipAutoLocationRef = useRef(false);
 
   const {
@@ -190,6 +205,35 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     }
   };
 
+  const handleFetchDarkSpots = async () => {
+    let lat, lng;
+    if (contextMenu) {
+      lat = contextMenu.lat;
+      lng = contextMenu.lng;
+    } else if (location) {
+      lat = location.lat;
+      lng = location.lng;
+    }
+
+    if (lat && lng) {
+      handleCloseContextMenu();
+      const spots = await fetchDarkSpots(lat, lng, searchDistance);
+      setDarkSpots(spots);
+
+      if (spots.length > 0 && mapRef.current) {
+        // Create bounds from the origin and all spots
+        const bounds = L.latLngBounds([[lat, lng]]);
+        spots.forEach(spot => bounds.extend([spot.lat, spot.lon]));
+        
+        mapRef.current.flyToBounds(bounds, {
+          padding: [50, 50],
+          duration: 2.5,
+          easeLinearity: 0.25
+        });
+      }
+    }
+  };
+
   const handleGetDirections = () => {
     if (contextMenu && location) {
       const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${contextMenu.lat},${contextMenu.lng}`;
@@ -213,6 +257,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       );
       return;
     }
+
+    // Don't clear dark spots on simple menu close.
 
     if (!location) {
       planetPanelRef.current?.hidePanel();
@@ -288,6 +334,12 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                 >
                   Visible Planets
                 </button>
+                <button
+                  className="popup-btn"
+                  onClick={handleFetchDarkSpots}
+                >
+                  Find Dark Spots
+                </button>
               </div>
             </Popup>
           </Marker>
@@ -304,11 +356,50 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                 onGetVisiblePlanets={handleGetVisiblePlanets}
                 onGetDirections={location ? handleGetDirections : null}
                 onRemovePin={handleCloseContextMenu}
+                onFindDarkSpots={handleFetchDarkSpots}
               />
             </Popup>
           </Marker>
         )}
+
+        {darkSpots.map((spot, i) => (
+          <Marker 
+            key={`darkspot-${i}`} 
+            position={[spot.lat, spot.lon]} 
+            icon={darkSpotIcon}
+          >
+             <Popup>
+                <div className="context-menu-popup">
+                  <div className="popup-coords">Dark Spot #{i + 1}</div>
+                  <div className="popup-coords" style={{ fontSize: '0.85em', opacity: 0.8 }}>
+                    {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
+                  </div>
+                  <div className="popup-coords">
+                   Level: {spot.level}
+                   <br/>
+                   Light Value: {spot.light_value?.toFixed(2)}
+                  </div>
+                  {location && (
+                    <button
+                      className="popup-btn"
+                      onClick={() => {
+                         const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${spot.lat},${spot.lon}`;
+                         window.open(url, "_blank");
+                      }}
+                    >
+                      Get Directions
+                    </button>
+                  )}
+                </div>
+             </Popup>
+          </Marker>
+        ))}
       </MapContainer>
+
+      <SearchDistanceSelector 
+        value={searchDistance} 
+        onChange={setSearchDistance} 
+      />
 
       <LocationIndicator
         status={locationStatus}
