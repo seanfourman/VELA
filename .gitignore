@@ -24,3 +24,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local GIS data (too large for GitHub)
+data/World_Atlas_2015.tif
+data/World_Atlas_2015.tpk
+public/World_Atlas_2015.tif
+public/World_Atlas_2015.tpk
