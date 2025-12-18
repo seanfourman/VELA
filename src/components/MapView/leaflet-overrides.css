@@ -106,7 +106,42 @@
 }
 
 .dark-spot-marker .marker-pulse {
-  background: rgba(168, 85, 247, 0.35);
+  --dark-spot-pulse-gradient: radial-gradient(
+    circle,
+    rgba(168, 85, 247, 0) 0%,
+    rgba(168, 85, 247, 0) 46%,
+    rgba(217, 70, 239, 0.85) 60%,
+    rgba(168, 85, 247, 0.22) 76%,
+    rgba(168, 85, 247, 0) 100%
+  );
+
+  width: 32px;
+  height: 32px;
+  background: var(--dark-spot-pulse-gradient);
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.2);
+  pointer-events: none;
+  animation: dark-spot-sonar 1.6s ease-out infinite;
+}
+
+.dark-spot-marker .marker-pulse::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--dark-spot-pulse-gradient);
+  animation: dark-spot-sonar 1.6s ease-out infinite;
+  animation-delay: 0.8s;
+}
+
+@keyframes dark-spot-sonar {
+  0% {
+    transform: scale(0.35);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
 }
 
 @keyframes marker-pulse {
