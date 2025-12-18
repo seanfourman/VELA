@@ -68,6 +68,20 @@
   animation: none !important;
 }
 
+/* Pin removal: force-hide should override bounce/no-bounce states. */
+.planet-panel-mobile[data-force-hide-toggle="true"]
+  .panel-mobile-toggle-slot.ready
+  .planet-panel-toggle,
+.planet-panel-mobile[data-force-hide-toggle="true"]
+  .panel-mobile-toggle-slot.ready
+  .planet-panel-toggle.no-bounce,
+.planet-panel-mobile[data-force-hide-toggle="true"].bounce-disabled
+  .panel-mobile-toggle-slot.ready
+  .planet-panel-toggle {
+  pointer-events: none;
+  animation: mobile-toggle-force-hide 0.35s ease forwards !important;
+}
+
 .planet-panel-mobile.open .panel-mobile-toggle-slot {
   bottom: calc(100% + 12px);
   transform: translate(-50%, 0);
@@ -81,20 +95,24 @@
   border-radius: 20px;
   box-shadow: var(--glass-shadow-elevated);
   border: 1px solid var(--glass-border-strong);
-  padding: 0 16px 16px;
+  padding: 0;
   transform: translateY(calc(100% + 140px));
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.2s ease;
+    height 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
   pointer-events: none;
   border: none;
   position: relative;
   overflow: hidden;
-  will-change: transform;
+  will-change: transform, height;
 }
 
 .planet-panel-mobile.open .panel-mobile-sheet {
   transform: translateY(0);
   pointer-events: auto;
+}
+
+.panel-mobile-sheet-inner {
+  padding: 0 16px 16px;
 }
 
 .panel-mobile-sheet::before {
@@ -278,11 +296,29 @@
   }
 }
 
+@keyframes mobile-toggle-force-hide {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(180px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .planet-panel-mobile.collapsed
     .panel-mobile-toggle-slot.ready
     .planet-panel-toggle {
     animation: none;
+  }
+
+  .planet-panel-mobile[data-force-hide-toggle="true"]
+    .panel-mobile-toggle-slot
+    .planet-panel-toggle {
+    animation: none !important;
+    opacity: 0;
   }
 }
 

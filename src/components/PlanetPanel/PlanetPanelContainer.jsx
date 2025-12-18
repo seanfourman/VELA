@@ -247,6 +247,7 @@ const PlanetPanelContainer = forwardRef(
             error={error}
             panelVisible={planetPanelVisible}
             reducedMotion={reducedMotion}
+            forceHideToggle={forceHideToggle}
             containerRef={panelRootRef}
             toggleControl={
               showPlanetPanelToggle ? (

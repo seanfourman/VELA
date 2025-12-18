@@ -1,4 +1,12 @@
-import { cloneElement, useEffect, useMemo, useRef, useState } from "react";
+import {
+  cloneElement,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import PlanetCard from "./PlanetCard";
 import "./planetPanelMobile.css";
 
@@ -43,6 +51,7 @@ export default function PlanetPanelMobile({
   error,
   panelVisible,
   reducedMotion = false,
+  forceHideToggle = false,
   containerRef,
   toggleControl,
   toggleReady = false,
@@ -58,7 +67,9 @@ export default function PlanetPanelMobile({
   const [activeIndex, setActiveIndex] = useState(0);
   const [bounceDisabled, setBounceDisabled] = useState(false);
   const [slotReady, setSlotReady] = useState(false);
+  const [sheetHeight, setSheetHeight] = useState(null);
   const resetActiveTimeoutRef = useRef(null);
+  const sheetContentRef = useRef(null);
   const safeActiveIndex = Math.min(
     activeIndex,
     Math.max(planetsToShow.length - 1, 0)
@@ -66,6 +77,46 @@ export default function PlanetPanelMobile({
   const currentPlanet = planetsToShow[safeActiveIndex] || null;
   const hasPlanets = planetsToShow.length > 0;
   const canNavigate = !loading && !error && planetsToShow.length > 1;
+
+  const updateSheetHeight = useCallback(() => {
+    const content = sheetContentRef.current;
+    if (!content) return;
+
+    const nextHeight = content.offsetHeight;
+    setSheetHeight((previous) =>
+      previous === nextHeight ? previous : nextHeight
+    );
+  }, []);
+
+  useLayoutEffect(() => {
+    updateSheetHeight();
+  }, [
+    updateSheetHeight,
+    panelVisible,
+    loading,
+    error,
+    safeActiveIndex,
+    hasPlanets,
+  ]);
+
+  useEffect(() => {
+    if (typeof ResizeObserver === "undefined") return undefined;
+    const content = sheetContentRef.current;
+    if (!content) return undefined;
+
+    let rafId = 0;
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => updateSheetHeight());
+    });
+
+    observer.observe(content);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      observer.disconnect();
+    };
+  }, [updateSheetHeight]);
 
   useEffect(() => {
     if (resetActiveTimeoutRef.current) {
@@ -127,7 +178,11 @@ export default function PlanetPanelMobile({
   } ${bounceDisabled ? "bounce-disabled" : ""}`.trim();
 
   return (
-    <div className={panelClasses} ref={containerRef}>
+    <div
+      className={panelClasses}
+      ref={containerRef}
+      data-force-hide-toggle={forceHideToggle ? "true" : "false"}
+    >
       {toggleControl && (
         <div
           className={`panel-mobile-toggle-slot ${
@@ -145,107 +200,109 @@ export default function PlanetPanelMobile({
           })}
         </div>
       )}
-      <div className="panel-mobile-sheet">
-        <div className="planet-mobile-card-row">
-          <button
-            className="panel-mobile-nav prev"
-            onClick={handlePrev}
-            aria-label="Previous planet"
-            disabled={!canNavigate}
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+      <div
+        className="panel-mobile-sheet"
+        style={sheetHeight != null ? { height: sheetHeight } : undefined}
+      >
+        <div className="panel-mobile-sheet-inner" ref={sheetContentRef}>
+          <div className="planet-mobile-card-row">
+            <button
+              className="panel-mobile-nav prev"
+              onClick={handlePrev}
+              aria-label="Previous planet"
+              disabled={!canNavigate}
             >
-              <path d="M14 5l-7 7 7 7" />
-            </svg>
-          </button>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M14 5l-7 7 7 7" />
+              </svg>
+            </button>
 
-          <div className="planet-mobile-card">
-            {loading && (
-              <div className="mobile-placeholder">Aligning the orbits...</div>
-            )}
-            {!loading && error && (
-              <div className="mobile-placeholder error">{error}</div>
-            )}
-            {!loading && !error && hasPlanets && (
-              <PlanetCard
-                planet={currentPlanet}
-                reducedMotion={reducedMotion}
-              />
-            )}
-            {!loading && !error && !hasPlanets && (
-              <div className="mobile-placeholder">No visible planets yet.</div>
-            )}
+            <div className="planet-mobile-card">
+              {loading && (
+                <div className="mobile-placeholder">Aligning the orbits...</div>
+              )}
+              {!loading && error && (
+                <div className="mobile-placeholder error">{error}</div>
+              )}
+              {!loading && !error && hasPlanets && (
+                <PlanetCard planet={currentPlanet} reducedMotion={reducedMotion} />
+              )}
+              {!loading && !error && !hasPlanets && (
+                <div className="mobile-placeholder">No visible planets yet.</div>
+              )}
+            </div>
+
+            <button
+              className="panel-mobile-nav next"
+              onClick={handleNext}
+              aria-label="Next planet"
+              disabled={!canNavigate}
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M10 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
 
-          <button
-            className="panel-mobile-nav next"
-            onClick={handleNext}
-            aria-label="Next planet"
-            disabled={!canNavigate}
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M10 5l7 7-7 7" />
-            </svg>
-          </button>
+          {currentPlanet && !loading && !error && (
+            <div className="planet-mobile-info">
+              <div className="planet-mobile-title">
+                {currentPlanet?.name || "Planet"}
+              </div>
+              <div className="planet-mobile-sub">
+                {currentPlanet?.constellation || "Constellation unknown"}
+              </div>
+
+              <div className="planet-mobile-grid">
+                <div>
+                  <span className="planet-mobile-label">Altitude</span>
+                  <span className="planet-mobile-value">
+                    {formatDegrees(currentPlanet?.altitude)}
+                  </span>
+                </div>
+                <div>
+                  <span className="planet-mobile-label">Azimuth</span>
+                  <span className="planet-mobile-value">
+                    {formatDegrees(currentPlanet?.azimuth)}
+                  </span>
+                </div>
+                <div>
+                  <span className="planet-mobile-label">Magnitude</span>
+                  <span className="planet-mobile-value">
+                    {formatMagnitude(currentPlanet?.magnitude)}
+                  </span>
+                </div>
+                <div>
+                  <span className="planet-mobile-label">RA / Dec</span>
+                  <span className="planet-mobile-value">
+                    {formatRightAscension(currentPlanet?.rightAscension)} /{" "}
+                    {formatDeclination(currentPlanet?.declination)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="planet-mobile-footnote">
+                {currentPlanet?.aboveHorizon === false
+                  ? "Below horizon right now"
+                  : "Above the horizon"}
+              </div>
+            </div>
+          )}
         </div>
-
-        {currentPlanet && !loading && !error && (
-          <div className="planet-mobile-info">
-            <div className="planet-mobile-title">
-              {currentPlanet?.name || "Planet"}
-            </div>
-            <div className="planet-mobile-sub">
-              {currentPlanet?.constellation || "Constellation unknown"}
-            </div>
-
-            <div className="planet-mobile-grid">
-              <div>
-                <span className="planet-mobile-label">Altitude</span>
-                <span className="planet-mobile-value">
-                  {formatDegrees(currentPlanet?.altitude)}
-                </span>
-              </div>
-              <div>
-                <span className="planet-mobile-label">Azimuth</span>
-                <span className="planet-mobile-value">
-                  {formatDegrees(currentPlanet?.azimuth)}
-                </span>
-              </div>
-              <div>
-                <span className="planet-mobile-label">Magnitude</span>
-                <span className="planet-mobile-value">
-                  {formatMagnitude(currentPlanet?.magnitude)}
-                </span>
-              </div>
-              <div>
-                <span className="planet-mobile-label">RA / Dec</span>
-                <span className="planet-mobile-value">
-                  {formatRightAscension(currentPlanet?.rightAscension)} /{" "}
-                  {formatDeclination(currentPlanet?.declination)}
-                </span>
-              </div>
-            </div>
-
-            <div className="planet-mobile-footnote">
-              {currentPlanet?.aboveHorizon === false
-                ? "Below horizon right now"
-                : "Above the horizon"}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
