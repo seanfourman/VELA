@@ -1,0 +1,16 @@
+.sky-quality-panel {
+  position: absolute;
+  top: 80px;
+  left: 40px;
+  z-index: 1500;
+  width: 260px;
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .sky-quality-panel {
+    left: 20px;
+    width: min(320px, calc(100vw - 40px));
+  }
+}
+

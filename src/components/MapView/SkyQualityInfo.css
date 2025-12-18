@@ -1,0 +1,45 @@
+.sky-quality-info {
+  padding: 10px 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+}
+
+.sky-quality-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--surface-text);
+  margin-bottom: 6px;
+}
+
+.sky-quality-status {
+  font-size: 0.8125rem;
+  color: var(--surface-text-muted);
+  line-height: 1.2;
+}
+
+.sky-quality-error {
+  color: #fca5a5;
+}
+
+.sky-quality-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 4px;
+  column-gap: 10px;
+  align-items: baseline;
+}
+
+.sky-quality-label {
+  font-size: 0.75rem;
+  color: var(--surface-text-subtle);
+}
+
+.sky-quality-value {
+  font-size: 0.8125rem;
+  color: var(--surface-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
