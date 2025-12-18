@@ -382,7 +382,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           >
             <Popup>
               <div className="context-menu-popup">
-                <div className="popup-coords">Dark Spot #{i + 1}</div>
+                <div className="popup-coords">Dark Spot</div>
                 <div className="popup-coords">
                   {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
                 </div>
