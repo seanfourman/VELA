@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import MapView from "./components/MapView";
 import PopupPortal from "./components/PopupPortal";
+import { useCognitoAuth } from "./hooks/useCognitoAuth";
 import { showPopup } from "./utils/popup";
 import { isProbablyHardwareAccelerated } from "./utils/hardwareUtils";
 import "./App.css";
 
 function App() {
+  const auth = useCognitoAuth();
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState(() =>
     navigator.geolocation ? "searching" : "off"
@@ -57,7 +59,7 @@ function App() {
 
   return (
     <div className="app">
-      <Navbar mapType={mapType} />
+      <Navbar mapType={mapType} auth={auth} />
       <MapView
         location={location}
         locationStatus={locationStatus}

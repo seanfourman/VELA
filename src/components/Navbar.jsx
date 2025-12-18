@@ -2,8 +2,21 @@ import "./Navbar.css";
 import velaLogo from "../assets/vela.svg";
 import velaLogoBlack from "../assets/vela-black.svg";
 
-function Navbar({ mapType }) {
+function Navbar({ mapType, auth }) {
   const isLight = mapType === "light";
+  const isAuthenticated = Boolean(auth?.isAuthenticated);
+  const isLoading = Boolean(auth?.isLoading);
+
+  const authLabel = isLoading ? "Loading..." : isAuthenticated ? "Sign Out" : "Sign In";
+
+  function handleAuthClick() {
+    if (isLoading) return;
+    if (isAuthenticated) {
+      auth?.signOut?.();
+      return;
+    }
+    auth?.signIn?.();
+  }
 
   return (
     <>
@@ -40,7 +53,14 @@ function Navbar({ mapType }) {
           <a href="#" className="nav-link">
             About
           </a>
-          <button className="auth-button">Sign In</button>
+          <button
+            className="auth-button"
+            onClick={handleAuthClick}
+            disabled={isLoading}
+            type="button"
+          >
+            {authLabel}
+          </button>
         </div>
       </nav>
     </>
