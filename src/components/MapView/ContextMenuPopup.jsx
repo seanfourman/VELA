@@ -21,7 +21,7 @@ export default function ContextMenuPopup({
         </button>
       )}
       <button className="popup-btn" onClick={onFindDarkSpots}>
-        Find Dark Spots
+        Stargazing Locations
       </button>
       <button className="popup-btn" onClick={onRemovePin}>
         Remove Pin

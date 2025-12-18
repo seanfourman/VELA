@@ -8,7 +8,7 @@
   z-index: 10;
 }
 
-/* Dark Spot Marker */
+/* Stargazing Location Marker */
 .dark-spot-marker .marker-pin.dark-spot {
   background: transparent; /* Remove square */
   border: none; /* Remove border */

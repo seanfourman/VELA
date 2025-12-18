@@ -273,7 +273,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       return;
     }
 
-    // Don't clear dark spots on simple menu close.
+    // Don't clear stargazing locations on simple menu close.
 
     if (!location) {
       planetPanelRef.current?.hidePanel();
@@ -350,7 +350,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                   Visible Planets
                 </button>
                 <button className="popup-btn" onClick={handleFetchDarkSpots}>
-                  Find Dark Spots
+                  Stargazing Locations
                 </button>
               </div>
             </Popup>
@@ -382,7 +382,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           >
             <Popup>
               <div className="context-menu-popup">
-                <div className="popup-coords">Dark Spot</div>
+                <div className="popup-coords">Stargazing Location</div>
                 <div className="popup-coords">
                   {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
                 </div>
