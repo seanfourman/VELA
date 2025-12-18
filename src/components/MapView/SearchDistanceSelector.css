@@ -39,7 +39,7 @@
 .distance-menu {
   position: absolute;
   top: 100%;
-  right: 0;
+  right: 5px;
   margin-top: 8px;
   min-width: 140px;
   display: flex;
