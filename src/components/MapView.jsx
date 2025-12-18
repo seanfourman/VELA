@@ -216,7 +216,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     }
 
     if (lat && lng) {
-      handleCloseContextMenu();
+      // Close any open popup, but keep the pinned (blue) marker on the map.
+      mapRef.current?.closePopup();
       const spots = await fetchDarkSpots(lat, lng, searchDistance);
       setDarkSpots(spots);
 
@@ -239,6 +240,13 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${contextMenu.lat},${contextMenu.lng}`;
       window.open(url, "_blank");
     }
+  };
+
+  const getDirectionsOrigin = () => {
+    // Blue pinned marker is stronger than the green live location dot.
+    if (placedMarker) return { lat: placedMarker.lat, lng: placedMarker.lng, label: "Pinned spot" };
+    if (location) return { lat: location.lat, lng: location.lng, label: "Your location" };
+    return null;
   };
 
   const handleCloseContextMenu = () => {
@@ -379,15 +387,17 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                    <br/>
                    Light Value: {spot.light_value?.toFixed(2)}
                   </div>
-                  {location && (
+                  {getDirectionsOrigin() && (
                     <button
                       className="popup-btn"
                       onClick={() => {
-                         const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${spot.lat},${spot.lon}`;
+                         const origin = getDirectionsOrigin();
+                         if (!origin) return;
+                         const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${spot.lat},${spot.lon}`;
                          window.open(url, "_blank");
                       }}
                     >
-                      Get Directions
+                      Get Directions (from {getDirectionsOrigin()?.label})
                     </button>
                   )}
                 </div>

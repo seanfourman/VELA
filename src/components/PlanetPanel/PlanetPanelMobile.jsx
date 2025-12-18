@@ -166,7 +166,7 @@ export default function PlanetPanelMobile({
 
           <div className="planet-mobile-card">
             {loading && (
-              <div className="mobile-placeholder">Loading planets...</div>
+              <div className="mobile-placeholder">Aligning the orbits…</div>
             )}
             {!loading && error && (
               <div className="mobile-placeholder error">{error}</div>
