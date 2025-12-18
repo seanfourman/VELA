@@ -15,6 +15,19 @@ function normalizeDomain(domain) {
   return String(domain).replace(/\/+$/, "");
 }
 
+function normalizeCognitoRedirectUri(uri) {
+  if (!uri) return "";
+  try {
+    const parsed = new URL(String(uri));
+    if (parsed.pathname === "/" && parsed.search === "" && parsed.hash === "") {
+      return parsed.origin;
+    }
+  } catch {
+    // Ignore and fall through to raw string.
+  }
+  return String(uri);
+}
+
 export function getCognitoConfig() {
   const domain = normalizeDomain(
     import.meta.env.VITE_COGNITO_DOMAIN || DEFAULTS.domain
@@ -24,7 +37,7 @@ export function getCognitoConfig() {
   const redirectUri =
     import.meta.env.VITE_COGNITO_REDIRECT_URI || window.location.origin;
   const logoutUri =
-    import.meta.env.VITE_COGNITO_LOGOUT_URI || `${window.location.origin}/`;
+    import.meta.env.VITE_COGNITO_LOGOUT_URI || window.location.origin;
 
   const scopesRaw = import.meta.env.VITE_COGNITO_SCOPES;
   const scopes = scopesRaw
@@ -37,8 +50,8 @@ export function getCognitoConfig() {
   return {
     domain,
     clientId,
-    redirectUri,
-    logoutUri,
+    redirectUri: normalizeCognitoRedirectUri(redirectUri),
+    logoutUri: normalizeCognitoRedirectUri(logoutUri),
     scopes,
   };
 }
@@ -352,5 +365,6 @@ export async function ensureValidSession() {
 export function signOutToCognito() {
   clearPkceSession();
   clearStoredSession();
-  window.location.assign(buildLogoutUrl());
+  const url = buildLogoutUrl();
+  window.location.assign(url);
 }
