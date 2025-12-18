@@ -15,6 +15,7 @@ import PlanetPanelContainer from "./PlanetPanel/PlanetPanelContainer";
 import MapTypeSwitcher from "./MapView/MapTypeSwitcher";
 import LocationIndicator from "./MapView/LocationIndicator";
 import ContextMenuPopup from "./MapView/ContextMenuPopup";
+import SkyQualityPanel from "./MapView/SkyQualityPanel";
 import usePlanets from "../hooks/usePlanets";
 import { preloadAllPlanetTextures } from "../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
@@ -411,6 +412,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           </Marker>
         ))}
       </MapContainer>
+
+      <SkyQualityPanel coords={placedMarker} />
 
       <SearchDistanceSelector
         value={searchDistance}

@@ -23,7 +23,7 @@ export async function fetchDarkSpots(lat, lon, searchDistance) {
       return data.spots.slice(0, 3);
     }
     return [];
-  } catch (error) {
+  } catch {
     return [];
   }
 }
