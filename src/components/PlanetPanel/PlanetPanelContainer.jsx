@@ -26,6 +26,7 @@ const PlanetPanelContainer = forwardRef(
       return window.matchMedia("(max-width: 768px)").matches;
     });
 
+    const panelRootRef = useRef(null);
     const hoverHideTimeoutRef = useRef(null);
     const initialAutoHideScheduled = useRef(false);
     const initialRevealDelayRef = useRef(null);
@@ -67,6 +68,27 @@ const PlanetPanelContainer = forwardRef(
       setHasShownPanelToggle(true);
       setPanelSource(null);
     }, []);
+
+    useEffect(() => {
+      if (!planetPanelVisible) return undefined;
+      if (typeof window === "undefined") return undefined;
+
+      const handlePointerDown = (event) => {
+        const panelRoot = panelRootRef.current;
+        if (!panelRoot) return;
+
+        const target = event?.target;
+        if (!(target instanceof Node)) return;
+
+        if (panelRoot.contains(target)) return;
+        hidePlanetPanel();
+      };
+
+      window.addEventListener("pointerdown", handlePointerDown, true);
+      return () => {
+        window.removeEventListener("pointerdown", handlePointerDown, true);
+      };
+    }, [planetPanelVisible, hidePlanetPanel]);
 
     const togglePlanetPanel = useCallback(() => {
       if (planetPanelVisible) {
@@ -195,6 +217,7 @@ const PlanetPanelContainer = forwardRef(
               planetPanelVisible ? "open" : "collapsed"
             }`}
             data-force-hide-toggle={forceHideToggle ? "true" : "false"}
+            ref={panelRootRef}
             onMouseEnter={handlePanelMouseEnter}
             onMouseLeave={handlePanelMouseLeave}
           >
@@ -224,6 +247,7 @@ const PlanetPanelContainer = forwardRef(
             error={error}
             panelVisible={planetPanelVisible}
             reducedMotion={reducedMotion}
+            containerRef={panelRootRef}
             toggleControl={
               showPlanetPanelToggle ? (
                 <PlanetPanelToggle

@@ -94,7 +94,6 @@
 
 .planet-panel-mobile.open .panel-mobile-sheet {
   transform: translateY(0);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.5), 0 16px 32px rgba(0, 0, 0, 0.3);
   pointer-events: auto;
 }
 

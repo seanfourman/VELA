@@ -43,6 +43,7 @@ export default function PlanetPanelMobile({
   error,
   panelVisible,
   reducedMotion = false,
+  containerRef,
   toggleControl,
   toggleReady = false,
 }) {
@@ -126,7 +127,7 @@ export default function PlanetPanelMobile({
   } ${bounceDisabled ? "bounce-disabled" : ""}`.trim();
 
   return (
-    <div className={panelClasses}>
+    <div className={panelClasses} ref={containerRef}>
       {toggleControl && (
         <div
           className={`panel-mobile-toggle-slot ${
