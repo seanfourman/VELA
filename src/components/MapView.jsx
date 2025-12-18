@@ -224,12 +224,12 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       if (spots.length > 0 && mapRef.current) {
         // Create bounds from the origin and all spots
         const bounds = L.latLngBounds([[lat, lng]]);
-        spots.forEach(spot => bounds.extend([spot.lat, spot.lon]));
-        
+        spots.forEach((spot) => bounds.extend([spot.lat, spot.lon]));
+
         mapRef.current.flyToBounds(bounds, {
           padding: [50, 50],
           duration: 2.5,
-          easeLinearity: 0.25
+          easeLinearity: 0.25,
         });
       }
     }
@@ -244,8 +244,14 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   const getDirectionsOrigin = () => {
     // Blue pinned marker is stronger than the green live location dot.
-    if (placedMarker) return { lat: placedMarker.lat, lng: placedMarker.lng, label: "Pinned spot" };
-    if (location) return { lat: location.lat, lng: location.lng, label: "Your location" };
+    if (placedMarker)
+      return {
+        lat: placedMarker.lat,
+        lng: placedMarker.lng,
+        label: "Pinned spot",
+      };
+    if (location)
+      return { lat: location.lat, lng: location.lng, label: "Your location" };
     return null;
   };
 
@@ -342,10 +348,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                 >
                   Visible Planets
                 </button>
-                <button
-                  className="popup-btn"
-                  onClick={handleFetchDarkSpots}
-                >
+                <button className="popup-btn" onClick={handleFetchDarkSpots}>
                   Find Dark Spots
                 </button>
               </div>
@@ -371,44 +374,49 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         )}
 
         {darkSpots.map((spot, i) => (
-          <Marker 
-            key={`darkspot-${i}`} 
-            position={[spot.lat, spot.lon]} 
+          <Marker
+            key={`darkspot-${i}`}
+            position={[spot.lat, spot.lon]}
             icon={darkSpotIcon}
           >
-             <Popup>
-                <div className="context-menu-popup">
-                  <div className="popup-coords">Dark Spot #{i + 1}</div>
-                  <div className="popup-coords" style={{ fontSize: '0.85em', opacity: 0.8 }}>
-                    {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
-                  </div>
-                  <div className="popup-coords">
-                   Level: {spot.level}
-                   <br/>
-                   Light Value: {spot.light_value?.toFixed(2)}
-                  </div>
-                  {getDirectionsOrigin() && (
-                    <button
-                      className="popup-btn"
-                      onClick={() => {
-                         const origin = getDirectionsOrigin();
-                         if (!origin) return;
-                         const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${spot.lat},${spot.lon}`;
-                         window.open(url, "_blank");
-                      }}
-                    >
-                      Get Directions (from {getDirectionsOrigin()?.label})
-                    </button>
-                  )}
+            <Popup>
+              <div className="context-menu-popup">
+                <div className="popup-coords">Dark Spot #{i + 1}</div>
+                <div
+                  className="popup-coords"
+                  style={{ fontSize: "0.85em", opacity: 0.8 }}
+                >
+                  {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
                 </div>
-             </Popup>
+                <div className="popup-coords">
+                  Level: {spot.level}
+                  <br />
+                  Light Value: {spot.light_value?.toFixed(2)}
+                </div>
+                {getDirectionsOrigin() && (
+                  <button
+                    className="popup-btn"
+                    onClick={() => {
+                      const origin = getDirectionsOrigin();
+                      if (!origin) return;
+                      const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${spot.lat},${spot.lon}`;
+                      window.open(url, "_blank");
+                    }}
+                  >
+                    Get Directions
+                    <br />
+                    (from {getDirectionsOrigin()?.label.toLowerCase()})
+                  </button>
+                )}
+              </div>
+            </Popup>
           </Marker>
         ))}
       </MapContainer>
 
-      <SearchDistanceSelector 
-        value={searchDistance} 
-        onChange={setSearchDistance} 
+      <SearchDistanceSelector
+        value={searchDistance}
+        onChange={setSearchDistance}
       />
 
       <LocationIndicator
