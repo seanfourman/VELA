@@ -80,6 +80,7 @@ const darkSpotIcon = new L.DivIcon({
   className: "custom-marker dark-spot-marker",
   html: `
     <div class="marker-pin dark-spot">
+      <div class="marker-pulse"></div>
       <div class="marker-dot dark-spot"></div>
     </div>
   `,
@@ -382,10 +383,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
             <Popup>
               <div className="context-menu-popup">
                 <div className="popup-coords">Dark Spot #{i + 1}</div>
-                <div
-                  className="popup-coords"
-                  style={{ fontSize: "0.85em", opacity: 0.8 }}
-                >
+                <div className="popup-coords">
                   {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
                 </div>
                 <div className="popup-coords">
