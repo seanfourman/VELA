@@ -45,6 +45,8 @@ const PlanetPanelContainer = forwardRef(
       hasShownPanelToggle &&
       (location || (Array.isArray(planets) && planets.length > 0));
 
+    const mobilePanelVisible = planetPanelVisible && !loading;
+
     const revealPlanetPanel = useCallback((source = "manual") => {
       if (hoverHideTimeoutRef.current) {
         clearTimeout(hoverHideTimeoutRef.current);
@@ -245,14 +247,14 @@ const PlanetPanelContainer = forwardRef(
             planets={planets}
             loading={loading}
             error={error}
-            panelVisible={planetPanelVisible}
+            panelVisible={mobilePanelVisible}
             reducedMotion={reducedMotion}
             forceHideToggle={forceHideToggle}
             containerRef={panelRootRef}
             toggleControl={
               showPlanetPanelToggle ? (
                 <PlanetPanelToggle
-                  active={planetPanelVisible}
+                  active={mobilePanelVisible}
                   onClick={togglePlanetPanel}
                   direction="vertical"
                 />
