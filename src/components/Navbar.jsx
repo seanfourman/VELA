@@ -7,11 +7,7 @@ function Navbar({ mapType, auth }) {
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const isLoading = Boolean(auth?.isLoading);
 
-  const authLabel = isLoading
-    ? "Loading..."
-    : isAuthenticated
-    ? "Sign Out"
-    : "Sign In";
+  const authLabel = !isLoading && isAuthenticated ? "Sign Out" : "Sign In";
 
   function handleAuthClick() {
     if (isLoading) return;
