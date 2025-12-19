@@ -258,6 +258,13 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     preloadAllPlanetTextures();
   }, []);
 
+  const centerOnCoords = (lat, lng) => {
+    if (!mapRef.current || !isCoarsePointerEnv()) return;
+    const map = mapRef.current;
+    const zoom = map.getZoom();
+    map.flyTo([lat, lng], zoom, { duration: 0.5, easeLinearity: 0.35 });
+  };
+
   useEffect(() => {
     return () => {
       if (removalTimeoutRef.current) clearTimeout(removalTimeoutRef.current);
@@ -473,7 +480,13 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         {location && <MapAnimator location={location} />}
 
         {location && (
-          <Marker position={[location.lat, location.lng]} icon={customIcon}>
+          <Marker
+            position={[location.lat, location.lng]}
+            icon={customIcon}
+            eventHandlers={{
+              popupopen: () => centerOnCoords(location.lat, location.lng),
+            }}
+          >
             <Popup>
               <div className="context-menu-popup">
                 <div className="popup-coords">
@@ -507,6 +520,9 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
             key={`placed-${placedMarker.id}`}
             position={[placedMarker.lat, placedMarker.lng]}
             icon={pinIcon}
+            eventHandlers={{
+              popupopen: () => centerOnCoords(placedMarker.lat, placedMarker.lng),
+            }}
           >
             <Popup>
               <ContextMenuPopup
@@ -525,6 +541,9 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
             key={`darkspot-${i}`}
             position={[spot.lat, spot.lon]}
             icon={darkSpotIcon}
+            eventHandlers={{
+              popupopen: () => centerOnCoords(spot.lat, spot.lon),
+            }}
           >
             <Popup>
               <div className="context-menu-popup">
