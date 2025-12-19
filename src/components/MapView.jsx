@@ -232,7 +232,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const [placedMarker, setPlacedMarker] = useState(null);
   const [exitingMarker, setExitingMarker] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
-  const [searchDistance, setSearchDistance] = useState(50);
+  const [searchDistance, setSearchDistance] = useState(10);
   const [darkSpots, setDarkSpots] = useState([]);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
