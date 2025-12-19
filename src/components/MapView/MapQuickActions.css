@@ -206,7 +206,7 @@ body.map-ui-shifted .map-quick-actions {
   .map-quick-actions {
     left: 14px;
     bottom: 16px;
-    gap: 8px;
+    gap: 16px;
   }
 
   .quick-action-btn,
