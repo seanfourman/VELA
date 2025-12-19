@@ -115,6 +115,11 @@ body.map-ui-shifted .map-quick-actions {
   z-index: 2;
 }
 
+.map-container.light .quick-action-icon {
+  filter: none;
+  opacity: 0.92;
+}
+
 .location-control {
   display: flex;
   align-items: center;
