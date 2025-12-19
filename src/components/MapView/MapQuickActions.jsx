@@ -4,6 +4,8 @@ import locationIcon from "../../assets/icons/location-icon.svg";
 import "./MapQuickActions.css";
 
 function QuickActionButton({ icon, label, title, disabled, onClick }) {
+  const text = title || label;
+
   return (
     <div className="quick-action">
       <button
@@ -15,6 +17,12 @@ function QuickActionButton({ icon, label, title, disabled, onClick }) {
       >
         <img src={icon} alt="" className="quick-action-icon" />
       </button>
+      <span
+        className={`quick-action-label${disabled ? " disabled" : ""}`}
+        aria-hidden="true"
+      >
+        {text}
+      </span>
     </div>
   );
 }
@@ -29,6 +37,11 @@ function LocationStatusButton({ status, onClick }) {
       : status === "searching"
       ? "Searching..."
       : "Location off";
+  const hoverLabel = isActive
+    ? "Snap to your location"
+    : isSearching
+    ? "Locating you..."
+    : "Location off";
 
   return (
     <div className="quick-action location-control">
@@ -42,6 +55,12 @@ function LocationStatusButton({ status, onClick }) {
         <span className="location-ping" aria-hidden="true" />
         <img src={locationIcon} alt="" className="quick-action-icon" />
       </button>
+      <span
+        className={`quick-action-label${!isActive ? " disabled" : ""}`}
+        aria-hidden="true"
+      >
+        {hoverLabel}
+      </span>
     </div>
   );
 }
