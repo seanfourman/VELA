@@ -6,10 +6,10 @@
   display: inline-flex;
   align-items: center;
   padding: 3px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur-heavy);
-  -webkit-backdrop-filter: var(--glass-blur-heavy);
-  border: 1px solid var(--glass-border-strong);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
   border-radius: var(--radius-md);
   box-shadow: var(--glass-shadow-elevated);
   z-index: 1501;
@@ -25,12 +25,25 @@
   border-radius: inherit;
   pointer-events: none;
   background: var(--glass-highlight);
+  z-index: 2;
+}
+
+.map-type-switcher::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-elevated);
   z-index: 1;
 }
 
 .map-type-switcher:hover,
 .map-type-switcher.expanded {
-  border-color: var(--glass-border);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
 }
 
 .map-type-btn {
@@ -43,6 +56,8 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
@@ -50,6 +65,7 @@
   color: #fff;
   isolation: isolate;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
+  z-index: 3;
 }
 
 .map-type-fill {
