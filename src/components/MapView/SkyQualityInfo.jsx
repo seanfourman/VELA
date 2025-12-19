@@ -3,12 +3,12 @@ import { fetchSkyQualityMetrics } from "../../utils/skyQuality";
 import "./SkyQualityInfo.css";
 
 function formatMaybeNumber(value, digits = 2) {
-  if (value == null) return "—";
+  if (value == null) return "N/A";
   if (typeof value !== "number" || !Number.isFinite(value)) return String(value);
   return value.toFixed(digits);
 }
 
-export default function SkyQualityInfo({ lat, lng }) {
+export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
   const coordKey = useMemo(() => {
     if (typeof lat !== "number" || typeof lng !== "number") return null;
     return `${lat.toFixed(5)},${lng.toFixed(5)}`;
@@ -27,7 +27,7 @@ export default function SkyQualityInfo({ lat, lng }) {
       .catch((error) => {
         if (cancelled) return;
         const message =
-          error instanceof Error ? error.message : "Failed to load WA2015 data";
+          error instanceof Error ? error.message : "Failed to load sky quality";
         setState({ key: coordKey, metrics: null, error: message });
       });
     return () => {
@@ -42,11 +42,14 @@ export default function SkyQualityInfo({ lat, lng }) {
   const error = state.key === coordKey ? state.error : null;
 
   return (
-    <div className="sky-quality-info">
-      <div className="sky-quality-title">Sky Quality</div>
+    <div className={`sky-quality-info ${variant}`}>
+      <div className="sky-quality-heading">
+        <span className="sky-quality-label">Sky quality</span>
+        <span className="sky-quality-chip">WA2015</span>
+      </div>
 
       {loading && (
-        <div className="sky-quality-status">Loading sky brightness…</div>
+        <div className="sky-quality-status">Loading sky brightness...</div>
       )}
 
       {error && (
@@ -54,30 +57,39 @@ export default function SkyQualityInfo({ lat, lng }) {
       )}
 
       {metrics && (
-        <div className="sky-quality-grid">
-          <div className="sky-quality-label">Bortle</div>
-          <div className="sky-quality-value">{metrics.Bortle}</div>
-
-          <div className="sky-quality-label">SQM</div>
-          <div className="sky-quality-value">
-            {formatMaybeNumber(metrics.SQM, 2)}
+        <>
+          <div className="sky-quality-main">
+            <div className="sky-quality-block">
+              <div className="sky-quality-block-label">Bortle</div>
+              <div className="sky-quality-block-value">{metrics.Bortle}</div>
+            </div>
+            <div className="sky-quality-block">
+              <div className="sky-quality-block-label">SQM</div>
+              <div className="sky-quality-block-value">
+                {formatMaybeNumber(metrics.SQM, 2)}
+              </div>
+            </div>
           </div>
 
-          <div className="sky-quality-label">Brightness</div>
-          <div className="sky-quality-value">
-            {formatMaybeNumber(metrics.Brightness_mcd_m2, 1)} mcd/m²
+          <div className="sky-quality-meta">
+            <div className="meta-row">
+              <span>Brightness</span>
+              <span>
+                {formatMaybeNumber(metrics.Brightness_mcd_m2, 1)} mcd/m^2
+              </span>
+            </div>
+            <div className="meta-row">
+              <span>Artificial</span>
+              <span>
+                {formatMaybeNumber(metrics.Artif_bright_uccd_m2, 0)} ucd/m^2
+              </span>
+            </div>
+            <div className="meta-row">
+              <span>Ratio</span>
+              <span>{formatMaybeNumber(metrics.Ratio, 1)}x</span>
+            </div>
           </div>
-
-          <div className="sky-quality-label">Artificial</div>
-          <div className="sky-quality-value">
-            {formatMaybeNumber(metrics.Artif_bright_uccd_m2, 0)} µcd/m²
-          </div>
-
-          <div className="sky-quality-label">Ratio</div>
-          <div className="sky-quality-value">
-            {formatMaybeNumber(metrics.Ratio, 1)}×
-          </div>
-        </div>
+        </>
       )}
     </div>
   );

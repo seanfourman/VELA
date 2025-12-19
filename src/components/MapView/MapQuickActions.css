@@ -1,0 +1,150 @@
+.map-quick-actions {
+  position: absolute;
+  bottom: 24px;
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow-subtle);
+  z-index: 1550;
+}
+
+.quick-action-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quick-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 64px;
+}
+
+.quick-action-btn,
+.location-btn {
+  width: 48px;
+  height: 48px;
+}
+
+.quick-action-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.quick-action-icon {
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+}
+
+.quick-action-label {
+  font-size: 0.75rem;
+  color: var(--surface-text-muted);
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+.location-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.location-btn {
+  position: relative;
+  color: var(--surface-text);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow);
+}
+
+.location-btn .location-ping {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.location-btn.active {
+  --status-color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.55);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.3), var(--glass-shadow);
+}
+
+.location-btn.searching {
+  --status-color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.55);
+  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.3), var(--glass-shadow);
+}
+
+.location-btn.off {
+  --status-color: var(--accent-muted);
+  opacity: 0.65;
+}
+
+.location-btn.active .location-ping,
+.location-btn.searching .location-ping {
+  background: var(--status-color);
+  opacity: 0.25;
+  animation: location-ping 1.8s infinite;
+}
+
+.location-btn.searching .location-ping {
+  animation-duration: 1.4s;
+}
+
+.location-btn img {
+  position: relative;
+  z-index: 1;
+}
+
+.location-btn:disabled {
+  cursor: not-allowed;
+}
+
+@keyframes location-ping {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.35;
+  }
+  70% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .map-quick-actions {
+    left: 14px;
+    bottom: 18px;
+    padding: 8px 10px;
+    gap: 10px;
+  }
+
+  .quick-action-btn,
+  .location-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .quick-action-label {
+    font-size: 0.7rem;
+  }
+}

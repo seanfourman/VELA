@@ -1,45 +1,114 @@
 .sky-quality-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 10px 12px;
   border: 1px solid var(--glass-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur-light);
   -webkit-backdrop-filter: var(--glass-blur-light);
+  box-shadow: var(--glass-shadow-subtle);
 }
 
-.sky-quality-title {
+.sky-quality-info.compact {
+  padding: 10px;
+}
+
+.sky-quality-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sky-quality-label {
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.01em;
   color: var(--surface-text);
-  margin-bottom: 6px;
+}
+
+.sky-quality-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-hover);
+  color: var(--surface-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .sky-quality-status {
   font-size: 0.8125rem;
   color: var(--surface-text-muted);
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .sky-quality-error {
   color: #fca5a5;
 }
 
-.sky-quality-grid {
+.sky-quality-main {
   display: grid;
-  grid-template-columns: 1fr auto;
-  row-gap: 4px;
-  column-gap: 10px;
-  align-items: baseline;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
-.sky-quality-label {
+.sky-quality-block {
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-hover);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.sky-quality-block-label {
   font-size: 0.75rem;
   color: var(--surface-text-subtle);
+  margin-bottom: 2px;
 }
 
-.sky-quality-value {
+.sky-quality-block-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--surface-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.sky-quality-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border-subtle);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   font-size: 0.8125rem;
   color: var(--surface-text);
   font-variant-numeric: tabular-nums;
-  text-align: right;
+}
+
+.meta-row span:first-child {
+  color: var(--surface-text-subtle);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .sky-quality-main {
+    grid-template-columns: 1fr 1fr;
+  }
 }

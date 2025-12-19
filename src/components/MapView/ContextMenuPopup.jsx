@@ -1,31 +1,40 @@
+import SkyQualityInfo from "./SkyQualityInfo";
 import "./ContextMenuPopup.css";
 
 export default function ContextMenuPopup({
   coords,
-  onGetVisiblePlanets,
   onGetDirections,
-  onFindDarkSpots,
   onRemovePin,
 }) {
+  if (!coords) return null;
+
   return (
     <div className="context-menu-popup">
       <div className="popup-coords">
-        {coords?.lat.toFixed(4)}, {coords?.lng.toFixed(4)}
+        <span className="popup-coords-label">Pinned location</span>
+        <span className="popup-coords-value">
+          {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+        </span>
       </div>
-      <button className="popup-btn" onClick={onGetVisiblePlanets}>
-        Visible Planets
-      </button>
-      {onGetDirections && (
-        <button className="popup-btn" onClick={onGetDirections}>
-          Get Directions
-        </button>
-      )}
-      <button className="popup-btn" onClick={onFindDarkSpots}>
-        Stargazing Locations
-      </button>
-      <button className="popup-btn" onClick={onRemovePin}>
-        Remove Pin
-      </button>
+
+      <SkyQualityInfo
+        lat={coords.lat}
+        lng={coords.lng}
+        variant="compact"
+      />
+
+      <div className="popup-actions">
+        {onGetDirections && (
+          <button className="popup-btn" onClick={onGetDirections}>
+            Get Directions
+          </button>
+        )}
+        {onRemovePin && (
+          <button className="popup-btn danger" onClick={onRemovePin}>
+            Remove Pin
+          </button>
+        )}
+      </div>
     </div>
   );
 }

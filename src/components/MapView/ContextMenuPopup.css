@@ -8,12 +8,34 @@
 }
 
 .popup-coords {
-  font-size: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   text-align: center;
-  color: var(--surface-text-muted);
-  padding-bottom: 4px;
+  padding-bottom: 6px;
   border-bottom: 1px solid var(--glass-border);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+.popup-coords-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--surface-text-subtle);
+}
+
+.popup-coords-value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--surface-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.popup-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
 }
 
 .popup-btn {
@@ -34,9 +56,19 @@
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
+.popup-btn.danger {
+  border-color: rgba(252, 165, 165, 0.35);
+  color: #fca5a5;
+}
+
 .popup-btn:hover:not(:disabled) {
   background: var(--glass-bg-hover);
   border-color: rgba(255, 255, 255, 0.5);
+}
+
+.popup-btn.danger:hover:not(:disabled) {
+  border-color: rgba(252, 165, 165, 0.55);
+  color: #fecdd3;
 }
 
 .popup-btn:focus,

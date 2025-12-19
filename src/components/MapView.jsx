@@ -13,9 +13,9 @@ import "./MapView/mapView.css";
 import "./MapView/leaflet-overrides.css";
 import PlanetPanelContainer from "./PlanetPanel/PlanetPanelContainer";
 import MapTypeSwitcher from "./MapView/MapTypeSwitcher";
-import LocationIndicator from "./MapView/LocationIndicator";
 import ContextMenuPopup from "./MapView/ContextMenuPopup";
-import SkyQualityPanel from "./MapView/SkyQualityPanel";
+import SkyQualityInfo from "./MapView/SkyQualityInfo";
+import MapQuickActions from "./MapView/MapQuickActions";
 import usePlanets from "../hooks/usePlanets";
 import { preloadAllPlanetTextures } from "../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
@@ -322,18 +322,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     }
   };
 
-  const handleShowLocationPlanets = () => {
-    if (!location) return;
-    skipAutoLocationRef.current = false;
-    planetPanelRef.current?.openPanel("manual");
-    fetchPlanetsForLocation(
-      location.lat,
-      location.lng,
-      "Visible from your sky",
-      { force: true, source: "location" }
-    );
-  };
-
   const handleDoubleClick = (latlng) => {
     if (removalTimeoutRef.current) {
       clearTimeout(removalTimeoutRef.current);
@@ -360,52 +348,53 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   };
 
   const handleGetVisiblePlanets = () => {
-    if (contextMenu) {
-      planetPanelRef.current?.openPanel("manual");
-      fetchPlanetsForLocation(
-        contextMenu.lat,
-        contextMenu.lng,
-        "Visible from pinned spot",
-        { force: true, source: "pin" }
-      );
-    }
+    const target = placedMarker || location || contextMenu;
+    if (!target) return;
+
+    const isPinned = Boolean(placedMarker);
+    const label = isPinned
+      ? "Visible from pinned spot"
+      : "Visible from your sky";
+
+    planetPanelRef.current?.openPanel("manual");
+    fetchPlanetsForLocation(target.lat, target.lng, label, {
+      force: true,
+      source: isPinned ? "pin" : "location",
+    });
   };
 
   const handleFetchDarkSpots = async () => {
-    let lat, lng;
-    if (contextMenu) {
-      lat = contextMenu.lat;
-      lng = contextMenu.lng;
-    } else if (location) {
-      lat = location.lat;
-      lng = location.lng;
-    }
+    const target = placedMarker || location || contextMenu;
+    if (!target) return;
 
-    if (lat && lng) {
-      // Close any open popup, but keep the pinned (blue) marker on the map.
-      mapRef.current?.closePopup();
-      const spots = await fetchDarkSpots(lat, lng, searchDistance);
-      setDarkSpots(spots);
+    // Close any open popup, but keep the pinned (blue) marker on the map.
+    mapRef.current?.closePopup();
+    const spots = await fetchDarkSpots(
+      target.lat,
+      target.lng,
+      searchDistance
+    );
+    setDarkSpots(spots);
 
-      if (spots.length > 0 && mapRef.current) {
-        // Create bounds from the origin and all spots
-        const bounds = L.latLngBounds([[lat, lng]]);
-        spots.forEach((spot) => bounds.extend([spot.lat, spot.lon]));
+    if (spots.length > 0 && mapRef.current) {
+      // Create bounds from the origin and all spots
+      const bounds = L.latLngBounds([[target.lat, target.lng]]);
+      spots.forEach((spot) => bounds.extend([spot.lat, spot.lon]));
 
-        mapRef.current.flyToBounds(bounds, {
-          padding: [50, 50],
-          duration: 2.5,
-          easeLinearity: 0.25,
-        });
-      }
+      mapRef.current.flyToBounds(bounds, {
+        padding: [50, 50],
+        duration: 2.5,
+        easeLinearity: 0.25,
+      });
     }
   };
 
   const handleGetDirections = () => {
-    if (contextMenu && location) {
-      const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${contextMenu.lat},${contextMenu.lng}`;
-      window.open(url, "_blank");
-    }
+    const target = placedMarker || contextMenu;
+    if (!target || !location) return;
+
+    const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${target.lat},${target.lng}`;
+    window.open(url, "_blank");
   };
 
   const getDirectionsOrigin = () => {
@@ -466,6 +455,19 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     );
   }, [location, planetQuery?.source, fetchPlanetsForLocation]);
 
+  const hasPinnedSpot = Boolean(placedMarker);
+  const hasAnyLocation = hasPinnedSpot || Boolean(location);
+  const quickPlanetsTitle = hasPinnedSpot
+    ? "Visible planets from pinned spot"
+    : hasAnyLocation
+    ? "Visible planets from your location"
+    : "Drop a pin or enable location";
+  const quickDarkSpotsTitle = hasPinnedSpot
+    ? "Find stargazing spots near the pin"
+    : hasAnyLocation
+    ? "Find stargazing spots near you"
+    : "Drop a pin or enable location";
+
   return (
     <div className={`map-container visible ${mapType}`}>
       <PlanetPanelContainer
@@ -516,42 +518,42 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         {location && <MapAnimator location={location} />}
 
         {location && (
-          <Marker
-            position={[location.lat, location.lng]}
-            icon={customIcon}
-            eventHandlers={{
-              popupopen: () => centerOnCoords(location.lat, location.lng),
-            }}
-          >
-            <Popup>
-              <div className="context-menu-popup">
-                <div className="popup-coords">
+        <Marker
+          position={[location.lat, location.lng]}
+          icon={customIcon}
+          eventHandlers={{
+            popupopen: () => centerOnCoords(location.lat, location.lng),
+          }}
+        >
+          <Popup>
+            <div className="context-menu-popup">
+              <div className="popup-coords">
+                <span className="popup-coords-label">Your location</span>
+                <span className="popup-coords-value">
                   {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                </div>
-                <button
-                  className="popup-btn"
-                  onClick={handleShowLocationPlanets}
-                >
-                  Visible Planets
-                </button>
-                <button className="popup-btn" onClick={handleFetchDarkSpots}>
-                  Stargazing Locations
-                </button>
+                </span>
               </div>
-            </Popup>
-          </Marker>
-        )}
 
-        {exitingMarker && (
-          <Marker
-            key={`removing-${
-              exitingMarker.id || `${exitingMarker.lat}-${exitingMarker.lng}`
-            }`}
-            position={[exitingMarker.lat, exitingMarker.lng]}
-            icon={pinIconRemoving}
-            interactive={false}
-          />
-        )}
+              <SkyQualityInfo
+                lat={location.lat}
+                lng={location.lng}
+                variant="compact"
+              />
+            </div>
+          </Popup>
+        </Marker>
+      )}
+
+      {exitingMarker && (
+        <Marker
+          key={`removing-${
+            exitingMarker.id || `${exitingMarker.lat}-${exitingMarker.lng}`
+          }`}
+          position={[exitingMarker.lat, exitingMarker.lng]}
+          icon={pinIconRemoving}
+          interactive={false}
+        />
+      )}
 
         {placedMarker && (
           <Marker
@@ -566,10 +568,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
             <Popup>
               <ContextMenuPopup
                 coords={placedMarker}
-                onGetVisiblePlanets={handleGetVisiblePlanets}
                 onGetDirections={location ? handleGetDirections : null}
                 onRemovePin={handleCloseContextMenu}
-                onFindDarkSpots={handleFetchDarkSpots}
               />
             </Popup>
           </Marker>
@@ -616,16 +616,22 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         ))}
       </MapContainer>
 
-      <SkyQualityPanel coords={placedMarker} />
+      <MapQuickActions
+        onShowPlanets={handleGetVisiblePlanets}
+        onFindDarkSpots={handleFetchDarkSpots}
+        canShowPlanets={hasAnyLocation}
+        canFindDarkSpots={hasAnyLocation}
+        planetsTitle={quickPlanetsTitle}
+        darkSpotsTitle={quickDarkSpotsTitle}
+        locationStatus={locationStatus}
+        onSnapToLocation={
+          locationStatus === "active" ? handleSnapToLocation : undefined
+        }
+      />
 
       <SearchDistanceSelector
         value={searchDistance}
         onChange={setSearchDistance}
-      />
-
-      <LocationIndicator
-        status={locationStatus}
-        onClick={locationStatus === "active" ? handleSnapToLocation : undefined}
       />
 
       <MapTypeSwitcher
