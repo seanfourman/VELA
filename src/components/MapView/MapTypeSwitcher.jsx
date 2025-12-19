@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./MapTypeSwitcher.css";
 
 const OPTION_META = (previewKey) => [
@@ -30,6 +30,7 @@ export default function MapTypeSwitcher({
   const current = options.find((opt) => opt.id === mapType) || options[0];
   const [previewSrc, setPreviewSrc] = useState(current.preview);
   const [previewVersion, setPreviewVersion] = useState(0);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     setPreviewSrc(current.preview);
@@ -41,6 +42,23 @@ export default function MapTypeSwitcher({
     setPreviewVersion((v) => v + 1);
   }, [latestGridShot]);
 
+  useEffect(() => {
+    const handleOutside = (event) => {
+      if (!containerRef.current) return;
+      if (!containerRef.current.contains(event.target)) {
+        setExpanded(false);
+      }
+    };
+    window.addEventListener("pointerdown", handleOutside, true);
+    return () => {
+      window.removeEventListener("pointerdown", handleOutside, true);
+    };
+  }, []);
+
+  const toggleMenu = useCallback(() => {
+    setExpanded((prev) => !prev);
+  }, []);
+
   const handleOptionChange = useCallback(
     (id) => {
       onChange(id);
@@ -49,25 +67,15 @@ export default function MapTypeSwitcher({
     [onChange]
   );
 
-  const handleBlur = useCallback((event) => {
-    if (!event.currentTarget.contains(event.relatedTarget)) {
-      setExpanded(false);
-    }
-  }, []);
-
   return (
     <div
+      ref={containerRef}
       className={`map-type-switcher ${expanded ? "expanded" : ""}`}
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
-      onFocus={() => setExpanded(true)}
-      onBlur={handleBlur}
     >
       <button
         className="map-type-btn map-type-current"
-        title={`${current.label} map`}
         aria-label={`${current.label} map`}
-        onClick={() => handleOptionChange(current.id)}
+        onClick={toggleMenu}
       >
         <div
           key={previewVersion}
@@ -80,7 +88,9 @@ export default function MapTypeSwitcher({
         <span className="map-type-label">{current.label}</span>
       </button>
 
-      <div className="map-type-options">
+      <div
+        className="map-type-options"
+      >
         {options.map((opt) => (
           <button
             key={opt.id}
@@ -88,7 +98,6 @@ export default function MapTypeSwitcher({
               opt.id === mapType ? "active" : ""
             }`}
             onClick={() => handleOptionChange(opt.id)}
-            title={`${opt.label} map`}
             aria-label={`${opt.label} map`}
           >
             <div
