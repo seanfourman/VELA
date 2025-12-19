@@ -36,7 +36,6 @@ export default function SearchDistanceSelector({ value, onChange }) {
       <button
         className={`glass-btn distance-toggle ${isOpen ? "active" : ""}`}
         onClick={toggleOpen}
-        title="Search Distance"
       >
         <span className="label">Radius: {value}km</span>
         <svg

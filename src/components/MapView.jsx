@@ -274,10 +274,18 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
       skipAutoLocationRef.current = false;
-      mapRef.current.flyTo([location.lat, location.lng], LOCATION_ZOOM, {
-        duration: 2.5,
-        easeLinearity: 0.25,
-      });
+      const map = mapRef.current;
+      const target = L.latLng(location.lat, location.lng);
+      const currentCenter = map.getCenter();
+      const alreadyCentered =
+        map.distance(currentCenter, target) < 5 && map.getZoom() >= LOCATION_ZOOM - 0.1;
+
+      if (!alreadyCentered) {
+        map.flyTo(target, LOCATION_ZOOM, {
+          duration: 2.5,
+          easeLinearity: 0.25,
+        });
+      }
 
       const isMobile = isCoarsePointerEnv();
       if (isMobile) {

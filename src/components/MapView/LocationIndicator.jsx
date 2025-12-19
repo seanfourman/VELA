@@ -7,7 +7,6 @@ export default function LocationIndicator({ status, onClick }) {
     <div
       className={`location-indicator ${isClickable ? "clickable" : ""}`}
       onClick={isClickable ? onClick : undefined}
-      title={isClickable ? "Click to go to your location" : ""}
     >
       <div className={`indicator-dot ${status}`}></div>
       <span className="indicator-text">
