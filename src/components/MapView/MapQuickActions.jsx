@@ -13,7 +13,6 @@ function QuickActionButton({ icon, label, title, disabled, onClick }) {
         onClick={onClick}
         disabled={disabled}
         aria-label={title || label}
-        title={title || label}
       >
         <img src={icon} alt="" className="quick-action-icon" />
       </button>
@@ -50,7 +49,6 @@ function LocationStatusButton({ status, onClick }) {
         onClick={isActive ? onClick : undefined}
         disabled={!isActive}
         aria-label={label}
-        title={label}
       >
         <span className="location-ping" aria-hidden="true" />
         <img src={locationIcon} alt="" className="quick-action-icon" />
