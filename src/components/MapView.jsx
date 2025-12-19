@@ -214,6 +214,9 @@ function LongPressHandler({ onLongPress, delayMs = LONG_PRESS_MS }) {
 
     // Fallback: Leaflet fires contextmenu on long-press/right-click
     contextmenu: (e) => {
+      const btn = e.originalEvent?.button;
+      const pointerType = e.originalEvent?.pointerType;
+      if (btn === 2 || pointerType === "mouse") return;
       cancelTimer();
       if (e.originalEvent) L.DomEvent.stop(e.originalEvent);
       onLongPress(e.latlng);
