@@ -32,6 +32,12 @@
   font-weight: 600;
   white-space: nowrap;
   border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.16s ease, transform 0.18s ease, filter 0.2s ease;
@@ -43,6 +49,8 @@
 
 .quick-action-label.disabled {
   color: var(--surface-text-muted);
+  background: rgba(16, 16, 22, 0.7);
+  border-color: var(--glass-border);
 }
 
 .quick-action:hover .quick-action-label,
