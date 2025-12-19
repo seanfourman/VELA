@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
   TileLayer,
@@ -234,8 +234,10 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const [contextMenu, setContextMenu] = useState(null);
   const [searchDistance, setSearchDistance] = useState(10);
   const [darkSpots, setDarkSpots] = useState([]);
+  const [latestGridShot, setLatestGridShot] = useState(null);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
+  const lastGridShotAtRef = useRef(0);
 
   const {
     visiblePlanets,
@@ -258,33 +260,25 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     preloadAllPlanetTextures();
   }, []);
 
-  useEffect(() => {
-    if (!location || !mapRef.current) return undefined;
-    if (planetQuery?.source === "pin") return undefined;
-    if (skipAutoLocationRef.current) return undefined;
-
-    const map = mapRef.current;
-    const target = L.latLng(location.lat, location.lng);
-    const currentCenter = map.getCenter();
-    const distance = map.distance(currentCenter, target);
-    const zoom = map.getZoom();
-    const alreadyCentered = distance < 5 && zoom >= LOCATION_ZOOM - 0.1;
-
-    if (!alreadyCentered) {
-      const duration = distance > 1000 ? 1.8 : distance > 200 ? 1.2 : 0.8;
-      map.flyTo(target, Math.max(zoom, LOCATION_ZOOM), {
-        duration,
-        easeLinearity: 0.25,
-      });
-    }
-  }, [location, planetQuery?.source]);
-
   const centerOnCoords = (lat, lng) => {
     if (!mapRef.current || !isCoarsePointerEnv()) return;
     const map = mapRef.current;
     const zoom = map.getZoom();
     map.flyTo([lat, lng], zoom, { duration: 0.5, easeLinearity: 0.35 });
   };
+
+  const handleTileLoad = useCallback((event) => {
+    const src = event?.tile?.src;
+    if (!src) return;
+    const now = Date.now();
+    if (now - lastGridShotAtRef.current < 3000) return;
+    lastGridShotAtRef.current = now;
+    setLatestGridShot(src);
+  }, []);
+
+  useEffect(() => {
+    setLatestGridShot(null);
+  }, [mapType]);
 
   useEffect(() => {
     return () => {
@@ -299,7 +293,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       const target = L.latLng(location.lat, location.lng);
       const currentCenter = map.getCenter();
       const alreadyCentered =
-        map.distance(currentCenter, target) < 5 && map.getZoom() >= LOCATION_ZOOM - 0.1;
+        map.distance(currentCenter, target) < 5 &&
+        map.getZoom() >= LOCATION_ZOOM - 0.1;
 
       if (!alreadyCentered) {
         map.flyTo(target, LOCATION_ZOOM, {
@@ -315,10 +310,15 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         planetPanelRef.current?.openPanel("manual");
       }
 
-      fetchPlanetsForLocation(location.lat, location.lng, "Visible from your sky", {
-        force: true,
-        source: "location",
-      });
+      fetchPlanetsForLocation(
+        location.lat,
+        location.lng,
+        "Visible from your sky",
+        {
+          force: true,
+          source: "location",
+        }
+      );
     }
   };
 
@@ -502,6 +502,9 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           updateWhenIdle={true}
           updateWhenZooming={false}
           noWrap={true}
+          eventHandlers={{
+            tileload: handleTileLoad,
+          }}
         />
 
         <MapController mapRef={mapRef} />
@@ -541,7 +544,9 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
         {exitingMarker && (
           <Marker
-            key={`removing-${exitingMarker.id || `${exitingMarker.lat}-${exitingMarker.lng}`}`}
+            key={`removing-${
+              exitingMarker.id || `${exitingMarker.lat}-${exitingMarker.lng}`
+            }`}
             position={[exitingMarker.lat, exitingMarker.lng]}
             icon={pinIconRemoving}
             interactive={false}
@@ -554,7 +559,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
             position={[placedMarker.lat, placedMarker.lng]}
             icon={pinIcon}
             eventHandlers={{
-              popupopen: () => centerOnCoords(placedMarker.lat, placedMarker.lng),
+              popupopen: () =>
+                centerOnCoords(placedMarker.lat, placedMarker.lng),
             }}
           >
             <Popup>
@@ -626,6 +632,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         mapType={mapType}
         onChange={setMapType}
         previewKey={MAPTILER_KEY}
+        latestGridShot={latestGridShot}
       />
     </div>
   );
