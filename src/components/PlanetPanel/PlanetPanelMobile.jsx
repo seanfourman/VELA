@@ -150,6 +150,23 @@ export default function PlanetPanelMobile({
     };
   }, [toggleReady]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+    const className = "map-ui-shifted";
+    const body = document.body;
+    if (!body) return undefined;
+
+    if (panelVisible) {
+      body.classList.add(className);
+    } else {
+      body.classList.remove(className);
+    }
+
+    return () => {
+      body.classList.remove(className);
+    };
+  }, [panelVisible]);
+
   const handlePrev = () => {
     if (!hasPlanets) return;
     setActiveIndex((prev) => {

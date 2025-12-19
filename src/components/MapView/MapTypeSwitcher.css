@@ -15,7 +15,9 @@
   z-index: 1501;
   isolation: isolate;
   overflow: visible;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .map-type-switcher::before {
@@ -165,6 +167,11 @@
 .map-type-switcher,
 .map-type-options {
   background: var(--glass-bg);
+}
+
+body.map-ui-shifted .map-type-switcher {
+  transform: translateX(140%);
+  pointer-events: none;
 }
 
 @keyframes preview-fade-in {

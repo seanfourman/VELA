@@ -3,7 +3,7 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 96px;
+  bottom: 22px;
   display: flex;
   justify-content: center;
   z-index: 1400;
@@ -21,7 +21,7 @@
   justify-content: center;
   pointer-events: none;
   z-index: 1502;
-  bottom: -120px;
+  bottom: -50px;
   opacity: 1;
   transition: bottom 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.35s ease;
 }
@@ -44,7 +44,7 @@
 }
 
 .panel-mobile-toggle-slot.ready {
-  bottom: -78px;
+  bottom: -6px;
   transform: translate(-50%, 0);
 }
 
@@ -83,7 +83,7 @@
 }
 
 .planet-panel-mobile.open .panel-mobile-toggle-slot {
-  bottom: calc(100% + 12px);
+  bottom: calc(100% + 8px);
   transform: translate(-50%, 0);
 }
 
@@ -96,7 +96,7 @@
   box-shadow: var(--glass-shadow-elevated);
   border: 1px solid var(--glass-border-strong);
   padding: 0;
-  transform: translateY(calc(100% + 140px));
+  transform: translateY(calc(100% + 70px));
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
     height 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease;
   pointer-events: none;
