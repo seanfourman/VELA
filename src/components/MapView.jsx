@@ -31,6 +31,12 @@ const MAX_ZOOM = 16;
 const LONG_PRESS_MS = 750;
 const MARKER_EXIT_MS = 280;
 
+const isCoarsePointerEnv = () => {
+  if (typeof window === "undefined") return false;
+  if (window.matchMedia?.("(pointer: coarse)")?.matches) return true;
+  return typeof navigator !== "undefined" && navigator.maxTouchPoints > 0;
+};
+
 const MAP_TILES = {
   dark: {
     url: `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
@@ -133,6 +139,13 @@ function MapController({ mapRef }) {
 function DoubleClickHandler({ onDoubleClick }) {
   useMapEvents({
     dblclick: (e) => {
+      const isTouchEvent =
+        e.originalEvent?.pointerType === "touch" ||
+        e.originalEvent?.pointerType === "pen" ||
+        Boolean(e.originalEvent?.touches?.length);
+
+      if (isTouchEvent || isCoarsePointerEnv()) return;
+
       L.DomEvent.stopPropagation(e);
       onDoubleClick(e.latlng);
     },
