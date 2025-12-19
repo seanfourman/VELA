@@ -4,7 +4,8 @@ import "./SkyQualityInfo.css";
 
 function formatMaybeNumber(value, digits = 2) {
   if (value == null) return "N/A";
-  if (typeof value !== "number" || !Number.isFinite(value)) return String(value);
+  if (typeof value !== "number" || !Number.isFinite(value))
+    return String(value);
   return value.toFixed(digits);
 }
 
@@ -49,7 +50,23 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
       </div>
 
       {loading && (
-        <div className="sky-quality-status">Loading sky brightness...</div>
+        <div className="sky-quality-placeholder">
+          <div className="sky-quality-main placeholder">
+            <div className="sky-quality-block">
+              <div className="placeholder-line short" />
+              <div className="placeholder-line" />
+            </div>
+            <div className="sky-quality-block">
+              <div className="placeholder-line short" />
+              <div className="placeholder-line" />
+            </div>
+          </div>
+          <div className="sky-quality-meta placeholder">
+            <div className="placeholder-line wide" />
+            <div className="placeholder-line wide" />
+            <div className="placeholder-line wide" />
+          </div>
+        </div>
       )}
 
       {error && (
@@ -75,13 +92,13 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
             <div className="meta-row">
               <span>Brightness</span>
               <span>
-                {formatMaybeNumber(metrics.Brightness_mcd_m2, 1)} mcd/m^2
+                {formatMaybeNumber(metrics.Brightness_mcd_m2, 1)} mcd/m²
               </span>
             </div>
             <div className="meta-row">
               <span>Artificial</span>
               <span>
-                {formatMaybeNumber(metrics.Artif_bright_uccd_m2, 0)} ucd/m^2
+                {formatMaybeNumber(metrics.Artif_bright_uccd_m2, 0)} ucd/m²
               </span>
             </div>
             <div className="meta-row">

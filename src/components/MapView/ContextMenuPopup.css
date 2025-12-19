@@ -2,8 +2,9 @@
 .context-menu-popup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  min-width: 160px;
+  gap: 6px;
+  min-width: 170px;
+  max-width: 220px;
   color: var(--surface-text);
 }
 
@@ -13,9 +14,9 @@
   align-items: center;
   gap: 4px;
   text-align: center;
-  padding-bottom: 6px;
+  padding-bottom: 4px;
   border-bottom: 1px solid var(--glass-border);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .popup-coords-label {
@@ -35,23 +36,23 @@
 .popup-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 8px;
+  gap: 6px;
 }
 
 .popup-btn {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 7px 10px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 6px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur-light);
   -webkit-backdrop-filter: var(--glass-blur-light);
   color: var(--surface-text);
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.84rem;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }

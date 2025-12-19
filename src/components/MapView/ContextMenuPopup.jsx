@@ -17,11 +17,7 @@ export default function ContextMenuPopup({
         </span>
       </div>
 
-      <SkyQualityInfo
-        lat={coords.lat}
-        lng={coords.lng}
-        variant="compact"
-      />
+      <SkyQualityInfo lat={coords.lat} lng={coords.lng} variant="compact" />
 
       <div className="popup-actions">
         {onGetDirections && (
@@ -30,7 +26,7 @@ export default function ContextMenuPopup({
           </button>
         )}
         {onRemovePin && (
-          <button className="popup-btn danger" onClick={onRemovePin}>
+          <button className="popup-btn" onClick={onRemovePin}>
             Remove Pin
           </button>
         )}

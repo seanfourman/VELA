@@ -13,7 +13,10 @@
 }
 
 .sky-quality-info.compact {
-  padding: 10px;
+  padding: 8px 9px;
+  gap: 6px;
+  min-width: 200px;
+  min-height: 160px;
 }
 
 .sky-quality-heading {
@@ -61,12 +64,20 @@
   gap: 8px;
 }
 
+.sky-quality-info.compact .sky-quality-main {
+  gap: 6px;
+}
+
 .sky-quality-block {
   padding: 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--glass-border);
   background: var(--glass-bg-hover);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.sky-quality-info.compact .sky-quality-block {
+  padding: 8px;
 }
 
 .sky-quality-block-label {
@@ -92,6 +103,11 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.sky-quality-info.compact .sky-quality-meta {
+  padding: 6px;
+  gap: 5px;
+}
+
 .meta-row {
   display: flex;
   align-items: center;
@@ -102,9 +118,60 @@
   font-variant-numeric: tabular-nums;
 }
 
+.sky-quality-info.compact .meta-row {
+  font-size: 0.8rem;
+}
+
 .meta-row span:first-child {
   color: var(--surface-text-subtle);
   font-size: 0.75rem;
+}
+
+.sky-quality-info.compact .meta-row span:first-child {
+  font-size: 0.72rem;
+}
+
+.sky-quality-placeholder .sky-quality-block,
+.sky-quality-placeholder .sky-quality-meta {
+  border-color: var(--glass-border-subtle);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.placeholder-line {
+  width: 100%;
+  height: 12px;
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  background-size: 160% 100%;
+  animation: placeholder-shimmer 1.6s ease-in-out infinite;
+}
+
+.placeholder-line.short {
+  width: 60%;
+  height: 10px;
+}
+
+.placeholder-line.wide {
+  height: 10px;
+}
+
+.sky-quality-placeholder .sky-quality-main,
+.sky-quality-placeholder .sky-quality-meta {
+  gap: 8px;
+}
+
+@keyframes placeholder-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -20% 0;
+  }
 }
 
 @media (max-width: 480px) {
