@@ -205,7 +205,7 @@ body.map-ui-shifted .map-quick-actions {
 @media (max-width: 768px) {
   .map-quick-actions {
     left: 14px;
-    bottom: 18px;
+    bottom: 16px;
     gap: 8px;
   }
 
