@@ -128,6 +128,7 @@ body.map-ui-shifted .map-quick-actions {
 .location-btn {
   position: relative;
   color: var(--surface-text);
+  overflow: visible;
 }
 
 .location-btn .location-ping {
@@ -135,19 +136,24 @@ body.map-ui-shifted .map-quick-actions {
   inset: 0;
   border-radius: 50%;
   background: transparent;
+  border: 2px solid transparent;
   opacity: 0;
+  transform: scale(1);
+  box-shadow: none;
   pointer-events: none;
   z-index: 0;
 }
 
 .location-btn.active {
   --status-color: #22c55e;
+  --status-glow: rgba(34, 197, 94, 0.35);
   border-color: rgba(34, 197, 94, 0.65);
   box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35), var(--glass-shadow-elevated);
 }
 
 .location-btn.searching {
   --status-color: #f59e0b;
+  --status-glow: rgba(245, 158, 11, 0.4);
   border-color: rgba(245, 158, 11, 0.65);
   box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35), var(--glass-shadow-elevated);
 }
@@ -159,13 +165,14 @@ body.map-ui-shifted .map-quick-actions {
 
 .location-btn.active .location-ping,
 .location-btn.searching .location-ping {
-  background: var(--status-color);
-  opacity: 0.25;
-  animation: location-ping 1.8s infinite;
+  border-color: var(--status-color);
+  box-shadow: 0 0 0 6px var(--status-glow), 0 0 18px 6px var(--status-glow);
+  opacity: 1;
+  animation: location-wave 1.6s infinite ease-out;
 }
 
 .location-btn.searching .location-ping {
-  animation-duration: 1.4s;
+  animation-duration: 1.2s;
 }
 
 .location-btn img {
@@ -177,18 +184,21 @@ body.map-ui-shifted .map-quick-actions {
   cursor: not-allowed;
 }
 
-@keyframes location-ping {
+@keyframes location-wave {
   0% {
-    transform: scale(0.7);
-    opacity: 0.35;
+    transform: scale(0.85);
+    opacity: 0.9;
+    box-shadow: 0 0 0 2px var(--status-glow), 0 0 12px 2px var(--status-glow);
   }
-  70% {
-    transform: scale(1.6);
-    opacity: 0;
+  60% {
+    transform: scale(1.3);
+    opacity: 0.15;
+    box-shadow: 0 0 0 8px transparent, 0 0 22px 10px var(--status-glow);
   }
   100% {
-    transform: scale(1.8);
+    transform: scale(1.45);
     opacity: 0;
+    box-shadow: 0 0 0 10px transparent, 0 0 24px 14px transparent;
   }
 }
 
