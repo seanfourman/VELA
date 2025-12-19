@@ -164,8 +164,8 @@
 
 @media (max-width: 768px) {
   .map-type-switcher {
-    bottom: 12px;
-    right: 12px;
+    bottom: 8px;
+    right: 15px;
     padding: 2px;
   }
 

@@ -3,7 +3,7 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 90px;
+  bottom: 96px;
   display: flex;
   justify-content: center;
   z-index: 1400;
@@ -14,8 +14,8 @@
   position: absolute;
   left: 50%;
   transform: translate(-50%, 0) translateY(20px);
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -29,8 +29,8 @@
 .panel-mobile-toggle-slot .planet-panel-toggle {
   position: static;
   pointer-events: auto;
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   top: auto;
   bottom: auto;
   left: auto;
