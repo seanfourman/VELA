@@ -28,6 +28,8 @@ const DEFAULT_CENTER = [20, 0];
 const DEFAULT_ZOOM = 2;
 const MIN_ZOOM = 4;
 const MAX_ZOOM = 16;
+const LONG_PRESS_MS = 750;
+const MARKER_EXIT_MS = 280;
 
 const MAP_TILES = {
   dark: {
@@ -71,6 +73,17 @@ const pinIcon = new L.DivIcon({
   html: `
     <div class="marker-pin placed">
       <div class="marker-dot placed"></div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
+const pinIconRemoving = new L.DivIcon({
+  className: "custom-marker placed-pin removing",
+  html: `
+    <div class="marker-pin placed removing">
+      <div class="marker-dot placed removing"></div>
     </div>
   `,
   iconSize: [30, 30],
@@ -127,14 +140,86 @@ function DoubleClickHandler({ onDoubleClick }) {
   return null;
 }
 
+function LongPressHandler({ onLongPress, delayMs = LONG_PRESS_MS }) {
+  const map = useMap();
+  const timerRef = useRef(null);
+  const startPointRef = useRef(null);
+  const lastEventRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  const cancelTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  const startTimer = (e) => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    startPointRef.current = map.latLngToContainerPoint(e.latlng);
+    lastEventRef.current = e;
+
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      if (lastEventRef.current?.originalEvent) {
+        L.DomEvent.stop(lastEventRef.current.originalEvent);
+      }
+      onLongPress(lastEventRef.current?.latlng ?? e.latlng);
+    }, delayMs);
+  };
+
+  const handleMove = (e) => {
+    if (!timerRef.current || !startPointRef.current) return;
+    const currentPoint = map.latLngToContainerPoint(e.latlng);
+    if (startPointRef.current.distanceTo(currentPoint) > 10) {
+      cancelTimer();
+    }
+  };
+
+  useMapEvents({
+    // Pointer events (Leaflet uses these when available)
+    pointerdown: (e) => {
+      startTimer(e);
+    },
+    pointermove: handleMove,
+    pointerup: cancelTimer,
+    pointercancel: cancelTimer,
+
+    // Fallback for older mobile browsers without Pointer Events
+    touchstart: (e) => {
+      if (e.originalEvent?.touches?.length !== 1) return;
+      startTimer(e);
+    },
+    touchmove: handleMove,
+    touchend: cancelTimer,
+    touchcancel: cancelTimer,
+
+    // Fallback: Leaflet fires contextmenu on long-press/right-click
+    contextmenu: (e) => {
+      cancelTimer();
+      if (e.originalEvent) L.DomEvent.stop(e.originalEvent);
+      onLongPress(e.latlng);
+    },
+  });
+
+  return null;
+}
+
 function MapView({ location, locationStatus, mapType, setMapType }) {
   const mapRef = useRef(null);
   const planetPanelRef = useRef(null);
   const [placedMarker, setPlacedMarker] = useState(null);
+  const [exitingMarker, setExitingMarker] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [searchDistance, setSearchDistance] = useState(50);
   const [darkSpots, setDarkSpots] = useState([]);
   const skipAutoLocationRef = useRef(false);
+  const removalTimeoutRef = useRef(null);
 
   const {
     visiblePlanets,
@@ -155,6 +240,12 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   useEffect(() => {
     preloadAllPlanetTextures();
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (removalTimeoutRef.current) clearTimeout(removalTimeoutRef.current);
+    };
   }, []);
 
   const handleSnapToLocation = () => {
@@ -188,10 +279,27 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   };
 
   const handleDoubleClick = (latlng) => {
-    setPlacedMarker(latlng);
-    setContextMenu({
+    if (removalTimeoutRef.current) {
+      clearTimeout(removalTimeoutRef.current);
+    }
+
+    if (placedMarker) {
+      setExitingMarker(placedMarker);
+      removalTimeoutRef.current = setTimeout(() => {
+        setExitingMarker(null);
+      }, MARKER_EXIT_MS);
+    }
+
+    const nextMarker = {
       lat: latlng.lat,
       lng: latlng.lng,
+      id: Date.now(),
+    };
+
+    setPlacedMarker(nextMarker);
+    setContextMenu({
+      lat: nextMarker.lat,
+      lng: nextMarker.lng,
     });
   };
 
@@ -259,6 +367,13 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   const handleCloseContextMenu = () => {
     setContextMenu(null);
+    if (removalTimeoutRef.current) clearTimeout(removalTimeoutRef.current);
+    if (placedMarker) {
+      setExitingMarker(placedMarker);
+      removalTimeoutRef.current = setTimeout(() => {
+        setExitingMarker(null);
+      }, MARKER_EXIT_MS);
+    }
     setPlacedMarker(null);
 
     const isShowingPinPlanets = planetQuery?.source === "pin";
@@ -335,6 +450,10 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
         <MapController mapRef={mapRef} />
         <DoubleClickHandler onDoubleClick={handleDoubleClick} />
+        <LongPressHandler
+          onLongPress={handleDoubleClick}
+          delayMs={LONG_PRESS_MS}
+        />
         {location && <MapAnimator location={location} />}
 
         {location && (
@@ -358,8 +477,18 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           </Marker>
         )}
 
+        {exitingMarker && (
+          <Marker
+            key={`removing-${exitingMarker.id || `${exitingMarker.lat}-${exitingMarker.lng}`}`}
+            position={[exitingMarker.lat, exitingMarker.lng]}
+            icon={pinIconRemoving}
+            interactive={false}
+          />
+        )}
+
         {placedMarker && (
           <Marker
+            key={`placed-${placedMarker.id}`}
             position={[placedMarker.lat, placedMarker.lng]}
             icon={pinIcon}
           >
