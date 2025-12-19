@@ -84,6 +84,12 @@ const PlanetPanelContainer = forwardRef(
         if (!(target instanceof Node)) return;
 
         if (panelRoot.contains(target)) return;
+        if (
+          target instanceof Element &&
+          target.closest(".map-quick-actions")
+        ) {
+          return; // allow map quick actions without hiding the panel
+        }
         hidePlanetPanel();
       };
 
