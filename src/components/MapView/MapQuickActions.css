@@ -216,8 +216,6 @@ body.map-ui-shifted .map-quick-actions {
   }
 
   .quick-action-label {
-    left: calc(100% + 10px);
-    font-size: 0.82rem;
-    padding: 7px 10px;
+    display: none;
   }
 }
