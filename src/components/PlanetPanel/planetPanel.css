@@ -261,8 +261,8 @@
     left: 50%;
     right: auto;
     transform: translate(-50%, 0);
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     z-index: 1502;
   }
 
@@ -302,8 +302,8 @@
     left: 12px;
     right: auto;
     transform: none;
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
   }
 
   .planet-panel-wrapper.open .planet-panel-toggle {
