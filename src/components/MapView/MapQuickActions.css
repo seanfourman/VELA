@@ -5,29 +5,20 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  padding: 10px 12px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur-light);
-  -webkit-backdrop-filter: var(--glass-blur-light);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow-subtle);
-  z-index: 1550;
-}
-
-.quick-action-row {
-  display: flex;
-  align-items: center;
   gap: 10px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  z-index: 1550;
 }
 
 .quick-action {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
-  min-width: 64px;
+  gap: 8px;
+  position: relative;
 }
 
 .quick-action-btn,
@@ -49,16 +40,12 @@
 }
 
 .quick-action-label {
-  font-size: 0.75rem;
-  color: var(--surface-text-muted);
-  letter-spacing: 0.02em;
-  text-align: center;
+  display: none;
 }
 
 .location-control {
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
 .location-btn {
@@ -115,6 +102,30 @@
   cursor: not-allowed;
 }
 
+.quick-action-tooltip {
+  position: absolute;
+  left: 58px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--surface-text);
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  box-shadow: var(--glass-shadow-subtle);
+}
+
+.quick-action:hover .quick-action-tooltip,
+.quick-action:focus-within .quick-action-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 @keyframes location-ping {
   0% {
     transform: scale(0.7);
@@ -134,8 +145,7 @@
   .map-quick-actions {
     left: 14px;
     bottom: 18px;
-    padding: 8px 10px;
-    gap: 10px;
+    gap: 8px;
   }
 
   .quick-action-btn,
@@ -144,7 +154,8 @@
     height: 44px;
   }
 
-  .quick-action-label {
-    font-size: 0.7rem;
+  .quick-action-tooltip {
+    left: 54px;
+    font-size: 0.75rem;
   }
 }

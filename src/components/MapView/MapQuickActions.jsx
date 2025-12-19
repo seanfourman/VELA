@@ -15,7 +15,7 @@ function QuickActionButton({ icon, label, title, disabled, onClick }) {
       >
         <img src={icon} alt="" className="quick-action-icon" />
       </button>
-      <span className="quick-action-label">{label}</span>
+      <span className="quick-action-tooltip">{label}</span>
     </div>
   );
 }
@@ -32,7 +32,7 @@ function LocationStatusButton({ status, onClick }) {
       : "Location off";
 
   return (
-    <div className="location-control">
+    <div className="quick-action location-control">
       <button
         className={`glass-icon-btn location-btn ${statusClass}`}
         onClick={isActive ? onClick : undefined}
@@ -43,7 +43,7 @@ function LocationStatusButton({ status, onClick }) {
         <span className="location-ping" aria-hidden="true" />
         <img src={locationIcon} alt="" className="quick-action-icon" />
       </button>
-      <span className="quick-action-label">{label}</span>
+      <span className="quick-action-tooltip">{label}</span>
     </div>
   );
 }
@@ -60,24 +60,20 @@ export default function MapQuickActions({
 }) {
   return (
     <div className="map-quick-actions">
-      <div className="quick-action-row">
-        <QuickActionButton
-          icon={planetsIcon}
-          label="Planets"
-          title={planetsTitle}
-          disabled={!canShowPlanets}
-          onClick={onShowPlanets}
-        />
-
-        <QuickActionButton
-          icon={stargazingIcon}
-          label="Stargaze"
-          title={darkSpotsTitle}
-          disabled={!canFindDarkSpots}
-          onClick={onFindDarkSpots}
-        />
-      </div>
-
+      <QuickActionButton
+        icon={planetsIcon}
+        label="Planets"
+        title={planetsTitle}
+        disabled={!canShowPlanets}
+        onClick={onShowPlanets}
+      />
+      <QuickActionButton
+        icon={stargazingIcon}
+        label="Stargaze"
+        title={darkSpotsTitle}
+        disabled={!canFindDarkSpots}
+        onClick={onFindDarkSpots}
+      />
       <LocationStatusButton
         status={locationStatus}
         onClick={onSnapToLocation}
