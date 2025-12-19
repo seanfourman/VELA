@@ -21,6 +21,7 @@ const PlanetPanelContainer = forwardRef(
     const [panelSource, setPanelSource] = useState(null);
     const [isHoveringPanel, setIsHoveringPanel] = useState(false);
     const [forceHideToggle, setForceHideToggle] = useState(false);
+    const [toggleNudgeKey, setToggleNudgeKey] = useState(0);
     const [isMobile, setIsMobile] = useState(() => {
       if (typeof window === "undefined" || !window.matchMedia) return false;
       return window.matchMedia("(max-width: 768px)").matches;
@@ -201,6 +202,11 @@ const PlanetPanelContainer = forwardRef(
       markToggleSeen: () => setHasShownPanelToggle(true),
       resetToggle: () => setHasShownPanelToggle(false),
       resetPanel,
+      nudgeToggle: () => {
+        setHasShownPanelToggle(true);
+        setForceHideToggle(false);
+        setToggleNudgeKey((key) => key + 1);
+      },
     }));
 
     useEffect(() => {
@@ -254,6 +260,7 @@ const PlanetPanelContainer = forwardRef(
             toggleControl={
               showPlanetPanelToggle ? (
                 <PlanetPanelToggle
+                  key={`mobile-toggle-${toggleNudgeKey}`}
                   active={mobilePanelVisible}
                   onClick={togglePlanetPanel}
                   direction="vertical"

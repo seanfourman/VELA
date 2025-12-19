@@ -279,13 +279,17 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         easeLinearity: 0.25,
       });
 
-      planetPanelRef.current?.openPanel("manual");
-      fetchPlanetsForLocation(
-        location.lat,
-        location.lng,
-        "Visible from your sky",
-        { force: true, source: "location" }
-      );
+      const isMobile = isCoarsePointerEnv();
+      if (isMobile) {
+        planetPanelRef.current?.nudgeToggle?.();
+      } else {
+        planetPanelRef.current?.openPanel("manual");
+      }
+
+      fetchPlanetsForLocation(location.lat, location.lng, "Visible from your sky", {
+        force: true,
+        source: "location",
+      });
     }
   };
 
