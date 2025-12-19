@@ -102,30 +102,6 @@
   cursor: not-allowed;
 }
 
-.quick-action-tooltip {
-  position: absolute;
-  left: 58px;
-  padding: 6px 10px;
-  border-radius: var(--radius-sm);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  color: var(--surface-text);
-  font-size: 0.8rem;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateY(4px);
-  pointer-events: none;
-  transition: opacity 0.18s ease, transform 0.18s ease;
-  box-shadow: var(--glass-shadow-subtle);
-}
-
-.quick-action:hover .quick-action-tooltip,
-.quick-action:focus-within .quick-action-tooltip {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 @keyframes location-ping {
   0% {
     transform: scale(0.7);
@@ -152,10 +128,5 @@
   .location-btn {
     width: 44px;
     height: 44px;
-  }
-
-  .quick-action-tooltip {
-    left: 54px;
-    font-size: 0.75rem;
   }
 }

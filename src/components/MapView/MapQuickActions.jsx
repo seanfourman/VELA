@@ -15,7 +15,6 @@ function QuickActionButton({ icon, label, title, disabled, onClick }) {
       >
         <img src={icon} alt="" className="quick-action-icon" />
       </button>
-      <span className="quick-action-tooltip">{label}</span>
     </div>
   );
 }
@@ -43,7 +42,6 @@ function LocationStatusButton({ status, onClick }) {
         <span className="location-ping" aria-hidden="true" />
         <img src={locationIcon} alt="" className="quick-action-icon" />
       </button>
-      <span className="quick-action-tooltip">{label}</span>
     </div>
   );
 }
