@@ -258,6 +258,27 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     preloadAllPlanetTextures();
   }, []);
 
+  useEffect(() => {
+    if (!location || !mapRef.current) return undefined;
+    if (planetQuery?.source === "pin") return undefined;
+    if (skipAutoLocationRef.current) return undefined;
+
+    const map = mapRef.current;
+    const target = L.latLng(location.lat, location.lng);
+    const currentCenter = map.getCenter();
+    const distance = map.distance(currentCenter, target);
+    const zoom = map.getZoom();
+    const alreadyCentered = distance < 5 && zoom >= LOCATION_ZOOM - 0.1;
+
+    if (!alreadyCentered) {
+      const duration = distance > 1000 ? 1.8 : distance > 200 ? 1.2 : 0.8;
+      map.flyTo(target, Math.max(zoom, LOCATION_ZOOM), {
+        duration,
+        easeLinearity: 0.25,
+      });
+    }
+  }, [location, planetQuery?.source]);
+
   const centerOnCoords = (lat, lng) => {
     if (!mapRef.current || !isCoarsePointerEnv()) return;
     const map = mapRef.current;
