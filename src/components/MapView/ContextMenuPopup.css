@@ -115,7 +115,6 @@
 .target-toggle:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.7);
-  transform: translate(-50%, -50%) translateY(-1px);
 }
 
 .target-toggle.active {
@@ -134,6 +133,11 @@
 .target-toggle-icon {
   width: 18px;
   height: 18px;
+}
+
+.map-container.dark .target-toggle-icon,
+.map-container.satellite .target-toggle-icon {
+  filter: brightness(0) invert(1);
 }
 
 .darkspot-popup {
