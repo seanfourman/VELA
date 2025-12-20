@@ -267,7 +267,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     const map = mapRef.current;
     const zoom = map.getZoom();
     const targetPoint = map.latLngToContainerPoint([lat, lng]);
-    const verticalOffset = Math.min(180, map.getSize().y * 0.1);
+    const verticalOffset = Math.min(180, map.getSize().y);
     const adjustedLatLng = map.containerPointToLatLng([
       targetPoint.x,
       targetPoint.y - verticalOffset,
@@ -489,7 +489,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     : hasAnyLocation
     ? "Find stargazing spots near you"
     : "Drop a pin or enable location";
-
 
   return (
     <div className={`map-container visible ${mapType}`}>
