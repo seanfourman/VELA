@@ -590,7 +590,9 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
             <Popup>
               <div className="context-menu-popup darkspot-popup">
                 <div className="popup-coords">
-                  <span className="popup-coords-label">Stargazing location</span>
+                  <span className="popup-coords-label">
+                    Stargazing location
+                  </span>
                   <span className="popup-coords-value">
                     {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
                   </span>
@@ -609,8 +611,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                       <span
                         className="stat-help"
                         tabIndex={0}
-                        aria-label="Darkness rating: lower numbers are darker skies"
-                        data-tooltip="Darkness rating: lower numbers are darker skies"
+                        aria-label="Darkness rating: lower numbers are darker skies (1-5)"
+                        data-tooltip="Darkness rating: lower numbers are darker skies (1-5)"
                       >
                         ?
                       </span>
