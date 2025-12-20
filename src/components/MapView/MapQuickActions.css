@@ -252,6 +252,22 @@ body.map-ui-shifted .map-quick-actions {
     .quick-action-label {
     transform: translate(-50%, 0);
   }
+
+  /* Nudge the middle label slightly right */
+  .map-quick-actions
+    .quick-action:not(.location-control):first-of-type
+    .quick-action-label {
+    transform: translate(-36%, 6px);
+  }
+
+  .map-quick-actions
+    .quick-action:not(.location-control):first-of-type:hover
+    .quick-action-label,
+  .map-quick-actions
+    .quick-action:not(.location-control):first-of-type:focus-within
+    .quick-action-label {
+    transform: translate(-36%, 0);
+  }
 }
 
 @media (max-width: 768px) {
