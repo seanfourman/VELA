@@ -21,6 +21,7 @@ import { preloadAllPlanetTextures } from "../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
 import { fetchDarkSpots } from "../utils/darkSpots";
 import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
+import targetIcon from "../assets/icons/target-icon.svg";
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
 const LOCATION_ZOOM = 16;
@@ -608,6 +609,36 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           >
             <Popup>
               <div className="context-menu-popup darkspot-popup">
+                {(() => {
+                  const isSelected =
+                    selectedDarkSpot &&
+                    Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
+                    Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6;
+                  return (
+                    <button
+                      className={`target-toggle${isSelected ? " active" : ""}`}
+                      aria-label={
+                        isSelected
+                          ? "This spot is the active target"
+                          : "Use this spot for quick actions"
+                      }
+                      onClick={() =>
+                        setSelectedDarkSpot({
+                          lat: spot.lat,
+                          lng: spot.lon,
+                          label: "Stargazing spot",
+                        })
+                      }
+                    >
+                      <img
+                        src={targetIcon}
+                        alt=""
+                        aria-hidden="true"
+                        className="target-toggle-icon"
+                      />
+                    </button>
+                  );
+                })()}
                 <div className="popup-coords">
                   <span className="popup-coords-label">
                     Stargazing location
@@ -660,28 +691,6 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                   </div>
                 </div>
                 <div className="popup-actions">
-                  <button
-                    className={`popup-btn select-target${
-                      selectedDarkSpot &&
-                      Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
-                      Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6
-                        ? " selected"
-                        : ""
-                    }`}
-                    onClick={() =>
-                      setSelectedDarkSpot({
-                        lat: spot.lat,
-                        lng: spot.lon,
-                        label: "Stargazing spot",
-                      })
-                    }
-                  >
-                    {selectedDarkSpot &&
-                    Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
-                    Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6
-                      ? "Target selected"
-                      : "Set as target"}
-                  </button>
                   {getDirectionsOrigin() && (
                     <button
                       className="popup-btn"

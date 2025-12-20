@@ -84,33 +84,62 @@
   cursor: not-allowed;
 }
 
-.popup-btn.select-target {
-  padding: 6px 9px;
+.target-toggle {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--glass-border);
   background: rgba(255, 255, 255, 0.06);
-  border-color: var(--glass-border);
-  font-size: 0.8rem;
+  color: var(--surface-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--glass-shadow-subtle);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease,
+    color 0.2s ease;
+  z-index: 6;
 }
 
-.popup-btn.select-target:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.6);
+.target-toggle span {
+  font-size: 0.85rem;
+  line-height: 1;
 }
 
-.popup-btn.select-target.selected {
-  background: rgba(34, 197, 94, 0.16);
-  border-color: rgba(34, 197, 94, 0.7);
-  color: #bbf7d0;
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
+.target-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.7);
+  transform: translate(-50%, -50%) translateY(-1px);
 }
 
-.popup-btn.select-target.selected:hover:not(:disabled) {
-  background: rgba(34, 197, 94, 0.22);
+.target-toggle.active {
+  background: rgba(34, 197, 94, 0.18);
   border-color: rgba(34, 197, 94, 0.8);
+  color: #bbf7d0;
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4),
+    0 10px 24px rgba(34, 197, 94, 0.25);
+}
+
+.target-toggle.active:hover {
+  background: rgba(34, 197, 94, 0.24);
+  transform: translate(-50%, -50%) translateY(-1px);
+}
+
+.target-toggle-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .darkspot-popup {
   gap: 10px;
   max-width: 260px;
+  position: relative;
 }
 
 .darkspot-stats {
