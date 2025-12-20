@@ -626,7 +626,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                           isSelected ? " active" : ""
                         }`}
                         aria-label={buttonLabel}
-                        onClick={() => {
+                        onClick={(event) => {
+                          event.currentTarget.blur();
                           if (isSelected) {
                             setSelectedDarkSpot(null);
                             return;
