@@ -31,6 +31,7 @@ const MIN_ZOOM = 4;
 const MAX_ZOOM = 16;
 const LONG_PRESS_MS = 750;
 const MARKER_EXIT_MS = 280;
+const LIGHT_TILE_URL = "/api/lightmap/{z}/{x}/{y}.png";
 
 const isCoarsePointerEnv = () => {
   if (typeof window === "undefined") return false;
@@ -237,6 +238,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const [darkSpots, setDarkSpots] = useState([]);
   const [selectedDarkSpot, setSelectedDarkSpot] = useState(null);
   const [latestGridShot, setLatestGridShot] = useState(null);
+  const [lightOverlayEnabled, setLightOverlayEnabled] = useState(true);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
   const lastGridShotAtRef = useRef(0);
@@ -531,6 +533,17 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
           }}
         />
 
+        {lightOverlayEnabled && (
+          <TileLayer
+            url={LIGHT_TILE_URL}
+            attribution="WA2015 artificial sky brightness"
+            opacity={0.72}
+            zIndex={5}
+            maxZoom={MAX_ZOOM}
+            tileSize={256}
+          />
+        )}
+
         <MapController mapRef={mapRef} />
         <DoubleClickHandler onDoubleClick={handleDoubleClick} />
         <LongPressHandler
@@ -741,6 +754,10 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         locationStatus={locationStatus}
         onSnapToLocation={
           locationStatus === "active" ? handleSnapToLocation : undefined
+        }
+        lightOverlayEnabled={lightOverlayEnabled}
+        onToggleLightOverlay={() =>
+          setLightOverlayEnabled((current) => !current)
         }
       />
 

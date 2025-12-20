@@ -104,6 +104,12 @@ body.map-ui-shifted .map-quick-actions {
   border-color: var(--glass-border-strong);
 }
 
+.quick-action-btn.active {
+  border-color: rgba(99, 102, 241, 0.8);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35),
+    var(--glass-shadow-elevated);
+}
+
 .quick-action-btn:active,
 .location-btn:active {
   transform: scale(0.97);

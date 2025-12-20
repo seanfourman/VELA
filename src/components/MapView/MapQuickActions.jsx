@@ -1,9 +1,17 @@
 import planetsIcon from "../../assets/icons/planets-icon.svg";
 import stargazingIcon from "../../assets/icons/stargazing-icon.svg";
 import locationIcon from "../../assets/icons/location-icon.svg";
+import lightmapIcon from "../../assets/icons/lightmap-icon.svg";
 import "./MapQuickActions.css";
 
-function QuickActionButton({ icon, label, title, disabled, onClick }) {
+function QuickActionButton({
+  icon,
+  label,
+  title,
+  disabled,
+  onClick,
+  active = undefined,
+}) {
   const text = title || label;
 
   const handleClick = (event) => {
@@ -15,10 +23,14 @@ function QuickActionButton({ icon, label, title, disabled, onClick }) {
   return (
     <div className="quick-action">
       <button
-        className="glass-icon-btn quick-action-btn"
+        className={`glass-icon-btn quick-action-btn${
+          active ? " active" : ""
+        }`}
         onClick={handleClick}
         disabled={disabled}
         aria-label={title || label}
+        aria-pressed={active ?? undefined}
+        type="button"
       >
         <img src={icon} alt="" className="quick-action-icon" />
       </button>
@@ -84,6 +96,8 @@ export default function MapQuickActions({
   darkSpotsTitle,
   locationStatus,
   onSnapToLocation,
+  lightOverlayEnabled,
+  onToggleLightOverlay,
 }) {
   return (
     <div className="map-quick-actions">
@@ -100,6 +114,17 @@ export default function MapQuickActions({
         title={darkSpotsTitle}
         disabled={!canFindDarkSpots}
         onClick={onFindDarkSpots}
+      />
+      <QuickActionButton
+        icon={lightmapIcon}
+        label="Light map"
+        title={
+          lightOverlayEnabled
+            ? "Hide light pollution overlay"
+            : "Show light pollution overlay"
+        }
+        active={lightOverlayEnabled}
+        onClick={onToggleLightOverlay}
       />
       <LocationStatusButton
         status={locationStatus}
