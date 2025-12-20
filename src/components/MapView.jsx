@@ -679,8 +679,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                       <span
                         className="stat-help"
                         tabIndex={0}
-                        aria-label="Level scale: 1 is darkest, 9 is brightest"
-                        data-tooltip="Level scale: 1 (darkest) -> 9 (brightest)"
+                        aria-label="Darkness rating: lower numbers are darker skies (1-5)"
+                        data-tooltip="Darkness rating: lower numbers are darker skies (1-5)"
                       >
                         ?
                       </span>
