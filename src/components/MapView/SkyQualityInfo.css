@@ -80,6 +80,18 @@
   padding: 8px;
 }
 
+.sky-quality-link-block {
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.sky-quality-link-block:hover,
+.sky-quality-link-block:focus-visible {
+  border-color: var(--accent-primary, #93c5fd);
+  outline: none;
+}
+
 .sky-quality-block-label {
   font-size: 0.75rem;
   color: var(--surface-text-subtle);

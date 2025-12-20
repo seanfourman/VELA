@@ -76,10 +76,15 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
       {metrics && (
         <>
           <div className="sky-quality-main">
-            <div className="sky-quality-block">
+            <a
+              className="sky-quality-block sky-quality-link-block"
+              href="https://www.handprint.com/ASTRO/bortle.html"
+              target="_blank"
+              rel="noreferrer"
+            >
               <div className="sky-quality-block-label">Bortle</div>
               <div className="sky-quality-block-value">{metrics.Bortle}</div>
-            </div>
+            </a>
             <div className="sky-quality-block">
               <div className="sky-quality-block-label">SQM</div>
               <div className="sky-quality-block-value">
