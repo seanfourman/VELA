@@ -21,15 +21,12 @@
 /* Leaflet Popup - Glass Style */
 .leaflet-popup-content-wrapper {
   position: relative;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur-heavy);
-  -webkit-backdrop-filter: var(--glass-blur-heavy);
-  border: 1px solid var(--glass-border-strong);
+  background: transparent;
   border-radius: var(--radius-md);
-  box-shadow: var(--glass-shadow-elevated);
   color: var(--surface-text);
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
+  border: none;
   animation: leaflet-popup-fade-in 0.75s ease;
 }
 
@@ -38,9 +35,26 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-elevated);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  z-index: 0;
+}
+
+.leaflet-popup-content-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   pointer-events: none;
   background: var(--glass-highlight);
   z-index: 1;
+}
+
+.leaflet-popup {
+  overflow: visible;
 }
 
 .leaflet-popup-close-button {
@@ -51,6 +65,7 @@
   margin: 12px;
   position: relative;
   z-index: 2;
+  overflow: visible;
 }
 
 .leaflet-popup-tip {

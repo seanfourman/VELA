@@ -85,8 +85,18 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
               <div className="sky-quality-block-label">Bortle</div>
               <div className="sky-quality-block-value">{metrics.Bortle}</div>
             </a>
-            <div className="sky-quality-block">
-              <div className="sky-quality-block-label">SQM</div>
+            <div className="sky-quality-block sky-quality-sqm">
+              <div className="sky-quality-block-label">
+                SQM
+                <span
+                  className="metric-help"
+                  tabIndex={0}
+                  aria-label="Sky Quality Meter reading (mag/arcsec²)"
+                  data-tooltip="Sky Quality Meter reading (mag/arcsec²)"
+                >
+                  ?
+                </span>
+              </div>
               <div className="sky-quality-block-value">
                 {formatMaybeNumber(metrics.SQM, 2)}
               </div>

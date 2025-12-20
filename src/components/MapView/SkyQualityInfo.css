@@ -1,15 +1,30 @@
 .sky-quality-info {
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 10px 12px;
-  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
+  overflow: visible;
+}
+
+.sky-quality-info::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
   background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: var(--glass-blur-light);
   -webkit-backdrop-filter: var(--glass-blur-light);
   box-shadow: var(--glass-shadow-subtle);
+  z-index: 0;
+}
+
+.sky-quality-info > * {
+  position: relative;
+  z-index: 1;
 }
 
 .sky-quality-info.compact {
@@ -91,11 +106,11 @@
 .sky-quality-link-block::after {
   content: "↗";
   position: absolute;
-  top: 2.5px;
-  right: 7.5px;
-  font-size: 1rem;
+  top: 8px;
+  right: 10px;
+  font-size: 0.9rem;
   color: var(--surface-text-subtle);
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 .sky-quality-link-block:hover,
@@ -107,6 +122,55 @@
     rgba(255, 255, 255, 0.08),
     rgba(255, 255, 255, 0.04)
   );
+}
+
+.sky-quality-sqm {
+  position: relative;
+}
+
+.sky-quality-sqm .metric-help {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--surface-text-subtle);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: help;
+}
+
+.sky-quality-sqm .metric-help::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 125%;
+  right: 50%;
+  transform: translateX(50%);
+  white-space: nowrap;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  color: var(--surface-text);
+  font-size: 0.75rem;
+  box-shadow: var(--glass-shadow-subtle);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+}
+
+.sky-quality-sqm .metric-help:hover::after,
+.sky-quality-sqm .metric-help:focus-visible::after {
+  opacity: 1;
+  transform: translateX(50%) translateY(2px);
 }
 
 .sky-quality-block-label {
