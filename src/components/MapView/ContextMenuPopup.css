@@ -230,7 +230,7 @@
   width: 18px;
   height: 18px;
   border-radius: var(--radius-round);
-  border: 2px solid var(--glass-border-strong);
+  border: 1px solid var(--glass-border-strong);
   background: var(--glass-bg);
   color: var(--surface-text-subtle);
   font-size: 0.7rem;
