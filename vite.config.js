@@ -15,13 +15,12 @@ const LIGHT_TILE_CACHE_LIMIT = 256;
 const LIGHT_TILE_CACHE_TTL_MS = 1000 * 60 * 10;
 
 const LIGHT_GRADIENT = [
-  { t: 0, color: [6, 22, 58, 32] },
-  { t: 0.15, color: [21, 71, 121, 72] },
-  { t: 0.35, color: [0, 135, 189, 108] },
-  { t: 0.55, color: [74, 182, 138, 138] },
-  { t: 0.72, color: [198, 206, 92, 164] },
-  { t: 0.88, color: [248, 170, 70, 194] },
-  { t: 1, color: [255, 104, 92, 218] },
+  // Low brightness -> green, high brightness -> red.
+  { t: 0, color: [30, 170, 95, 70] }, // deep green, subtle
+  { t: 0.35, color: [92, 200, 118, 120] }, // softer green
+  { t: 0.55, color: [210, 190, 70, 150] }, // yellow transition
+  { t: 0.78, color: [245, 155, 65, 190] }, // orange
+  { t: 1, color: [230, 70, 70, 220] }, // red at brightest
 ];
 const EMPTY_TILE = (() => {
   const png = new PNG({ width: LIGHT_TILE_SIZE, height: LIGHT_TILE_SIZE });
