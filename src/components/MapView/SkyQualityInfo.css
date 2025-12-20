@@ -121,24 +121,28 @@
 }
 
 .metric-help::after {
-  content: attr(data-tooltip);
   position: absolute;
   top: 125%;
   right: 50%;
   transform: translateX(50%);
   white-space: nowrap;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border-strong);
-  border-radius: var(--radius-sm);
-  padding: 6px 8px;
-  color: var(--surface-text);
-  font-size: 0.75rem;
-  box-shadow: var(--glass-shadow-subtle);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.metric-help::after {
+  content: attr(data-tooltip);
+  color: var(--surface-text);
+  font-size: 0.75rem;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-subtle);
   backdrop-filter: var(--glass-blur-light);
   -webkit-backdrop-filter: var(--glass-blur-light);
+  z-index: 2;
 }
 
 .metric-help:hover::after,
