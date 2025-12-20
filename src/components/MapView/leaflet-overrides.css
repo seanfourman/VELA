@@ -8,6 +8,12 @@
   cursor: default !important;
 }
 
+.leaflet-fade-anim .leaflet-popup,
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+  opacity: 1;
+  transition: none;
+}
+
 .leaflet-dragging .leaflet-grab,
 .leaflet-dragging .leaflet-grab .leaflet-interactive {
   cursor: move !important;
@@ -21,16 +27,26 @@
 /* Leaflet Popup - Glass Style */
 .leaflet-popup-content-wrapper {
   position: relative;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur-heavy);
-  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  background: transparent;
   border: 1px solid var(--glass-border-strong);
   border-radius: var(--radius-md);
   box-shadow: var(--glass-shadow-elevated);
   color: var(--surface-text);
   isolation: isolate;
   overflow: visible;
-  animation: leaflet-popup-fade-in 0.75s ease;
+}
+
+.leaflet-popup-content-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-heavy);
+  -webkit-backdrop-filter: var(--glass-blur-heavy);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
 }
 
 .leaflet-popup-content-wrapper::before {
@@ -58,12 +74,14 @@
   position: relative;
   z-index: 2;
   overflow: visible;
+  animation: leaflet-popup-fade-in 0.75s ease;
 }
 
 .leaflet-popup-tip {
   box-shadow: none;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border-strong);
+  animation: leaflet-popup-fade-in 0.75s ease;
 }
 
 @keyframes leaflet-popup-fade-in {

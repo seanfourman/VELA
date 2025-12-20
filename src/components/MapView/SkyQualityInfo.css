@@ -120,23 +120,35 @@
   cursor: default;
 }
 
+.metric-help {
+  isolation: isolate;
+}
+
+.metric-help::before,
 .metric-help::after {
   position: absolute;
-  top: 125%;
+  bottom: calc(100% + 10px);
   right: 50%;
-  transform: translateX(50%);
+  transform: translate(50%, -4px);
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  will-change: opacity, transform;
+}
+
+.metric-help::before {
+  content: attr(data-tooltip);
+  color: var(--surface-text);
+  font-size: 0.75rem;
+  z-index: 3;
 }
 
 .metric-help::after {
   content: attr(data-tooltip);
-  color: var(--surface-text);
-  font-size: 0.75rem;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
+  color: transparent;
   background: var(--glass-bg);
   border: 1px solid var(--glass-border-strong);
   box-shadow: var(--glass-shadow-subtle);
@@ -145,10 +157,12 @@
   z-index: 2;
 }
 
+.metric-help:hover::before,
+.metric-help:focus-visible::before,
 .metric-help:hover::after,
 .metric-help:focus-visible::after {
   opacity: 1;
-  transform: translateX(50%) translateY(2px);
+  transform: translate(50%, -8px);
 }
 
 .sky-quality-block-label {

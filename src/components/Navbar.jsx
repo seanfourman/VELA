@@ -22,14 +22,7 @@ function Navbar({ mapType, auth }) {
     <>
       <div className={`navbar-blur ${isLight ? "light" : ""}`} />
       <nav className={`navbar ${isLight ? "light" : ""}`}>
-        <div className="navbar-left">
-          <a href="#" className="nav-link">
-            Explore
-          </a>
-          <a href="#" className="nav-link">
-            Discover
-          </a>
-        </div>
+        <div className="navbar-left"></div>
 
         {window.location.pathname === "/" ? (
           <div className="navbar-logo disabled">
@@ -50,9 +43,6 @@ function Navbar({ mapType, auth }) {
         )}
 
         <div className="navbar-right">
-          <a href="#" className="nav-link">
-            About
-          </a>
           <button
             className="auth-button"
             onClick={handleAuthClick}
