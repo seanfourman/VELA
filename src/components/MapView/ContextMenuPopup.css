@@ -169,6 +169,10 @@
   transform: translateX(-50%) translateY(0);
 }
 
+.map-container.light .target-toggle-label {
+  color: #ffffff;
+}
+
 .target-toggle-icon {
   width: 22px;
   height: 22px;

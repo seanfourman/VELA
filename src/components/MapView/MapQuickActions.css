@@ -62,6 +62,9 @@ body.map-ui-shifted .map-quick-actions {
   opacity: 1;
   transform: translateY(-50%) translateX(0);
 }
+.map-container.light .quick-action-label.disabled {
+  color: #ffffff;
+}
 
 .quick-action-btn,
 .location-btn {
