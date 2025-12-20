@@ -604,13 +604,33 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
                 <div className="darkspot-stats">
                   <div className="darkspot-stat">
-                    <span className="darkspot-stat-label">Level</span>
+                    <span className="darkspot-stat-label">
+                      Level
+                      <span
+                        className="stat-help"
+                        tabIndex={0}
+                        aria-label="Darkness rating: lower numbers are darker skies"
+                        data-tooltip="Darkness rating: lower numbers are darker skies"
+                      >
+                        ?
+                      </span>
+                    </span>
                     <span className="darkspot-stat-value">
                       {spot.level ?? "—"}
                     </span>
                   </div>
                   <div className="darkspot-stat">
-                    <span className="darkspot-stat-label">Light value</span>
+                    <span className="darkspot-stat-label">
+                      Light value
+                      <span
+                        className="stat-help"
+                        tabIndex={0}
+                        aria-label="Modeled brightness at the site (ucd/m²)"
+                        data-tooltip="Modeled brightness at the site (ucd/m²)"
+                      >
+                        ?
+                      </span>
+                    </span>
                     <span className="darkspot-stat-value">
                       {spot.light_value != null
                         ? spot.light_value.toFixed(2)

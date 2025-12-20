@@ -95,6 +95,7 @@
 }
 
 .darkspot-stat {
+  position: relative;
   padding: 8px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--glass-border);
@@ -107,6 +108,7 @@
   font-size: 0.75rem;
   color: var(--surface-text-subtle);
   margin-bottom: 4px;
+  padding-right: 22px;
 }
 
 .darkspot-stat-value {
@@ -115,4 +117,53 @@
   font-weight: 700;
   color: var(--surface-text);
   font-variant-numeric: tabular-nums;
+}
+
+.stat-help {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--surface-text-subtle);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: default;
+}
+
+.stat-help::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 50%;
+  transform: translateX(50%) translateY(4px);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(10, 12, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  color: var(--surface-text);
+  font-size: 0.75rem;
+  z-index: 5;
+}
+
+.stat-help:hover::after,
+.stat-help:focus-visible::after {
+  opacity: 1;
+  transform: translateX(50%) translateY(0);
+}
+
+.map-container.light .stat-help::after {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
