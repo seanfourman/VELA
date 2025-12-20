@@ -30,14 +30,14 @@ body.map-ui-shifted .map-quick-actions {
 
 .quick-action-label {
   position: absolute;
-  left: 50%;
+  left: 0;
   right: auto;
   top: auto;
   bottom: calc(100% + 10px);
-  transform: translate(-50%, 6px);
+  transform: translate(0, 6px);
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 8px 12px;
   color: var(--surface-text);
   font-size: 0.85rem;
@@ -54,7 +54,9 @@ body.map-ui-shifted .map-quick-actions {
   pointer-events: none;
   transition: opacity 0.16s ease, transform 0.18s ease, filter 0.2s ease;
   z-index: 5;
-  text-align: center;
+  text-align: left;
+  max-width: calc(100vw - 32px);
+  overflow: visible;
 }
 
 .quick-action-label.disabled {
@@ -66,7 +68,7 @@ body.map-ui-shifted .map-quick-actions {
 .quick-action:hover .quick-action-label,
 .quick-action:focus-within .quick-action-label {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translate(0, 0);
 }
 .map-container.light .quick-action-label.disabled {
   color: #ffffff;
