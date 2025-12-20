@@ -614,33 +614,47 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                     selectedDarkSpot &&
                     Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
                     Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6;
+                  const buttonLabel = isSelected
+                    ? "This spot is the active target"
+                    : "Use this spot for quick actions";
+                  const hoverLabel = isSelected
+                    ? "Active target"
+                    : "Use for quick actions";
                   return (
-                    <button
-                      className={`target-toggle${isSelected ? " active" : ""}`}
-                      aria-label={
-                        isSelected
-                          ? "This spot is the active target"
-                          : "Use this spot for quick actions"
-                      }
-                      onClick={() => {
-                        if (isSelected) {
-                          setSelectedDarkSpot(null);
-                          return;
-                        }
-                        setSelectedDarkSpot({
-                          lat: spot.lat,
-                          lng: spot.lon,
-                          label: "Stargazing spot",
-                        });
-                      }}
-                    >
-                      <img
-                        src={targetIcon}
-                        alt=""
+                    <div className="target-toggle-wrapper">
+                      <button
+                        className={`target-toggle${
+                          isSelected ? " active" : ""
+                        }`}
+                        aria-label={buttonLabel}
+                        onClick={() => {
+                          if (isSelected) {
+                            setSelectedDarkSpot(null);
+                            return;
+                          }
+                          setSelectedDarkSpot({
+                            lat: spot.lat,
+                            lng: spot.lon,
+                            label: "Stargazing spot",
+                          });
+                        }}
+                      >
+                        <img
+                          src={targetIcon}
+                          alt=""
+                          aria-hidden="true"
+                          className="target-toggle-icon"
+                        />
+                      </button>
+                      <span
+                        className={`target-toggle-label${
+                          isSelected ? " active" : ""
+                        }`}
                         aria-hidden="true"
-                        className="target-toggle-icon"
-                      />
-                    </button>
+                      >
+                        {hoverLabel}
+                      </span>
+                    </div>
                   );
                 })()}
                 <div className="popup-coords">
