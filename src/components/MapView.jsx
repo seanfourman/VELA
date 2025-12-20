@@ -234,6 +234,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   const [contextMenu, setContextMenu] = useState(null);
   const [searchDistance, setSearchDistance] = useState(10);
   const [darkSpots, setDarkSpots] = useState([]);
+  const [selectedDarkSpot, setSelectedDarkSpot] = useState(null);
   const [latestGridShot, setLatestGridShot] = useState(null);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
@@ -355,23 +356,33 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   };
 
   const handleGetVisiblePlanets = () => {
-    const target = placedMarker || location || contextMenu;
+    const target = selectedDarkSpot || placedMarker || location || contextMenu;
     if (!target) return;
 
-    const isPinned = Boolean(placedMarker);
-    const label = isPinned
+    const label = selectedDarkSpot
+      ? "Visible from stargazing spot"
+      : placedMarker
       ? "Visible from pinned spot"
-      : "Visible from your sky";
+      : location
+      ? "Visible from your sky"
+      : "Visible from here";
+    const source = selectedDarkSpot
+      ? "darkspot"
+      : placedMarker
+      ? "pin"
+      : location
+      ? "location"
+      : "context";
 
     planetPanelRef.current?.openPanel("manual");
     fetchPlanetsForLocation(target.lat, target.lng, label, {
       force: true,
-      source: isPinned ? "pin" : "location",
+      source,
     });
   };
 
   const handleFetchDarkSpots = async () => {
-    const target = placedMarker || location || contextMenu;
+    const target = selectedDarkSpot || placedMarker || location || contextMenu;
     if (!target) return;
 
     // Close any open popup, but keep the pinned (blue) marker on the map.
@@ -424,10 +435,11 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     }
     setPlacedMarker(null);
 
-    const isShowingPinPlanets = planetQuery?.source === "pin";
-    skipAutoLocationRef.current = isShowingPinPlanets;
+    const isShowingPinnedPlanets =
+      planetQuery?.source === "pin" || planetQuery?.source === "darkspot";
+    skipAutoLocationRef.current = isShowingPinnedPlanets;
 
-    if (isShowingPinPlanets) {
+    if (isShowingPinnedPlanets) {
       planetPanelRef.current?.resetPanel?.(
         () => {
           clearPlanets();
@@ -447,7 +459,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
   useEffect(() => {
     if (!location) return;
-    if (planetQuery?.source === "pin") return;
+    if (planetQuery?.source === "pin" || planetQuery?.source === "darkspot")
+      return;
     if (skipAutoLocationRef.current) return;
 
     fetchPlanetsForLocation(
@@ -459,17 +472,23 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
   }, [location, planetQuery?.source, fetchPlanetsForLocation]);
 
   const hasPinnedSpot = Boolean(placedMarker);
-  const hasAnyLocation = hasPinnedSpot || Boolean(location);
-  const quickPlanetsTitle = hasPinnedSpot
+  const hasAnyLocation =
+    hasPinnedSpot || Boolean(location) || Boolean(selectedDarkSpot);
+  const quickPlanetsTitle = selectedDarkSpot
+    ? "Visible planets from stargazing spot"
+    : hasPinnedSpot
     ? "Visible planets from pinned spot"
     : hasAnyLocation
     ? "Visible planets from your location"
     : "Drop a pin or enable location";
-  const quickDarkSpotsTitle = hasPinnedSpot
+  const quickDarkSpotsTitle = selectedDarkSpot
+    ? "Find spots near the stargazing spot"
+    : hasPinnedSpot
     ? "Find stargazing spots near the pin"
     : hasAnyLocation
     ? "Find stargazing spots near you"
     : "Drop a pin or enable location";
+
 
   return (
     <div className={`map-container visible ${mapType}`}>
@@ -611,14 +630,14 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                       <span
                         className="stat-help"
                         tabIndex={0}
-                        aria-label="Darkness rating: lower numbers are darker skies (1-5)"
-                        data-tooltip="Darkness rating: lower numbers are darker skies (1-5)"
+                        aria-label="Level scale: 1 is darkest, 9 is brightest"
+                        data-tooltip="Level scale: 1 (darkest) -> 9 (brightest)"
                       >
                         ?
                       </span>
                     </span>
                     <span className="darkspot-stat-value">
-                      {spot.level ?? "—"}
+                      {spot.level ?? "--"}
                     </span>
                   </div>
                   <div className="darkspot-stat">
@@ -627,8 +646,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                       <span
                         className="stat-help"
                         tabIndex={0}
-                        aria-label="Modeled brightness at the site (ucd/m²)"
-                        data-tooltip="Modeled brightness at the site (ucd/m²)"
+                        aria-label="Modeled brightness at the site (ucd/m2)"
+                        data-tooltip="Modeled brightness at the site (ucd/m2)"
                       >
                         ?
                       </span>
@@ -636,25 +655,49 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                     <span className="darkspot-stat-value">
                       {spot.light_value != null
                         ? spot.light_value.toFixed(2)
-                        : "—"}
+                        : "--"}
                     </span>
                   </div>
                 </div>
-                {getDirectionsOrigin() && (
+                <div className="popup-actions">
                   <button
-                    className="popup-btn"
-                    onClick={() => {
-                      const origin = getDirectionsOrigin();
-                      if (!origin) return;
-                      const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${spot.lat},${spot.lon}`;
-                      window.open(url, "_blank");
-                    }}
+                    className={`popup-btn select-target${
+                      selectedDarkSpot &&
+                      Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
+                      Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6
+                        ? " selected"
+                        : ""
+                    }`}
+                    onClick={() =>
+                      setSelectedDarkSpot({
+                        lat: spot.lat,
+                        lng: spot.lon,
+                        label: "Stargazing spot",
+                      })
+                    }
                   >
-                    Get Directions
-                    <br />
-                    (from {getDirectionsOrigin()?.label.toLowerCase()})
+                    {selectedDarkSpot &&
+                    Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
+                    Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6
+                      ? "Target selected"
+                      : "Set as target"}
                   </button>
-                )}
+                  {getDirectionsOrigin() && (
+                    <button
+                      className="popup-btn"
+                      onClick={() => {
+                        const origin = getDirectionsOrigin();
+                        if (!origin) return;
+                        const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${spot.lat},${spot.lon}`;
+                        window.open(url, "_blank");
+                      }}
+                    >
+                      Get Directions
+                      <br />
+                      (from {getDirectionsOrigin()?.label.toLowerCase()})
+                    </button>
+                  )}
+                </div>
               </div>
             </Popup>
           </Marker>
