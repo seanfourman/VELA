@@ -708,8 +708,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                       <span
                         className="stat-help"
                         tabIndex={0}
-                        aria-label="Modeled brightness at the site (ucd/m2)"
-                        data-tooltip="Modeled brightness at the site (ucd/m2)"
+                        aria-label="Modeled brightness at the site (ucd/m²)"
+                        data-tooltip="Modeled brightness at the site (ucd/m²)"
                       >
                         ?
                       </span>
