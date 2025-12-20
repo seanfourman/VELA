@@ -264,7 +264,14 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     if (!mapRef.current || !isCoarsePointerEnv()) return;
     const map = mapRef.current;
     const zoom = map.getZoom();
-    map.flyTo([lat, lng], zoom, { duration: 0.5, easeLinearity: 0.35 });
+    const targetPoint = map.latLngToContainerPoint([lat, lng]);
+    const verticalOffset = Math.min(180, map.getSize().y * 0.1);
+    const adjustedLatLng = map.containerPointToLatLng([
+      targetPoint.x,
+      targetPoint.y - verticalOffset,
+    ]);
+
+    map.flyTo(adjustedLatLng, zoom, { duration: 0.5, easeLinearity: 0.35 });
   };
 
   const handleTileLoad = useCallback((event) => {
@@ -369,11 +376,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
 
     // Close any open popup, but keep the pinned (blue) marker on the map.
     mapRef.current?.closePopup();
-    const spots = await fetchDarkSpots(
-      target.lat,
-      target.lng,
-      searchDistance
-    );
+    const spots = await fetchDarkSpots(target.lat, target.lng, searchDistance);
     setDarkSpots(spots);
 
     if (spots.length > 0 && mapRef.current) {
@@ -518,42 +521,42 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
         {location && <MapAnimator location={location} />}
 
         {location && (
-        <Marker
-          position={[location.lat, location.lng]}
-          icon={customIcon}
-          eventHandlers={{
-            popupopen: () => centerOnCoords(location.lat, location.lng),
-          }}
-        >
-          <Popup>
-            <div className="context-menu-popup">
-              <div className="popup-coords">
-                <span className="popup-coords-label">Your location</span>
-                <span className="popup-coords-value">
-                  {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                </span>
+          <Marker
+            position={[location.lat, location.lng]}
+            icon={customIcon}
+            eventHandlers={{
+              popupopen: () => centerOnCoords(location.lat, location.lng),
+            }}
+          >
+            <Popup>
+              <div className="context-menu-popup">
+                <div className="popup-coords">
+                  <span className="popup-coords-label">Your location</span>
+                  <span className="popup-coords-value">
+                    {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                  </span>
+                </div>
+
+                <SkyQualityInfo
+                  lat={location.lat}
+                  lng={location.lng}
+                  variant="compact"
+                />
               </div>
+            </Popup>
+          </Marker>
+        )}
 
-              <SkyQualityInfo
-                lat={location.lat}
-                lng={location.lng}
-                variant="compact"
-              />
-            </div>
-          </Popup>
-        </Marker>
-      )}
-
-      {exitingMarker && (
-        <Marker
-          key={`removing-${
-            exitingMarker.id || `${exitingMarker.lat}-${exitingMarker.lng}`
-          }`}
-          position={[exitingMarker.lat, exitingMarker.lng]}
-          icon={pinIconRemoving}
-          interactive={false}
-        />
-      )}
+        {exitingMarker && (
+          <Marker
+            key={`removing-${
+              exitingMarker.id || `${exitingMarker.lat}-${exitingMarker.lng}`
+            }`}
+            position={[exitingMarker.lat, exitingMarker.lng]}
+            icon={pinIconRemoving}
+            interactive={false}
+          />
+        )}
 
         {placedMarker && (
           <Marker
