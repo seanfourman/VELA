@@ -121,34 +121,34 @@
 }
 
 .metric-help::after {
+  content: attr(data-tooltip);
   position: absolute;
-  top: 125%;
+  bottom: calc(100% + 10px);
   right: 50%;
-  transform: translateX(50%);
+  transform: translateX(50%) translateY(4px);
   white-space: nowrap;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.metric-help::after {
-  content: attr(data-tooltip);
   color: var(--surface-text);
   font-size: 0.75rem;
   padding: 6px 8px;
   border-radius: var(--radius-sm);
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border-strong);
-  box-shadow: var(--glass-shadow-subtle);
-  backdrop-filter: var(--glass-blur-light);
-  -webkit-backdrop-filter: var(--glass-blur-light);
-  z-index: 2;
+  background: rgba(10, 12, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  z-index: 5;
 }
 
 .metric-help:hover::after,
 .metric-help:focus-visible::after {
   opacity: 1;
-  transform: translateX(50%) translateY(2px);
+  transform: translateX(50%) translateY(0);
+}
+
+.map-container.light .metric-help::after {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
 }
 
 .sky-quality-block-label {
