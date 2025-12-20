@@ -6,11 +6,17 @@ import "./MapQuickActions.css";
 function QuickActionButton({ icon, label, title, disabled, onClick }) {
   const text = title || label;
 
+  const handleClick = (event) => {
+    if (disabled) return;
+    onClick?.(event);
+    event.currentTarget.blur();
+  };
+
   return (
     <div className="quick-action">
       <button
         className="glass-icon-btn quick-action-btn"
-        onClick={onClick}
+        onClick={handleClick}
         disabled={disabled}
         aria-label={title || label}
       >
@@ -42,11 +48,17 @@ function LocationStatusButton({ status, onClick }) {
     ? "Locating you..."
     : "Location off";
 
+  const handleClick = (event) => {
+    if (!isActive) return;
+    onClick?.(event);
+    event.currentTarget.blur();
+  };
+
   return (
     <div className="quick-action location-control">
       <button
         className={`glass-icon-btn location-btn ${statusClass}`}
-        onClick={isActive ? onClick : undefined}
+        onClick={handleClick}
         disabled={!isActive}
         aria-label={label}
       >
