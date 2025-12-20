@@ -84,6 +84,7 @@
 }
 
 .sky-quality-block {
+  position: relative;
   padding: 10px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--glass-border);
@@ -95,43 +96,16 @@
   padding: 8px;
 }
 
-.sky-quality-link-block {
-  text-decoration: none;
-  color: inherit;
+.sky-quality-help {
+  position: relative;
   transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease,
     background 0.2s ease;
-  position: relative;
 }
 
-.sky-quality-link-block::after {
-  content: "↗";
+.metric-help {
   position: absolute;
-  top: 8px;
-  right: 10px;
-  font-size: 0.9rem;
-  color: var(--surface-text-subtle);
-  opacity: 0.85;
-}
-
-.sky-quality-link-block:hover,
-.sky-quality-link-block:focus-visible {
-  border-color: var(--accent-primary, #93c5fd);
-  outline: none;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.04)
-  );
-}
-
-.sky-quality-sqm {
-  position: relative;
-}
-
-.sky-quality-sqm .metric-help {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 4px;
+  right: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -146,7 +120,7 @@
   cursor: default;
 }
 
-.sky-quality-sqm .metric-help::after {
+.metric-help::after {
   content: attr(data-tooltip);
   position: absolute;
   top: 125%;
@@ -167,8 +141,8 @@
   -webkit-backdrop-filter: var(--glass-blur-light);
 }
 
-.sky-quality-sqm .metric-help:hover::after,
-.sky-quality-sqm .metric-help:focus-visible::after {
+.metric-help:hover::after,
+.metric-help:focus-visible::after {
   opacity: 1;
   transform: translateX(50%) translateY(2px);
 }

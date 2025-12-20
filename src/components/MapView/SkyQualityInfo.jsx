@@ -76,16 +76,21 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
       {metrics && (
         <>
           <div className="sky-quality-main">
-            <a
-              className="sky-quality-block sky-quality-link-block"
-              href="https://www.handprint.com/ASTRO/bortle.html"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <div className="sky-quality-block-label">Bortle</div>
+            <div className="sky-quality-block sky-quality-help">
+              <div className="sky-quality-block-label">
+                Bortle
+                <span
+                  className="metric-help"
+                  tabIndex={0}
+                  aria-label="Bortle scale: 1 = darkest; 9 = bright city sky"
+                  data-tooltip="Bortle scale: 1 = darkest; 9 = bright city sky"
+                >
+                  ?
+                </span>
+              </div>
               <div className="sky-quality-block-value">{metrics.Bortle}</div>
-            </a>
-            <div className="sky-quality-block sky-quality-sqm">
+            </div>
+            <div className="sky-quality-block sky-quality-help">
               <div className="sky-quality-block-label">
                 SQM
                 <span
