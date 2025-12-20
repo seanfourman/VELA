@@ -83,3 +83,36 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.darkspot-popup {
+  gap: 10px;
+}
+
+.darkspot-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.darkspot-stat {
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-hover);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.darkspot-stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--surface-text-subtle);
+  margin-bottom: 4px;
+}
+
+.darkspot-stat-value {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--surface-text);
+  font-variant-numeric: tabular-nums;
+}

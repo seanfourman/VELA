@@ -588,15 +588,35 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
             }}
           >
             <Popup>
-              <div className="context-menu-popup">
-                <div className="popup-coords">Stargazing Location</div>
+              <div className="context-menu-popup darkspot-popup">
                 <div className="popup-coords">
-                  {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
+                  <span className="popup-coords-label">Stargazing location</span>
+                  <span className="popup-coords-value">
+                    {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
+                  </span>
                 </div>
-                <div className="popup-coords">
-                  Level: {spot.level}
-                  <br />
-                  Light Value: {spot.light_value?.toFixed(2)}
+
+                <SkyQualityInfo
+                  lat={spot.lat}
+                  lng={spot.lon}
+                  variant="compact"
+                />
+
+                <div className="darkspot-stats">
+                  <div className="darkspot-stat">
+                    <span className="darkspot-stat-label">Level</span>
+                    <span className="darkspot-stat-value">
+                      {spot.level ?? "—"}
+                    </span>
+                  </div>
+                  <div className="darkspot-stat">
+                    <span className="darkspot-stat-label">Light value</span>
+                    <span className="darkspot-stat-value">
+                      {spot.light_value != null
+                        ? spot.light_value.toFixed(2)
+                        : "—"}
+                    </span>
+                  </div>
                 </div>
                 {getDirectionsOrigin() && (
                   <button
