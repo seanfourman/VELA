@@ -622,13 +622,17 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                           ? "This spot is the active target"
                           : "Use this spot for quick actions"
                       }
-                      onClick={() =>
+                      onClick={() => {
+                        if (isSelected) {
+                          setSelectedDarkSpot(null);
+                          return;
+                        }
                         setSelectedDarkSpot({
                           lat: spot.lat,
                           lng: spot.lon,
                           label: "Stargazing spot",
-                        })
-                      }
+                        });
+                      }}
                     >
                       <img
                         src={targetIcon}
