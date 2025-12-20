@@ -144,8 +144,8 @@
   top: 50%;
   left: -6px;
   transform: translateY(-50%);
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
@@ -237,8 +237,8 @@
   }
 
   .planet-panel-toggle {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     left: -4px;
   }
 
@@ -261,8 +261,8 @@
     left: 50%;
     right: auto;
     transform: translate(-50%, 0);
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     z-index: 1502;
   }
 
@@ -302,8 +302,8 @@
     left: 12px;
     right: auto;
     transform: none;
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
   }
 
   .planet-panel-wrapper.open .planet-panel-toggle {

@@ -187,8 +187,8 @@ body.map-ui-shifted .map-type-switcher {
 
 @media (max-width: 768px) {
   .map-type-switcher {
-    bottom: 10px;
-    right: 15px;
+    bottom: 14px;
+    right: 14px;
     padding: 2px;
   }
 

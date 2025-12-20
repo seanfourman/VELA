@@ -66,8 +66,8 @@ body.map-ui-shifted .map-quick-actions {
 .quick-action-btn,
 .location-btn {
   position: relative;
-  width: 46px;
-  height: 46px;
+  width: 48px;
+  height: 48px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
@@ -211,8 +211,8 @@ body.map-ui-shifted .map-quick-actions {
 
   .quick-action-btn,
   .location-btn {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
   }
 
   .quick-action-label {
