@@ -618,7 +618,7 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
                     : "Use this spot for quick actions";
                   const hoverLabel = isSelected
                     ? "Active target"
-                    : "Use for quick actions";
+                    : "Set as target";
                   return (
                     <div className="target-toggle-wrapper">
                       <button
