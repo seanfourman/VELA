@@ -3,9 +3,9 @@
   bottom: 24px;
   left: 14px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 16px;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 14px;
   padding: 0;
   background: transparent;
   border: none;
@@ -22,17 +22,22 @@ body.map-ui-shifted .map-quick-actions {
 
 .quick-action {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   position: relative;
 }
 
 .quick-action-label {
   position: absolute;
-  left: calc(100% + 12px);
-  top: 50%;
-  transform: translateY(-50%) translateX(-6px);
+  left: 50%;
+  right: auto;
+  top: auto;
+  bottom: calc(100% + 10px);
+  transform: translate(-50%, 6px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px 12px;
   color: var(--surface-text);
   font-size: 0.85rem;
@@ -49,6 +54,7 @@ body.map-ui-shifted .map-quick-actions {
   pointer-events: none;
   transition: opacity 0.16s ease, transform 0.18s ease, filter 0.2s ease;
   z-index: 5;
+  text-align: center;
 }
 
 .quick-action-label.disabled {
@@ -60,7 +66,7 @@ body.map-ui-shifted .map-quick-actions {
 .quick-action:hover .quick-action-label,
 .quick-action:focus-within .quick-action-label {
   opacity: 1;
-  transform: translateY(-50%) translateX(0);
+  transform: translate(-50%, 0);
 }
 .map-container.light .quick-action-label.disabled {
   color: #ffffff;
@@ -208,67 +214,6 @@ body.map-ui-shifted .map-quick-actions {
     transform: scale(1.45);
     opacity: 0;
     box-shadow: 0 0 0 10px transparent, 0 0 24px 14px transparent;
-  }
-}
-
-@media (max-height: 1060px) and (min-width: 769px) {
-  .map-quick-actions {
-    flex-direction: row-reverse;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .quick-action {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .quick-action-label {
-    left: 0;
-    right: auto;
-    top: auto;
-    bottom: calc(100% + 10px);
-    transform: translate(0, 6px);
-    text-align: left;
-  }
-
-  .quick-action:hover .quick-action-label,
-  .quick-action:focus-within .quick-action-label {
-    transform: translate(0, 0);
-  }
-
-  /* Center labels for the non-left (middle/right) actions */
-  .map-quick-actions .quick-action:not(.location-control) .quick-action-label {
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, 6px);
-    text-align: center;
-    min-width: max-content;
-  }
-
-  .map-quick-actions
-    .quick-action:not(.location-control):hover
-    .quick-action-label,
-  .map-quick-actions
-    .quick-action:not(.location-control):focus-within
-    .quick-action-label {
-    transform: translate(-50%, 0);
-  }
-
-  /* Nudge the middle label slightly right */
-  .map-quick-actions
-    .quick-action:not(.location-control):first-of-type
-    .quick-action-label {
-    transform: translate(-36%, 6px);
-  }
-
-  .map-quick-actions
-    .quick-action:not(.location-control):first-of-type:hover
-    .quick-action-label,
-  .map-quick-actions
-    .quick-action:not(.location-control):first-of-type:focus-within
-    .quick-action-label {
-    transform: translate(-36%, 0);
   }
 }
 
