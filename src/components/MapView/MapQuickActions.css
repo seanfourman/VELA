@@ -213,13 +213,9 @@ body.map-ui-shifted .map-quick-actions {
 
 @media (max-height: 1060px) and (min-width: 769px) {
   .map-quick-actions {
-    flex-direction: row;
+    flex-direction: row-reverse;
     align-items: center;
     gap: 12px;
-  }
-
-  .map-quick-actions .location-control {
-    order: -1;
   }
 
   .quick-action {
