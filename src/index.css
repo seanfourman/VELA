@@ -64,7 +64,7 @@ div {
   /* Glass Blur Effects */
   --glass-blur: blur(20px) saturate(180%);
   --glass-blur-heavy: blur(28px) saturate(200%);
-  --glass-blur-light: blur(14px) saturate(150%);
+  --glass-blur-light: blur(14px) saturate(150%); /* Might need to make it darker - brightness(0.75); */
 
   /* Glass Shadows */
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
