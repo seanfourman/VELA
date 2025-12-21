@@ -224,6 +224,8 @@ body.map-ui-shifted .map-quick-actions {
     left: 14px;
     bottom: 16px;
     gap: 16px;
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .quick-action-btn,
