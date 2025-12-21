@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import "./ProfileMenu.css";
 
 function ProfileMenu({ auth, isLight }) {
   const [menuOpen, setMenuOpen] = useState(false);

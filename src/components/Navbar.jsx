@@ -8,8 +8,6 @@ function Navbar({ mapType, auth }) {
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const isLoading = Boolean(auth?.isLoading);
 
-  const authLabel = isLoading ? "Loading..." : "Sign In";
-
   function handleAuthClick() {
     if (isLoading) return;
     auth?.signIn?.();
@@ -49,7 +47,7 @@ function Navbar({ mapType, auth }) {
               disabled={isLoading}
               type="button"
             >
-              {authLabel}
+              Sign In
             </button>
           )}
         </div>
