@@ -1,11 +1,11 @@
 .search-distance-selector {
   position: absolute;
   top: 80px;
-  right: 40px;
+  left: 40px;
   z-index: 1000;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 .distance-toggle {
@@ -34,7 +34,7 @@
 .distance-menu {
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   margin-top: 8px;
   min-width: 160px;
   display: flex;
@@ -46,7 +46,7 @@
   transform: translateY(-10px) scale(0.95);
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  transform-origin: top right;
+  transform-origin: top left;
 }
 
 .distance-menu.open {
@@ -84,6 +84,6 @@
 
 @media (max-width: 768px) {
   .search-distance-selector {
-    right: 20px;
+    left: 20px;
   }
 }
