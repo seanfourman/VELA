@@ -235,8 +235,10 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   padding: 12px;
-  animation: glass-fade-in 0.2s ease;
   z-index: 1200;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  pointer-events: none;
 }
 
 .profile-meta {
@@ -294,6 +296,30 @@
 
 .profile-action.logout:hover {
   background: rgba(220, 38, 38, 0.12);
+}
+
+.profile-dropdown.open {
+  animation: glass-fade-in 0.2s ease;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.profile-dropdown.closing {
+  animation: glass-fade-out 0.18s ease forwards;
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+}
+
+@keyframes glass-fade-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
 }
 
 /* ========================================

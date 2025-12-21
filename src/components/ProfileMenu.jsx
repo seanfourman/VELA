@@ -1,0 +1,139 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+
+function ProfileMenu({ auth, isLight }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuVisible, setMenuVisible] = useState(false);
+  const avatarButtonRef = useRef(null);
+  const menuRef = useRef(null);
+
+  const displayName =
+    auth?.user?.name || auth?.user?.email || auth?.user?.preferred_username;
+  const userEmail = auth?.user?.email;
+  const avatarUrl = auth?.user?.picture;
+  const userInitial = String(
+    displayName || auth?.user?.email || auth?.user?.given_name || "U"
+  )
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false);
+  }, []);
+
+  const toggleMenu = () => {
+    if (!menuVisible || !menuOpen) {
+      setMenuVisible(true);
+      setMenuOpen(true);
+      return;
+    }
+    setMenuOpen(false);
+  };
+
+  const handleSignOut = () => {
+    closeMenu();
+    auth?.signOut?.();
+  };
+
+  useEffect(() => {
+    if (!menuVisible) return;
+
+    const handlePointerDown = (event) => {
+      const target = event.target;
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(target) &&
+        avatarButtonRef.current &&
+        !avatarButtonRef.current.contains(target)
+      ) {
+        closeMenu();
+      }
+    };
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuVisible, closeMenu]);
+
+  useEffect(() => {
+    if (menuOpen || !menuVisible) return undefined;
+
+    const timeout = setTimeout(() => {
+      setMenuVisible(false);
+    }, 200);
+
+    return () => clearTimeout(timeout);
+  }, [menuOpen, menuVisible]);
+
+  useEffect(() => {
+    if (!auth?.isAuthenticated) {
+      setMenuOpen(false);
+      setMenuVisible(false);
+    }
+  }, [auth?.isAuthenticated]);
+
+  return (
+    <div className="profile-menu-container">
+      <button
+        type="button"
+        className={`profile-trigger ${menuOpen ? "open" : ""}`}
+        onClick={toggleMenu}
+        ref={avatarButtonRef}
+        aria-haspopup="true"
+        aria-expanded={menuOpen}
+      >
+        {avatarUrl ? (
+          <img src={avatarUrl} alt="Profile" className="profile-avatar" />
+        ) : (
+          <span className="profile-initial">{userInitial}</span>
+        )}
+      </button>
+
+      {menuVisible && (
+        <div
+          className={`profile-dropdown ${isLight ? "light" : ""} ${
+            menuOpen ? "open" : "closing"
+          }`}
+          ref={menuRef}
+        >
+          <div className="profile-meta">
+            <div className="profile-name">{displayName || "Signed In"}</div>
+            {userEmail ? <div className="profile-email">{userEmail}</div> : null}
+          </div>
+
+          <div className="profile-actions">
+            <a
+              href="/profile"
+              className="profile-action"
+              onClick={closeMenu}
+            >
+              Profile
+            </a>
+            <a href="/admin" className="profile-action" onClick={closeMenu}>
+              Admin Panel
+            </a>
+            <button
+              type="button"
+              className="profile-action logout"
+              onClick={handleSignOut}
+            >
+              Log Out
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default ProfileMenu;
