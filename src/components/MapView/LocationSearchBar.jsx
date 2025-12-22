@@ -83,7 +83,7 @@ export default function LocationSearchBar({
       suppressAutoOpenRef.current = false;
       return;
     }
-    setListOpen(results.length > 0);
+    setListOpen(true);
   }, [debouncedQuery, results.length]);
 
   const handleInputChange = (event) => {
@@ -131,7 +131,7 @@ export default function LocationSearchBar({
             value={query}
             onChange={handleInputChange}
             onFocus={() => {
-              if (results.length > 0) {
+              if (debouncedQuery) {
                 setListOpen(true);
               }
             }}
@@ -139,43 +139,52 @@ export default function LocationSearchBar({
         </div>
       </div>
 
-      {listOpen && results.length > 0 && (
+      {listOpen && trimmedQuery && (
         <div className="location-search__results glass-panel">
-          {results.map((result) => {
-            if (result.type === "coords") {
+          {results.length > 0 ? (
+            results.map((result) => {
+              if (result.type === "coords") {
+                return (
+                  <button
+                    key={result.id}
+                    type="button"
+                    className="location-search__item location-search__item--coords"
+                    onClick={() => handleSelectCoordinates(result.coords)}
+                  >
+                    <span className="location-search__name">
+                      Coordinates found
+                    </span>
+                    <span className="location-search__coords">
+                      {formatCoords(result.coords.lat, result.coords.lng)}
+                    </span>
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={result.id}
                   type="button"
-                  className="location-search__item location-search__item--coords"
-                  onClick={() => handleSelectCoordinates(result.coords)}
+                  className="location-search__item"
+                  onClick={() => handleSelectLocation(result.location)}
                 >
                   <span className="location-search__name">
-                    Coordinates found
+                    {result.location.name || "Untitled"}
                   </span>
                   <span className="location-search__coords">
-                    {formatCoords(result.coords.lat, result.coords.lng)}
+                    {formatCoords(
+                      result.location.lat,
+                      result.location.lng
+                    )}
                   </span>
                 </button>
               );
-            }
-
-            return (
-              <button
-                key={result.id}
-                type="button"
-                className="location-search__item"
-                onClick={() => handleSelectLocation(result.location)}
-              >
-                <span className="location-search__name">
-                  {result.location.name || "Untitled"}
-                </span>
-                <span className="location-search__coords">
-                  {formatCoords(result.location.lat, result.location.lng)}
-                </span>
-              </button>
-            );
-          })}
+            })
+          ) : (
+            <div className="location-search__empty">
+              No results for "{trimmedQuery}"
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -86,6 +86,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.location-search__empty {
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  color: var(--surface-text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
 @keyframes location-search-reveal {
   from {
     opacity: 0;
