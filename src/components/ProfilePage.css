@@ -47,27 +47,16 @@
 }
 
 .profile-page.light {
-  --profile-stars-opacity: 0.32;
-  --profile-earth-opacity: 0.7;
-  background: radial-gradient(
-      120% 120% at 20% 0%,
-      rgba(255, 255, 255, 0.92),
-      rgba(226, 232, 240, 0.95)
-    ),
-    linear-gradient(160deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 1));
+  --profile-stars-opacity: 0.68;
+  --profile-earth-opacity: 0.9;
 }
 
-.profile-page.light::after {
-  background: radial-gradient(
-      110% 90% at 50% 20%,
-      rgba(248, 250, 252, 0.4),
-      rgba(226, 232, 240, 0.92)
-    ),
-    linear-gradient(
-      180deg,
-      rgba(248, 250, 252, 0.35),
-      rgba(226, 232, 240, 0.95)
-    );
+.profile-page.light .profile-page__title {
+  color: rgba(248, 250, 252, 0.95);
+}
+
+.profile-page.light .profile-page__subtitle {
+  color: rgba(226, 232, 240, 0.75);
 }
 
 .profile-page__earth {
