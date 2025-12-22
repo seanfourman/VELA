@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import showPopup from "../../utils/popup";
+import searchIcon from "../../assets/icons/search-icon.svg";
 import "./LocationSearchBar.css";
 
 const parseCoordinates = (value) => {
   const trimmed = String(value || "").trim();
   if (!trimmed) return null;
 
-  const match = trimmed.match(
-    /^(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)$/
-  );
+  const match = trimmed.match(/^(-?\d+(?:\.\d+)?)[,\s]+(-?\d+(?:\.\d+)?)$/);
   if (!match) return null;
 
   const lat = Number(match[1]);
@@ -30,59 +29,75 @@ export default function LocationSearchBar({
   const [listOpen, setListOpen] = useState(false);
   const containerRef = useRef(null);
 
-  const matches = useMemo(() => {
-    const trimmed = query.trim().toLowerCase();
+  const trimmedQuery = query.trim();
+  const coordinateMatch = useMemo(() => parseCoordinates(query), [query]);
+  const nameMatches = useMemo(() => {
+    const trimmed = trimmedQuery.toLowerCase();
     if (!trimmed) return [];
-    return locations
-      .filter((location) =>
-        String(location?.name || "")
-          .toLowerCase()
-          .includes(trimmed)
-      )
-      .slice(0, 6);
-  }, [locations, query]);
-
-  const visibleList = useMemo(() => {
-    if (!listOpen) return [];
-    if (query.trim()) return matches;
-    return locations.slice(0, 6);
-  }, [listOpen, matches, locations, query]);
-
-  const handleSearch = () => {
-    const trimmed = query.trim();
-    if (!trimmed) {
-      setListOpen((prev) => !prev);
-      return;
-    }
-
-    const coords = parseCoordinates(trimmed);
-    if (coords) {
-      onSelectCoordinates?.(coords);
-      setListOpen(false);
-      return;
-    }
-
-    if (matches.length > 0) {
-      onSelectLocation?.(matches[0]);
-      setListOpen(false);
-      return;
-    }
-
-    showPopup(
-      "Enter coordinates like \"34.05, -118.25\" or pick a listed spot.",
-      "info",
-      { duration: 3200 }
+    return locations.filter((location) =>
+      String(location?.name || "")
+        .toLowerCase()
+        .includes(trimmed)
     );
+  }, [locations, trimmedQuery]);
+
+  const results = useMemo(() => {
+    if (!trimmedQuery) return [];
+    const items = [];
+    if (coordinateMatch) {
+      items.push({
+        type: "coords",
+        id: `coords-${coordinateMatch.lat}-${coordinateMatch.lng}`,
+        coords: coordinateMatch,
+      });
+    }
+    nameMatches.forEach((location) => {
+      items.push({
+        type: "location",
+        id: `location-${location.id}`,
+        location,
+      });
+    });
+    return items;
+  }, [coordinateMatch, nameMatches, trimmedQuery]);
+
+  const handleOpenResults = () => {
+    if (!trimmedQuery) {
+      setListOpen(false);
+      return;
+    }
+    if (results.length === 0) {
+      showPopup("No matching locations found.", "failure", { duration: 2600 });
+      setListOpen(false);
+      return;
+    }
+    setListOpen(true);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    handleSearch();
+    handleOpenResults();
+  };
+
+  const handleInputChange = (event) => {
+    const value = event.target.value;
+    setQuery(value);
+    if (!value.trim()) {
+      setListOpen(false);
+      return;
+    }
+    setListOpen(true);
   };
 
   const handleSelectLocation = (location) => {
     onSelectLocation?.(location);
     setQuery(location?.name || "");
+    setListOpen(false);
+  };
+
+  const handleSelectCoordinates = (coords) => {
+    onSelectCoordinates?.(coords);
+    setQuery(formatCoords(coords.lat, coords.lng));
     setListOpen(false);
   };
 
@@ -103,47 +118,65 @@ export default function LocationSearchBar({
     <div className="location-search" ref={containerRef}>
       <form className="location-search__form" onSubmit={handleSubmit}>
         <div className="location-search__bar glass-panel">
-          <div className="location-search__icon" aria-hidden="true">
-            +
-          </div>
           <input
             className="location-search__input"
             type="text"
             placeholder="Search coordinates or best stargazing spots"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onFocus={() => setListOpen(true)}
+            onChange={handleInputChange}
+            onFocus={() => {
+              if (trimmedQuery && results.length > 0) {
+                setListOpen(true);
+              }
+            }}
           />
           <button
-            type="button"
-            className="location-search__toggle"
-            onClick={() => setListOpen((prev) => !prev)}
+            type="submit"
+            className="location-search__submit"
+            aria-label="Search"
           >
-            Best spots
-          </button>
-          <button type="submit" className="location-search__submit">
-            Go
+            <img src={searchIcon} alt="" aria-hidden="true" />
           </button>
         </div>
       </form>
 
-      {listOpen && visibleList.length > 0 && (
+      {listOpen && results.length > 0 && (
         <div className="location-search__results glass-panel">
-          {visibleList.map((location) => (
-            <button
-              key={location.id}
-              type="button"
-              className="location-search__item"
-              onClick={() => handleSelectLocation(location)}
-            >
-              <span className="location-search__name">
-                {location.name || "Untitled"}
-              </span>
-              <span className="location-search__coords">
-                {formatCoords(location.lat, location.lng)}
-              </span>
-            </button>
-          ))}
+          {results.map((result) => {
+            if (result.type === "coords") {
+              return (
+                <button
+                  key={result.id}
+                  type="button"
+                  className="location-search__item location-search__item--coords"
+                  onClick={() => handleSelectCoordinates(result.coords)}
+                >
+                  <span className="location-search__name">
+                    Coordinates found
+                  </span>
+                  <span className="location-search__coords">
+                    {formatCoords(result.coords.lat, result.coords.lng)}
+                  </span>
+                </button>
+              );
+            }
+
+            return (
+              <button
+                key={result.id}
+                type="button"
+                className="location-search__item"
+                onClick={() => handleSelectLocation(result.location)}
+              >
+                <span className="location-search__name">
+                  {result.location.name || "Untitled"}
+                </span>
+                <span className="location-search__coords">
+                  {formatCoords(result.location.lat, result.location.lng)}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
