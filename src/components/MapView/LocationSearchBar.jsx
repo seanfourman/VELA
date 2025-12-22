@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./LocationSearchBar.css";
 
 const SEARCH_DEBOUNCE_MS = 250;
@@ -40,40 +40,42 @@ export default function LocationSearchBar({
     return () => clearTimeout(handle);
   }, [query]);
 
-  const trimmedQuery = debouncedQuery;
-  const coordinateMatch = useMemo(
-    () => parseCoordinates(debouncedQuery),
-    [debouncedQuery]
+  const buildResults = useCallback(
+    (rawQuery) => {
+      const trimmed = String(rawQuery || "").trim();
+      if (!trimmed) return [];
+      const coords = parseCoordinates(trimmed);
+      const lowered = trimmed.toLowerCase();
+      const matches = locations.filter((location) =>
+        String(location?.name || "")
+          .toLowerCase()
+          .includes(lowered)
+      );
+      const items = [];
+      if (coords) {
+        items.push({
+          type: "coords",
+          id: `coords-${coords.lat}-${coords.lng}`,
+          coords,
+        });
+      }
+      matches.forEach((location) => {
+        items.push({
+          type: "location",
+          id: `location-${location.id}`,
+          location,
+        });
+      });
+      return items;
+    },
+    [locations]
   );
-  const nameMatches = useMemo(() => {
-    const trimmed = trimmedQuery.toLowerCase();
-    if (!trimmed) return [];
-    return locations.filter((location) =>
-      String(location?.name || "")
-        .toLowerCase()
-        .includes(trimmed)
-    );
-  }, [locations, trimmedQuery]);
 
-  const results = useMemo(() => {
-    if (!trimmedQuery) return [];
-    const items = [];
-    if (coordinateMatch) {
-      items.push({
-        type: "coords",
-        id: `coords-${coordinateMatch.lat}-${coordinateMatch.lng}`,
-        coords: coordinateMatch,
-      });
-    }
-    nameMatches.forEach((location) => {
-      items.push({
-        type: "location",
-        id: `location-${location.id}`,
-        location,
-      });
-    });
-    return items;
-  }, [coordinateMatch, nameMatches, trimmedQuery]);
+  const trimmedQuery = debouncedQuery.trim();
+  const results = useMemo(
+    () => buildResults(trimmedQuery),
+    [buildResults, trimmedQuery]
+  );
   const hasQuery = Boolean(trimmedQuery);
   const isResultsOpen = listOpen && hasQuery;
 
@@ -94,6 +96,25 @@ export default function LocationSearchBar({
     setQuery(value);
     suppressAutoOpenRef.current = false;
     setListOpen(false);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    const rawQuery = query.trim();
+    if (!rawQuery) return;
+    const immediateResults = buildResults(rawQuery);
+    if (immediateResults.length === 1) {
+      const result = immediateResults[0];
+      if (result.type === "coords") {
+        handleSelectCoordinates(result.coords);
+      } else {
+        handleSelectLocation(result.location);
+      }
+      return;
+    }
+    setDebouncedQuery(rawQuery);
+    setListOpen(true);
   };
 
   const handleSelectLocation = (location) => {
@@ -134,6 +155,7 @@ export default function LocationSearchBar({
               placeholder="Search coordinates or best stargazing spots"
               value={query}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
               onFocus={() => {
                 onFocusChange?.(true);
                 if (debouncedQuery) {
@@ -156,6 +178,10 @@ export default function LocationSearchBar({
               results.length > 0 ? (
                 results.map((result) => {
                   if (result.type === "coords") {
+                    const coordsLabel = formatCoords(
+                      result.coords.lat,
+                      result.coords.lng
+                    );
                     return (
                       <button
                         key={result.id}
@@ -166,13 +192,7 @@ export default function LocationSearchBar({
                         }
                       >
                         <span className="location-search__name">
-                          Coordinates found
-                        </span>
-                        <span className="location-search__coords">
-                          {formatCoords(
-                            result.coords.lat,
-                            result.coords.lng
-                          )}
+                          Go to {coordsLabel}
                         </span>
                       </button>
                     );
