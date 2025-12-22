@@ -119,7 +119,8 @@
 
 @media (max-width: 768px) {
   .location-search {
-    bottom: 18px;
+    top: 80px;
+    bottom: auto;
     width: min(92vw, 360px);
   }
 

@@ -84,6 +84,7 @@
 
 @media (max-width: 768px) {
   .search-distance-selector {
-    left: 20px;
+    left: 16px;
+    top: 150px;
   }
 }
