@@ -175,8 +175,8 @@ div {
 
   /* Glass Surface - Light */
   --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-hover: rgba(255, 255, 255, 0.85);
-  --glass-bg-active: rgba(255, 255, 255, 0.92);
+  --glass-bg-hover: rgba(226, 232, 240, 0.9);
+  --glass-bg-active: rgba(203, 213, 225, 0.92);
   --glass-bg-elevated: rgba(255, 255, 255, 0.88);
 
   /* Glass Borders - Light */
@@ -217,6 +217,8 @@ div {
   --surface-text-subtle: rgba(15, 23, 42, 0.45);
 
   /* Accent Adjustments */
+  --accent-primary: #0f172a;
+  --accent-primary-hover: #1e293b;
   --accent-success: #16a34a;
   --accent-success-glow: rgba(22, 163, 74, 0.5);
   --accent-muted: #9ca3af;
