@@ -250,7 +250,14 @@ function LongPressHandler({ onLongPress, delayMs = LONG_PRESS_MS }) {
 }
 
 const MapView = forwardRef(function MapView(
-  { location, locationStatus, mapType, setMapType, stargazeLocations = [] },
+  {
+    location,
+    locationStatus,
+    mapType,
+    setMapType,
+    stargazeLocations = [],
+    isAuthenticated,
+  },
   ref
 ) {
   const mapRef = useRef(null);
@@ -318,7 +325,7 @@ const MapView = forwardRef(function MapView(
       setContextMenu(null);
       setSelectedDarkSpot(null);
       setActiveStargazeId(null);
-      setPlacedMarker({ lat, lng, id: Date.now() });
+      setPlacedMarker({ lat, lng, id: Date.now(), isFavorite: false });
       flyToCoordinates(lat, lng, LOCATION_ZOOM);
     },
     [flyToCoordinates]
@@ -412,6 +419,7 @@ const MapView = forwardRef(function MapView(
       lat: latlng.lat,
       lng: latlng.lng,
       id: Date.now(),
+      isFavorite: false,
     };
 
     setPlacedMarker(nextMarker);
@@ -568,6 +576,13 @@ const MapView = forwardRef(function MapView(
     });
   }, []);
 
+  const handleTogglePinnedFavorite = useCallback(() => {
+    setPlacedMarker((prev) => {
+      if (!prev) return prev;
+      return { ...prev, isFavorite: !prev.isFavorite };
+    });
+  }, []);
+
   useImperativeHandle(ref, () => ({ zoomOutToMin }), [zoomOutToMin]);
 
   return (
@@ -687,6 +702,9 @@ const MapView = forwardRef(function MapView(
                 coords={placedMarker}
                 onGetDirections={location ? handleGetDirections : null}
                 onRemovePin={handleCloseContextMenu}
+                isAuthenticated={Boolean(isAuthenticated)}
+                isFavorite={Boolean(placedMarker.isFavorite)}
+                onToggleFavorite={handleTogglePinnedFavorite}
               />
             </Popup>
           </Marker>

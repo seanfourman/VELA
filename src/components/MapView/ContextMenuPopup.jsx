@@ -1,15 +1,54 @@
 import SkyQualityInfo from "./SkyQualityInfo";
+import favoriteIcon from "../../assets/icons/favorite-icon.svg";
 import "./ContextMenuPopup.css";
 
 export default function ContextMenuPopup({
   coords,
   onGetDirections,
   onRemovePin,
+  isAuthenticated,
+  isFavorite,
+  onToggleFavorite,
 }) {
   if (!coords) return null;
 
+  const canFavorite = Boolean(isAuthenticated && onToggleFavorite);
+  const favoriteButtonLabel = isFavorite
+    ? "Remove from favorites"
+    : "Add to favorites";
+  const favoriteLabel = isFavorite ? "Favorited" : "Favorite";
+
   return (
     <div className="context-menu-popup">
+      {canFavorite ? (
+        <div className="target-toggle-wrapper">
+          <button
+            className={`target-toggle favorite-toggle${
+              isFavorite ? " active" : ""
+            }`}
+            aria-label={favoriteButtonLabel}
+            onClick={(event) => {
+              event.currentTarget.blur();
+              onToggleFavorite?.();
+            }}
+          >
+            <img
+              src={favoriteIcon}
+              alt=""
+              aria-hidden="true"
+              className="favorite-toggle-icon"
+            />
+          </button>
+          <span
+            className={`target-toggle-label favorite-toggle-label${
+              isFavorite ? " active" : ""
+            }`}
+            aria-hidden="true"
+          >
+            {favoriteLabel}
+          </span>
+        </div>
+      ) : null}
       <div className="popup-coords">
         <span className="popup-coords-label">Pinned location</span>
         <span className="popup-coords-value">

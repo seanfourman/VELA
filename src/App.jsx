@@ -328,6 +328,7 @@ function App() {
           locationStatus={locationStatus}
           mapType={mapType}
           setMapType={setMapType}
+          isAuthenticated={auth?.isAuthenticated}
           stargazeLocations={stargazeLocations}
         />
       )}
