@@ -175,8 +175,8 @@ div {
 
   /* Glass Surface - Light */
   --glass-bg: rgba(255, 255, 255, 0.72);
-  --glass-bg-hover: rgba(226, 232, 240, 0.9);
-  --glass-bg-active: rgba(203, 213, 225, 0.92);
+  --glass-bg-hover: rgba(241, 245, 249, 0.92);
+  --glass-bg-active: rgba(226, 232, 240, 0.5);
   --glass-bg-elevated: rgba(255, 255, 255, 0.88);
 
   /* Glass Borders - Light */
