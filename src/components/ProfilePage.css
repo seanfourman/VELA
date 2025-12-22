@@ -3,8 +3,12 @@
   width: 100%;
   height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding: 110px 32px 40px;
+  isolation: isolate;
+  --profile-stars-opacity: 0.72;
+  --profile-earth-opacity: 0.92;
   background: radial-gradient(
       120% 120% at 20% 0%,
       rgba(255, 255, 255, 0.08),
@@ -13,7 +17,38 @@
     linear-gradient(160deg, rgba(8, 10, 22, 0.88), rgba(18, 18, 24, 0.96));
 }
 
+.profile-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("../assets/planets/2k_stars_milky_way.jpg");
+  background-size: cover;
+  background-position: 50% 40%;
+  opacity: 0;
+  transform: scale(1.04);
+  animation: profile-stars-fade 1.2s ease forwards,
+    profile-stars-drift 80s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.profile-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+      110% 90% at 50% 20%,
+      rgba(18, 18, 24, 0.08),
+      rgba(8, 10, 22, 0.82)
+    ),
+    linear-gradient(180deg, rgba(8, 10, 22, 0.2), rgba(8, 10, 22, 0.85));
+  pointer-events: none;
+  z-index: 1;
+}
+
 .profile-page.light {
+  --profile-stars-opacity: 0.32;
+  --profile-earth-opacity: 0.7;
   background: radial-gradient(
       120% 120% at 20% 0%,
       rgba(255, 255, 255, 0.92),
@@ -22,12 +57,46 @@
     linear-gradient(160deg, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 1));
 }
 
+.profile-page.light::after {
+  background: radial-gradient(
+      110% 90% at 50% 20%,
+      rgba(248, 250, 252, 0.4),
+      rgba(226, 232, 240, 0.92)
+    ),
+    linear-gradient(
+      180deg,
+      rgba(248, 250, 252, 0.35),
+      rgba(226, 232, 240, 0.95)
+    );
+}
+
+.profile-page__earth {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(4%) scale(1.24);
+  animation: profile-earth-enter 1.35s var(--glass-appear-timing) forwards;
+  z-index: 2;
+}
+
+.profile-page__earth-canvas {
+  width: min(72vmin, 720px);
+  height: min(72vmin, 720px);
+  filter: drop-shadow(0 30px 90px rgba(0, 0, 0, 0.45));
+}
+
 .profile-page__content {
   max-width: 960px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   gap: 28px;
+  position: relative;
+  z-index: 3;
 }
 
 .profile-page__header {
@@ -221,9 +290,37 @@
   font-size: 0.9rem;
 }
 
+@keyframes profile-stars-fade {
+  to {
+    opacity: var(--profile-stars-opacity);
+    transform: scale(1);
+  }
+}
+
+@keyframes profile-stars-drift {
+  0% {
+    background-position: 50% 40%;
+  }
+  100% {
+    background-position: 50% 90%;
+  }
+}
+
+@keyframes profile-earth-enter {
+  to {
+    opacity: var(--profile-earth-opacity);
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (max-width: 768px) {
   .profile-page {
     padding: 96px 18px 32px;
+  }
+
+  .profile-page__earth-canvas {
+    width: min(86vmin, 460px);
+    height: min(86vmin, 460px);
   }
 
   .profile-page__header {
@@ -246,5 +343,19 @@
 
   .admin-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-page::before {
+    animation: none;
+    opacity: var(--profile-stars-opacity);
+    transform: none;
+  }
+
+  .profile-page__earth {
+    animation: none;
+    opacity: var(--profile-earth-opacity);
+    transform: none;
   }
 }

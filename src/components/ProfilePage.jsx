@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import ProfileEarth from "./ProfileEarth";
 import showPopup from "../utils/popup";
+import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
 import "./ProfilePage.css";
 
 const EMPTY_PROFILE = {
@@ -26,6 +28,7 @@ function ProfilePage({
   profile,
   isLight,
   isAdmin,
+  mapType,
   onSave,
   onReset,
   onNavigate,
@@ -36,6 +39,9 @@ function ProfilePage({
   const userEmail = user?.email;
   const userName =
     user?.name || user?.preferred_username || user?.given_name || "Explorer";
+  const showEarth = useMemo(() => isProbablyHardwareAccelerated(), []);
+  const isDayMap = mapType === "light" || mapType === "satellite" || isLight;
+  const earthVariant = isDayMap ? "day" : "night";
 
   useEffect(() => {
     setDraft(normalizeProfile(profile));
@@ -95,6 +101,15 @@ function ProfilePage({
 
   return (
     <div className={`profile-page ${isLight ? "light" : ""}`}>
+      {showEarth ? (
+        <div className="profile-page__earth" aria-hidden="true">
+          <ProfileEarth
+            variant={earthVariant}
+            showClouds={isDayMap}
+            className="profile-page__earth-canvas"
+          />
+        </div>
+      ) : null}
       <div className="profile-page__content">
         <header className="profile-page__header">
           <div>

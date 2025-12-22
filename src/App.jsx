@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Navbar from "./components/Navbar";
 import MapView from "./components/MapView";
 import ProfilePage from "./components/ProfilePage";
@@ -69,6 +69,8 @@ const isAdminUser = (user) => {
 
 function App() {
   const auth = useCognitoAuth();
+  const mapViewRef = useRef(null);
+  const transitionTimeoutRef = useRef(null);
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState(() =>
     navigator.geolocation ? "searching" : "off"
@@ -131,10 +133,36 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const navigate = useCallback(
     (path) => {
       const nextPath = normalizePath(path);
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+        transitionTimeoutRef.current = null;
+      }
       if (nextPath === route) return;
+
+      if (nextPath === "/profile" && normalizePath(route) === "/") {
+        if (mapViewRef.current?.zoomOutToMin) {
+          mapViewRef.current.zoomOutToMin();
+        }
+
+        transitionTimeoutRef.current = setTimeout(() => {
+          window.history.pushState({}, document.title, nextPath);
+          setRoute(nextPath);
+          transitionTimeoutRef.current = null;
+        }, 700);
+        return;
+      }
+
       window.history.pushState({}, document.title, nextPath);
       setRoute(nextPath);
     },
@@ -172,6 +200,7 @@ function App() {
           profile={profileSettings}
           isAdmin={isAdmin}
           isLight={isLight}
+          mapType={mapType}
           onSave={handleSaveProfile}
           onReset={handleResetProfile}
           onNavigate={navigate}
@@ -185,6 +214,7 @@ function App() {
         />
       ) : (
         <MapView
+          ref={mapViewRef}
           location={location}
           locationStatus={locationStatus}
           mapType={mapType}

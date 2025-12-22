@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   MapContainer,
   TileLayer,
@@ -228,7 +236,10 @@ function LongPressHandler({ onLongPress, delayMs = LONG_PRESS_MS }) {
   return null;
 }
 
-function MapView({ location, locationStatus, mapType, setMapType }) {
+const MapView = forwardRef(function MapView(
+  { location, locationStatus, mapType, setMapType },
+  ref
+) {
   const mapRef = useRef(null);
   const planetPanelRef = useRef(null);
   const [placedMarker, setPlacedMarker] = useState(null);
@@ -491,6 +502,21 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
     : hasAnyLocation
     ? "Find stargazing spots near you"
     : "Drop a pin or enable location";
+
+  const zoomOutToMin = useCallback(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const center = map.getCenter();
+    const minZoom = map.getMinZoom?.() ?? MIN_ZOOM;
+    if (map.stop) map.stop();
+    map.flyTo(center, minZoom, {
+      duration: 0.9,
+      easeLinearity: 0.25,
+    });
+  }, []);
+
+  useImperativeHandle(ref, () => ({ zoomOutToMin }), [zoomOutToMin]);
 
   return (
     <div className={`map-container visible ${mapType}`}>
@@ -774,6 +800,8 @@ function MapView({ location, locationStatus, mapType, setMapType }) {
       />
     </div>
   );
-}
+});
+
+MapView.displayName = "MapView";
 
 export default MapView;
