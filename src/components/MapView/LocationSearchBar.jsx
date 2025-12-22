@@ -24,6 +24,7 @@ export default function LocationSearchBar({
   locations = [],
   onSelectCoordinates,
   onSelectLocation,
+  onFocusChange,
 }) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -131,9 +132,13 @@ export default function LocationSearchBar({
             value={query}
             onChange={handleInputChange}
             onFocus={() => {
+              onFocusChange?.(true);
               if (debouncedQuery) {
                 setListOpen(true);
               }
+            }}
+            onBlur={() => {
+              onFocusChange?.(false);
             }}
           />
         </div>

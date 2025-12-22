@@ -264,6 +264,7 @@ const MapView = forwardRef(function MapView(
   const [latestGridShot, setLatestGridShot] = useState(null);
   const [lightOverlayEnabled, setLightOverlayEnabled] = useState(false);
   const [activeStargazeId, setActiveStargazeId] = useState(null);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
   const lastGridShotAtRef = useRef(0);
@@ -570,7 +571,11 @@ const MapView = forwardRef(function MapView(
   useImperativeHandle(ref, () => ({ zoomOutToMin }), [zoomOutToMin]);
 
   return (
-    <div className={`map-container visible ${mapType}`}>
+    <div
+      className={`map-container visible ${mapType}${
+        isSearchFocused ? " search-focused" : ""
+      }`}
+    >
       <PlanetPanelContainer
         ref={planetPanelRef}
         planets={visiblePlanets}
@@ -889,6 +894,7 @@ const MapView = forwardRef(function MapView(
         locations={stargazeLocations}
         onSelectCoordinates={handleCoordinateSearch}
         onSelectLocation={handleStargazeSearch}
+        onFocusChange={setIsSearchFocused}
       />
 
       <MapTypeSwitcher

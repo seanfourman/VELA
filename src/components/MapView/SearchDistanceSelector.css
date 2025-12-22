@@ -6,6 +6,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  transform: translateX(0);
+  transition: transform 0.24s ease;
+  will-change: transform;
 }
 
 .distance-toggle {
@@ -86,5 +89,10 @@
   .search-distance-selector {
     left: 16px;
     top: 150px;
+  }
+
+  .map-container.search-focused .search-distance-selector {
+    transform: translateX(calc(-100% - 32px));
+    pointer-events: none;
   }
 }
