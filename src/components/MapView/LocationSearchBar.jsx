@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import showPopup from "../../utils/popup";
-import searchIcon from "../../assets/icons/search-icon.svg";
 import "./LocationSearchBar.css";
+
+const SEARCH_DEBOUNCE_MS = 250;
 
 const parseCoordinates = (value) => {
   const trimmed = String(value || "").trim();
@@ -26,11 +26,24 @@ export default function LocationSearchBar({
   onSelectLocation,
 }) {
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [listOpen, setListOpen] = useState(false);
   const containerRef = useRef(null);
+  const suppressAutoOpenRef = useRef(false);
 
-  const trimmedQuery = query.trim();
-  const coordinateMatch = useMemo(() => parseCoordinates(query), [query]);
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedQuery(query.trim());
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => clearTimeout(handle);
+  }, [query]);
+
+  const trimmedQuery = debouncedQuery;
+  const coordinateMatch = useMemo(
+    () => parseCoordinates(debouncedQuery),
+    [debouncedQuery]
+  );
   const nameMatches = useMemo(() => {
     const trimmed = trimmedQuery.toLowerCase();
     if (!trimmed) return [];
@@ -61,41 +74,34 @@ export default function LocationSearchBar({
     return items;
   }, [coordinateMatch, nameMatches, trimmedQuery]);
 
-  const handleOpenResults = () => {
-    if (!trimmedQuery) {
+  useEffect(() => {
+    if (!debouncedQuery) {
       setListOpen(false);
       return;
     }
-    if (results.length === 0) {
-      showPopup("No matching locations found.", "failure", { duration: 2600 });
-      setListOpen(false);
+    if (suppressAutoOpenRef.current) {
+      suppressAutoOpenRef.current = false;
       return;
     }
-    setListOpen(true);
-  };
-
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    handleOpenResults();
-  };
+    setListOpen(results.length > 0);
+  }, [debouncedQuery, results.length]);
 
   const handleInputChange = (event) => {
     const value = event.target.value;
     setQuery(value);
-    if (!value.trim()) {
-      setListOpen(false);
-      return;
-    }
-    setListOpen(true);
+    suppressAutoOpenRef.current = false;
+    setListOpen(false);
   };
 
   const handleSelectLocation = (location) => {
+    suppressAutoOpenRef.current = true;
     onSelectLocation?.(location);
     setQuery(location?.name || "");
     setListOpen(false);
   };
 
   const handleSelectCoordinates = (coords) => {
+    suppressAutoOpenRef.current = true;
     onSelectCoordinates?.(coords);
     setQuery(formatCoords(coords.lat, coords.lng));
     setListOpen(false);
@@ -116,7 +122,7 @@ export default function LocationSearchBar({
 
   return (
     <div className="location-search" ref={containerRef}>
-      <form className="location-search__form" onSubmit={handleSubmit}>
+      <div className="location-search__form">
         <div className="location-search__bar glass-panel">
           <input
             className="location-search__input"
@@ -125,20 +131,13 @@ export default function LocationSearchBar({
             value={query}
             onChange={handleInputChange}
             onFocus={() => {
-              if (trimmedQuery && results.length > 0) {
+              if (results.length > 0) {
                 setListOpen(true);
               }
             }}
           />
-          <button
-            type="submit"
-            className="location-search__submit"
-            aria-label="Search"
-          >
-            <img src={searchIcon} alt="" aria-hidden="true" />
-          </button>
         </div>
-      </form>
+      </div>
 
       {listOpen && results.length > 0 && (
         <div className="location-search__results glass-panel">
