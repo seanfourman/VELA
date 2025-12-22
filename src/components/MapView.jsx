@@ -24,6 +24,7 @@ import MapTypeSwitcher from "./MapView/MapTypeSwitcher";
 import ContextMenuPopup from "./MapView/ContextMenuPopup";
 import SkyQualityInfo from "./MapView/SkyQualityInfo";
 import MapQuickActions from "./MapView/MapQuickActions";
+import LocationSearchBar from "./MapView/LocationSearchBar";
 import usePlanets from "../hooks/usePlanets";
 import { preloadAllPlanetTextures } from "../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
@@ -112,6 +113,18 @@ const darkSpotIcon = new L.DivIcon({
     <div class="marker-pin dark-spot">
       <div class="marker-pulse"></div>
       <div class="marker-dot dark-spot"></div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
+const stargazeIcon = new L.DivIcon({
+  className: "custom-marker stargaze-marker",
+  html: `
+    <div class="marker-pin stargaze-pin">
+      <div class="marker-dot stargaze-dot"></div>
+      <div class="stargaze-star" aria-hidden="true">&#9733;</div>
     </div>
   `,
   iconSize: [30, 30],
@@ -237,7 +250,7 @@ function LongPressHandler({ onLongPress, delayMs = LONG_PRESS_MS }) {
 }
 
 const MapView = forwardRef(function MapView(
-  { location, locationStatus, mapType, setMapType },
+  { location, locationStatus, mapType, setMapType, stargazeLocations = [] },
   ref
 ) {
   const mapRef = useRef(null);
@@ -250,9 +263,11 @@ const MapView = forwardRef(function MapView(
   const [selectedDarkSpot, setSelectedDarkSpot] = useState(null);
   const [latestGridShot, setLatestGridShot] = useState(null);
   const [lightOverlayEnabled, setLightOverlayEnabled] = useState(false);
+  const [activeStargazeId, setActiveStargazeId] = useState(null);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
   const lastGridShotAtRef = useRef(0);
+  const stargazeMarkerRefs = useRef(new Map());
 
   const {
     visiblePlanets,
@@ -289,6 +304,34 @@ const MapView = forwardRef(function MapView(
     map.flyTo(adjustedLatLng, zoom, { duration: 0.5, easeLinearity: 0.35 });
   };
 
+  const flyToCoordinates = useCallback((lat, lng, zoom = LOCATION_ZOOM) => {
+    if (!mapRef.current) return;
+    mapRef.current.flyTo([lat, lng], zoom, {
+      duration: 1.1,
+      easeLinearity: 0.25,
+    });
+  }, []);
+
+  const handleCoordinateSearch = useCallback(
+    ({ lat, lng }) => {
+      setContextMenu(null);
+      setSelectedDarkSpot(null);
+      setActiveStargazeId(null);
+      setPlacedMarker({ lat, lng, id: Date.now() });
+      flyToCoordinates(lat, lng, LOCATION_ZOOM);
+    },
+    [flyToCoordinates]
+  );
+
+  const handleStargazeSearch = useCallback(
+    (location) => {
+      if (!location) return;
+      setActiveStargazeId(location.id);
+      flyToCoordinates(location.lat, location.lng, LOCATION_ZOOM);
+    },
+    [flyToCoordinates]
+  );
+
   const handleTileLoad = useCallback((event) => {
     const src = event?.tile?.src;
     if (!src) return;
@@ -307,6 +350,14 @@ const MapView = forwardRef(function MapView(
       if (removalTimeoutRef.current) clearTimeout(removalTimeoutRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!activeStargazeId) return;
+    const marker = stargazeMarkerRefs.current.get(activeStargazeId);
+    if (marker?.openPopup) {
+      marker.openPopup();
+    }
+  }, [activeStargazeId]);
 
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
@@ -636,6 +687,48 @@ const MapView = forwardRef(function MapView(
           </Marker>
         )}
 
+        {Array.isArray(stargazeLocations) &&
+          stargazeLocations.map((spot) => (
+            <Marker
+              key={`stargaze-${spot.id}`}
+              position={[spot.lat, spot.lng]}
+              icon={stargazeIcon}
+              ref={(marker) => {
+                if (marker) {
+                  stargazeMarkerRefs.current.set(spot.id, marker);
+                } else {
+                  stargazeMarkerRefs.current.delete(spot.id);
+                }
+              }}
+            >
+              <Popup>
+                <div className="context-menu-popup stargaze-popup">
+                  <div className="stargaze-popup__title">{spot.name}</div>
+                  {spot.description ? (
+                    <div className="stargaze-popup__desc">
+                      {spot.description}
+                    </div>
+                  ) : null}
+                  <div className="stargaze-popup__coords">
+                    {spot.lat.toFixed(4)}, {spot.lng.toFixed(4)}
+                  </div>
+                  {spot.images && spot.images.length > 0 ? (
+                    <div className="stargaze-popup__images">
+                      {spot.images.slice(0, 3).map((imageUrl, index) => (
+                        <img
+                          key={`${spot.id}-${index}`}
+                          src={imageUrl}
+                          alt={`${spot.name} view ${index + 1}`}
+                          loading="lazy"
+                        />
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+
         {darkSpots.map((spot, i) => (
           <Marker
             key={`darkspot-${i}`}
@@ -790,6 +883,12 @@ const MapView = forwardRef(function MapView(
       <SearchDistanceSelector
         value={searchDistance}
         onChange={setSearchDistance}
+      />
+
+      <LocationSearchBar
+        locations={stargazeLocations}
+        onSelectCoordinates={handleCoordinateSearch}
+        onSelectLocation={handleStargazeSearch}
       />
 
       <MapTypeSwitcher

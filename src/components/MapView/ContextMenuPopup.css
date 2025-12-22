@@ -188,6 +188,43 @@
   position: relative;
 }
 
+.stargaze-popup {
+  gap: 10px;
+  max-width: 240px;
+}
+
+.stargaze-popup__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--surface-text);
+}
+
+.stargaze-popup__desc {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--surface-text);
+}
+
+.stargaze-popup__coords {
+  font-size: 0.78rem;
+  color: var(--surface-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.stargaze-popup__images {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(68px, 1fr));
+  gap: 6px;
+}
+
+.stargaze-popup__images img {
+  width: 100%;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+}
+
 .darkspot-stats {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

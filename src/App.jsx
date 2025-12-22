@@ -10,6 +10,7 @@ import { isProbablyHardwareAccelerated } from "./utils/hardwareUtils";
 import "./App.css";
 
 const PROFILE_STORAGE_KEY = "vela:profile:settings";
+const STARGAZE_STORAGE_KEY = "vela:stargaze:locations";
 const DEFAULT_PROFILE = {
   displayName: "",
   avatarUrl: "",
@@ -26,6 +27,59 @@ const normalizeProfile = (value) => {
   };
 };
 
+const createStargazeId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `spot-${Date.now()}-${Math.round(Math.random() * 1000)}`;
+};
+
+const normalizeImageList = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) {
+    return value
+      .filter((item) => typeof item === "string")
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(/[\n,]+/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const isValidCoordinate = (value, min, max) =>
+  Number.isFinite(value) && value >= min && value <= max;
+
+const normalizeStargazeLocation = (value) => {
+  if (!value || typeof value !== "object") return null;
+
+  const name =
+    typeof value.name === "string" ? value.name.trim() : "";
+  const lat = Number(value.lat);
+  const lng = Number(value.lng);
+  const description =
+    typeof value.description === "string" ? value.description.trim() : "";
+  const images = normalizeImageList(value.images);
+
+  if (!name) return null;
+  if (!isValidCoordinate(lat, -90, 90) || !isValidCoordinate(lng, -180, 180)) {
+    return null;
+  }
+
+  return {
+    id: typeof value.id === "string" ? value.id : createStargazeId(),
+    name,
+    lat,
+    lng,
+    description,
+    images,
+  };
+};
+
 const loadProfileSettings = () => {
   if (typeof window === "undefined") return { ...DEFAULT_PROFILE };
   try {
@@ -35,6 +89,19 @@ const loadProfileSettings = () => {
     return { ...DEFAULT_PROFILE, ...normalizeProfile(parsed) };
   } catch {
     return { ...DEFAULT_PROFILE };
+  }
+};
+
+const loadStargazeLocations = () => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STARGAZE_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(normalizeStargazeLocation).filter(Boolean);
+  } catch {
+    return [];
   }
 };
 
@@ -80,6 +147,9 @@ function App() {
   });
   const [profileSettings, setProfileSettings] = useState(() =>
     loadProfileSettings()
+  );
+  const [stargazeLocations, setStargazeLocations] = useState(() =>
+    loadStargazeLocations()
   );
   const [route, setRoute] = useState(() =>
     normalizePath(window.location.pathname)
@@ -180,6 +250,42 @@ function App() {
     localStorage.removeItem(PROFILE_STORAGE_KEY);
   }, []);
 
+  const persistStargazeLocations = useCallback((next) => {
+    try {
+      localStorage.setItem(STARGAZE_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Storage unavailable; ignore
+    }
+  }, []);
+
+  const handleSaveStargazeLocation = useCallback(
+    (location) => {
+      const normalized = normalizeStargazeLocation(location);
+      if (!normalized) return;
+
+      setStargazeLocations((prev) => {
+        const exists = prev.some((item) => item.id === normalized.id);
+        const next = exists
+          ? prev.map((item) => (item.id === normalized.id ? normalized : item))
+          : [...prev, normalized];
+        persistStargazeLocations(next);
+        return next;
+      });
+    },
+    [persistStargazeLocations]
+  );
+
+  const handleDeleteStargazeLocation = useCallback(
+    (id) => {
+      setStargazeLocations((prev) => {
+        const next = prev.filter((item) => item.id !== id);
+        persistStargazeLocations(next);
+        return next;
+      });
+    },
+    [persistStargazeLocations]
+  );
+
   const isAdmin = isAdminUser(auth?.user);
   const isLight = mapType === "light";
   const currentRoute = normalizePath(route);
@@ -210,6 +316,9 @@ function App() {
           auth={auth}
           isAdmin={isAdmin}
           isLight={isLight}
+          stargazeLocations={stargazeLocations}
+          onSaveStargazeLocation={handleSaveStargazeLocation}
+          onDeleteStargazeLocation={handleDeleteStargazeLocation}
           onNavigate={navigate}
         />
       ) : (
@@ -219,6 +328,7 @@ function App() {
           locationStatus={locationStatus}
           mapType={mapType}
           setMapType={setMapType}
+          stargazeLocations={stargazeLocations}
         />
       )}
       <PopupPortal />

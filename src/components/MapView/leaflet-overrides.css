@@ -199,6 +199,25 @@
   --marker-ring: rgba(59, 130, 246, 0.35);
 }
 
+.stargaze-marker .marker-dot.stargaze-dot {
+  --marker-color: #fbbf24;
+  --marker-glow: rgba(251, 191, 36, 0.55);
+  --marker-ring: rgba(251, 191, 36, 0.35);
+  box-shadow: 0 0 12px var(--marker-glow);
+  border-color: rgba(255, 255, 255, 0.9);
+}
+
+.stargaze-marker .stargaze-star {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: #fef3c7;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.9);
+  pointer-events: none;
+}
+
 @keyframes marker-pop {
   0% {
     transform: scale(0.55);
