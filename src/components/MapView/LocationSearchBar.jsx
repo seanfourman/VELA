@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import markerIcon from "../../assets/icons/marker-icon.svg";
 import "./LocationSearchBar.css";
 
 const SEARCH_DEBOUNCE_MS = 250;
@@ -191,8 +192,14 @@ export default function LocationSearchBar({
                           handleSelectCoordinates(result.coords)
                         }
                       >
+                        <span className="location-search__item-icon">
+                          <img src={markerIcon} alt="" aria-hidden="true" />
+                        </span>
                         <span className="location-search__name">
-                          Go to {coordsLabel}
+                          Go to coordinates
+                        </span>
+                        <span className="location-search__coords">
+                          {coordsLabel}
                         </span>
                       </button>
                     );
