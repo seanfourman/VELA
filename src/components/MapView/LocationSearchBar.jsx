@@ -126,11 +126,7 @@ export default function LocationSearchBar({
   return (
     <div className="location-search" ref={containerRef}>
       <div className="location-search__form">
-        <div
-          className={`location-search__panel glass-panel${
-            isResultsOpen ? " open" : ""
-          }`}
-        >
+        <div className="location-search__panel glass-panel">
           <div className="location-search__bar">
             <input
               className="location-search__input"
