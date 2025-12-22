@@ -3,15 +3,25 @@ import velaLogo from "../assets/vela.svg";
 import velaLogoBlack from "../assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
 
-function Navbar({ mapType, auth }) {
+function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
   const isLight = mapType === "light";
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const isLoading = Boolean(auth?.isLoading);
+  const isHome =
+    typeof currentRoute === "string"
+      ? currentRoute === "/"
+      : window.location.pathname === "/";
 
   function handleAuthClick() {
     if (isLoading) return;
     auth?.signIn?.();
   }
+
+  const handleNavigate = (event, path) => {
+    if (!onNavigate) return;
+    event.preventDefault();
+    onNavigate(path);
+  };
 
   return (
     <>
@@ -19,7 +29,7 @@ function Navbar({ mapType, auth }) {
       <nav className={`navbar ${isLight ? "light" : ""}`}>
         <div className="navbar-left"></div>
 
-        {window.location.pathname === "/" ? (
+        {isHome ? (
           <div className="navbar-logo disabled">
             <img
               src={isLight ? velaLogoBlack : velaLogo}
@@ -28,7 +38,11 @@ function Navbar({ mapType, auth }) {
             />
           </div>
         ) : (
-          <a href="/" className="navbar-logo">
+          <a
+            href="/"
+            className="navbar-logo"
+            onClick={(event) => handleNavigate(event, "/")}
+          >
             <img
               src={isLight ? velaLogoBlack : velaLogo}
               alt="VELA"
@@ -39,7 +53,13 @@ function Navbar({ mapType, auth }) {
 
         <div className="navbar-right">
           {isAuthenticated ? (
-            <ProfileMenu auth={auth} isLight={isLight} />
+            <ProfileMenu
+              auth={auth}
+              profile={profile}
+              isAdmin={isAdmin}
+              isLight={isLight}
+              onNavigate={onNavigate}
+            />
           ) : (
             <button
               className="auth-button"

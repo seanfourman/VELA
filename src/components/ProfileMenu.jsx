@@ -1,16 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import "./ProfileMenu.css";
 
-function ProfileMenu({ auth, isLight }) {
+function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false);
   const avatarButtonRef = useRef(null);
   const menuRef = useRef(null);
 
+  const profileDisplayName =
+    typeof profile?.displayName === "string" ? profile.displayName.trim() : "";
+  const profileAvatarUrl =
+    typeof profile?.avatarUrl === "string" ? profile.avatarUrl.trim() : "";
   const displayName =
-    auth?.user?.name || auth?.user?.email || auth?.user?.preferred_username;
+    profileDisplayName ||
+    auth?.user?.name ||
+    auth?.user?.email ||
+    auth?.user?.preferred_username;
   const userEmail = auth?.user?.email;
-  const avatarUrl = auth?.user?.picture;
+  const avatarUrl = profileAvatarUrl || auth?.user?.picture;
   const userInitial = String(
     displayName || auth?.user?.email || auth?.user?.given_name || "U"
   )
@@ -21,6 +28,16 @@ function ProfileMenu({ auth, isLight }) {
   const closeMenu = useCallback(() => {
     setMenuOpen(false);
   }, []);
+
+  const handleMenuNavigate = (event, path) => {
+    if (onNavigate) {
+      event.preventDefault();
+      closeMenu();
+      onNavigate(path);
+      return;
+    }
+    closeMenu();
+  };
 
   const toggleMenu = () => {
     if (!menuVisible || !menuOpen) {
@@ -116,13 +133,19 @@ function ProfileMenu({ auth, isLight }) {
             <a
               href="/profile"
               className="profile-action"
-              onClick={closeMenu}
+              onClick={(event) => handleMenuNavigate(event, "/profile")}
             >
               Profile
             </a>
-            <a href="/admin" className="profile-action" onClick={closeMenu}>
-              Admin Panel
-            </a>
+            {isAdmin ? (
+              <a
+                href="/admin"
+                className="profile-action"
+                onClick={(event) => handleMenuNavigate(event, "/admin")}
+              >
+                Admin Panel
+              </a>
+            ) : null}
             <button
               type="button"
               className="profile-action logout"
