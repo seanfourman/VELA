@@ -25,14 +25,8 @@ const tuneTexture = (baseTexture, anisotropy = 4) => {
 };
 
 function EarthGroup({ textureUrl, variant, showClouds }) {
-  const [baseTexture, cloudsTexture] = useTexture([
-    textureUrl,
-    earthCloudsMap,
-  ]);
-  const surfaceMap = useMemo(
-    () => tuneTexture(baseTexture, 6),
-    [baseTexture]
-  );
+  const [baseTexture, cloudsTexture] = useTexture([textureUrl, earthCloudsMap]);
+  const surfaceMap = useMemo(() => tuneTexture(baseTexture, 6), [baseTexture]);
   const cloudMap = useMemo(
     () => tuneTexture(cloudsTexture, 4),
     [cloudsTexture]
