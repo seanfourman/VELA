@@ -74,6 +74,8 @@ export default function LocationSearchBar({
     });
     return items;
   }, [coordinateMatch, nameMatches, trimmedQuery]);
+  const hasQuery = Boolean(trimmedQuery);
+  const isResultsOpen = listOpen && hasQuery;
 
   useEffect(() => {
     if (!debouncedQuery) {
@@ -124,74 +126,90 @@ export default function LocationSearchBar({
   return (
     <div className="location-search" ref={containerRef}>
       <div className="location-search__form">
-        <div className="location-search__bar glass-panel">
-          <input
-            className="location-search__input"
-            type="text"
-            placeholder="Search coordinates or best stargazing spots"
-            value={query}
-            onChange={handleInputChange}
-            onFocus={() => {
-              onFocusChange?.(true);
-              if (debouncedQuery) {
-                setListOpen(true);
-              }
-            }}
-            onBlur={() => {
-              onFocusChange?.(false);
-            }}
-          />
+        <div
+          className={`location-search__panel glass-panel${
+            isResultsOpen ? " open" : ""
+          }`}
+        >
+          <div className="location-search__bar">
+            <input
+              className="location-search__input"
+              type="text"
+              placeholder="Search coordinates or best stargazing spots"
+              value={query}
+              onChange={handleInputChange}
+              onFocus={() => {
+                onFocusChange?.(true);
+                if (debouncedQuery) {
+                  setListOpen(true);
+                }
+              }}
+              onBlur={() => {
+                onFocusChange?.(false);
+              }}
+            />
+          </div>
+
+          <div
+            className={`location-search__results${
+              isResultsOpen ? " open" : ""
+            }`}
+            aria-hidden={!isResultsOpen}
+          >
+            {hasQuery ? (
+              results.length > 0 ? (
+                results.map((result) => {
+                  if (result.type === "coords") {
+                    return (
+                      <button
+                        key={result.id}
+                        type="button"
+                        className="location-search__item location-search__item--coords"
+                        onClick={() =>
+                          handleSelectCoordinates(result.coords)
+                        }
+                      >
+                        <span className="location-search__name">
+                          Coordinates found
+                        </span>
+                        <span className="location-search__coords">
+                          {formatCoords(
+                            result.coords.lat,
+                            result.coords.lng
+                          )}
+                        </span>
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <button
+                      key={result.id}
+                      type="button"
+                      className="location-search__item"
+                      onClick={() => handleSelectLocation(result.location)}
+                    >
+                      <span className="location-search__name">
+                        {result.location.name || "Untitled"}
+                      </span>
+                      <span className="location-search__coords">
+                        {formatCoords(
+                          result.location.lat,
+                          result.location.lng
+                        )}
+                      </span>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="location-search__empty">
+                  No results for "{trimmedQuery}"
+                </div>
+              )
+            ) : null}
+          </div>
         </div>
       </div>
-
-      {listOpen && trimmedQuery && (
-        <div className="location-search__results glass-panel">
-          {results.length > 0 ? (
-            results.map((result) => {
-              if (result.type === "coords") {
-                return (
-                  <button
-                    key={result.id}
-                    type="button"
-                    className="location-search__item location-search__item--coords"
-                    onClick={() => handleSelectCoordinates(result.coords)}
-                  >
-                    <span className="location-search__name">
-                      Coordinates found
-                    </span>
-                    <span className="location-search__coords">
-                      {formatCoords(result.coords.lat, result.coords.lng)}
-                    </span>
-                  </button>
-                );
-              }
-
-              return (
-                <button
-                  key={result.id}
-                  type="button"
-                  className="location-search__item"
-                  onClick={() => handleSelectLocation(result.location)}
-                >
-                  <span className="location-search__name">
-                    {result.location.name || "Untitled"}
-                  </span>
-                  <span className="location-search__coords">
-                    {formatCoords(
-                      result.location.lat,
-                      result.location.lng
-                    )}
-                  </span>
-                </button>
-              );
-            })
-          ) : (
-            <div className="location-search__empty">
-              No results for "{trimmedQuery}"
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }
