@@ -11,6 +11,11 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
     typeof currentRoute === "string"
       ? currentRoute === "/"
       : window.location.pathname === "/";
+  const isProfilePage =
+    typeof currentRoute === "string"
+      ? currentRoute === "/profile"
+      : window.location.pathname === "/profile";
+  const logoSrc = isProfilePage ? velaLogo : isLight ? velaLogoBlack : velaLogo;
 
   function handleAuthClick() {
     if (isLoading) return;
@@ -32,7 +37,7 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
         {isHome ? (
           <div className="navbar-logo disabled">
             <img
-              src={isLight ? velaLogoBlack : velaLogo}
+              src={logoSrc}
               alt="VELA"
               className="logo-img"
             />
@@ -44,7 +49,7 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
             onClick={(event) => handleNavigate(event, "/")}
           >
             <img
-              src={isLight ? velaLogoBlack : velaLogo}
+              src={logoSrc}
               alt="VELA"
               className="logo-img"
             />
