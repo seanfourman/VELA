@@ -649,9 +649,7 @@ const MapView = forwardRef(function MapView(
       }, MARKER_EXIT_MS);
     }
 
-    const isFavorite = favoriteSpotKeys.has(
-      getSpotKey(latlng.lat, latlng.lng)
-    );
+    const isFavorite = favoriteSpotKeys.has(getSpotKey(latlng.lat, latlng.lng));
     const nextMarker = {
       lat: latlng.lat,
       lng: latlng.lng,
@@ -901,22 +899,25 @@ const MapView = forwardRef(function MapView(
     setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
   }, [getSpotKey, placedMarker, selectedDarkSpot]);
 
-  const handleToggleStargazeTarget = useCallback((spot) => {
-    if (!spot) return;
-    const spotKey = getSpotKey(spot.lat, spot.lng);
-    const isSelected =
-      selectedDarkSpot &&
-      getSpotKey(selectedDarkSpot.lat, selectedDarkSpot.lng) === spotKey;
-    if (isSelected) {
-      setSelectedDarkSpot(null);
-      return;
-    }
-    setSelectedDarkSpot({
-      lat: spot.lat,
-      lng: spot.lng,
-      label: spot.name || "Stargazing spot",
-    });
-  }, [getSpotKey, selectedDarkSpot]);
+  const handleToggleStargazeTarget = useCallback(
+    (spot) => {
+      if (!spot) return;
+      const spotKey = getSpotKey(spot.lat, spot.lng);
+      const isSelected =
+        selectedDarkSpot &&
+        getSpotKey(selectedDarkSpot.lat, selectedDarkSpot.lng) === spotKey;
+      if (isSelected) {
+        setSelectedDarkSpot(null);
+        return;
+      }
+      setSelectedDarkSpot({
+        lat: spot.lat,
+        lng: spot.lng,
+        label: spot.name || "Stargazing spot",
+      });
+    },
+    [getSpotKey, selectedDarkSpot]
+  );
 
   const handleRemoveFavoriteSpot = useCallback(
     (spotKey) => {
@@ -955,9 +956,7 @@ const MapView = forwardRef(function MapView(
 
       const timeoutId = setTimeout(() => {
         favoriteRemovalTimeoutsRef.current.delete(spotKey);
-        setExitingFavoriteKeys((prev) =>
-          prev.filter((key) => key !== spotKey)
-        );
+        setExitingFavoriteKeys((prev) => prev.filter((key) => key !== spotKey));
         handleRemoveFavoriteSpot(spotKey);
       }, FAVORITE_EXIT_MS);
 
@@ -1189,7 +1188,7 @@ const MapView = forwardRef(function MapView(
                         : null
                     }
                     coordsLabel="Recommended spot"
-                    extraActionLabel="Spot details"
+                    extraActionLabel="Details"
                     isTarget={Boolean(isTarget)}
                     onToggleTarget={() => handleToggleStargazeTarget(spot)}
                   />
@@ -1226,166 +1225,166 @@ const MapView = forwardRef(function MapView(
                 popupopen: () => centerOnCoords(spot.lat, spot.lon),
               }}
             >
-            <Popup>
-              <div className="context-menu-popup darkspot-popup">
-                {(() => {
-                  const isSelected =
-                    selectedDarkSpot &&
-                    Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
-                    Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6;
-                  const buttonLabel = isSelected
-                    ? "This spot is the active target"
-                    : "Use this spot for quick actions";
-                  const hoverLabel = isSelected
-                    ? "Active target"
-                    : "Set as target";
-                  const favoriteLabel = isFavoriteSpot
-                    ? "Favorited"
-                    : "Favorite";
-                  const favoriteButtonLabel = isFavoriteSpot
-                    ? "Remove from favorites"
-                    : "Add to favorites";
-                  return (
-                    <div className="target-toggle-row">
-                      <div className="target-toggle-wrapper">
-                        <button
-                          className={`target-toggle${
-                            isSelected ? " active" : ""
-                          }`}
-                          aria-label={buttonLabel}
-                          onClick={(event) => {
-                            event.currentTarget.blur();
-                            if (isSelected) {
-                              setSelectedDarkSpot(null);
-                              return;
-                            }
-                            setSelectedDarkSpot({
-                              lat: spot.lat,
-                              lng: spot.lon,
-                              label: "Stargazing spot",
-                            });
-                          }}
-                        >
-                          <img
-                            src={targetIcon}
-                            alt=""
-                            aria-hidden="true"
-                            className="target-toggle-icon"
-                          />
-                        </button>
-                        <span
-                          className={`target-toggle-label${
-                            isSelected ? " active" : ""
-                          }`}
-                          aria-hidden="true"
-                        >
-                          {hoverLabel}
-                        </span>
-                      </div>
-                      {isAuthenticated ? (
+              <Popup>
+                <div className="context-menu-popup darkspot-popup">
+                  {(() => {
+                    const isSelected =
+                      selectedDarkSpot &&
+                      Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
+                      Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6;
+                    const buttonLabel = isSelected
+                      ? "This spot is the active target"
+                      : "Use this spot for quick actions";
+                    const hoverLabel = isSelected
+                      ? "Active target"
+                      : "Set as target";
+                    const favoriteLabel = isFavoriteSpot
+                      ? "Favorited"
+                      : "Favorite";
+                    const favoriteButtonLabel = isFavoriteSpot
+                      ? "Remove from favorites"
+                      : "Add to favorites";
+                    return (
+                      <div className="target-toggle-row">
                         <div className="target-toggle-wrapper">
                           <button
-                            className={`target-toggle favorite-toggle${
-                              isFavoriteSpot ? " active" : ""
+                            className={`target-toggle${
+                              isSelected ? " active" : ""
                             }`}
-                            aria-label={favoriteButtonLabel}
+                            aria-label={buttonLabel}
                             onClick={(event) => {
                               event.currentTarget.blur();
-                              handleToggleDarkSpotFavorite(spot);
+                              if (isSelected) {
+                                setSelectedDarkSpot(null);
+                                return;
+                              }
+                              setSelectedDarkSpot({
+                                lat: spot.lat,
+                                lng: spot.lon,
+                                label: "Stargazing spot",
+                              });
                             }}
                           >
                             <img
-                              src={favoriteIcon}
+                              src={targetIcon}
                               alt=""
                               aria-hidden="true"
-                              className="favorite-toggle-icon"
+                              className="target-toggle-icon"
                             />
                           </button>
                           <span
-                            className={`target-toggle-label favorite-toggle-label${
-                              isFavoriteSpot ? " active" : ""
+                            className={`target-toggle-label${
+                              isSelected ? " active" : ""
                             }`}
                             aria-hidden="true"
                           >
-                            {favoriteLabel}
+                            {hoverLabel}
                           </span>
                         </div>
-                      ) : null}
+                        {isAuthenticated ? (
+                          <div className="target-toggle-wrapper">
+                            <button
+                              className={`target-toggle favorite-toggle${
+                                isFavoriteSpot ? " active" : ""
+                              }`}
+                              aria-label={favoriteButtonLabel}
+                              onClick={(event) => {
+                                event.currentTarget.blur();
+                                handleToggleDarkSpotFavorite(spot);
+                              }}
+                            >
+                              <img
+                                src={favoriteIcon}
+                                alt=""
+                                aria-hidden="true"
+                                className="favorite-toggle-icon"
+                              />
+                            </button>
+                            <span
+                              className={`target-toggle-label favorite-toggle-label${
+                                isFavoriteSpot ? " active" : ""
+                              }`}
+                              aria-hidden="true"
+                            >
+                              {favoriteLabel}
+                            </span>
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })()}
+                  <div className="popup-coords">
+                    <span className="popup-coords-label">
+                      Stargazing location
+                    </span>
+                    <span className="popup-coords-value">
+                      {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
+                    </span>
+                  </div>
+
+                  <SkyQualityInfo
+                    lat={spot.lat}
+                    lng={spot.lon}
+                    variant="compact"
+                  />
+
+                  <div className="darkspot-stats">
+                    <div className="darkspot-stat">
+                      <span className="darkspot-stat-label">
+                        Level
+                        <span
+                          className="stat-help"
+                          tabIndex={0}
+                          aria-label="Darkness rating: lower numbers are darker skies (1-5)"
+                          data-tooltip="Darkness rating: lower numbers are darker skies (1-5)"
+                        >
+                          ?
+                        </span>
+                      </span>
+                      <span className="darkspot-stat-value">
+                        {spot.level ?? "--"}
+                      </span>
                     </div>
-                  );
-                })()}
-                <div className="popup-coords">
-                  <span className="popup-coords-label">
-                    Stargazing location
-                  </span>
-                  <span className="popup-coords-value">
-                    {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
-                  </span>
-                </div>
-
-                <SkyQualityInfo
-                  lat={spot.lat}
-                  lng={spot.lon}
-                  variant="compact"
-                />
-
-                <div className="darkspot-stats">
-                  <div className="darkspot-stat">
-                    <span className="darkspot-stat-label">
-                      Level
-                      <span
-                        className="stat-help"
-                        tabIndex={0}
-                        aria-label="Darkness rating: lower numbers are darker skies (1-5)"
-                        data-tooltip="Darkness rating: lower numbers are darker skies (1-5)"
-                      >
-                        ?
+                    <div className="darkspot-stat">
+                      <span className="darkspot-stat-label">
+                        Light value
+                        <span
+                          className="stat-help"
+                          tabIndex={0}
+                          aria-label="Modeled brightness at the site (ucd/m²)"
+                          data-tooltip="Modeled brightness at the site (ucd/m²)"
+                        >
+                          ?
+                        </span>
                       </span>
-                    </span>
-                    <span className="darkspot-stat-value">
-                      {spot.level ?? "--"}
-                    </span>
+                      <span className="darkspot-stat-value">
+                        {spot.light_value != null
+                          ? spot.light_value.toFixed(2)
+                          : "--"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="darkspot-stat">
-                    <span className="darkspot-stat-label">
-                      Light value
-                      <span
-                        className="stat-help"
-                        tabIndex={0}
-                        aria-label="Modeled brightness at the site (ucd/m²)"
-                        data-tooltip="Modeled brightness at the site (ucd/m²)"
+                  <div className="popup-actions">
+                    {getDirectionsOrigin() && (
+                      <button
+                        className="popup-btn"
+                        onClick={() => {
+                          const origin = getDirectionsOrigin();
+                          if (!origin) return;
+                          const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${spot.lat},${spot.lon}`;
+                          window.open(url, "_blank");
+                        }}
                       >
-                        ?
-                      </span>
-                    </span>
-                    <span className="darkspot-stat-value">
-                      {spot.light_value != null
-                        ? spot.light_value.toFixed(2)
-                        : "--"}
-                    </span>
+                        Get Directions
+                        <br />
+                        (from {getDirectionsOrigin()?.label.toLowerCase()})
+                      </button>
+                    )}
                   </div>
                 </div>
-                <div className="popup-actions">
-                  {getDirectionsOrigin() && (
-                    <button
-                      className="popup-btn"
-                      onClick={() => {
-                        const origin = getDirectionsOrigin();
-                        if (!origin) return;
-                        const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${spot.lat},${spot.lon}`;
-                        window.open(url, "_blank");
-                      }}
-                    >
-                      Get Directions
-                      <br />
-                      (from {getDirectionsOrigin()?.label.toLowerCase()})
-                    </button>
-                  )}
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        );
+              </Popup>
+            </Marker>
+          );
         })}
 
         {favoriteOnlySpots.map((spot) => {
@@ -1425,9 +1424,7 @@ const MapView = forwardRef(function MapView(
                 <ContextMenuPopup
                   coords={{ lat: spot.lat, lng: spot.lng }}
                   onGetDirections={handleDirections}
-                  onRemovePin={
-                    isAuthenticated ? handleRemoveFavorite : null
-                  }
+                  onRemovePin={isAuthenticated ? handleRemoveFavorite : null}
                   isAuthenticated={Boolean(isAuthenticated)}
                   isFavorite={true}
                   onToggleFavorite={
