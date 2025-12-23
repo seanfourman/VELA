@@ -205,16 +205,37 @@
   --marker-ring: rgba(251, 191, 36, 0.35);
   box-shadow: 0 0 12px var(--marker-glow);
   border-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .stargaze-marker .stargaze-star {
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  color: #fef3c7;
-  text-shadow: 0 0 8px rgba(251, 191, 36, 0.9);
+  width: 10px;
+  height: 10px;
+  display: block;
+  filter: brightness(0) invert(1)
+    drop-shadow(0 0 4px rgba(251, 191, 36, 0.8));
+  pointer-events: none;
+}
+
+.favorite-marker .marker-dot.favorite-dot {
+  --marker-color: #ec4899;
+  --marker-glow: rgba(236, 72, 153, 0.6);
+  --marker-ring: rgba(236, 72, 153, 0.35);
+  box-shadow: 0 0 14px var(--marker-glow);
+  border-color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.favorite-marker .favorite-heart {
+  width: 10px;
+  height: 10px;
+  display: block;
+  filter: brightness(0) invert(1)
+    drop-shadow(0 0 4px rgba(236, 72, 153, 0.85));
   pointer-events: none;
 }
 

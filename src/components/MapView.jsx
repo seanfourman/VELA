@@ -32,6 +32,8 @@ import { fetchDarkSpots } from "../utils/darkSpots";
 import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
 import targetIcon from "../assets/icons/target-icon.svg";
 import favoriteIcon from "../assets/icons/favorite-icon.svg";
+import favoriteFullIcon from "../assets/icons/favorite-full-icon.svg";
+import starFullIcon from "../assets/icons/star-full-icon.svg";
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
 const LOCATION_ZOOM = 16;
@@ -124,8 +126,22 @@ const stargazeIcon = new L.DivIcon({
   className: "custom-marker stargaze-marker",
   html: `
     <div class="marker-pin stargaze-pin">
-      <div class="marker-dot stargaze-dot"></div>
-      <div class="stargaze-star" aria-hidden="true">&#9733;</div>
+      <div class="marker-dot stargaze-dot">
+        <img class="stargaze-star" src="${starFullIcon}" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
+const favoriteSpotIcon = new L.DivIcon({
+  className: "custom-marker favorite-marker",
+  html: `
+    <div class="marker-pin favorite-pin">
+      <div class="marker-dot favorite-dot">
+        <img class="favorite-heart" src="${favoriteFullIcon}" alt="" aria-hidden="true" />
+      </div>
     </div>
   `,
   iconSize: [30, 30],
@@ -272,14 +288,16 @@ const MapView = forwardRef(function MapView(
   const [latestGridShot, setLatestGridShot] = useState(null);
   const [lightOverlayEnabled, setLightOverlayEnabled] = useState(false);
   const [activeStargazeId, setActiveStargazeId] = useState(null);
-  const [favoriteDarkSpotKeys, setFavoriteDarkSpotKeys] = useState(
-    () => new Set()
-  );
+  const [favoriteSpots, setFavoriteSpots] = useState([]);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
   const lastGridShotAtRef = useRef(0);
   const stargazeMarkerRefs = useRef(new Map());
+  const favoriteSpotKeys = useMemo(
+    () => new Set(favoriteSpots.map((spot) => spot.key)),
+    [favoriteSpots]
+  );
 
   const {
     visiblePlanets,
@@ -324,15 +342,21 @@ const MapView = forwardRef(function MapView(
     });
   }, []);
 
+  const getSpotKey = useCallback(
+    (lat, lng) => `${lat.toFixed(5)}:${lng.toFixed(5)}`,
+    []
+  );
+
   const handleCoordinateSearch = useCallback(
     ({ lat, lng }) => {
+      const isFavorite = favoriteSpotKeys.has(getSpotKey(lat, lng));
       setContextMenu(null);
       setSelectedDarkSpot(null);
       setActiveStargazeId(null);
-      setPlacedMarker({ lat, lng, id: Date.now(), isFavorite: false });
+      setPlacedMarker({ lat, lng, id: Date.now(), isFavorite });
       flyToCoordinates(lat, lng, LOCATION_ZOOM);
     },
-    [flyToCoordinates]
+    [favoriteSpotKeys, flyToCoordinates, getSpotKey]
   );
 
   const handleStargazeSearch = useCallback(
@@ -370,6 +394,18 @@ const MapView = forwardRef(function MapView(
       marker.openPopup();
     }
   }, [activeStargazeId]);
+
+  useEffect(() => {
+    if (!placedMarker) return;
+    const isFavorite = favoriteSpotKeys.has(
+      getSpotKey(placedMarker.lat, placedMarker.lng)
+    );
+    if (placedMarker.isFavorite === isFavorite) return;
+    setPlacedMarker((prev) => {
+      if (!prev) return prev;
+      return { ...prev, isFavorite };
+    });
+  }, [favoriteSpotKeys, getSpotKey, placedMarker]);
 
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
@@ -419,11 +455,14 @@ const MapView = forwardRef(function MapView(
       }, MARKER_EXIT_MS);
     }
 
+    const isFavorite = favoriteSpotKeys.has(
+      getSpotKey(latlng.lat, latlng.lng)
+    );
     const nextMarker = {
       lat: latlng.lat,
       lng: latlng.lng,
       id: Date.now(),
-      isFavorite: false,
+      isFavorite,
     };
 
     setPlacedMarker(nextMarker);
@@ -535,26 +574,19 @@ const MapView = forwardRef(function MapView(
     }
   };
 
-  const getDarkSpotKey = useCallback(
-    (spot) => `${spot.lat.toFixed(5)}:${spot.lon.toFixed(5)}`,
-    []
-  );
-
   const handleToggleDarkSpotFavorite = useCallback(
     (spot) => {
       if (!spot) return;
-      const key = getDarkSpotKey(spot);
-      setFavoriteDarkSpotKeys((prev) => {
-        const next = new Set(prev);
-        if (next.has(key)) {
-          next.delete(key);
-        } else {
-          next.add(key);
+      const key = getSpotKey(spot.lat, spot.lon);
+      setFavoriteSpots((prev) => {
+        const exists = prev.some((item) => item.key === key);
+        if (exists) {
+          return prev.filter((item) => item.key !== key);
         }
-        return next;
+        return [...prev, { key, lat: spot.lat, lng: spot.lon }];
       });
     },
-    [getDarkSpotKey]
+    [getSpotKey]
   );
 
   useEffect(() => {
@@ -588,6 +620,20 @@ const MapView = forwardRef(function MapView(
     : hasAnyLocation
     ? "Find stargazing spots near you"
     : "Drop a pin or enable location";
+  const favoriteOnlySpots = useMemo(() => {
+    if (favoriteSpots.length === 0) return [];
+    const activeDarkSpotKeys = new Set(
+      darkSpots.map((spot) => getSpotKey(spot.lat, spot.lon))
+    );
+    const placedKey = placedMarker
+      ? getSpotKey(placedMarker.lat, placedMarker.lng)
+      : null;
+    return favoriteSpots.filter((spot) => {
+      if (placedKey && spot.key === placedKey) return false;
+      if (activeDarkSpotKeys.has(spot.key)) return false;
+      return true;
+    });
+  }, [darkSpots, favoriteSpots, getSpotKey, placedMarker]);
 
   const zoomOutToMin = useCallback(() => {
     const map = mapRef.current;
@@ -603,11 +649,37 @@ const MapView = forwardRef(function MapView(
   }, []);
 
   const handleTogglePinnedFavorite = useCallback(() => {
+    if (!placedMarker) return;
+    const key = getSpotKey(placedMarker.lat, placedMarker.lng);
+    setFavoriteSpots((prev) => {
+      const exists = prev.some((item) => item.key === key);
+      if (exists) {
+        return prev.filter((item) => item.key !== key);
+      }
+      return [
+        ...prev,
+        { key, lat: placedMarker.lat, lng: placedMarker.lng },
+      ];
+    });
     setPlacedMarker((prev) => {
       if (!prev) return prev;
       return { ...prev, isFavorite: !prev.isFavorite };
     });
-  }, []);
+  }, [getSpotKey, placedMarker]);
+
+  const handleRemoveFavoriteSpot = useCallback(
+    (spotKey) => {
+      if (!spotKey) return;
+      setFavoriteSpots((prev) => prev.filter((item) => item.key !== spotKey));
+      setPlacedMarker((prev) => {
+        if (!prev) return prev;
+        const currentKey = getSpotKey(prev.lat, prev.lng);
+        if (currentKey !== spotKey) return prev;
+        return { ...prev, isFavorite: false };
+      });
+    },
+    [getSpotKey]
+  );
 
   useImperativeHandle(ref, () => ({ zoomOutToMin }), [zoomOutToMin]);
 
@@ -717,7 +789,7 @@ const MapView = forwardRef(function MapView(
           <Marker
             key={`placed-${placedMarker.id}`}
             position={[placedMarker.lat, placedMarker.lng]}
-            icon={pinIcon}
+            icon={placedMarker.isFavorite ? favoriteSpotIcon : pinIcon}
             eventHandlers={{
               popupopen: () =>
                 centerOnCoords(placedMarker.lat, placedMarker.lng),
@@ -778,11 +850,15 @@ const MapView = forwardRef(function MapView(
             </Marker>
           ))}
 
-        {darkSpots.map((spot, i) => (
-          <Marker
-            key={`darkspot-${i}`}
-            position={[spot.lat, spot.lon]}
-            icon={darkSpotIcon}
+        {darkSpots.map((spot, i) => {
+          const isFavoriteSpot = favoriteSpotKeys.has(
+            getSpotKey(spot.lat, spot.lon)
+          );
+          return (
+            <Marker
+              key={`darkspot-${i}`}
+              position={[spot.lat, spot.lon]}
+              icon={isFavoriteSpot ? favoriteSpotIcon : darkSpotIcon}
             eventHandlers={{
               popupopen: () => centerOnCoords(spot.lat, spot.lon),
             }}
@@ -800,9 +876,6 @@ const MapView = forwardRef(function MapView(
                   const hoverLabel = isSelected
                     ? "Active target"
                     : "Set as target";
-                  const isFavoriteSpot = favoriteDarkSpotKeys.has(
-                    getDarkSpotKey(spot)
-                  );
                   const favoriteLabel = isFavoriteSpot
                     ? "Favorited"
                     : "Favorite";
@@ -946,6 +1019,36 @@ const MapView = forwardRef(function MapView(
                     </button>
                   )}
                 </div>
+              </div>
+            </Popup>
+          </Marker>
+        );
+        })}
+
+        {favoriteOnlySpots.map((spot) => (
+          <Marker
+            key={`favorite-${spot.key}`}
+            position={[spot.lat, spot.lng]}
+            icon={favoriteSpotIcon}
+          >
+            <Popup>
+              <div className="context-menu-popup favorite-popup">
+                <div className="popup-coords">
+                  <span className="popup-coords-label">Favorite spot</span>
+                  <span className="popup-coords-value">
+                    {spot.lat.toFixed(4)}, {spot.lng.toFixed(4)}
+                  </span>
+                </div>
+                {isAuthenticated ? (
+                  <div className="popup-actions">
+                    <button
+                      className="popup-btn danger"
+                      onClick={() => handleRemoveFavoriteSpot(spot.key)}
+                    >
+                      Remove Favorite
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </Popup>
           </Marker>

@@ -11,6 +11,7 @@ import "./App.css";
 
 const PROFILE_STORAGE_KEY = "vela:profile:settings";
 const STARGAZE_STORAGE_KEY = "vela:stargaze:locations";
+const STARGAZE_DATA_URL = "/data/stargazing-spots.json";
 const DEFAULT_PROFILE = {
   displayName: "",
   avatarUrl: "",
@@ -158,6 +159,34 @@ function App() {
   useEffect(() => {
     localStorage.setItem("mapType", mapType);
   }, [mapType]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (localStorage.getItem(STARGAZE_STORAGE_KEY)) return;
+    let isActive = true;
+
+    const loadSeedLocations = async () => {
+      try {
+        const response = await fetch(STARGAZE_DATA_URL);
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (!Array.isArray(payload) || !isActive) return;
+        const normalized = payload
+          .map(normalizeStargazeLocation)
+          .filter(Boolean);
+        if (normalized.length === 0) return;
+        setStargazeLocations(normalized);
+      } catch {
+        // Seed data unavailable; ignore.
+      }
+    };
+
+    loadSeedLocations();
+
+    return () => {
+      isActive = false;
+    };
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
