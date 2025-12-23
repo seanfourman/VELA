@@ -17,6 +17,10 @@ export default function ContextMenuPopup({
 }) {
   if (!coords) return null;
 
+  const stopPopupEvent = (event) => {
+    event.stopPropagation();
+  };
+
   const canFavorite = Boolean(isAuthenticated && onToggleFavorite);
   const canTarget = Boolean(onToggleTarget);
   const favoriteButtonLabel = isFavorite
@@ -32,7 +36,11 @@ export default function ContextMenuPopup({
   const resolvedRemoveLabel = removeLabel || "Remove Pin";
 
   return (
-    <div className="context-menu-popup">
+    <div
+      className="context-menu-popup"
+      onPointerDown={stopPopupEvent}
+      onClick={stopPopupEvent}
+    >
       {canTarget && canFavorite ? (
         <div className="target-toggle-row">
           <div className="target-toggle-wrapper">

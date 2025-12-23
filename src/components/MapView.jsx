@@ -712,27 +712,56 @@ const MapView = forwardRef(function MapView(
 
   const handleTogglePinnedFavorite = useCallback(() => {
     if (!placedMarker) return;
-    const key = getSpotKey(placedMarker.lat, placedMarker.lng);
+    const { lat, lng } = placedMarker;
+    const key = getSpotKey(lat, lng);
+    const isCurrentlyFavorite = favoriteSpotKeys.has(key);
     setFavoriteSpots((prev) => {
       const exists = prev.some((item) => item.key === key);
       if (exists) {
         return prev.filter((item) => item.key !== key);
       }
-      return [
-        ...prev,
-        { key, lat: placedMarker.lat, lng: placedMarker.lng },
-      ];
+      return [...prev, { key, lat, lng }];
     });
+    if (isCurrentlyFavorite) {
+      setSelectedDarkSpot((prev) => {
+        if (!prev) return prev;
+        const currentKey = getSpotKey(prev.lat, prev.lng);
+        if (currentKey !== key) return prev;
+        return null;
+      });
+    } else {
+      setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
+    }
     setPlacedMarker((prev) => {
       if (!prev) return prev;
       return { ...prev, isFavorite: !prev.isFavorite };
     });
-  }, [getSpotKey, placedMarker]);
+  }, [favoriteSpotKeys, getSpotKey, placedMarker]);
+
+  const handleTogglePinnedTarget = useCallback(() => {
+    if (!placedMarker?.isFavorite) return;
+    const { lat, lng } = placedMarker;
+    const key = getSpotKey(lat, lng);
+    const isSelected =
+      selectedDarkSpot &&
+      getSpotKey(selectedDarkSpot.lat, selectedDarkSpot.lng) === key;
+    if (isSelected) {
+      setSelectedDarkSpot(null);
+      return;
+    }
+    setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
+  }, [getSpotKey, placedMarker, selectedDarkSpot]);
 
   const handleRemoveFavoriteSpot = useCallback(
     (spotKey) => {
       if (!spotKey) return;
       setFavoriteSpots((prev) => prev.filter((item) => item.key !== spotKey));
+      setSelectedDarkSpot((prev) => {
+        if (!prev) return prev;
+        const currentKey = getSpotKey(prev.lat, prev.lng);
+        if (currentKey !== spotKey) return prev;
+        return null;
+      });
       setPlacedMarker((prev) => {
         if (!prev) return prev;
         const currentKey = getSpotKey(prev.lat, prev.lng);
@@ -748,6 +777,12 @@ const MapView = forwardRef(function MapView(
       if (!spotKey) return;
       if (favoriteRemovalTimeoutsRef.current.has(spotKey)) return;
 
+      setSelectedDarkSpot((prev) => {
+        if (!prev) return prev;
+        const currentKey = getSpotKey(prev.lat, prev.lng);
+        if (currentKey !== spotKey) return prev;
+        return null;
+      });
       setExitingFavoriteKeys((prev) =>
         prev.includes(spotKey) ? prev : [...prev, spotKey]
       );
@@ -762,10 +797,16 @@ const MapView = forwardRef(function MapView(
 
       favoriteRemovalTimeoutsRef.current.set(spotKey, timeoutId);
     },
-    [handleRemoveFavoriteSpot]
+    [getSpotKey, handleRemoveFavoriteSpot]
   );
 
   useImperativeHandle(ref, () => ({ zoomOutToMin }), [zoomOutToMin]);
+
+  const isPinnedTarget =
+    placedMarker?.isFavorite &&
+    selectedDarkSpot &&
+    getSpotKey(placedMarker.lat, placedMarker.lng) ===
+      getSpotKey(selectedDarkSpot.lat, selectedDarkSpot.lng);
 
   return (
     <div
@@ -896,6 +937,10 @@ const MapView = forwardRef(function MapView(
                 onToggleFavorite={handleTogglePinnedFavorite}
                 coordsLabel={
                   placedMarker.isFavorite ? "Favorited spot" : "Pinned location"
+                }
+                isTarget={Boolean(isPinnedTarget)}
+                onToggleTarget={
+                  placedMarker.isFavorite ? handleTogglePinnedTarget : null
                 }
               />
             </Popup>
