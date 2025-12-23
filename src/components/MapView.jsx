@@ -321,6 +321,12 @@ const MapView = forwardRef(function MapView(
     () => new Set(exitingFavoriteKeys),
     [exitingFavoriteKeys]
   );
+  const activeStargazeSpot = useMemo(() => {
+    if (!activeStargazeId) return null;
+    return (
+      stargazeLocations.find((spot) => spot.id === activeStargazeId) || null
+    );
+  }, [activeStargazeId, stargazeLocations]);
 
   const {
     visiblePlanets,
@@ -391,6 +397,11 @@ const MapView = forwardRef(function MapView(
     [flyToCoordinates]
   );
 
+  const handleCloseStargazePanel = useCallback(() => {
+    setActiveStargazeId(null);
+    mapRef.current?.closePopup();
+  }, []);
+
   const handleTileLoad = useCallback((event) => {
     const src = event?.tile?.src;
     if (!src) return;
@@ -419,11 +430,17 @@ const MapView = forwardRef(function MapView(
 
   useEffect(() => {
     if (!activeStargazeId) return;
-    const marker = stargazeMarkerRefs.current.get(activeStargazeId);
+    if (activeStargazeSpot) return;
+    setActiveStargazeId(null);
+  }, [activeStargazeId, activeStargazeSpot]);
+
+  useEffect(() => {
+    if (!activeStargazeSpot) return;
+    const marker = stargazeMarkerRefs.current.get(activeStargazeSpot.id);
     if (marker?.openPopup) {
       marker.openPopup();
     }
-  }, [activeStargazeId]);
+  }, [activeStargazeSpot]);
 
   useEffect(() => {
     if (!placedMarker) return;
@@ -649,6 +666,21 @@ const MapView = forwardRef(function MapView(
     [getSpotKey]
   );
 
+  const handleToggleStargazeFavorite = useCallback(
+    (spot) => {
+      if (!spot) return;
+      const key = getSpotKey(spot.lat, spot.lng);
+      setFavoriteSpots((prev) => {
+        const exists = prev.some((item) => item.key === key);
+        if (exists) {
+          return prev.filter((item) => item.key !== key);
+        }
+        return [...prev, { key, lat: spot.lat, lng: spot.lng }];
+      });
+    },
+    [getSpotKey]
+  );
+
   useEffect(() => {
     if (!location) return;
     if (planetQuery?.source === "pin" || planetQuery?.source === "darkspot")
@@ -666,6 +698,7 @@ const MapView = forwardRef(function MapView(
   const hasPinnedSpot = Boolean(placedMarker);
   const hasAnyLocation =
     hasPinnedSpot || Boolean(location) || Boolean(selectedDarkSpot);
+  const isStargazePanelOpen = Boolean(activeStargazeSpot);
   const selectedTargetLabel = selectedDarkSpot?.label || "stargazing spot";
   const selectedTargetLabelLower = selectedTargetLabel.toLowerCase();
   const quickPlanetsTitle = selectedDarkSpot
@@ -687,15 +720,19 @@ const MapView = forwardRef(function MapView(
     const activeDarkSpotKeys = new Set(
       darkSpots.map((spot) => getSpotKey(spot.lat, spot.lon))
     );
+    const stargazeKeys = new Set(
+      stargazeLocations.map((spot) => getSpotKey(spot.lat, spot.lng))
+    );
     const placedKey = placedMarker
       ? getSpotKey(placedMarker.lat, placedMarker.lng)
       : null;
     return favoriteSpots.filter((spot) => {
       if (placedKey && spot.key === placedKey) return false;
       if (activeDarkSpotKeys.has(spot.key)) return false;
+      if (stargazeKeys.has(spot.key)) return false;
       return true;
     });
-  }, [darkSpots, favoriteSpots, getSpotKey, placedMarker]);
+  }, [darkSpots, favoriteSpots, getSpotKey, placedMarker, stargazeLocations]);
 
   const zoomOutToMin = useCallback(() => {
     const map = mapRef.current;
@@ -751,6 +788,23 @@ const MapView = forwardRef(function MapView(
     }
     setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
   }, [getSpotKey, placedMarker, selectedDarkSpot]);
+
+  const handleToggleStargazeTarget = useCallback((spot) => {
+    if (!spot) return;
+    const spotKey = getSpotKey(spot.lat, spot.lng);
+    const isSelected =
+      selectedDarkSpot &&
+      getSpotKey(selectedDarkSpot.lat, selectedDarkSpot.lng) === spotKey;
+    if (isSelected) {
+      setSelectedDarkSpot(null);
+      return;
+    }
+    setSelectedDarkSpot({
+      lat: spot.lat,
+      lng: spot.lng,
+      label: spot.name || "Stargazing spot",
+    });
+  }, [getSpotKey, selectedDarkSpot]);
 
   const handleRemoveFavoriteSpot = useCallback(
     (spotKey) => {
@@ -948,46 +1002,69 @@ const MapView = forwardRef(function MapView(
         )}
 
         {Array.isArray(stargazeLocations) &&
-          stargazeLocations.map((spot) => (
-            <Marker
-              key={`stargaze-${spot.id}`}
-              position={[spot.lat, spot.lng]}
-              icon={stargazeIcon}
-              ref={(marker) => {
-                if (marker) {
-                  stargazeMarkerRefs.current.set(spot.id, marker);
-                } else {
-                  stargazeMarkerRefs.current.delete(spot.id);
+          stargazeLocations.map((spot) => {
+            const spotKey = getSpotKey(spot.lat, spot.lng);
+            const isFavoriteSpot = favoriteSpotKeys.has(spotKey);
+            const isTarget =
+              selectedDarkSpot &&
+              Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
+              Math.abs(selectedDarkSpot.lng - spot.lng) < 1e-6;
+            const directionsOrigin = getDirectionsOrigin();
+            const handleDirections = directionsOrigin
+              ? () => {
+                  const url = `https://www.google.com/maps/dir/${directionsOrigin.lat},${directionsOrigin.lng}/${spot.lat},${spot.lng}`;
+                  window.open(url, "_blank");
                 }
-              }}
-            >
-              <Popup>
-                <div className="context-menu-popup stargaze-popup">
-                  <div className="stargaze-popup__title">{spot.name}</div>
-                  {spot.description ? (
-                    <div className="stargaze-popup__desc">
-                      {spot.description}
-                    </div>
-                  ) : null}
-                  <div className="stargaze-popup__coords">
-                    {spot.lat.toFixed(4)}, {spot.lng.toFixed(4)}
-                  </div>
-                  {spot.images && spot.images.length > 0 ? (
-                    <div className="stargaze-popup__images">
-                      {spot.images.slice(0, 3).map((imageUrl, index) => (
-                        <img
-                          key={`${spot.id}-${index}`}
-                          src={imageUrl}
-                          alt={`${spot.name} view ${index + 1}`}
-                          loading="lazy"
-                        />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+              : null;
+
+            return (
+              <Marker
+                key={`stargaze-${spot.id}`}
+                position={[spot.lat, spot.lng]}
+                icon={stargazeIcon}
+                ref={(marker) => {
+                  if (marker) {
+                    stargazeMarkerRefs.current.set(spot.id, marker);
+                  } else {
+                    stargazeMarkerRefs.current.delete(spot.id);
+                  }
+                }}
+                eventHandlers={{
+                  click: () => {
+                    setActiveStargazeId(spot.id);
+                  },
+                  popupopen: () => {
+                    setActiveStargazeId(spot.id);
+                    centerOnCoords(spot.lat, spot.lng);
+                  },
+                  popupclose: () => {
+                    setActiveStargazeId((prev) =>
+                      prev === spot.id ? null : prev
+                    );
+                  },
+                }}
+              >
+                <Popup>
+                  <ContextMenuPopup
+                    coords={{ lat: spot.lat, lng: spot.lng }}
+                    onGetDirections={handleDirections}
+                    onRemovePin={handleCloseStargazePanel}
+                    isAuthenticated={Boolean(isAuthenticated)}
+                    isFavorite={Boolean(isFavoriteSpot)}
+                    onToggleFavorite={
+                      isAuthenticated
+                        ? () => handleToggleStargazeFavorite(spot)
+                        : null
+                    }
+                    coordsLabel="Recommended spot"
+                    removeLabel="Close"
+                    isTarget={Boolean(isTarget)}
+                    onToggleTarget={() => handleToggleStargazeTarget(spot)}
+                  />
+                </Popup>
+              </Marker>
+            );
+          })}
 
         {darkSpots.map((spot, i) => {
           const isFavoriteSpot = favoriteSpotKeys.has(
@@ -998,10 +1075,10 @@ const MapView = forwardRef(function MapView(
               key={`darkspot-${i}`}
               position={[spot.lat, spot.lon]}
               icon={isFavoriteSpot ? favoriteSpotIcon : darkSpotIcon}
-            eventHandlers={{
-              popupopen: () => centerOnCoords(spot.lat, spot.lon),
-            }}
-          >
+              eventHandlers={{
+                popupopen: () => centerOnCoords(spot.lat, spot.lon),
+              }}
+            >
             <Popup>
               <div className="context-menu-popup darkspot-popup">
                 {(() => {
@@ -1219,6 +1296,53 @@ const MapView = forwardRef(function MapView(
           );
         })}
       </MapContainer>
+
+      <aside
+        className={`stargaze-panel glass-panel glass-panel-elevated${
+          isStargazePanelOpen ? " open" : ""
+        }`}
+        aria-hidden={!isStargazePanelOpen}
+      >
+        {activeStargazeSpot ? (
+          <>
+            <div className="stargaze-panel__header">
+              <div className="stargaze-panel__title">
+                {activeStargazeSpot.name}
+              </div>
+              <button
+                type="button"
+                className="stargaze-panel__close"
+                onClick={handleCloseStargazePanel}
+                aria-label="Close spot details"
+              >
+                <span aria-hidden="true">X</span>
+              </button>
+            </div>
+            <div className="stargaze-panel__content">
+              {activeStargazeSpot.description ? (
+                <div className="stargaze-panel__desc">
+                  {activeStargazeSpot.description}
+                </div>
+              ) : null}
+              {activeStargazeSpot.images &&
+              activeStargazeSpot.images.length > 0 ? (
+                <div className="stargaze-panel__images">
+                  {activeStargazeSpot.images
+                    .slice(0, 4)
+                    .map((imageUrl, index) => (
+                      <img
+                        key={`${activeStargazeSpot.id}-${index}`}
+                        src={imageUrl}
+                        alt={`${activeStargazeSpot.name} view ${index + 1}`}
+                        loading="lazy"
+                      />
+                    ))}
+                </div>
+              ) : null}
+            </div>
+          </>
+        ) : null}
+      </aside>
 
       <MapQuickActions
         onShowPlanets={handleGetVisiblePlanets}
