@@ -110,6 +110,19 @@ const pinIconRemoving = new L.DivIcon({
   iconAnchor: [15, 15],
 });
 
+const favoritePinIconRemoving = new L.DivIcon({
+  className: "custom-marker favorite-marker removing",
+  html: `
+    <div class="marker-pin favorite-pin removing">
+      <div class="marker-dot favorite-dot removing">
+        <img class="favorite-heart" src="${favoriteFullIcon}" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
 const darkSpotIcon = new L.DivIcon({
   className: "custom-marker dark-spot-marker",
   html: `
@@ -780,7 +793,11 @@ const MapView = forwardRef(function MapView(
               exitingMarker.id || `${exitingMarker.lat}-${exitingMarker.lng}`
             }`}
             position={[exitingMarker.lat, exitingMarker.lng]}
-            icon={pinIconRemoving}
+            icon={
+              exitingMarker.isFavorite
+                ? favoritePinIconRemoving
+                : pinIconRemoving
+            }
             interactive={false}
           />
         )}
