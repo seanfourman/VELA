@@ -91,7 +91,8 @@
     top: 150px;
   }
 
-  .map-container.search-focused .search-distance-selector {
+  .map-container.search-focused .search-distance-selector,
+  .map-container.popup-open .search-distance-selector {
     transform: translateX(calc(-100% - 32px));
     pointer-events: none;
   }

@@ -296,6 +296,35 @@ function LongPressHandler({ onLongPress, delayMs = LONG_PRESS_MS }) {
   return null;
 }
 
+function PopupStateHandler({ onPopupStateChange }) {
+  const map = useMapEvents({});
+
+  useEffect(() => {
+    if (!map || !onPopupStateChange) return undefined;
+
+    const refresh = () => {
+      const popup = map._popup;
+      const hasPopup = Boolean(popup && map.hasLayer(popup));
+      onPopupStateChange(hasPopup);
+    };
+
+    const handle = () => {
+      requestAnimationFrame(refresh);
+    };
+
+    map.on("popupopen", handle);
+    map.on("popupclose", handle);
+    refresh();
+
+    return () => {
+      map.off("popupopen", handle);
+      map.off("popupclose", handle);
+    };
+  }, [map, onPopupStateChange]);
+
+  return null;
+}
+
 const MapView = forwardRef(function MapView(
   {
     location,
@@ -325,6 +354,7 @@ const MapView = forwardRef(function MapView(
     if (typeof window === "undefined") return false;
     return window.matchMedia?.("(max-width: 768px)")?.matches ?? false;
   });
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
@@ -965,7 +995,7 @@ const MapView = forwardRef(function MapView(
     <div
       className={`map-container visible ${mapType}${
         isSearchFocused ? " search-focused" : ""
-      }`}
+      }${isPopupOpen ? " popup-open" : ""}`}
     >
       <PlanetPanelContainer
         ref={planetPanelRef}
@@ -1023,6 +1053,7 @@ const MapView = forwardRef(function MapView(
           onLongPress={handleDoubleClick}
           delayMs={LONG_PRESS_MS}
         />
+        <PopupStateHandler onPopupStateChange={setIsPopupOpen} />
         {location && <MapAnimator location={location} />}
 
         {location && (
