@@ -534,8 +534,10 @@ const MapView = forwardRef(function MapView(
     const target = selectedDarkSpot || placedMarker || location || contextMenu;
     if (!target) return;
 
+    const selectedLabel = selectedDarkSpot?.label || "stargazing spot";
+    const selectedLabelLower = selectedLabel.toLowerCase();
     const label = selectedDarkSpot
-      ? "Visible from stargazing spot"
+      ? `Visible from ${selectedLabelLower}`
       : placedMarker
       ? "Visible from pinned spot"
       : location
@@ -664,15 +666,17 @@ const MapView = forwardRef(function MapView(
   const hasPinnedSpot = Boolean(placedMarker);
   const hasAnyLocation =
     hasPinnedSpot || Boolean(location) || Boolean(selectedDarkSpot);
+  const selectedTargetLabel = selectedDarkSpot?.label || "stargazing spot";
+  const selectedTargetLabelLower = selectedTargetLabel.toLowerCase();
   const quickPlanetsTitle = selectedDarkSpot
-    ? "Visible planets from stargazing spot"
+    ? `Visible planets from ${selectedTargetLabelLower}`
     : hasPinnedSpot
     ? "Visible planets from pinned spot"
     : hasAnyLocation
     ? "Visible planets from your location"
     : "Drop a pin or enable location";
   const quickDarkSpotsTitle = selectedDarkSpot
-    ? "Find spots near the stargazing spot"
+    ? `Find spots near the ${selectedTargetLabelLower}`
     : hasPinnedSpot
     ? "Find stargazing spots near the pin"
     : hasAnyLocation
@@ -1118,6 +1122,10 @@ const MapView = forwardRef(function MapView(
         {favoriteOnlySpots.map((spot) => {
           const directionsOrigin = getDirectionsOrigin();
           const isExiting = exitingFavoriteKeySet.has(spot.key);
+          const isSelected =
+            selectedDarkSpot &&
+            Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
+            Math.abs(selectedDarkSpot.lng - spot.lng) < 1e-6;
           const handleDirections = directionsOrigin
             ? () => {
                 const url = `https://www.google.com/maps/dir/${directionsOrigin.lat},${directionsOrigin.lng}/${spot.lat},${spot.lng}`;
@@ -1126,6 +1134,17 @@ const MapView = forwardRef(function MapView(
             : null;
           const handleRemoveFavorite = () =>
             handleRemoveFavoriteSpotAnimated(spot.key);
+          const handleToggleTarget = () => {
+            if (isSelected) {
+              setSelectedDarkSpot(null);
+              return;
+            }
+            setSelectedDarkSpot({
+              lat: spot.lat,
+              lng: spot.lng,
+              label: "Favorite spot",
+            });
+          };
 
           return (
             <Marker
@@ -1147,6 +1166,8 @@ const MapView = forwardRef(function MapView(
                   }
                   coordsLabel="Favorited spot"
                   removeLabel="Remove Favorite"
+                  isTarget={Boolean(isSelected)}
+                  onToggleTarget={handleToggleTarget}
                 />
               </Popup>
             </Marker>
