@@ -43,6 +43,7 @@ const MIN_ZOOM = 4;
 const MAX_ZOOM = 16;
 const LONG_PRESS_MS = 750;
 const MARKER_EXIT_MS = 280;
+const FAVORITE_EXIT_MS = 260;
 const LIGHT_TILE_URL = "/api/lightmap/{z}/{x}/{y}.png";
 
 const isCoarsePointerEnv = () => {
@@ -306,13 +307,19 @@ const MapView = forwardRef(function MapView(
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
   const favoriteTransitionTimeoutRef = useRef(null);
+  const favoriteRemovalTimeoutsRef = useRef(new Map());
   const lastGridShotAtRef = useRef(0);
   const stargazeMarkerRefs = useRef(new Map());
   const placedMarkerRef = useRef(null);
   const prevPlacedFavoriteRef = useRef(false);
+  const [exitingFavoriteKeys, setExitingFavoriteKeys] = useState([]);
   const favoriteSpotKeys = useMemo(
     () => new Set(favoriteSpots.map((spot) => spot.key)),
     [favoriteSpots]
+  );
+  const exitingFavoriteKeySet = useMemo(
+    () => new Set(exitingFavoriteKeys),
+    [exitingFavoriteKeys]
   );
 
   const {
@@ -403,6 +410,10 @@ const MapView = forwardRef(function MapView(
       if (favoriteTransitionTimeoutRef.current) {
         clearTimeout(favoriteTransitionTimeoutRef.current);
       }
+      favoriteRemovalTimeoutsRef.current.forEach((timeoutId) => {
+        clearTimeout(timeoutId);
+      });
+      favoriteRemovalTimeoutsRef.current.clear();
     };
   }, []);
 
@@ -726,6 +737,28 @@ const MapView = forwardRef(function MapView(
       });
     },
     [getSpotKey]
+  );
+
+  const handleRemoveFavoriteSpotAnimated = useCallback(
+    (spotKey) => {
+      if (!spotKey) return;
+      if (favoriteRemovalTimeoutsRef.current.has(spotKey)) return;
+
+      setExitingFavoriteKeys((prev) =>
+        prev.includes(spotKey) ? prev : [...prev, spotKey]
+      );
+
+      const timeoutId = setTimeout(() => {
+        favoriteRemovalTimeoutsRef.current.delete(spotKey);
+        setExitingFavoriteKeys((prev) =>
+          prev.filter((key) => key !== spotKey)
+        );
+        handleRemoveFavoriteSpot(spotKey);
+      }, FAVORITE_EXIT_MS);
+
+      favoriteRemovalTimeoutsRef.current.set(spotKey, timeoutId);
+    },
+    [handleRemoveFavoriteSpot]
   );
 
   useImperativeHandle(ref, () => ({ zoomOutToMin }), [zoomOutToMin]);
@@ -1084,21 +1117,23 @@ const MapView = forwardRef(function MapView(
 
         {favoriteOnlySpots.map((spot) => {
           const directionsOrigin = getDirectionsOrigin();
+          const isExiting = exitingFavoriteKeySet.has(spot.key);
           const handleDirections = directionsOrigin
             ? () => {
                 const url = `https://www.google.com/maps/dir/${directionsOrigin.lat},${directionsOrigin.lng}/${spot.lat},${spot.lng}`;
                 window.open(url, "_blank");
               }
             : null;
-          const handleRemoveFavorite = () => handleRemoveFavoriteSpot(spot.key);
+          const handleRemoveFavorite = () =>
+            handleRemoveFavoriteSpotAnimated(spot.key);
 
           return (
             <Marker
               key={`favorite-${spot.key}`}
               position={[spot.lat, spot.lng]}
-              icon={favoriteSpotIcon}
+              icon={isExiting ? favoritePinIconRemoving : favoriteSpotIcon}
             >
-              <Popup>
+              <Popup className={isExiting ? "popup-exiting" : undefined}>
                 <ContextMenuPopup
                   coords={{ lat: spot.lat, lng: spot.lng }}
                   onGetDirections={handleDirections}
