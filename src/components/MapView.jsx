@@ -1178,7 +1178,12 @@ const MapView = forwardRef(function MapView(
                     coords={{ lat: spot.lat, lng: spot.lng }}
                     onGetDirections={handleDirections}
                     onExtraAction={
-                      isMobileView ? () => openStargazePanel(spot) : null
+                      isMobileView
+                        ? () => {
+                            openStargazePanel(spot);
+                            mapRef.current?.closePopup();
+                          }
+                        : null
                     }
                     isAuthenticated={Boolean(isAuthenticated)}
                     isFavorite={Boolean(isFavoriteSpot)}
