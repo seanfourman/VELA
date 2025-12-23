@@ -162,6 +162,19 @@ const favoriteSpotIcon = new L.DivIcon({
   iconAnchor: [15, 15],
 });
 
+const favoriteSpotIconTransition = new L.DivIcon({
+  className: "custom-marker favorite-marker favorite-transition",
+  html: `
+    <div class="marker-pin favorite-pin">
+      <div class="marker-dot favorite-dot">
+        <img class="favorite-heart" src="${favoriteFullIcon}" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
 function MapAnimator({ location }) {
   const map = useMap();
   const hasAnimated = useRef(false);
@@ -666,21 +679,6 @@ const MapView = forwardRef(function MapView(
     [getSpotKey]
   );
 
-  const handleToggleStargazeFavorite = useCallback(
-    (spot) => {
-      if (!spot) return;
-      const key = getSpotKey(spot.lat, spot.lng);
-      setFavoriteSpots((prev) => {
-        const exists = prev.some((item) => item.key === key);
-        if (exists) {
-          return prev.filter((item) => item.key !== key);
-        }
-        return [...prev, { key, lat: spot.lat, lng: spot.lng }];
-      });
-    },
-    [getSpotKey]
-  );
-
   useEffect(() => {
     if (!location) return;
     if (planetQuery?.source === "pin" || planetQuery?.source === "darkspot")
@@ -861,6 +859,23 @@ const MapView = forwardRef(function MapView(
       favoriteRemovalTimeoutsRef.current.set(spotKey, timeoutId);
     },
     [getSpotKey, handleRemoveFavoriteSpot]
+  );
+
+  const handleToggleStargazeFavorite = useCallback(
+    (spot) => {
+      if (!spot) return;
+      const key = getSpotKey(spot.lat, spot.lng);
+      const isFavorite = favoriteSpotKeys.has(key);
+      if (isFavorite) {
+        handleRemoveFavoriteSpotAnimated(key);
+        return;
+      }
+      setFavoriteSpots((prev) => [
+        ...prev,
+        { key, lat: spot.lat, lng: spot.lng },
+      ]);
+    },
+    [favoriteSpotKeys, getSpotKey, handleRemoveFavoriteSpotAnimated]
   );
 
   useImperativeHandle(ref, () => ({ zoomOutToMin }), [zoomOutToMin]);
@@ -1075,14 +1090,20 @@ const MapView = forwardRef(function MapView(
             );
           })}
 
-        {favoriteStargazeSpots.map((spot) => (
-          <Marker
-            key={`favorite-stargaze-${spot.id}`}
-            position={[spot.lat, spot.lng]}
-            icon={favoriteSpotIcon}
-            interactive={false}
-          />
-        ))}
+        {favoriteStargazeSpots.map((spot) => {
+          const spotKey = getSpotKey(spot.lat, spot.lng);
+          const isExiting = exitingFavoriteKeySet.has(spotKey);
+          return (
+            <Marker
+              key={`favorite-stargaze-${spot.id}`}
+              position={[spot.lat, spot.lng]}
+              icon={
+                isExiting ? favoritePinIconRemoving : favoriteSpotIconTransition
+              }
+              interactive={false}
+            />
+          );
+        })}
 
         {darkSpots.map((spot, i) => {
           const isFavoriteSpot = favoriteSpotKeys.has(
