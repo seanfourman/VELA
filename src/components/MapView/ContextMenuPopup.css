@@ -95,6 +95,24 @@
   z-index: 6;
 }
 
+.target-toggle-row {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 6;
+}
+
+.target-toggle-row .target-toggle-wrapper {
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+}
+
 .target-toggle {
   position: relative;
   width: 48px;

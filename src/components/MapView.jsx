@@ -31,6 +31,7 @@ import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
 import { fetchDarkSpots } from "../utils/darkSpots";
 import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
 import targetIcon from "../assets/icons/target-icon.svg";
+import favoriteIcon from "../assets/icons/favorite-icon.svg";
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
 const LOCATION_ZOOM = 16;
@@ -271,6 +272,9 @@ const MapView = forwardRef(function MapView(
   const [latestGridShot, setLatestGridShot] = useState(null);
   const [lightOverlayEnabled, setLightOverlayEnabled] = useState(false);
   const [activeStargazeId, setActiveStargazeId] = useState(null);
+  const [favoriteDarkSpotKeys, setFavoriteDarkSpotKeys] = useState(
+    () => new Set()
+  );
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
@@ -531,6 +535,28 @@ const MapView = forwardRef(function MapView(
     }
   };
 
+  const getDarkSpotKey = useCallback(
+    (spot) => `${spot.lat.toFixed(5)}:${spot.lon.toFixed(5)}`,
+    []
+  );
+
+  const handleToggleDarkSpotFavorite = useCallback(
+    (spot) => {
+      if (!spot) return;
+      const key = getDarkSpotKey(spot);
+      setFavoriteDarkSpotKeys((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) {
+          next.delete(key);
+        } else {
+          next.add(key);
+        }
+        return next;
+      });
+    },
+    [getDarkSpotKey]
+  );
+
   useEffect(() => {
     if (!location) return;
     if (planetQuery?.source === "pin" || planetQuery?.source === "darkspot")
@@ -774,41 +800,81 @@ const MapView = forwardRef(function MapView(
                   const hoverLabel = isSelected
                     ? "Active target"
                     : "Set as target";
+                  const isFavoriteSpot = favoriteDarkSpotKeys.has(
+                    getDarkSpotKey(spot)
+                  );
+                  const favoriteLabel = isFavoriteSpot
+                    ? "Favorited"
+                    : "Favorite";
+                  const favoriteButtonLabel = isFavoriteSpot
+                    ? "Remove from favorites"
+                    : "Add to favorites";
                   return (
-                    <div className="target-toggle-wrapper">
-                      <button
-                        className={`target-toggle${
-                          isSelected ? " active" : ""
-                        }`}
-                        aria-label={buttonLabel}
-                        onClick={(event) => {
-                          event.currentTarget.blur();
-                          if (isSelected) {
-                            setSelectedDarkSpot(null);
-                            return;
-                          }
-                          setSelectedDarkSpot({
-                            lat: spot.lat,
-                            lng: spot.lon,
-                            label: "Stargazing spot",
-                          });
-                        }}
-                      >
-                        <img
-                          src={targetIcon}
-                          alt=""
+                    <div className="target-toggle-row">
+                      <div className="target-toggle-wrapper">
+                        <button
+                          className={`target-toggle${
+                            isSelected ? " active" : ""
+                          }`}
+                          aria-label={buttonLabel}
+                          onClick={(event) => {
+                            event.currentTarget.blur();
+                            if (isSelected) {
+                              setSelectedDarkSpot(null);
+                              return;
+                            }
+                            setSelectedDarkSpot({
+                              lat: spot.lat,
+                              lng: spot.lon,
+                              label: "Stargazing spot",
+                            });
+                          }}
+                        >
+                          <img
+                            src={targetIcon}
+                            alt=""
+                            aria-hidden="true"
+                            className="target-toggle-icon"
+                          />
+                        </button>
+                        <span
+                          className={`target-toggle-label${
+                            isSelected ? " active" : ""
+                          }`}
                           aria-hidden="true"
-                          className="target-toggle-icon"
-                        />
-                      </button>
-                      <span
-                        className={`target-toggle-label${
-                          isSelected ? " active" : ""
-                        }`}
-                        aria-hidden="true"
-                      >
-                        {hoverLabel}
-                      </span>
+                        >
+                          {hoverLabel}
+                        </span>
+                      </div>
+                      {isAuthenticated ? (
+                        <div className="target-toggle-wrapper">
+                          <button
+                            className={`target-toggle favorite-toggle${
+                              isFavoriteSpot ? " active" : ""
+                            }`}
+                            aria-label={favoriteButtonLabel}
+                            onClick={(event) => {
+                              event.currentTarget.blur();
+                              handleToggleDarkSpotFavorite(spot);
+                            }}
+                          >
+                            <img
+                              src={favoriteIcon}
+                              alt=""
+                              aria-hidden="true"
+                              className="favorite-toggle-icon"
+                            />
+                          </button>
+                          <span
+                            className={`target-toggle-label favorite-toggle-label${
+                              isFavoriteSpot ? " active" : ""
+                            }`}
+                            aria-hidden="true"
+                          >
+                            {favoriteLabel}
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })()}
