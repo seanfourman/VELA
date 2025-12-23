@@ -7,11 +7,11 @@ import PopupPortal from "./components/PopupPortal";
 import { useCognitoAuth } from "./hooks/useCognitoAuth";
 import { showPopup } from "./utils/popup";
 import { isProbablyHardwareAccelerated } from "./utils/hardwareUtils";
+import stargazeSeed from "../data/stargazing_locations.json";
 import "./App.css";
 
 const PROFILE_STORAGE_KEY = "vela:profile:settings";
 const STARGAZE_STORAGE_KEY = "vela:stargaze:locations";
-const STARGAZE_DATA_URL = "/data/stargazing-spots.json";
 const DEFAULT_PROFILE = {
   displayName: "",
   avatarUrl: "",
@@ -60,11 +60,27 @@ const normalizeStargazeLocation = (value) => {
 
   const name =
     typeof value.name === "string" ? value.name.trim() : "";
-  const lat = Number(value.lat);
-  const lng = Number(value.lng);
+  const coordinates =
+    value.coordinates && typeof value.coordinates === "object"
+      ? value.coordinates
+      : null;
+  const lat = Number(
+    value.lat ??
+      value.latitude ??
+      coordinates?.lat ??
+      coordinates?.latitude
+  );
+  const lng = Number(
+    value.lng ??
+      value.lon ??
+      value.longitude ??
+      coordinates?.lng ??
+      coordinates?.lon ??
+      coordinates?.longitude
+  );
   const description =
     typeof value.description === "string" ? value.description.trim() : "";
-  const images = normalizeImageList(value.images);
+  const images = normalizeImageList(value.images ?? value.photo_urls);
 
   if (!name) return null;
   if (!isValidCoordinate(lat, -90, 90) || !isValidCoordinate(lng, -180, 180)) {
@@ -72,7 +88,10 @@ const normalizeStargazeLocation = (value) => {
   }
 
   return {
-    id: typeof value.id === "string" ? value.id : createStargazeId(),
+    id:
+      typeof value.id === "string" && value.id.trim()
+        ? value.id.trim()
+        : createStargazeId(),
     name,
     lat,
     lng,
@@ -80,6 +99,17 @@ const normalizeStargazeLocation = (value) => {
     images,
   };
 };
+
+const normalizeStargazePayload = (payload) => {
+  const locations = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.locations)
+      ? payload.locations
+      : [];
+  return locations.map(normalizeStargazeLocation).filter(Boolean);
+};
+
+const STARGAZE_SEED_LOCATIONS = normalizeStargazePayload(stargazeSeed);
 
 const loadProfileSettings = () => {
   if (typeof window === "undefined") return { ...DEFAULT_PROFILE };
@@ -99,11 +129,21 @@ const loadStargazeLocations = () => {
     const raw = localStorage.getItem(STARGAZE_STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeStargazeLocation).filter(Boolean);
+    return normalizeStargazePayload(parsed);
   } catch {
     return [];
   }
+};
+
+const mergeStargazeLocations = (seed, local) => {
+  const merged = new Map();
+  (Array.isArray(seed) ? seed : []).forEach((item) => {
+    merged.set(item.id, item);
+  });
+  (Array.isArray(local) ? local : []).forEach((item) => {
+    merged.set(item.id, item);
+  });
+  return Array.from(merged.values());
 };
 
 const normalizePath = (path = "/") => {
@@ -150,7 +190,7 @@ function App() {
     loadProfileSettings()
   );
   const [stargazeLocations, setStargazeLocations] = useState(() =>
-    loadStargazeLocations()
+    mergeStargazeLocations(STARGAZE_SEED_LOCATIONS, loadStargazeLocations())
   );
   const [route, setRoute] = useState(() =>
     normalizePath(window.location.pathname)
@@ -159,34 +199,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem("mapType", mapType);
   }, [mapType]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (localStorage.getItem(STARGAZE_STORAGE_KEY)) return;
-    let isActive = true;
-
-    const loadSeedLocations = async () => {
-      try {
-        const response = await fetch(STARGAZE_DATA_URL);
-        if (!response.ok) return;
-        const payload = await response.json();
-        if (!Array.isArray(payload) || !isActive) return;
-        const normalized = payload
-          .map(normalizeStargazeLocation)
-          .filter(Boolean);
-        if (normalized.length === 0) return;
-        setStargazeLocations(normalized);
-      } catch {
-        // Seed data unavailable; ignore.
-      }
-    };
-
-    loadSeedLocations();
-
-    return () => {
-      isActive = false;
-    };
-  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
