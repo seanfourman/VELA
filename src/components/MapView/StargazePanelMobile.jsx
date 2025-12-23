@@ -23,11 +23,16 @@ export default function StargazePanelMobile({ spot, isOpen, onClose }) {
     <div
       className={`stargaze-panel-mobile ${isOpen ? "open" : "collapsed"}`}
       aria-hidden={!isOpen}
+      onClick={onClose}
     >
-      <div className="stargaze-panel-mobile__sheet glass-panel glass-panel-elevated">
+      <div
+        className="stargaze-panel-mobile__sheet glass-panel glass-panel-elevated"
+        onClick={(event) => {
+          event.stopPropagation();
+        }}
+      >
         {spot ? (
           <>
-            <div className="stargaze-panel-mobile__handle" aria-hidden="true" />
             <div className="stargaze-panel-mobile__header">
               <div className="stargaze-panel-mobile__title">{spot.name}</div>
               <button
