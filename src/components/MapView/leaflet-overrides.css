@@ -214,8 +214,7 @@
   width: 10px;
   height: 10px;
   display: block;
-  filter: brightness(0) invert(1)
-    drop-shadow(0 0 4px rgba(251, 191, 36, 0.8));
+  filter: brightness(0) invert(1) drop-shadow(0 0 4px rgba(251, 191, 36, 0.8));
   pointer-events: none;
 }
 
@@ -228,14 +227,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 18px;
+  height: 18px;
 }
 
 .favorite-marker .favorite-heart {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   display: block;
-  filter: brightness(0) invert(1)
-    drop-shadow(0 0 4px rgba(236, 72, 153, 0.85));
+  filter: brightness(0) invert(1) drop-shadow(0 0 4px rgba(236, 72, 153, 0.85));
   pointer-events: none;
 }
 
