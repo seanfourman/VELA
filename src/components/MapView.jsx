@@ -733,6 +733,15 @@ const MapView = forwardRef(function MapView(
       return true;
     });
   }, [darkSpots, favoriteSpots, getSpotKey, placedMarker, stargazeLocations]);
+  const favoriteStargazeSpots = useMemo(() => {
+    if (!Array.isArray(stargazeLocations) || stargazeLocations.length === 0) {
+      return [];
+    }
+    if (favoriteSpotKeys.size === 0) return [];
+    return stargazeLocations.filter((spot) =>
+      favoriteSpotKeys.has(getSpotKey(spot.lat, spot.lng))
+    );
+  }, [favoriteSpotKeys, getSpotKey, stargazeLocations]);
 
   const zoomOutToMin = useCallback(() => {
     const map = mapRef.current;
@@ -1065,6 +1074,15 @@ const MapView = forwardRef(function MapView(
               </Marker>
             );
           })}
+
+        {favoriteStargazeSpots.map((spot) => (
+          <Marker
+            key={`favorite-stargaze-${spot.id}`}
+            position={[spot.lat, spot.lng]}
+            icon={favoriteSpotIcon}
+            interactive={false}
+          />
+        ))}
 
         {darkSpots.map((spot, i) => {
           const isFavoriteSpot = favoriteSpotKeys.has(
