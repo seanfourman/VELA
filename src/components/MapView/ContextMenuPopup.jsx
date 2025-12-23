@@ -7,11 +7,13 @@ export default function ContextMenuPopup({
   coords,
   onGetDirections,
   onRemovePin,
+  onExtraAction,
   isAuthenticated,
   isFavorite,
   onToggleFavorite,
   coordsLabel,
   removeLabel,
+  extraActionLabel,
   isTarget,
   onToggleTarget,
 }) {
@@ -34,6 +36,7 @@ export default function ContextMenuPopup({
   const resolvedCoordsLabel =
     coordsLabel || (isFavorite ? "Favorited spot" : "Pinned location");
   const resolvedRemoveLabel = removeLabel || "Remove Pin";
+  const resolvedExtraLabel = extraActionLabel || "View details";
 
   return (
     <div
@@ -160,6 +163,11 @@ export default function ContextMenuPopup({
         {onGetDirections && (
           <button className="popup-btn" onClick={onGetDirections}>
             Get Directions
+          </button>
+        )}
+        {onExtraAction && (
+          <button className="popup-btn" onClick={onExtraAction}>
+            {resolvedExtraLabel}
           </button>
         )}
         {onRemovePin && (

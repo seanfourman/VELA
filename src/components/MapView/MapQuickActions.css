@@ -15,7 +15,8 @@
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-body.map-ui-shifted .map-quick-actions {
+body.map-ui-shifted .map-quick-actions,
+body.map-ui-shifted-stargaze .map-quick-actions {
   transform: translateX(-140%);
   pointer-events: none;
 }

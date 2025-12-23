@@ -25,6 +25,8 @@ import ContextMenuPopup from "./MapView/ContextMenuPopup";
 import SkyQualityInfo from "./MapView/SkyQualityInfo";
 import MapQuickActions from "./MapView/MapQuickActions";
 import LocationSearchBar from "./MapView/LocationSearchBar";
+import StargazePanel from "./MapView/StargazePanel";
+import StargazePanelMobile from "./MapView/StargazePanelMobile";
 import usePlanets from "../hooks/usePlanets";
 import { preloadAllPlanetTextures } from "../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
@@ -44,6 +46,7 @@ const MAX_ZOOM = 16;
 const LONG_PRESS_MS = 750;
 const MARKER_EXIT_MS = 280;
 const FAVORITE_EXIT_MS = 260;
+const STARGAZE_PANEL_EXIT_MS = 320;
 const LIGHT_TILE_URL = "/api/lightmap/{z}/{x}/{y}.png";
 
 const isCoarsePointerEnv = () => {
@@ -316,11 +319,18 @@ const MapView = forwardRef(function MapView(
   const [lightOverlayEnabled, setLightOverlayEnabled] = useState(false);
   const [activeStargazeId, setActiveStargazeId] = useState(null);
   const [favoriteSpots, setFavoriteSpots] = useState([]);
+  const [stargazePanelSpot, setStargazePanelSpot] = useState(null);
+  const [isStargazePanelOpen, setIsStargazePanelOpen] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia?.("(max-width: 768px)")?.matches ?? false;
+  });
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
   const favoriteTransitionTimeoutRef = useRef(null);
   const favoriteRemovalTimeoutsRef = useRef(new Map());
+  const stargazePanelCloseTimeoutRef = useRef(null);
   const lastGridShotAtRef = useRef(0);
   const stargazeMarkerRefs = useRef(new Map());
   const placedMarkerRef = useRef(null);
@@ -360,6 +370,23 @@ const MapView = forwardRef(function MapView(
 
   useEffect(() => {
     preloadAllPlanetTextures();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return undefined;
+    const media = window.matchMedia("(max-width: 768px)");
+    const handleChange = (event) => {
+      setIsMobileView(event.matches);
+    };
+
+    handleChange(media);
+    if (media.addEventListener) {
+      media.addEventListener("change", handleChange);
+      return () => media.removeEventListener("change", handleChange);
+    }
+
+    media.addListener(handleChange);
+    return () => media.removeListener(handleChange);
   }, []);
 
   const centerOnCoords = (lat, lng) => {
@@ -410,10 +437,32 @@ const MapView = forwardRef(function MapView(
     [flyToCoordinates]
   );
 
+  const openStargazePanel = useCallback((spot) => {
+    if (!spot) return;
+    if (stargazePanelCloseTimeoutRef.current) {
+      clearTimeout(stargazePanelCloseTimeoutRef.current);
+      stargazePanelCloseTimeoutRef.current = null;
+    }
+    setStargazePanelSpot(spot);
+    setIsStargazePanelOpen(true);
+  }, []);
+
+  const closeStargazePanel = useCallback(() => {
+    setIsStargazePanelOpen(false);
+    if (stargazePanelCloseTimeoutRef.current) {
+      clearTimeout(stargazePanelCloseTimeoutRef.current);
+    }
+    stargazePanelCloseTimeoutRef.current = setTimeout(() => {
+      setStargazePanelSpot(null);
+      stargazePanelCloseTimeoutRef.current = null;
+    }, STARGAZE_PANEL_EXIT_MS);
+  }, []);
+
   const handleCloseStargazePanel = useCallback(() => {
     setActiveStargazeId(null);
     mapRef.current?.closePopup();
-  }, []);
+    closeStargazePanel();
+  }, [closeStargazePanel]);
 
   const handleTileLoad = useCallback((event) => {
     const src = event?.tile?.src;
@@ -438,6 +487,9 @@ const MapView = forwardRef(function MapView(
         clearTimeout(timeoutId);
       });
       favoriteRemovalTimeoutsRef.current.clear();
+      if (stargazePanelCloseTimeoutRef.current) {
+        clearTimeout(stargazePanelCloseTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -454,6 +506,30 @@ const MapView = forwardRef(function MapView(
       marker.openPopup();
     }
   }, [activeStargazeSpot]);
+
+  useEffect(() => {
+    if (!activeStargazeSpot) {
+      if (!isMobileView) {
+        closeStargazePanel();
+      }
+      return;
+    }
+
+    if (!isMobileView) {
+      openStargazePanel(activeStargazeSpot);
+      return;
+    }
+
+    if (isStargazePanelOpen) {
+      setStargazePanelSpot(activeStargazeSpot);
+    }
+  }, [
+    activeStargazeSpot,
+    closeStargazePanel,
+    isMobileView,
+    isStargazePanelOpen,
+    openStargazePanel,
+  ]);
 
   useEffect(() => {
     if (!placedMarker) return;
@@ -696,7 +772,6 @@ const MapView = forwardRef(function MapView(
   const hasPinnedSpot = Boolean(placedMarker);
   const hasAnyLocation =
     hasPinnedSpot || Boolean(location) || Boolean(selectedDarkSpot);
-  const isStargazePanelOpen = Boolean(activeStargazeSpot);
   const selectedTargetLabel = selectedDarkSpot?.label || "stargazing spot";
   const selectedTargetLabelLower = selectedTargetLabel.toLowerCase();
   const quickPlanetsTitle = selectedDarkSpot
@@ -1072,6 +1147,9 @@ const MapView = forwardRef(function MapView(
                   <ContextMenuPopup
                     coords={{ lat: spot.lat, lng: spot.lng }}
                     onGetDirections={handleDirections}
+                    onExtraAction={
+                      isMobileView ? () => openStargazePanel(spot) : null
+                    }
                     onRemovePin={handleCloseStargazePanel}
                     isAuthenticated={Boolean(isAuthenticated)}
                     isFavorite={Boolean(isFavoriteSpot)}
@@ -1082,6 +1160,7 @@ const MapView = forwardRef(function MapView(
                     }
                     coordsLabel="Recommended spot"
                     removeLabel="Close"
+                    extraActionLabel="Spot details"
                     isTarget={Boolean(isTarget)}
                     onToggleTarget={() => handleToggleStargazeTarget(spot)}
                   />
@@ -1336,52 +1415,16 @@ const MapView = forwardRef(function MapView(
         })}
       </MapContainer>
 
-      <aside
-        className={`stargaze-panel glass-panel glass-panel-elevated${
-          isStargazePanelOpen ? " open" : ""
-        }`}
-        aria-hidden={!isStargazePanelOpen}
-      >
-        {activeStargazeSpot ? (
-          <>
-            <div className="stargaze-panel__header">
-              <div className="stargaze-panel__title">
-                {activeStargazeSpot.name}
-              </div>
-              <button
-                type="button"
-                className="stargaze-panel__close"
-                onClick={handleCloseStargazePanel}
-                aria-label="Close spot details"
-              >
-                <span aria-hidden="true">X</span>
-              </button>
-            </div>
-            <div className="stargaze-panel__content">
-              {activeStargazeSpot.description ? (
-                <div className="stargaze-panel__desc">
-                  {activeStargazeSpot.description}
-                </div>
-              ) : null}
-              {activeStargazeSpot.images &&
-              activeStargazeSpot.images.length > 0 ? (
-                <div className="stargaze-panel__images">
-                  {activeStargazeSpot.images
-                    .slice(0, 4)
-                    .map((imageUrl, index) => (
-                      <img
-                        key={`${activeStargazeSpot.id}-${index}`}
-                        src={imageUrl}
-                        alt={`${activeStargazeSpot.name} view ${index + 1}`}
-                        loading="lazy"
-                      />
-                    ))}
-                </div>
-              ) : null}
-            </div>
-          </>
-        ) : null}
-      </aside>
+      <StargazePanel
+        spot={stargazePanelSpot}
+        isOpen={isStargazePanelOpen && !isMobileView}
+        onClose={handleCloseStargazePanel}
+      />
+      <StargazePanelMobile
+        spot={stargazePanelSpot}
+        isOpen={isStargazePanelOpen && isMobileView}
+        onClose={handleCloseStargazePanel}
+      />
 
       <MapQuickActions
         onShowPlanets={handleGetVisiblePlanets}

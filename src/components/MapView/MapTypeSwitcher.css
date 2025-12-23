@@ -169,7 +169,8 @@
   background: var(--glass-bg);
 }
 
-body.map-ui-shifted .map-type-switcher {
+body.map-ui-shifted .map-type-switcher,
+body.map-ui-shifted-stargaze .map-type-switcher {
   transform: translateX(140%);
   pointer-events: none;
 }

@@ -1,0 +1,107 @@
+.stargaze-panel-mobile {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1500;
+  pointer-events: none;
+}
+
+.stargaze-panel-mobile__sheet {
+  margin: 0 12px 12px;
+  padding: 16px;
+  transform: translateY(calc(100% + 24px));
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease;
+  max-height: calc(100vh - 140px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.stargaze-panel-mobile.open .stargaze-panel-mobile__sheet {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.stargaze-panel-mobile__handle {
+  width: 56px;
+  height: 4px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.35);
+  align-self: center;
+}
+
+.stargaze-panel-mobile__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stargaze-panel-mobile__title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--surface-text);
+}
+
+.stargaze-panel-mobile__close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-round);
+  border: 1px solid var(--glass-border-strong);
+  background: var(--glass-bg);
+  color: var(--surface-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.stargaze-panel-mobile__close:hover {
+  background: var(--glass-bg-hover);
+}
+
+.stargaze-panel-mobile__close:active {
+  transform: scale(0.96);
+}
+
+.stargaze-panel-mobile__content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.stargaze-panel-mobile__desc {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--surface-text);
+}
+
+.stargaze-panel-mobile__images {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.stargaze-panel-mobile__images img {
+  width: 100%;
+  height: 86px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+}
+
+@media (min-width: 769px) {
+  .stargaze-panel-mobile {
+    display: none;
+  }
+}
