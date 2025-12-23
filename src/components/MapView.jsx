@@ -305,8 +305,11 @@ const MapView = forwardRef(function MapView(
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const skipAutoLocationRef = useRef(false);
   const removalTimeoutRef = useRef(null);
+  const favoriteTransitionTimeoutRef = useRef(null);
   const lastGridShotAtRef = useRef(0);
   const stargazeMarkerRefs = useRef(new Map());
+  const placedMarkerRef = useRef(null);
+  const prevPlacedFavoriteRef = useRef(false);
   const favoriteSpotKeys = useMemo(
     () => new Set(favoriteSpots.map((spot) => spot.key)),
     [favoriteSpots]
@@ -397,6 +400,9 @@ const MapView = forwardRef(function MapView(
   useEffect(() => {
     return () => {
       if (removalTimeoutRef.current) clearTimeout(removalTimeoutRef.current);
+      if (favoriteTransitionTimeoutRef.current) {
+        clearTimeout(favoriteTransitionTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -419,6 +425,34 @@ const MapView = forwardRef(function MapView(
       return { ...prev, isFavorite };
     });
   }, [favoriteSpotKeys, getSpotKey, placedMarker]);
+
+  useEffect(() => {
+    const isFavorite = Boolean(placedMarker?.isFavorite);
+    const hadFavorite = prevPlacedFavoriteRef.current;
+
+    if (!placedMarker) {
+      prevPlacedFavoriteRef.current = false;
+      return;
+    }
+
+    if (isFavorite && !hadFavorite) {
+      const marker = placedMarkerRef.current;
+      const element = marker?.getElement?.();
+      if (element) {
+        element.classList.remove("favorite-transition");
+        void element.offsetWidth;
+        element.classList.add("favorite-transition");
+        if (favoriteTransitionTimeoutRef.current) {
+          clearTimeout(favoriteTransitionTimeoutRef.current);
+        }
+        favoriteTransitionTimeoutRef.current = setTimeout(() => {
+          element.classList.remove("favorite-transition");
+        }, 360);
+      }
+    }
+
+    prevPlacedFavoriteRef.current = isFavorite;
+  }, [placedMarker]);
 
   const handleSnapToLocation = () => {
     if (location && mapRef.current) {
@@ -807,6 +841,9 @@ const MapView = forwardRef(function MapView(
             key={`placed-${placedMarker.id}`}
             position={[placedMarker.lat, placedMarker.lng]}
             icon={placedMarker.isFavorite ? favoriteSpotIcon : pinIcon}
+            ref={(marker) => {
+              placedMarkerRef.current = marker || null;
+            }}
             eventHandlers={{
               popupopen: () =>
                 centerOnCoords(placedMarker.lat, placedMarker.lng),
@@ -820,6 +857,9 @@ const MapView = forwardRef(function MapView(
                 isAuthenticated={Boolean(isAuthenticated)}
                 isFavorite={Boolean(placedMarker.isFavorite)}
                 onToggleFavorite={handleTogglePinnedFavorite}
+                coordsLabel={
+                  placedMarker.isFavorite ? "Favorited spot" : "Pinned location"
+                }
               />
             </Popup>
           </Marker>
@@ -1042,34 +1082,41 @@ const MapView = forwardRef(function MapView(
         );
         })}
 
-        {favoriteOnlySpots.map((spot) => (
-          <Marker
-            key={`favorite-${spot.key}`}
-            position={[spot.lat, spot.lng]}
-            icon={favoriteSpotIcon}
-          >
-            <Popup>
-              <div className="context-menu-popup favorite-popup">
-                <div className="popup-coords">
-                  <span className="popup-coords-label">Favorite spot</span>
-                  <span className="popup-coords-value">
-                    {spot.lat.toFixed(4)}, {spot.lng.toFixed(4)}
-                  </span>
-                </div>
-                {isAuthenticated ? (
-                  <div className="popup-actions">
-                    <button
-                      className="popup-btn danger"
-                      onClick={() => handleRemoveFavoriteSpot(spot.key)}
-                    >
-                      Remove Favorite
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {favoriteOnlySpots.map((spot) => {
+          const directionsOrigin = getDirectionsOrigin();
+          const handleDirections = directionsOrigin
+            ? () => {
+                const url = `https://www.google.com/maps/dir/${directionsOrigin.lat},${directionsOrigin.lng}/${spot.lat},${spot.lng}`;
+                window.open(url, "_blank");
+              }
+            : null;
+          const handleRemoveFavorite = () => handleRemoveFavoriteSpot(spot.key);
+
+          return (
+            <Marker
+              key={`favorite-${spot.key}`}
+              position={[spot.lat, spot.lng]}
+              icon={favoriteSpotIcon}
+            >
+              <Popup>
+                <ContextMenuPopup
+                  coords={{ lat: spot.lat, lng: spot.lng }}
+                  onGetDirections={handleDirections}
+                  onRemovePin={
+                    isAuthenticated ? handleRemoveFavorite : null
+                  }
+                  isAuthenticated={Boolean(isAuthenticated)}
+                  isFavorite={true}
+                  onToggleFavorite={
+                    isAuthenticated ? handleRemoveFavorite : null
+                  }
+                  coordsLabel="Favorited spot"
+                  removeLabel="Remove Favorite"
+                />
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
 
       <MapQuickActions

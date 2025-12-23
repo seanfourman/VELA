@@ -9,6 +9,8 @@ export default function ContextMenuPopup({
   isAuthenticated,
   isFavorite,
   onToggleFavorite,
+  coordsLabel,
+  removeLabel,
 }) {
   if (!coords) return null;
 
@@ -17,6 +19,9 @@ export default function ContextMenuPopup({
     ? "Remove from favorites"
     : "Add to favorites";
   const favoriteLabel = isFavorite ? "Favorited" : "Favorite";
+  const resolvedCoordsLabel =
+    coordsLabel || (isFavorite ? "Favorited spot" : "Pinned location");
+  const resolvedRemoveLabel = removeLabel || "Remove Pin";
 
   return (
     <div className="context-menu-popup">
@@ -50,7 +55,7 @@ export default function ContextMenuPopup({
         </div>
       ) : null}
       <div className="popup-coords">
-        <span className="popup-coords-label">Pinned location</span>
+        <span className="popup-coords-label">{resolvedCoordsLabel}</span>
         <span className="popup-coords-value">
           {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
         </span>
@@ -66,7 +71,7 @@ export default function ContextMenuPopup({
         )}
         {onRemovePin && (
           <button className="popup-btn" onClick={onRemovePin}>
-            Remove Pin
+            {resolvedRemoveLabel}
           </button>
         )}
       </div>

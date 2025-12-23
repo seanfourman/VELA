@@ -241,6 +241,20 @@
   pointer-events: none;
 }
 
+.custom-marker.favorite-transition .marker-dot::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(236, 72, 153, 0.55);
+  opacity: 0;
+  animation: favorite-ring 340ms ease-out forwards;
+}
+
+.custom-marker.favorite-transition .favorite-heart {
+  animation: favorite-heart-pop 320ms ease-out;
+}
+
 @keyframes marker-pop {
   0% {
     transform: scale(0.55);
@@ -289,6 +303,29 @@
   }
   100% {
     transform: scale(0.4);
+    opacity: 0;
+  }
+}
+
+@keyframes favorite-heart-pop {
+  0% {
+    transform: scale(0.9);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes favorite-ring {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.8);
     opacity: 0;
   }
 }
