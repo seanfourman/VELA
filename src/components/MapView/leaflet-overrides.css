@@ -282,30 +282,30 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: url("../../assets/icons/favorite-full-icon.svg") no-repeat center /
     contain;
   filter: brightness(0) invert(1) drop-shadow(0 0 6px rgba(236, 72, 153, 0.75));
   opacity: 0;
   pointer-events: none;
-  animation: favorite-heart-float 0.42s ease-out forwards;
+  animation: favorite-heart-float 0.6s ease-out forwards;
   z-index: 4;
 }
 
 .custom-marker.favorite-transition .marker-pin::before {
-  --heart-x: -14px;
-  --heart-y: -8px;
-  --heart-y-end: -26px;
-  width: 10px;
-  height: 10px;
+  --heart-x: -10px;
+  --heart-y: -1px;
+  --heart-y-end: -6px;
+  width: 12px;
+  height: 12px;
 }
 
 .custom-marker.favorite-transition .marker-pin::after {
-  --heart-x: 8px;
-  --heart-y: -4px;
-  --heart-y-end: -22px;
-  animation-delay: 0.06s;
+  --heart-x: 10px;
+  --heart-y: 0px;
+  --heart-y-end: -5px;
+  animation-delay: 0.08s;
 }
 
 @keyframes marker-pop {
@@ -390,9 +390,9 @@
         calc(-50% + var(--heart-x)),
         calc(-50% + var(--heart-y))
       )
-      scale(0.35);
+      scale(0.55);
   }
-  40% {
+  30% {
     opacity: 1;
   }
   100% {
