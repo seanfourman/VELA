@@ -1181,7 +1181,6 @@ const MapView = forwardRef(function MapView(
                     onExtraAction={
                       isMobileView ? () => openStargazePanel(spot) : null
                     }
-                    onRemovePin={handleCloseStargazePanel}
                     isAuthenticated={Boolean(isAuthenticated)}
                     isFavorite={Boolean(isFavoriteSpot)}
                     onToggleFavorite={
@@ -1190,7 +1189,6 @@ const MapView = forwardRef(function MapView(
                         : null
                     }
                     coordsLabel="Recommended spot"
-                    removeLabel="Close"
                     extraActionLabel="Spot details"
                     isTarget={Boolean(isTarget)}
                     onToggleTarget={() => handleToggleStargazeTarget(spot)}
