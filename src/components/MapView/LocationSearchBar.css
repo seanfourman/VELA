@@ -31,7 +31,7 @@
     rgba(255, 255, 255, 0.76)
   );
   --search-item-bg: rgba(255, 255, 255, 0.94);
-  --search-item-hover-bg: #ffffff;
+  --search-item-hover-bg: rgba(226, 232, 240, 0.35);
   --search-item-border: rgba(15, 23, 42, 0.12);
   --search-item-hover-border: rgba(15, 23, 42, 0.22);
   --search-item-chip-bg: rgba(15, 23, 42, 0.05);
