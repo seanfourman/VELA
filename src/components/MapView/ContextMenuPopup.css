@@ -24,6 +24,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--surface-text-subtle);
+  animation: popup-label-swap 0.22s ease;
 }
 
 .popup-coords-value {
@@ -31,6 +32,17 @@
   font-weight: 600;
   color: var(--surface-text);
   font-variant-numeric: tabular-nums;
+}
+
+@keyframes popup-label-swap {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .popup-actions {

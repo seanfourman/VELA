@@ -113,7 +113,9 @@ export default function ContextMenuPopup({
         </div>
       ) : null}
       <div className="popup-coords">
-        <span className="popup-coords-label">{resolvedCoordsLabel}</span>
+        <span key={resolvedCoordsLabel} className="popup-coords-label">
+          {resolvedCoordsLabel}
+        </span>
         <span className="popup-coords-value">
           {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
         </span>
