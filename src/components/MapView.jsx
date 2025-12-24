@@ -296,7 +296,7 @@ function LongPressHandler({ onLongPress, delayMs = LONG_PRESS_MS }) {
   return null;
 }
 
-function PopupStateHandler({ onPopupStateChange }) {
+function PopupStateHandler({ onPopupStateChange, onPopupClose }) {
   const map = useMapEvents({});
 
   useEffect(() => {
@@ -308,19 +308,24 @@ function PopupStateHandler({ onPopupStateChange }) {
       onPopupStateChange(hasPopup);
     };
 
-    const handle = () => {
+    const handleOpen = () => {
       requestAnimationFrame(refresh);
     };
 
-    map.on("popupopen", handle);
-    map.on("popupclose", handle);
+    const handleClose = (event) => {
+      requestAnimationFrame(refresh);
+      onPopupClose?.(event);
+    };
+
+    map.on("popupopen", handleOpen);
+    map.on("popupclose", handleClose);
     refresh();
 
     return () => {
-      map.off("popupopen", handle);
-      map.off("popupclose", handle);
+      map.off("popupopen", handleOpen);
+      map.off("popupclose", handleClose);
     };
-  }, [map, onPopupStateChange]);
+  }, [map, onPopupClose, onPopupStateChange]);
 
   return null;
 }
@@ -494,6 +499,19 @@ const MapView = forwardRef(function MapView(
     closeStargazePanel();
   }, [closeStargazePanel]);
 
+  const handlePopupClose = useCallback(
+    (event) => {
+      if (isMobileView) return;
+      if (!activeStargazeId) return;
+      const marker = stargazeMarkerRefs.current.get(activeStargazeId);
+      if (!marker) return;
+      if (event?.popup?._source !== marker) return;
+      setActiveStargazeId(null);
+      closeStargazePanel();
+    },
+    [activeStargazeId, closeStargazePanel, isMobileView]
+  );
+
   const handleTileLoad = useCallback((event) => {
     const src = event?.tile?.src;
     if (!src) return;
@@ -538,28 +556,26 @@ const MapView = forwardRef(function MapView(
   }, [activeStargazeSpot]);
 
   useEffect(() => {
+    if (isMobileView) return;
     if (!activeStargazeSpot) {
-      if (!isMobileView) {
-        closeStargazePanel();
-      }
+      closeStargazePanel();
       return;
     }
-
-    if (!isMobileView) {
-      openStargazePanel(activeStargazeSpot);
-      return;
-    }
-
-    if (isStargazePanelOpen) {
-      setStargazePanelSpot(activeStargazeSpot);
-    }
+    openStargazePanel(activeStargazeSpot);
   }, [
     activeStargazeSpot,
     closeStargazePanel,
     isMobileView,
-    isStargazePanelOpen,
     openStargazePanel,
   ]);
+
+  useEffect(() => {
+    if (!isMobileView) return;
+    if (!activeStargazeSpot) return;
+    if (isStargazePanelOpen) {
+      setStargazePanelSpot(activeStargazeSpot);
+    }
+  }, [activeStargazeSpot, isMobileView, isStargazePanelOpen]);
 
   useEffect(() => {
     if (!placedMarker) return;
@@ -1052,7 +1068,10 @@ const MapView = forwardRef(function MapView(
           onLongPress={handleDoubleClick}
           delayMs={LONG_PRESS_MS}
         />
-        <PopupStateHandler onPopupStateChange={setIsPopupOpen} />
+        <PopupStateHandler
+          onPopupStateChange={setIsPopupOpen}
+          onPopupClose={handlePopupClose}
+        />
         {location && <MapAnimator location={location} />}
 
         {location && (
@@ -1165,6 +1184,9 @@ const MapView = forwardRef(function MapView(
                   popupopen: () => {
                     setActiveStargazeId(spot.id);
                     centerOnCoords(spot.lat, spot.lng);
+                    if (!isMobileView) {
+                      openStargazePanel(spot);
+                    }
                   },
                   popupclose: () => {
                     setActiveStargazeId((prev) =>
