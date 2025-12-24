@@ -85,14 +85,15 @@
 }
 
 .target-toggle-wrapper {
-  position: absolute;
-  top: -50px;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 48px;
   z-index: 6;
+  transition: opacity 0.18s ease, transform 0.24s ease, width 0.24s ease,
+    margin-left 0.24s ease;
+  will-change: opacity, transform, width, margin-left;
 }
 
 .target-toggle-row {
@@ -102,15 +103,27 @@
   transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 0;
   z-index: 6;
 }
 
-.target-toggle-row .target-toggle-wrapper {
-  position: relative;
-  top: auto;
-  left: auto;
-  transform: none;
+.target-toggle-row[data-layout="dual"]
+  .target-toggle-wrapper
+  + .target-toggle-wrapper {
+  margin-left: 12px;
+}
+
+.target-toggle-row[data-layout="single"] .target-toggle-wrapper {
+  margin-left: 0;
+}
+
+.target-toggle-wrapper[data-visible="false"] {
+  width: 0;
+  margin-left: 0;
+  opacity: 0;
+  transform: translateY(6px) scale(0.86);
+  pointer-events: none;
 }
 
 .target-toggle {

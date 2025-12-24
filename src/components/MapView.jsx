@@ -1272,7 +1272,10 @@ const MapView = forwardRef(function MapView(
                       ? "Remove from favorites"
                       : "Add to favorites";
                     return (
-                      <div className="target-toggle-row">
+                      <div
+                        className="target-toggle-row"
+                        data-layout={isAuthenticated ? "dual" : "single"}
+                      >
                         <div className="target-toggle-wrapper">
                           <button
                             className={`target-toggle${

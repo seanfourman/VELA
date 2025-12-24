@@ -25,6 +25,8 @@ export default function ContextMenuPopup({
 
   const canFavorite = Boolean(isAuthenticated && onToggleFavorite);
   const canTarget = Boolean(onToggleTarget);
+  const toggleCount = Number(canTarget) + Number(canFavorite);
+  const toggleLayout = toggleCount > 1 ? "dual" : "single";
   const favoriteButtonLabel = isFavorite
     ? "Remove from favorites"
     : "Add to favorites";
@@ -44,12 +46,18 @@ export default function ContextMenuPopup({
       onPointerDown={stopPopupEvent}
       onClick={stopPopupEvent}
     >
-      {canTarget && canFavorite ? (
-        <div className="target-toggle-row">
-          <div className="target-toggle-wrapper">
+      {toggleCount > 0 ? (
+        <div className="target-toggle-row" data-layout={toggleLayout}>
+          <div
+            className="target-toggle-wrapper"
+            data-visible={canTarget ? "true" : "false"}
+            aria-hidden={!canTarget}
+          >
             <button
               className={`target-toggle${isTarget ? " active" : ""}`}
               aria-label={targetButtonLabel}
+              disabled={!canTarget}
+              tabIndex={canTarget ? 0 : -1}
               onClick={(event) => {
                 event.currentTarget.blur();
                 onToggleTarget?.();
@@ -69,12 +77,18 @@ export default function ContextMenuPopup({
               {targetLabel}
             </span>
           </div>
-          <div className="target-toggle-wrapper">
+          <div
+            className="target-toggle-wrapper"
+            data-visible={canFavorite ? "true" : "false"}
+            aria-hidden={!canFavorite}
+          >
             <button
               className={`target-toggle favorite-toggle${
                 isFavorite ? " active" : ""
               }`}
               aria-label={favoriteButtonLabel}
+              disabled={!canFavorite}
+              tabIndex={canFavorite ? 0 : -1}
               onClick={(event) => {
                 event.currentTarget.blur();
                 onToggleFavorite?.();
@@ -96,58 +110,6 @@ export default function ContextMenuPopup({
               {favoriteLabel}
             </span>
           </div>
-        </div>
-      ) : canTarget ? (
-        <div className="target-toggle-wrapper">
-          <button
-            className={`target-toggle${isTarget ? " active" : ""}`}
-            aria-label={targetButtonLabel}
-            onClick={(event) => {
-              event.currentTarget.blur();
-              onToggleTarget?.();
-            }}
-          >
-            <img
-              src={targetIcon}
-              alt=""
-              aria-hidden="true"
-              className="target-toggle-icon"
-            />
-          </button>
-          <span
-            className={`target-toggle-label${isTarget ? " active" : ""}`}
-            aria-hidden="true"
-          >
-            {targetLabel}
-          </span>
-        </div>
-      ) : canFavorite ? (
-        <div className="target-toggle-wrapper">
-          <button
-            className={`target-toggle favorite-toggle${
-              isFavorite ? " active" : ""
-            }`}
-            aria-label={favoriteButtonLabel}
-            onClick={(event) => {
-              event.currentTarget.blur();
-              onToggleFavorite?.();
-            }}
-          >
-            <img
-              src={favoriteIcon}
-              alt=""
-              aria-hidden="true"
-              className="favorite-toggle-icon"
-            />
-          </button>
-          <span
-            className={`target-toggle-label favorite-toggle-label${
-              isFavorite ? " active" : ""
-            }`}
-            aria-hidden="true"
-          >
-            {favoriteLabel}
-          </span>
         </div>
       ) : null}
       <div className="popup-coords">
