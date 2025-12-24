@@ -32,106 +32,33 @@
   pointer-events: auto;
 }
 
-.stargaze-panel-mobile__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  position: relative;
+.stargaze-panel-mobile .stargaze-panel__title {
+  font-size: 1.02rem;
 }
 
-.stargaze-panel-mobile__title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--surface-text);
+.stargaze-panel-mobile .stargaze-panel__subtitle {
+  font-size: 0.74rem;
 }
 
-.stargaze-panel-mobile__close {
-  width: 28px;
-  height: 28px;
-  padding: 8px;
-  padding-bottom: 6px;
-  border-radius: var(--radius-pill);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--surface-text);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  overflow: hidden;
-  box-shadow: none;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease,
-    opacity 0.2s ease;
+.stargaze-panel-mobile .stargaze-panel__content {
+  padding-right: 2px;
 }
 
-.stargaze-panel-mobile__close span {
-  position: relative;
-  width: 12px;
-  height: 12px;
-  display: block;
-  font-size: 0;
+.stargaze-panel-mobile .stargaze-panel__facts {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
 
-.stargaze-panel-mobile__close span::before,
-.stargaze-panel-mobile__close span::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 12px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 2px;
-  transform-origin: center;
-}
-
-.stargaze-panel-mobile__close span::before {
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.stargaze-panel-mobile__close span::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
-}
-
-.stargaze-panel-mobile__close:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.stargaze-panel-mobile__close:active {
-  transform: scale(0.96);
-}
-
-.stargaze-panel-mobile__content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.stargaze-panel-mobile__desc {
-  font-size: 0.88rem;
-  line-height: 1.45;
-  color: var(--surface-text);
-}
-
-.stargaze-panel-mobile__images {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 8px;
-}
-
-.stargaze-panel-mobile__images img {
-  width: 100%;
+.stargaze-panel-mobile .stargaze-panel__gallery img {
   height: 86px;
-  object-fit: cover;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--glass-border);
+}
+
+.stargaze-panel-mobile .stargaze-panel__actions {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.stargaze-panel-mobile .stargaze-panel__action {
+  width: 100%;
 }
 
 @media (min-width: 769px) {

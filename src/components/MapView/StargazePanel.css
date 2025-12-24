@@ -30,15 +30,48 @@
 
 .stargaze-panel__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
 }
 
+.stargaze-panel__header-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
 .stargaze-panel__title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: 700;
   color: var(--surface-text);
+}
+
+.stargaze-panel__subtitle {
+  font-size: 0.78rem;
+  color: var(--surface-text-muted);
+}
+
+.stargaze-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stargaze-panel__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--surface-text);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .stargaze-panel__close {
@@ -103,29 +136,146 @@
 .stargaze-panel__content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: 6px;
+}
+
+.stargaze-panel__section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stargaze-panel__section-title {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--surface-text-subtle);
 }
 
 .stargaze-panel__desc {
   font-size: 0.9rem;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--surface-text);
 }
 
-.stargaze-panel__images {
+.stargaze-panel__facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 8px;
 }
 
-.stargaze-panel__images img {
+.stargaze-panel__fact {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stargaze-panel__fact-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--surface-text-subtle);
+}
+
+.stargaze-panel__fact-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--surface-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.stargaze-panel__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.stargaze-panel__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border-strong);
+  background: var(--glass-bg);
+  color: var(--surface-text);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.stargaze-panel__action:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-strong);
+}
+
+.stargaze-panel__action:active {
+  transform: scale(0.97);
+}
+
+.stargaze-panel__gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.stargaze-panel__gallery img {
   width: 100%;
-  height: 90px;
+  height: 100px;
   object-fit: cover;
   border-radius: var(--radius-sm);
   border: 1px solid var(--glass-border);
+}
+
+.stargaze-panel__links {
+  display: grid;
+  gap: 6px;
+}
+
+.stargaze-panel__link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--surface-text);
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.stargaze-panel__link:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-strong);
+}
+
+.stargaze-panel__link-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.stargaze-panel__link-domain {
+  font-size: 0.7rem;
+  color: var(--surface-text-muted);
+}
+
+.stargaze-panel__empty {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--glass-border);
+  background: var(--glass-bg-hover);
+  color: var(--surface-text-muted);
+  font-size: 0.82rem;
 }
 
 @media (max-width: 768px) {

@@ -52,6 +52,11 @@ const normalizeImageList = (value) => {
   return [];
 };
 
+const normalizeText = (value) =>
+  typeof value === "string" ? value.trim() : "";
+
+const normalizeLinkList = (value) => normalizeImageList(value);
+
 const isValidCoordinate = (value, min, max) =>
   Number.isFinite(value) && value >= min && value <= max;
 
@@ -78,9 +83,18 @@ const normalizeStargazeLocation = (value) => {
       coordinates?.lon ??
       coordinates?.longitude
   );
-  const description =
-    typeof value.description === "string" ? value.description.trim() : "";
-  const images = normalizeImageList(value.images ?? value.photo_urls);
+  const description = normalizeText(value.description);
+  const images = normalizeImageList(value.images);
+  const photoLinks = normalizeLinkList(
+    value.photo_urls ?? value.photoLinks ?? value.photos
+  );
+  const sourceLinks = normalizeLinkList(
+    value.source_urls ?? value.sourceLinks ?? value.sources
+  );
+  const country = normalizeText(value.country);
+  const region = normalizeText(value.region);
+  const type = normalizeText(value.type);
+  const bestTime = normalizeText(value.best_time ?? value.bestTime);
 
   if (!name) return null;
   if (!isValidCoordinate(lat, -90, 90) || !isValidCoordinate(lng, -180, 180)) {
@@ -97,6 +111,12 @@ const normalizeStargazeLocation = (value) => {
     lng,
     description,
     images,
+    photoLinks,
+    sourceLinks,
+    country,
+    region,
+    type,
+    bestTime,
   };
 };
 

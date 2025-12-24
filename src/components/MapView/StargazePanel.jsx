@@ -1,3 +1,4 @@
+import StargazePanelContent from "./StargazePanelContent";
 import "./StargazePanel.css";
 
 export default function StargazePanel({ spot, isOpen, onClose }) {
@@ -11,7 +12,19 @@ export default function StargazePanel({ spot, isOpen, onClose }) {
       {spot ? (
         <>
           <div className="stargaze-panel__header">
-            <div className="stargaze-panel__title">{spot.name}</div>
+            <div className="stargaze-panel__header-main">
+              <div className="stargaze-panel__title">{spot.name}</div>
+              {spot.region || spot.country ? (
+                <div className="stargaze-panel__subtitle">
+                  {[spot.region, spot.country].filter(Boolean).join(" · ")}
+                </div>
+              ) : null}
+              {spot.type ? (
+                <div className="stargaze-panel__chips">
+                  <span className="stargaze-panel__chip">{spot.type}</span>
+                </div>
+              ) : null}
+            </div>
             <button
               type="button"
               className="stargaze-panel__close"
@@ -21,23 +34,7 @@ export default function StargazePanel({ spot, isOpen, onClose }) {
               <span aria-hidden="true">X</span>
             </button>
           </div>
-          <div className="stargaze-panel__content">
-            {spot.description ? (
-              <div className="stargaze-panel__desc">{spot.description}</div>
-            ) : null}
-            {spot.images && spot.images.length > 0 ? (
-              <div className="stargaze-panel__images">
-                {spot.images.slice(0, 4).map((imageUrl, index) => (
-                  <img
-                    key={`${spot.id}-${index}`}
-                    src={imageUrl}
-                    alt={`${spot.name} view ${index + 1}`}
-                    loading="lazy"
-                  />
-                ))}
-              </div>
-            ) : null}
-          </div>
+          <StargazePanelContent spot={spot} />
         </>
       ) : null}
     </aside>
