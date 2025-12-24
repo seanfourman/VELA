@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import markerIcon from "../../assets/icons/marker-icon.svg";
-import stargazingIcon from "../../assets/icons/stargazing-icon.svg";
+import mapLocationIcon from "../../assets/icons/map-location-icon.svg";
 import "./LocationSearchBar.css";
 
 const SEARCH_DEBOUNCE_MS = 250;
@@ -219,7 +219,7 @@ export default function LocationSearchBar({
                       onClick={() => handleSelectLocation(result.location)}
                     >
                       <span className="location-search__item-icon">
-                        <img src={stargazingIcon} alt="" aria-hidden="true" />
+                        <img src={mapLocationIcon} alt="" aria-hidden="true" />
                       </span>
                       <span className="location-search__details">
                         <span className="location-search__name">
