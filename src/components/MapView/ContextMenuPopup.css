@@ -120,8 +120,8 @@
   border-radius: var(--radius-round);
   padding: 0;
   margin: 0;
-  border: 2px solid var(--glass-border-strong);
-  background: var(--glass-bg);
+  border: 2px solid rgba(15, 23, 42, 0.25);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: var(--glass-blur-heavy);
   -webkit-backdrop-filter: var(--glass-blur-heavy);
   color: var(--surface-text);
@@ -131,39 +131,55 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(255, 255, 255, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease,
     color 0.2s ease, box-shadow 0.2s ease;
   z-index: 1;
 }
 
+.target-toggle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-highlight);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .target-toggle:hover {
-  background: var(--glass-bg-hover);
-  border-color: var(--glass-border-strong);
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.35);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
 }
 
 .target-toggle.active {
-  background: rgba(34, 197, 94, 0.18);
-  border-color: rgba(34, 197, 94, 0.8);
-  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.52);
+  border-color: rgba(34, 197, 94, 0.9);
+  color: #ffffff;
   box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4),
     0 10px 24px rgba(34, 197, 94, 0.25);
 }
 
 .target-toggle.active:hover {
-  background: rgba(34, 197, 94, 0.24);
+  background: rgba(34, 197, 94, 0.62);
 }
 
 .favorite-toggle.active {
-  background: rgba(236, 72, 153, 0.24);
-  border-color: rgba(236, 72, 153, 0.9);
-  color: #fbcfe8;
+  background: rgba(236, 72, 153, 0.52);
+  border-color: rgba(236, 72, 153, 0.92);
+  color: #ffffff;
   box-shadow: 0 0 0 1px rgba(236, 72, 153, 0.4),
     0 10px 24px rgba(236, 72, 153, 0.25);
 }
 
 .favorite-toggle.active:hover {
-  background: rgba(236, 72, 153, 0.32);
+  background: rgba(236, 72, 153, 0.62);
 }
 
 .target-toggle-label {
@@ -211,20 +227,29 @@
 .target-toggle-icon {
   width: 22px;
   height: 22px;
+  position: relative;
+  z-index: 1;
 }
 
 .favorite-toggle-icon {
   width: 22px;
   height: 22px;
+  position: relative;
+  z-index: 1;
 }
 
 .map-container.dark .target-toggle-icon,
 .map-container.satellite .target-toggle-icon {
-  filter: brightness(0) invert(1);
+  filter: none;
 }
 
 .map-container.dark .favorite-toggle-icon,
 .map-container.satellite .favorite-toggle-icon {
+  filter: none;
+}
+
+.context-menu-popup .target-toggle.active .target-toggle-icon,
+.context-menu-popup .favorite-toggle.active .favorite-toggle-icon {
   filter: brightness(0) invert(1);
 }
 
