@@ -46,7 +46,7 @@
 
 .profile-dropdown {
   position: absolute;
-  top: 56px;
+  top: 68px;
   right: 0;
   min-width: 230px;
   background: var(--glass-bg-elevated);
