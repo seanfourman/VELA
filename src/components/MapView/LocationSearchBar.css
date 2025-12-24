@@ -132,7 +132,7 @@
 
 .location-search__results.open {
   padding: 0;
-  max-height: clamp(200px, 40vh, 280px);
+  max-height: clamp(240px, 45vh, 320px);
   opacity: 1;
   transform: translateY(0) scale(1);
   overflow-y: auto;
@@ -146,6 +146,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
+  min-height: 48px;
   padding: 8px 16px 8px 20px;
   border-radius: 0;
   border: none;
