@@ -84,6 +84,7 @@
   align-items: center;
   gap: 12px;
   padding: 12px 24px;
+  direction: ltr;
 }
 
 .location-search__input {
@@ -96,6 +97,8 @@
   font-size: 0.95rem;
   font-family: inherit;
   text-align: left;
+  direction: ltr;
+  unicode-bidi: plaintext;
 }
 
 .location-search__input::placeholder {
