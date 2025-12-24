@@ -126,7 +126,7 @@
 }
 
 .location-search__results.open {
-  padding: 8px 0 10px;
+  padding: 0;
   max-height: 320px;
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -151,6 +151,14 @@
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
   overflow: hidden;
+}
+
+.location-search__item:first-child {
+  padding-top: 16px;
+}
+
+.location-search__item:last-child {
+  padding-bottom: 16px;
 }
 
 .location-search__item + .location-search__item {
