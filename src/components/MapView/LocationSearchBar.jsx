@@ -20,7 +20,7 @@ const parseCoordinates = (value) => {
   return { lat, lng };
 };
 
-const formatCoords = (lat, lng) => `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+const formatCoords = (lat, lng) => `${lat.toFixed(2)}, ${lng.toFixed(2)}`;
 
 export default function LocationSearchBar({
   locations = [],
