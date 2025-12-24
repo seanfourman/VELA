@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import markerIcon from "../../assets/icons/marker-icon.svg";
+import stargazingIcon from "../../assets/icons/stargazing-icon.svg";
 import "./LocationSearchBar.css";
 
 const SEARCH_DEBOUNCE_MS = 250;
@@ -195,8 +196,13 @@ export default function LocationSearchBar({
                         <span className="location-search__item-icon">
                           <img src={markerIcon} alt="" aria-hidden="true" />
                         </span>
-                        <span className="location-search__name">
-                          Go to coordinates
+                        <span className="location-search__details">
+                          <span className="location-search__name">
+                            Go to coordinates
+                          </span>
+                          <span className="location-search__meta">
+                            Coordinates
+                          </span>
                         </span>
                         <span className="location-search__coords">
                           {coordsLabel}
@@ -209,11 +215,19 @@ export default function LocationSearchBar({
                     <button
                       key={result.id}
                       type="button"
-                      className="location-search__item"
+                      className="location-search__item location-search__item--location"
                       onClick={() => handleSelectLocation(result.location)}
                     >
-                      <span className="location-search__name">
-                        {result.location.name || "Untitled"}
+                      <span className="location-search__item-icon">
+                        <img src={stargazingIcon} alt="" aria-hidden="true" />
+                      </span>
+                      <span className="location-search__details">
+                        <span className="location-search__name">
+                          {result.location.name || "Untitled"}
+                        </span>
+                        <span className="location-search__meta">
+                          Stargazing spot
+                        </span>
                       </span>
                       <span className="location-search__coords">
                         {formatCoords(
