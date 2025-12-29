@@ -146,10 +146,17 @@
   object-fit: cover;
 }
 
-.profile-avatar__initial {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--surface-text);
+.profile-avatar__icon {
+  width: 32px;
+  height: 32px;
+  display: block;
+  filter: invert(1);
+  opacity: 0.9;
+}
+
+.profile-page.light .profile-avatar__icon {
+  filter: none;
+  opacity: 0.75;
 }
 
 .profile-preview {

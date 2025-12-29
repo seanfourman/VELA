@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import userIcon from "../assets/icons/user-icon.svg";
 import "./ProfileMenu.css";
 
 function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
@@ -18,13 +19,6 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
     auth?.user?.preferred_username;
   const userEmail = auth?.user?.email;
   const avatarUrl = profileAvatarUrl || auth?.user?.picture;
-  const userInitial = String(
-    displayName || auth?.user?.email || auth?.user?.given_name || "U"
-  )
-    .trim()
-    .charAt(0)
-    .toUpperCase();
-
   const closeMenu = useCallback(() => {
     setMenuOpen(false);
   }, []);
@@ -113,7 +107,9 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
         {avatarUrl ? (
           <img src={avatarUrl} alt="Profile" className="profile-avatar" />
         ) : (
-          <span className="profile-initial">{userInitial}</span>
+          <span className="profile-initial">
+            <img src={userIcon} alt="User" className="profile-icon" />
+          </span>
         )}
       </button>
 

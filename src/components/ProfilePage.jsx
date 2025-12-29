@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import ProfileEarth from "./ProfileEarth";
+import userIcon from "../assets/icons/user-icon.svg";
 import showPopup from "../utils/popup";
 import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
 import "./ProfilePage.css";
@@ -19,9 +20,6 @@ const normalizeProfile = (value) => {
     bio: typeof safe.bio === "string" ? safe.bio : "",
   };
 };
-
-const getInitial = (value = "") =>
-  String(value).trim().charAt(0).toUpperCase();
 
 function ProfilePage({
   auth,
@@ -62,7 +60,6 @@ function ProfilePage({
     userName;
   const avatarUrl =
     draftNormalized.avatarUrl.trim() || user?.picture || "";
-  const userInitial = getInitial(displayName || userEmail || "U");
 
   const handleFieldChange = (key) => (event) => {
     const value = event.target.value;
@@ -154,7 +151,11 @@ function ProfilePage({
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Profile avatar" />
                 ) : (
-                  <span className="profile-avatar__initial">{userInitial}</span>
+                  <img
+                    className="profile-avatar__icon"
+                    src={userIcon}
+                    alt="User"
+                  />
                 )}
               </div>
               <div className="profile-preview">
