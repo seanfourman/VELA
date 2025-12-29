@@ -3,14 +3,14 @@ import "./MapTypeSwitcher.css";
 
 const OPTION_META = (previewKey) => [
   {
-    id: "dark",
-    label: "Dark",
-    preview: `https://api.maptiler.com/maps/streets-v2-dark/0/0/0.png?key=${previewKey}`,
-  },
-  {
     id: "light",
     label: "Light",
     preview: `https://api.maptiler.com/maps/streets-v2/0/0/0.png?key=${previewKey}`,
+  },
+  {
+    id: "dark",
+    label: "Dark",
+    preview: `https://api.maptiler.com/maps/streets-v2-dark/0/0/0.png?key=${previewKey}`,
   },
   {
     id: "satellite",

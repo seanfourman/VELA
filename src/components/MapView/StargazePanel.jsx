@@ -1,7 +1,12 @@
 import StargazePanelContent from "./StargazePanelContent";
 import "./StargazePanel.css";
 
-export default function StargazePanel({ spot, isOpen, onClose }) {
+export default function StargazePanel({
+  spot,
+  isOpen,
+  onClose,
+  directionsProvider,
+}) {
   return (
     <aside
       className={`stargaze-panel glass-panel glass-panel-elevated${
@@ -34,7 +39,10 @@ export default function StargazePanel({ spot, isOpen, onClose }) {
               <span aria-hidden="true">X</span>
             </button>
           </div>
-          <StargazePanelContent spot={spot} />
+          <StargazePanelContent
+            spot={spot}
+            directionsProvider={directionsProvider}
+          />
         </>
       ) : null}
     </aside>

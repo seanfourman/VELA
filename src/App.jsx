@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import MapView from "./components/MapView";
 import ProfilePage from "./components/ProfilePage";
 import AdminPage from "./components/AdminPage";
+import SettingsPage from "./components/SettingsPage";
 import PopupPortal from "./components/PopupPortal";
 import { useCognitoAuth } from "./hooks/useCognitoAuth";
 import { showPopup } from "./utils/popup";
@@ -12,6 +13,17 @@ import "./App.css";
 
 const PROFILE_STORAGE_KEY = "vela:profile:settings";
 const STARGAZE_STORAGE_KEY = "vela:stargaze:locations";
+const SETTINGS_STORAGE_KEY = "vela:settings";
+const DEFAULT_MAP_TYPE = "satellite";
+const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 100, 200, 250];
+const DEFAULT_SETTINGS = {
+  directionsProvider: "google",
+  showRecommendedSpots: true,
+  lightOverlayEnabled: false,
+  autoCenterOnLocate: true,
+  highAccuracyLocation: true,
+  searchDistance: SEARCH_DISTANCE_OPTIONS[0],
+};
 const DEFAULT_PROFILE = {
   displayName: "",
   avatarUrl: "",
@@ -25,6 +37,23 @@ const normalizeProfile = (value) => {
       typeof safe.displayName === "string" ? safe.displayName : "",
     avatarUrl: typeof safe.avatarUrl === "string" ? safe.avatarUrl : "",
     bio: typeof safe.bio === "string" ? safe.bio : "",
+  };
+};
+
+const normalizeSettings = (value) => {
+  const safe = value && typeof value === "object" ? value : {};
+  const searchDistance = Number(safe.searchDistance);
+  return {
+    ...DEFAULT_SETTINGS,
+    directionsProvider:
+      safe.directionsProvider === "waze" ? "waze" : "google",
+    showRecommendedSpots: safe.showRecommendedSpots !== false,
+    lightOverlayEnabled: Boolean(safe.lightOverlayEnabled),
+    autoCenterOnLocate: safe.autoCenterOnLocate !== false,
+    highAccuracyLocation: safe.highAccuracyLocation !== false,
+    searchDistance: SEARCH_DISTANCE_OPTIONS.includes(searchDistance)
+      ? searchDistance
+      : DEFAULT_SETTINGS.searchDistance,
   };
 };
 
@@ -143,6 +172,18 @@ const loadProfileSettings = () => {
   }
 };
 
+const loadSettings = () => {
+  if (typeof window === "undefined") return { ...DEFAULT_SETTINGS };
+  try {
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (!raw) return { ...DEFAULT_SETTINGS };
+    const parsed = JSON.parse(raw);
+    return normalizeSettings(parsed);
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+};
+
 const loadStargazeLocations = () => {
   if (typeof window === "undefined") return [];
   try {
@@ -204,8 +245,9 @@ function App() {
     navigator.geolocation ? "searching" : "off"
   );
   const [mapType, setMapType] = useState(() => {
-    return localStorage.getItem("mapType") || "satellite";
+    return localStorage.getItem("mapType") || DEFAULT_MAP_TYPE;
   });
+  const [settings, setSettings] = useState(() => loadSettings());
   const [profileSettings, setProfileSettings] = useState(() =>
     loadProfileSettings()
   );
@@ -219,6 +261,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem("mapType", mapType);
   }, [mapType]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
+    } catch {
+      // Storage unavailable; ignore
+    }
+  }, [settings]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -243,7 +293,7 @@ function App() {
         setLocationStatus("off");
       },
       {
-        enableHighAccuracy: true,
+        enableHighAccuracy: settings.highAccuracyLocation,
         timeout: 15000,
         maximumAge: 0,
       }
@@ -252,7 +302,7 @@ function App() {
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
-  }, []);
+  }, [settings.highAccuracyLocation]);
 
   useEffect(() => {
     if (!isProbablyHardwareAccelerated()) {
@@ -281,7 +331,11 @@ function App() {
       }
       if (nextPath === route) return;
 
-      if (nextPath === "/profile" && normalizePath(route) === "/") {
+      const shouldZoomOut =
+        normalizePath(route) === "/" &&
+        ["/profile", "/settings", "/admin"].includes(nextPath);
+
+      if (shouldZoomOut) {
         if (mapViewRef.current?.zoomOutToMin) {
           mapViewRef.current.zoomOutToMin();
         }
@@ -309,6 +363,21 @@ function App() {
   const handleResetProfile = useCallback(() => {
     setProfileSettings({ ...DEFAULT_PROFILE });
     localStorage.removeItem(PROFILE_STORAGE_KEY);
+  }, []);
+
+  const handleUpdateSettings = useCallback((patch) => {
+    setSettings((prev) => normalizeSettings({ ...prev, ...patch }));
+  }, []);
+
+  const handleResetSettings = useCallback(() => {
+    setSettings({ ...DEFAULT_SETTINGS });
+    setMapType(DEFAULT_MAP_TYPE);
+    try {
+      localStorage.removeItem(SETTINGS_STORAGE_KEY);
+      localStorage.removeItem("mapType");
+    } catch {
+      // Storage unavailable; ignore
+    }
   }, []);
 
   const persistStargazeLocations = useCallback((next) => {
@@ -382,6 +451,16 @@ function App() {
           onDeleteStargazeLocation={handleDeleteStargazeLocation}
           onNavigate={navigate}
         />
+      ) : currentRoute === "/settings" ? (
+        <SettingsPage
+          mapType={mapType}
+          isLight={isLight}
+          settings={settings}
+          onUpdateSettings={handleUpdateSettings}
+          onResetSettings={handleResetSettings}
+          onMapTypeChange={setMapType}
+          onNavigate={navigate}
+        />
       ) : (
         <MapView
           ref={mapViewRef}
@@ -391,6 +470,17 @@ function App() {
           setMapType={setMapType}
           isAuthenticated={auth?.isAuthenticated}
           stargazeLocations={stargazeLocations}
+          directionsProvider={settings.directionsProvider}
+          showRecommendedSpots={settings.showRecommendedSpots}
+          lightOverlayEnabled={settings.lightOverlayEnabled}
+          onToggleLightOverlay={(next) =>
+            handleUpdateSettings({ lightOverlayEnabled: next })
+          }
+          searchDistance={settings.searchDistance}
+          onSearchDistanceChange={(next) =>
+            handleUpdateSettings({ searchDistance: next })
+          }
+          autoCenterOnLocate={settings.autoCenterOnLocate}
         />
       )}
       <PopupPortal />

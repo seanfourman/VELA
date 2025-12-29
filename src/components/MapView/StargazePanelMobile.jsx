@@ -2,7 +2,12 @@ import { useEffect } from "react";
 import StargazePanelContent from "./StargazePanelContent";
 import "./StargazePanelMobile.css";
 
-export default function StargazePanelMobile({ spot, isOpen, onClose }) {
+export default function StargazePanelMobile({
+  spot,
+  isOpen,
+  onClose,
+  directionsProvider,
+}) {
   useEffect(() => {
     if (typeof document === "undefined") return undefined;
     const body = document.body;
@@ -57,7 +62,10 @@ export default function StargazePanelMobile({ spot, isOpen, onClose }) {
                 <span aria-hidden="true">X</span>
               </button>
             </div>
-            <StargazePanelContent spot={spot} />
+            <StargazePanelContent
+              spot={spot}
+              directionsProvider={directionsProvider}
+            />
           </>
         ) : null}
       </div>

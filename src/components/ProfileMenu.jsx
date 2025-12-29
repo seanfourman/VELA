@@ -137,6 +137,13 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
             >
               Profile
             </a>
+            <a
+              href="/settings"
+              className="profile-action"
+              onClick={(event) => handleMenuNavigate(event, "/settings")}
+            >
+              Settings
+            </a>
             {isAdmin ? (
               <a
                 href="/admin"

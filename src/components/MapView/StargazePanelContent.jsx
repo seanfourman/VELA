@@ -30,6 +30,17 @@ const getLinkHost = (value) => {
   }
 };
 
+const getMapLink = (lat, lng, provider) => {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (provider === "waze") {
+    const params = new URLSearchParams();
+    params.set("ll", `${lat},${lng}`);
+    params.set("navigate", "yes");
+    return `https://www.waze.com/ul?${params.toString()}`;
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+};
+
 const renderLinkList = (title, links, labelPrefix) => {
   if (!links.length) return null;
   return (
@@ -57,7 +68,10 @@ const renderLinkList = (title, links, labelPrefix) => {
   );
 };
 
-export default function StargazePanelContent({ spot }) {
+export default function StargazePanelContent({
+  spot,
+  directionsProvider = "google",
+}) {
   if (!spot) return null;
 
   const rawImages = Array.isArray(spot.images) ? spot.images : [];
@@ -83,10 +97,9 @@ export default function StargazePanelContent({ spot }) {
     { label: "Coordinates", value: coordsLabel },
   ].filter((fact) => fact.value);
 
-  const mapUrl =
-    Number.isFinite(spot.lat) && Number.isFinite(spot.lng)
-      ? `https://www.google.com/maps/search/?api=1&query=${spot.lat},${spot.lng}`
-      : null;
+  const mapUrl = getMapLink(spot.lat, spot.lng, directionsProvider);
+  const mapLabel =
+    directionsProvider === "waze" ? "Open in Waze" : "Open in Google Maps";
 
   const hasMedia = imageUrls.length || photoLinks.length || sourceLinks.length;
 
@@ -127,7 +140,7 @@ export default function StargazePanelContent({ spot }) {
               target="_blank"
               rel="noreferrer"
             >
-              Open in Google Maps
+              {mapLabel}
             </a>
           </div>
         </section>

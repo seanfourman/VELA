@@ -178,11 +178,12 @@ const favoriteSpotIconTransition = new L.DivIcon({
   iconAnchor: [15, 15],
 });
 
-function MapAnimator({ location }) {
+function MapAnimator({ location, shouldAutoCenter }) {
   const map = useMap();
   const hasAnimated = useRef(false);
 
   useEffect(() => {
+    if (!shouldAutoCenter) return;
     if (location && !hasAnimated.current) {
       hasAnimated.current = true;
 
@@ -191,7 +192,7 @@ function MapAnimator({ location }) {
         easeLinearity: 0.25,
       });
     }
-  }, [location, map]);
+  }, [location, map, shouldAutoCenter]);
 
   return null;
 }
@@ -338,6 +339,13 @@ const MapView = forwardRef(function MapView(
     setMapType,
     stargazeLocations = [],
     isAuthenticated,
+    directionsProvider = "google",
+    showRecommendedSpots = true,
+    lightOverlayEnabled = false,
+    onToggleLightOverlay,
+    searchDistance = 10,
+    onSearchDistanceChange,
+    autoCenterOnLocate = true,
   },
   ref
 ) {
@@ -346,11 +354,9 @@ const MapView = forwardRef(function MapView(
   const [placedMarker, setPlacedMarker] = useState(null);
   const [exitingMarker, setExitingMarker] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
-  const [searchDistance, setSearchDistance] = useState(10);
   const [darkSpots, setDarkSpots] = useState([]);
   const [selectedDarkSpot, setSelectedDarkSpot] = useState(null);
   const [latestGridShot, setLatestGridShot] = useState(null);
-  const [lightOverlayEnabled, setLightOverlayEnabled] = useState(false);
   const [activeStargazeId, setActiveStargazeId] = useState(null);
   const [favoriteSpots, setFavoriteSpots] = useState([]);
   const [stargazePanelSpot, setStargazePanelSpot] = useState(null);
@@ -379,12 +385,17 @@ const MapView = forwardRef(function MapView(
     () => new Set(exitingFavoriteKeys),
     [exitingFavoriteKeys]
   );
+  const visibleStargazeLocations = useMemo(
+    () => (showRecommendedSpots ? stargazeLocations : []),
+    [showRecommendedSpots, stargazeLocations]
+  );
   const activeStargazeSpot = useMemo(() => {
     if (!activeStargazeId) return null;
     return (
-      stargazeLocations.find((spot) => spot.id === activeStargazeId) || null
+      visibleStargazeLocations.find((spot) => spot.id === activeStargazeId) ||
+      null
     );
-  }, [activeStargazeId, stargazeLocations]);
+  }, [activeStargazeId, visibleStargazeLocations]);
 
   const {
     visiblePlanets,
@@ -730,26 +741,70 @@ const MapView = forwardRef(function MapView(
     }
   };
 
+  const buildDirectionsUrl = useCallback(
+    (origin, destination) => {
+      const destLat = Number(destination?.lat);
+      const destLng = Number(destination?.lng);
+      if (!Number.isFinite(destLat) || !Number.isFinite(destLng)) return null;
+
+      if (directionsProvider === "waze") {
+        const params = new URLSearchParams();
+        params.set("ll", `${destLat},${destLng}`);
+        params.set("navigate", "yes");
+        if (
+          origin &&
+          Number.isFinite(origin.lat) &&
+          Number.isFinite(origin.lng)
+        ) {
+          params.set("from", `${origin.lat},${origin.lng}`);
+        }
+        return `https://www.waze.com/ul?${params.toString()}`;
+      }
+
+      if (
+        origin &&
+        Number.isFinite(origin.lat) &&
+        Number.isFinite(origin.lng)
+      ) {
+        return `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${destLat},${destLng}`;
+      }
+
+      return `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`;
+    },
+    [directionsProvider]
+  );
+
   const handleGetDirections = () => {
     const target = placedMarker || contextMenu;
-    if (!target || !location) return;
-
-    const url = `https://www.google.com/maps/dir/${location.lat},${location.lng}/${target.lat},${target.lng}`;
+    if (!target) return;
+    const origin = location
+      ? { lat: location.lat, lng: location.lng }
+      : null;
+    const url = buildDirectionsUrl(origin, target);
+    if (!url) return;
     window.open(url, "_blank");
   };
 
-  const getDirectionsOrigin = () => {
+  const getDirectionsOrigin = useCallback(() => {
+    if (directionsProvider === "waze") {
+      if (location) {
+        return { lat: location.lat, lng: location.lng, label: "Your location" };
+      }
+      return null;
+    }
     // Blue pinned marker is stronger than the green live location dot.
-    if (placedMarker)
+    if (placedMarker) {
       return {
         lat: placedMarker.lat,
         lng: placedMarker.lng,
         label: "Pinned spot",
       };
-    if (location)
+    }
+    if (location) {
       return { lat: location.lat, lng: location.lng, label: "Your location" };
+    }
     return null;
-  };
+  }, [directionsProvider, location, placedMarker]);
 
   const handleCloseContextMenu = () => {
     setContextMenu(null);
@@ -832,13 +887,25 @@ const MapView = forwardRef(function MapView(
     : hasAnyLocation
     ? "Find stargazing spots near you"
     : "Drop a pin or enable location";
+  const searchPlaceholder = showRecommendedSpots
+    ? "Search coordinates or best stargazing spots"
+    : "Search coordinates";
+  const handleToggleLightOverlay = useCallback(() => {
+    onToggleLightOverlay?.(!lightOverlayEnabled);
+  }, [lightOverlayEnabled, onToggleLightOverlay]);
+  const handleSearchDistanceChange = useCallback(
+    (value) => {
+      onSearchDistanceChange?.(value);
+    },
+    [onSearchDistanceChange]
+  );
   const favoriteOnlySpots = useMemo(() => {
     if (favoriteSpots.length === 0) return [];
     const activeDarkSpotKeys = new Set(
       darkSpots.map((spot) => getSpotKey(spot.lat, spot.lon))
     );
     const stargazeKeys = new Set(
-      stargazeLocations.map((spot) => getSpotKey(spot.lat, spot.lng))
+      visibleStargazeLocations.map((spot) => getSpotKey(spot.lat, spot.lng))
     );
     const placedKey = placedMarker
       ? getSpotKey(placedMarker.lat, placedMarker.lng)
@@ -849,16 +916,25 @@ const MapView = forwardRef(function MapView(
       if (stargazeKeys.has(spot.key)) return false;
       return true;
     });
-  }, [darkSpots, favoriteSpots, getSpotKey, placedMarker, stargazeLocations]);
+  }, [
+    darkSpots,
+    favoriteSpots,
+    getSpotKey,
+    placedMarker,
+    visibleStargazeLocations,
+  ]);
   const favoriteStargazeSpots = useMemo(() => {
-    if (!Array.isArray(stargazeLocations) || stargazeLocations.length === 0) {
+    if (
+      !Array.isArray(visibleStargazeLocations) ||
+      visibleStargazeLocations.length === 0
+    ) {
       return [];
     }
     if (favoriteSpotKeys.size === 0) return [];
-    return stargazeLocations.filter((spot) =>
+    return visibleStargazeLocations.filter((spot) =>
       favoriteSpotKeys.has(getSpotKey(spot.lat, spot.lng))
     );
-  }, [favoriteSpotKeys, getSpotKey, stargazeLocations]);
+  }, [favoriteSpotKeys, getSpotKey, visibleStargazeLocations]);
 
   const zoomOutToMin = useCallback(() => {
     const map = mapRef.current;
@@ -1072,7 +1148,12 @@ const MapView = forwardRef(function MapView(
           onPopupStateChange={setIsPopupOpen}
           onPopupClose={handlePopupClose}
         />
-        {location && <MapAnimator location={location} />}
+        {location && (
+          <MapAnimator
+            location={location}
+            shouldAutoCenter={autoCenterOnLocate}
+          />
+        )}
 
         {location && (
           <Marker
@@ -1132,7 +1213,7 @@ const MapView = forwardRef(function MapView(
             <Popup>
               <ContextMenuPopup
                 coords={placedMarker}
-                onGetDirections={location ? handleGetDirections : null}
+                onGetDirections={handleGetDirections}
                 onRemovePin={handleCloseContextMenu}
                 isAuthenticated={Boolean(isAuthenticated)}
                 isFavorite={Boolean(placedMarker.isFavorite)}
@@ -1149,8 +1230,8 @@ const MapView = forwardRef(function MapView(
           </Marker>
         )}
 
-        {Array.isArray(stargazeLocations) &&
-          stargazeLocations.map((spot) => {
+        {Array.isArray(visibleStargazeLocations) &&
+          visibleStargazeLocations.map((spot) => {
             const spotKey = getSpotKey(spot.lat, spot.lng);
             const isFavoriteSpot = favoriteSpotKeys.has(spotKey);
             const isTarget =
@@ -1158,10 +1239,10 @@ const MapView = forwardRef(function MapView(
               Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
               Math.abs(selectedDarkSpot.lng - spot.lng) < 1e-6;
             const directionsOrigin = getDirectionsOrigin();
-            const handleDirections = directionsOrigin
+            const directionsUrl = buildDirectionsUrl(directionsOrigin, spot);
+            const handleDirections = directionsUrl
               ? () => {
-                  const url = `https://www.google.com/maps/dir/${directionsOrigin.lat},${directionsOrigin.lng}/${spot.lat},${spot.lng}`;
-                  window.open(url, "_blank");
+                  window.open(directionsUrl, "_blank");
                 }
               : null;
 
@@ -1395,21 +1476,30 @@ const MapView = forwardRef(function MapView(
                     </div>
                   </div>
                   <div className="popup-actions">
-                    {getDirectionsOrigin() && (
-                      <button
-                        className="popup-btn"
-                        onClick={() => {
-                          const origin = getDirectionsOrigin();
-                          if (!origin) return;
-                          const url = `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${spot.lat},${spot.lon}`;
-                          window.open(url, "_blank");
-                        }}
-                      >
-                        Get Directions
-                        <br />
-                        (from {getDirectionsOrigin()?.label.toLowerCase()})
-                      </button>
-                    )}
+                    {(() => {
+                      const origin = getDirectionsOrigin();
+                      const directionsUrl = buildDirectionsUrl(origin, {
+                        lat: spot.lat,
+                        lng: spot.lon,
+                      });
+                      if (!directionsUrl) return null;
+                      return (
+                        <button
+                          className="popup-btn"
+                          onClick={() => {
+                            window.open(directionsUrl, "_blank");
+                          }}
+                        >
+                          Get Directions
+                          {origin ? (
+                            <>
+                              <br />
+                              (from {origin.label.toLowerCase()})
+                            </>
+                          ) : null}
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
               </Popup>
@@ -1424,10 +1514,10 @@ const MapView = forwardRef(function MapView(
             selectedDarkSpot &&
             Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
             Math.abs(selectedDarkSpot.lng - spot.lng) < 1e-6;
-          const handleDirections = directionsOrigin
+          const directionsUrl = buildDirectionsUrl(directionsOrigin, spot);
+          const handleDirections = directionsUrl
             ? () => {
-                const url = `https://www.google.com/maps/dir/${directionsOrigin.lat},${directionsOrigin.lng}/${spot.lat},${spot.lng}`;
-                window.open(url, "_blank");
+                window.open(directionsUrl, "_blank");
               }
             : null;
           const handleRemoveFavorite = () =>
@@ -1475,11 +1565,13 @@ const MapView = forwardRef(function MapView(
         spot={stargazePanelSpot}
         isOpen={isStargazePanelOpen && !isMobileView}
         onClose={handleCloseStargazePanel}
+        directionsProvider={directionsProvider}
       />
       <StargazePanelMobile
         spot={stargazePanelSpot}
         isOpen={isStargazePanelOpen && isMobileView}
         onClose={handleCloseStargazePanel}
+        directionsProvider={directionsProvider}
       />
 
       <MapQuickActions
@@ -1494,18 +1586,17 @@ const MapView = forwardRef(function MapView(
           locationStatus === "active" ? handleSnapToLocation : undefined
         }
         lightOverlayEnabled={lightOverlayEnabled}
-        onToggleLightOverlay={() =>
-          setLightOverlayEnabled((current) => !current)
-        }
+        onToggleLightOverlay={handleToggleLightOverlay}
       />
 
       <SearchDistanceSelector
         value={searchDistance}
-        onChange={setSearchDistance}
+        onChange={handleSearchDistanceChange}
       />
 
       <LocationSearchBar
-        locations={stargazeLocations}
+        locations={visibleStargazeLocations}
+        placeholder={searchPlaceholder}
         onSelectCoordinates={handleCoordinateSearch}
         onSelectLocation={handleStargazeSearch}
         onFocusChange={setIsSearchFocused}

@@ -27,6 +27,7 @@ export default function LocationSearchBar({
   onSelectCoordinates,
   onSelectLocation,
   onFocusChange,
+  placeholder = "Search coordinates or best stargazing spots",
 }) {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
@@ -154,7 +155,7 @@ export default function LocationSearchBar({
             <input
               className="location-search__input"
               type="text"
-              placeholder="Search coordinates or best stargazing spots"
+              placeholder={placeholder}
               value={query}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
