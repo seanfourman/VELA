@@ -11,7 +11,6 @@
   -webkit-backdrop-filter: none;
   border: none;
   border-radius: var(--radius-md);
-  box-shadow: var(--glass-shadow-elevated);
   z-index: 1501;
   isolation: isolate;
   overflow: visible;
