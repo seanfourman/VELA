@@ -1,6 +1,6 @@
 .map-quick-actions {
   position: absolute;
-  bottom: 24px;
+  bottom: 14px;
   left: 14px;
   display: flex;
   flex-direction: row-reverse;
@@ -115,8 +115,7 @@ body.map-ui-shifted-stargaze .map-quick-actions {
 
 .quick-action-btn.active {
   border-color: rgba(99, 102, 241, 0.8);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35),
-    var(--glass-shadow-elevated);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35), var(--glass-shadow-elevated);
 }
 
 .quick-action-btn:active,
