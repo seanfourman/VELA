@@ -1,16 +1,53 @@
-# React + Vite
+# VELA
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+VELA is a stargazing companion built with React, Vite, and Leaflet. It helps you find dark skies, explore curated stargazing locations, and see visible planets for any spot on the map.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Interactive map with dark, light, and satellite base layers (MapTiler).
+- Light pollution overlay and sky quality lookups from World_Atlas_2015.tif.
+- Dark spot discovery via a proxied API.
+- Curated stargazing locations with details and galleries.
+- Favorites, pinned spots, targets, and quick actions.
+- Visible planets panel powered by VisiblePlanets.
+- Profile, settings, and admin tools with optional Cognito auth.
 
-## React Compiler
+## Getting started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Install dependencies:
+   - `npm install`
+2. Create a local env file:
+   - `copy .env.example .env`
+3. Set `VITE_MAPTILER_KEY` in `.env`.
+4. Run the dev server:
+   - `npm run dev`
 
-## Expanding the ESLint configuration
+## Environment variables
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Required:
+- `VITE_MAPTILER_KEY` (MapTiler tiles)
+
+Optional (Cognito Hosted UI):
+- `VITE_COGNITO_DOMAIN`
+- `VITE_COGNITO_CLIENT_ID`
+- `VITE_COGNITO_REDIRECT_URI`
+- `VITE_COGNITO_LOGOUT_URI`
+- `VITE_COGNITO_SCOPES`
+
+## Data and services
+
+- Light map and sky quality endpoints are served by the Vite dev/preview server
+  (see `vite.config.js`). For static hosting, move those endpoints to a server.
+- The light pollution overlay uses `data/World_Atlas_2015.tif` (or a copy in
+  `public/`). The repo includes this file, but it is large.
+- Dark spot search is proxied via `/api/darkspots` in `vite.config.js`.
+- Visible planets are fetched from `https://api.visibleplanets.dev/v3`.
+- Curated locations live in `data/stargazing_locations.json`.
+- User preferences and favorites are stored in localStorage.
+
+## Scripts
+
+- `npm run dev` - start the Vite dev server
+- `npm run build` - create a production build
+- `npm run preview` - preview the production build
+- `npm run lint` - run ESLint
