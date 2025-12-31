@@ -143,7 +143,7 @@ function AdminPage({
             Sign In
           </button>
         </section>
-      ) : isAdmin ? ( // TODO: bring back admin role check (!isAdmin <-- needs the exclamation mark)
+      ) : !isAdmin ? (
         <section className="profile-card glass-panel glass-panel-elevated">
           <h2 className="profile-section-title">Access restricted</h2>
           <p className="profile-section-copy">
