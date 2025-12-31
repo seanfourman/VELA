@@ -275,17 +275,6 @@
   border-color: var(--glass-border-strong);
 }
 
-.admin-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.admin-grid .profile-readonly {
-  text-align: center;
-  padding: 18px 12px;
-  font-size: 0.9rem;
-}
 
 .admin-location-form {
   display: grid;
@@ -415,10 +404,6 @@
 
   .profile-actions {
     justify-content: flex-start;
-  }
-
-  .admin-grid {
-    grid-template-columns: 1fr;
   }
 
   .admin-location-grid {
