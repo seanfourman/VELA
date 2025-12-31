@@ -105,10 +105,14 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
         aria-expanded={menuOpen}
       >
         {avatarUrl ? (
-          <img src={avatarUrl} alt="Profile" className="profile-avatar" />
+          <img
+            src={avatarUrl}
+            alt="Profile"
+            className="profile-menu__avatar"
+          />
         ) : (
-          <span className="profile-initial">
-            <img src={userIcon} alt="User" className="profile-icon" />
+          <span className="profile-menu__initial">
+            <img src={userIcon} alt="User" className="profile-menu__icon" />
           </span>
         )}
       </button>

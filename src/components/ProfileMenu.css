@@ -27,13 +27,15 @@
   box-shadow: var(--glass-shadow-elevated);
 }
 
-.profile-avatar {
+.profile-menu__avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 
-.profile-initial {
+.profile-menu__initial {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,7 +43,7 @@
   height: 100%;
 }
 
-.profile-icon {
+.profile-menu__icon {
   width: 28px;
   height: 28px;
   display: block;
@@ -49,7 +51,7 @@
   opacity: 0.9;
 }
 
-.navbar.light .profile-icon {
+.navbar.light .profile-menu__icon {
   filter: none;
   opacity: 0.75;
 }
