@@ -53,15 +53,38 @@
 }
 
 .settings-switcher {
-  display: inline-flex;
+  --switch-count: 2;
+  --switch-index: 0;
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   align-items: center;
-  gap: 6px;
   padding: 4px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur-light);
   -webkit-backdrop-filter: var(--glass-blur-light);
+  overflow: hidden;
+}
+
+.settings-switcher::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--switch-count));
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-elevated);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-subtle);
+  box-sizing: border-box;
+  transform: translateX(calc(var(--switch-index) * 100%));
+  transition: transform 0.25s ease;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .settings-switch {
@@ -73,18 +96,20 @@
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
+  position: relative;
+  z-index: 1;
+  text-align: center;
 }
 
 .settings-switch:hover {
-  background: var(--glass-bg-hover);
+  color: var(--surface-text);
+  border-color: transparent;
 }
 
 .settings-switch.active {
-  background: var(--glass-bg-elevated);
-  border-color: var(--glass-border-strong);
   color: var(--surface-text);
-  box-shadow: var(--glass-shadow-subtle);
+  transform: translateY(-1px);
 }
 
 .settings-switch:focus-visible {
@@ -167,7 +192,6 @@
 
   .settings-switcher {
     width: 100%;
-    justify-content: space-between;
   }
 
   .settings-select {
@@ -176,5 +200,12 @@
 
   .settings-actions {
     align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-switcher::before,
+  .settings-switch {
+    transition: none;
   }
 }

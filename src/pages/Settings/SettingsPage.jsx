@@ -45,8 +45,15 @@ function SettingsPage({
   onNavigate,
 }) {
   const showMoon = useMemo(() => isProbablyHardwareAccelerated(), []);
-  const isDayMap = mapType === "light" || mapType === "satellite" || isLight;
-  const moonVariant = isDayMap ? "day" : "night";
+  const moonVariant = "day";
+  const mapTypeIndex = Math.max(
+    0,
+    MAP_TYPE_OPTIONS.findIndex((option) => option.value === mapType)
+  );
+  const mapTypeSwitcherStyle = {
+    "--switch-index": mapTypeIndex,
+    "--switch-count": MAP_TYPE_OPTIONS.length,
+  };
   const {
     directionsProvider = "google",
     showRecommendedSpots = true,
@@ -55,6 +62,10 @@ function SettingsPage({
     highAccuracyLocation = true,
     searchDistance = SEARCH_DISTANCE_OPTIONS[0],
   } = settings || {};
+  const directionsSwitcherStyle = {
+    "--switch-index": directionsProvider === "waze" ? 1 : 0,
+    "--switch-count": 2,
+  };
 
   const handleReset = () => {
     onResetSettings?.();
@@ -94,6 +105,7 @@ function SettingsPage({
               className="settings-switcher"
               role="group"
               aria-label="Directions provider"
+              style={directionsSwitcherStyle}
             >
               <button
                 type="button"
@@ -121,11 +133,6 @@ function SettingsPage({
               </button>
             </div>
           </div>
-          {directionsProvider === "waze" ? (
-            <div className="settings-note">
-              Waze uses your device location for routing.
-            </div>
-          ) : null}
         </div>
 
         <div className="settings-divider" role="presentation" />
@@ -181,6 +188,7 @@ function SettingsPage({
               className="settings-switcher"
               role="group"
               aria-label="Map style"
+              style={mapTypeSwitcherStyle}
             >
               {MAP_TYPE_OPTIONS.map((option) => (
                 <button
