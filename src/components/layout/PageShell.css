@@ -236,6 +236,17 @@
   font-family: inherit;
 }
 
+.profile-input[type="number"]::-webkit-outer-spin-button,
+.profile-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.profile-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
 .profile-textarea {
   resize: none;
   min-height: 96px;
