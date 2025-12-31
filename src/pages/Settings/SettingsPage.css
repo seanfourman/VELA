@@ -157,7 +157,10 @@
   border-color: rgba(34, 197, 94, 0.5);
 }
 
-.settings-toggle input:checked + .settings-toggle__track .settings-toggle__thumb {
+.settings-toggle
+  input:checked
+  + .settings-toggle__track
+  .settings-toggle__thumb {
   transform: translateX(20px);
   background: var(--accent-success);
 }
@@ -167,8 +170,24 @@
   outline-offset: 2px;
 }
 
-.settings-select {
-  min-width: 140px;
+.settings-page .search-distance-selector {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 2;
+  transform: none;
+}
+
+.settings-page .distance-menu {
+  min-width: 100%;
+  top: auto;
+  bottom: 100%;
+  margin-top: 0;
+  margin-bottom: 8px;
+  transform-origin: bottom left;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  background: rgba(12, 14, 24, 0.78);
 }
 
 .settings-actions {
@@ -194,7 +213,7 @@
     width: 100%;
   }
 
-  .settings-select {
+  .settings-page .search-distance-selector {
     width: 100%;
   }
 

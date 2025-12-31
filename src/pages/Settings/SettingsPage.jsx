@@ -3,6 +3,7 @@ import SaturnGlobe from "../../components/planets/SaturnGlobe";
 import PageShell from "../../components/layout/PageShell";
 import showPopup from "../../utils/popup";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
+import SearchDistanceSelector from "../Map/MapView/SearchDistanceSelector";
 import "./SettingsPage.css";
 
 const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 100, 200, 250];
@@ -212,21 +213,12 @@ function SettingsPage({
                 Choose how far to search for stargazing spots.
               </div>
             </div>
-            <select
-              className="profile-input settings-select"
+            <SearchDistanceSelector
               value={searchDistance}
-              onChange={(event) =>
-                onUpdateSettings?.({
-                  searchDistance: Number(event.target.value),
-                })
+              onChange={(next) =>
+                onUpdateSettings?.({ searchDistance: Number(next) })
               }
-            >
-              {SEARCH_DISTANCE_OPTIONS.map((dist) => (
-                <option key={dist} value={dist}>
-                  {dist} km
-                </option>
-              ))}
-            </select>
+            />
           </div>
         </div>
 
