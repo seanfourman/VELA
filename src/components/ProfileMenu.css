@@ -152,3 +152,9 @@
     transform: translateY(-6px) scale(0.98);
   }
 }
+
+@media (max-width: 480px) {
+  .profile-dropdown {
+    right: 4px;
+  }
+}
