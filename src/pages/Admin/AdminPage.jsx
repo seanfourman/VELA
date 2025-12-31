@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import PageShell from "../../components/layout/PageShell";
-import SaturnGlobe from "../../components/planets/SaturnGlobe";
+import MoonGlobe from "../../components/planets/MoonGlobe";
 import showPopup from "../../utils/popup";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
 
@@ -31,7 +31,7 @@ function AdminPage({
   const [draft, setDraft] = useState(EMPTY_LOCATION);
   const [editingId, setEditingId] = useState(null);
   const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
-  const saturnVariant = isLight ? "day" : "night";
+  const moonVariant = isLight ? "day" : "night";
   const locationList = useMemo(() => {
     if (!Array.isArray(stargazeLocations)) return [];
     return [...stargazeLocations].sort((a, b) =>
@@ -117,8 +117,8 @@ function AdminPage({
   };
 
   const hero = showPlanet ? (
-    <SaturnGlobe
-      variant={saturnVariant}
+    <MoonGlobe
+      variant={moonVariant}
       className="profile-page__earth-canvas"
     />
   ) : null;

@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import MoonGlobe from "../../components/planets/MoonGlobe";
+import SaturnGlobe from "../../components/planets/SaturnGlobe";
 import PageShell from "../../components/layout/PageShell";
 import showPopup from "../../utils/popup";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
@@ -45,7 +45,7 @@ function SettingsPage({
   onNavigate,
 }) {
   const showMoon = useMemo(() => isProbablyHardwareAccelerated(), []);
-  const moonVariant = "day";
+  const saturnVariant = "day";
   const mapTypeIndex = Math.max(
     0,
     MAP_TYPE_OPTIONS.findIndex((option) => option.value === mapType)
@@ -73,8 +73,8 @@ function SettingsPage({
   };
 
   const hero = showMoon ? (
-    <MoonGlobe
-      variant={moonVariant}
+    <SaturnGlobe
+      variant={saturnVariant}
       className="profile-page__earth-canvas"
     />
   ) : null;
