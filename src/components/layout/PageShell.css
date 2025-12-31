@@ -270,6 +270,17 @@
   gap: 12px;
 }
 
+.profile-account-id {
+  margin: 0;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--surface-text-subtle);
+  letter-spacing: 0.02em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  word-break: break-all;
+}
+
 .profile-action-btn {
   gap: 8px;
 }

@@ -14,8 +14,7 @@ const EMPTY_PROFILE = {
 const normalizeProfile = (value) => {
   const safe = value && typeof value === "object" ? value : {};
   return {
-    displayName:
-      typeof safe.displayName === "string" ? safe.displayName : "",
+    displayName: typeof safe.displayName === "string" ? safe.displayName : "",
     avatarUrl: typeof safe.avatarUrl === "string" ? safe.avatarUrl : "",
     bio: typeof safe.bio === "string" ? safe.bio : "",
   };
@@ -58,8 +57,7 @@ function ProfilePage({
     user?.email ||
     user?.preferred_username ||
     userName;
-  const avatarUrl =
-    draftNormalized.avatarUrl.trim() || user?.picture || "";
+  const avatarUrl = draftNormalized.avatarUrl.trim() || user?.picture || "";
 
   const handleFieldChange = (key) => (event) => {
     const value = event.target.value;
@@ -108,8 +106,7 @@ function ProfilePage({
         <section className="profile-card glass-panel glass-panel-elevated">
           <h2 className="profile-section-title">Sign in to edit</h2>
           <p className="profile-section-copy">
-            Sign in to customize your display name, avatar, and profile
-            details.
+            Sign in to customize your display name, avatar, and profile details.
           </p>
           <button
             type="button"
@@ -187,30 +184,6 @@ function ProfilePage({
             </label>
           </div>
 
-          <div className="profile-section">
-            <h2 className="profile-section-title">Account</h2>
-            <div className="profile-grid">
-              <div className="profile-field">
-                <span className="profile-label">Email</span>
-                <div className="profile-readonly">
-                  {userEmail || "Not available"}
-                </div>
-              </div>
-              <div className="profile-field">
-                <span className="profile-label">Username</span>
-                <div className="profile-readonly">
-                  {user?.preferred_username || "Not available"}
-                </div>
-              </div>
-              <div className="profile-field">
-                <span className="profile-label">User ID</span>
-                <div className="profile-readonly">
-                  {user?.sub || "Not available"}
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div className="profile-actions">
             <button
               type="button"
@@ -228,6 +201,9 @@ function ProfilePage({
               Save changes
             </button>
           </div>
+          <p className="profile-account-id">
+            {user?.sub || "Not available"}
+          </p>
         </form>
       )}
     </PageShell>
