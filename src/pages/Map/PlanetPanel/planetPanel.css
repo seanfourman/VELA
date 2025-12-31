@@ -2,7 +2,7 @@
 .planet-panel-wrapper {
   position: absolute;
   top: 50%;
-  left: 145px;
+  left: 140px;
   transform: translate(-50%, -50%);
   z-index: 950;
   pointer-events: none;
@@ -142,7 +142,7 @@
 .planet-panel-toggle {
   position: absolute;
   top: 50%;
-  left: -6px;
+  left: -2px;
   transform: translateY(-50%);
   width: 48px;
   height: 48px;
