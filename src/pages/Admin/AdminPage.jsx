@@ -117,16 +117,13 @@ function AdminPage({
   };
 
   const hero = showPlanet ? (
-    <MoonGlobe
-      variant={moonVariant}
-      className="profile-page__earth-canvas"
-    />
+    <MoonGlobe variant={moonVariant} className="profile-page__earth-canvas" />
   ) : null;
 
   return (
     <PageShell
       title="Admin Panel"
-      subtitle="Access admin-only tools and manage system settings."
+      subtitle="Access tools and manage system settings."
       isLight={isLight}
       className="admin-page"
       onBack={handleBackToMap}

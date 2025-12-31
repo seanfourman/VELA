@@ -187,7 +187,7 @@
   transform-origin: bottom left;
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  background: rgba(12, 14, 24, 0.78);
+  background: var(--glass-bg);
 }
 
 .settings-actions {
@@ -207,22 +207,6 @@
   .settings-row {
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .settings-page .profile-page__header {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .settings-page .profile-page__header > :first-child {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .settings-page .profile-page__header-actions {
-    flex: 0 0 auto;
-    margin-top: 2px;
   }
 
   .settings-switcher {
