@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
-import PlanetPanel from "../PlanetPanel";
+import PlanetPanel from "./PlanetPanel";
 import PlanetPanelMobile from "./PlanetPanelMobile";
 import PlanetPanelToggle from "./PlanetPanelToggle";
 import "./planetPanel.css";

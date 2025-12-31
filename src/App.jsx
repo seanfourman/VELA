@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Navbar from "./components/Navbar";
-import MapView from "./components/MapView";
-import ProfilePage from "./components/ProfilePage";
-import AdminPage from "./components/AdminPage";
-import SettingsPage from "./components/SettingsPage";
+import MapView from "./pages/Map/MapView";
+import ProfilePage from "./pages/Profile/ProfilePage";
+import AdminPage from "./pages/Admin/AdminPage";
+import SettingsPage from "./pages/Settings/SettingsPage";
 import PopupPortal from "./components/PopupPortal";
 import { useCognitoAuth } from "./hooks/useCognitoAuth";
 import { showPopup } from "./utils/popup";

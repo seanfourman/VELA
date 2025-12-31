@@ -6,11 +6,11 @@ import {
   useRef,
   useState,
 } from "react";
-import PlanetCard from "./PlanetPanel/PlanetCard";
-import PlanetInfoCard from "./PlanetPanel/PlanetInfoCard";
-import "./PlanetPanel/planetPanel.css";
-import "./PlanetPanel/planetCard.css";
-import "./PlanetPanel/planetInfoCard.css";
+import PlanetCard from "./PlanetCard";
+import PlanetInfoCard from "./PlanetInfoCard";
+import "./planetPanel.css";
+import "./planetCard.css";
+import "./planetInfoCard.css";
 
 export default function PlanetPanel({
   planets,

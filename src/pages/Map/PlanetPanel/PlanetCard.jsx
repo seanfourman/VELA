@@ -8,7 +8,7 @@ import {
   SRGBColorSpace,
   Vector3,
 } from "three";
-import { resolvePlanetTexture, PLANET_TEXTURES } from "../../utils/planetUtils";
+import { resolvePlanetTexture, PLANET_TEXTURES } from "../../../utils/planetUtils";
 import "./planetCard.css";
 
 function PlanetGlobe({ textureUrl, name }) {

@@ -21,7 +21,7 @@
   content: "";
   position: fixed;
   inset: 0;
-  background-image: url("../assets/planets/2k_stars_milky_way.jpg");
+  background-image: url("../../assets/planets/2k_stars_milky_way.jpg");
   background-size: cover;
   background-position: 50% 40%;
   opacity: 0;

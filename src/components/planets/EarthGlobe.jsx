@@ -7,9 +7,9 @@ import {
   LinearMipmapLinearFilter,
   SRGBColorSpace,
 } from "three";
-import earthDayMap from "../assets/planets/2k_earth_daymap.jpg";
-import earthNightMap from "../assets/planets/2k_earth_nightmap.jpg";
-import earthCloudsMap from "../assets/planets/2k_earth_clouds.jpg";
+import earthDayMap from "../../assets/planets/2k_earth_daymap.jpg";
+import earthNightMap from "../../assets/planets/2k_earth_nightmap.jpg";
+import earthCloudsMap from "../../assets/planets/2k_earth_clouds.jpg";
 
 const EARTH_TILT = 0.23;
 
@@ -74,7 +74,7 @@ function EarthGroup({ textureUrl, variant, showClouds }) {
   );
 }
 
-export default function ProfileEarth({
+export default function EarthGlobe({
   variant = "night",
   showClouds = false,
   className,

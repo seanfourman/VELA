@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import markerIcon from "../../assets/icons/marker-icon.svg";
-import mapLocationIcon from "../../assets/icons/map-location-icon.svg";
+import markerIcon from "../../../assets/icons/marker-icon.svg";
+import mapLocationIcon from "../../../assets/icons/map-location-icon.svg";
 import "./LocationSearchBar.css";
 
 const SEARCH_DEBOUNCE_MS = 250;

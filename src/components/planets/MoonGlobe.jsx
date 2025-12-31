@@ -6,7 +6,7 @@ import {
   LinearMipmapLinearFilter,
   SRGBColorSpace,
 } from "three";
-import moonMap from "../assets/planets/2k_moon.jpg";
+import moonMap from "../../assets/planets/2k_moon.jpg";
 
 const tuneTexture = (baseTexture, anisotropy = 4) => {
   if (!baseTexture) return baseTexture;
@@ -38,7 +38,7 @@ function MoonSurface({ textureUrl }) {
   );
 }
 
-export default function ProfileMoon({ variant = "night", className }) {
+export default function MoonGlobe({ variant = "night", className }) {
   const isDay = variant === "day";
 
   return (
