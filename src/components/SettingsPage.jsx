@@ -1,4 +1,7 @@
+import { useMemo } from "react";
+import ProfileMoon from "./ProfileMoon";
 import showPopup from "../utils/popup";
+import { isProbablyHardwareAccelerated } from "../utils/hardwareUtils";
 import "./ProfilePage.css";
 import "./SettingsPage.css";
 
@@ -41,6 +44,9 @@ function SettingsPage({
   onMapTypeChange,
   onNavigate,
 }) {
+  const showMoon = useMemo(() => isProbablyHardwareAccelerated(), []);
+  const isDayMap = mapType === "light" || mapType === "satellite" || isLight;
+  const moonVariant = isDayMap ? "day" : "night";
   const {
     directionsProvider = "google",
     showRecommendedSpots = true,
@@ -65,6 +71,14 @@ function SettingsPage({
 
   return (
     <div className={`profile-page settings-page ${isLight ? "light" : ""}`}>
+      {showMoon ? (
+        <div className="profile-page__earth" aria-hidden="true">
+          <ProfileMoon
+            variant={moonVariant}
+            className="profile-page__earth-canvas"
+          />
+        </div>
+      ) : null}
       <div className="profile-page__content">
         <header className="profile-page__header">
           <div>

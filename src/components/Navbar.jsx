@@ -7,15 +7,12 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
   const isLight = mapType === "light";
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const isLoading = Boolean(auth?.isLoading);
-  const isHome =
+  const currentPath =
     typeof currentRoute === "string"
-      ? currentRoute === "/"
-      : window.location.pathname === "/";
-  const isProfilePage =
-    typeof currentRoute === "string"
-      ? currentRoute === "/profile"
-      : window.location.pathname === "/profile";
-  const logoSrc = isProfilePage ? velaLogo : isLight ? velaLogoBlack : velaLogo;
+      ? currentRoute
+      : window.location.pathname;
+  const isHome = currentPath === "/";
+  const logoSrc = !isHome ? velaLogo : isLight ? velaLogoBlack : velaLogo;
 
   function handleAuthClick() {
     if (isLoading) return;

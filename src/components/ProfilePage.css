@@ -61,20 +61,19 @@
 
 .profile-page__earth {
   position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 50%;
+  left: 50%;
+  width: min(100vmin, 1000px);
+  height: min(100vmin, 1000px);
+  transform: translate(-50%, -50%);
   pointer-events: none;
-  opacity: 0;
-  transform: translateY(4%) scale(1.24);
-  animation: profile-earth-enter 1.35s var(--glass-appear-timing) forwards;
+  opacity: var(--profile-earth-opacity);
   z-index: 2;
 }
 
 .profile-page__earth-canvas {
-  width: min(72vmin, 720px);
-  height: min(72vmin, 720px);
+  width: min(100vmin, 1000px);
+  height: min(100vmin, 1000px);
   filter: drop-shadow(0 30px 90px rgba(0, 0, 0, 0.45));
 }
 
@@ -385,12 +384,6 @@
   }
 }
 
-@keyframes profile-earth-enter {
-  to {
-    opacity: var(--profile-earth-opacity);
-    transform: translateY(0) scale(1);
-  }
-}
 
 @media (max-width: 768px) {
   .profile-page {
@@ -450,8 +443,6 @@
   }
 
   .profile-page__earth {
-    animation: none;
-    opacity: var(--profile-earth-opacity);
-    transform: none;
+    transform: translate(-50%, -50%);
   }
 }
