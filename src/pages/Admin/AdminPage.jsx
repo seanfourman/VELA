@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import PageShell from "../../components/layout/PageShell";
+import SaturnGlobe from "../../components/planets/SaturnGlobe";
 import showPopup from "../../utils/popup";
+import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
 
 const EMPTY_LOCATION = {
   name: "",
@@ -28,6 +30,8 @@ function AdminPage({
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const [draft, setDraft] = useState(EMPTY_LOCATION);
   const [editingId, setEditingId] = useState(null);
+  const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
+  const saturnVariant = isLight ? "day" : "night";
   const locationList = useMemo(() => {
     if (!Array.isArray(stargazeLocations)) return [];
     return [...stargazeLocations].sort((a, b) =>
@@ -112,6 +116,13 @@ function AdminPage({
     resetForm();
   };
 
+  const hero = showPlanet ? (
+    <SaturnGlobe
+      variant={saturnVariant}
+      className="profile-page__earth-canvas"
+    />
+  ) : null;
+
   return (
     <PageShell
       title="Admin Panel"
@@ -119,6 +130,7 @@ function AdminPage({
       isLight={isLight}
       className="admin-page"
       onBack={handleBackToMap}
+      hero={hero}
     >
       {!isAuthenticated ? (
         <section className="profile-card glass-panel glass-panel-elevated">
