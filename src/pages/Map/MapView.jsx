@@ -436,7 +436,7 @@ const MapView = forwardRef(function MapView(
   }, []);
 
   const centerOnCoords = (lat, lng) => {
-    if (!mapRef.current || !isCoarsePointerEnv()) return;
+    if (!mapRef.current) return;
     const map = mapRef.current;
     const zoom = map.getZoom();
     const targetPoint = map.latLngToContainerPoint([lat, lng]);
