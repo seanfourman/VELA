@@ -209,6 +209,22 @@
     align-items: flex-start;
   }
 
+  .settings-page .profile-page__header {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .settings-page .profile-page__header > :first-child {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .settings-page .profile-page__header-actions {
+    flex: 0 0 auto;
+    margin-top: 2px;
+  }
+
   .settings-switcher {
     width: 100%;
   }
@@ -218,7 +234,9 @@
   }
 
   .settings-actions {
-    align-items: flex-start;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
   }
 }
 

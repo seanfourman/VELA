@@ -83,7 +83,7 @@ function SettingsPage({
   return (
     <PageShell
       title="Settings"
-      subtitle="Tune the map, directions, and default behaviors for VELA."
+      subtitle="Tune the map, directions, and default behaviors."
       isLight={isLight}
       onNavigate={onNavigate}
       hero={hero}
@@ -229,7 +229,7 @@ function SettingsPage({
             className="glass-btn profile-action-btn profile-secondary"
             onClick={handleReset}
           >
-            Reset to defaults
+            Reset
           </button>
         </div>
       </section>
