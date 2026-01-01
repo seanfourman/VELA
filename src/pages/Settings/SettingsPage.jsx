@@ -6,7 +6,7 @@ import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
 import SearchDistanceSelector from "../Map/MapView/SearchDistanceSelector";
 import "./SettingsPage.css";
 
-const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 100, 200, 250];
+const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
 const MAP_TYPE_OPTIONS = [
   { value: "light", label: "Light" },
   { value: "dark", label: "Dark" },

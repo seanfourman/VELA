@@ -15,7 +15,7 @@ const PROFILE_STORAGE_KEY = "vela:profile:settings";
 const STARGAZE_STORAGE_KEY = "vela:stargaze:locations";
 const SETTINGS_STORAGE_KEY = "vela:settings";
 const DEFAULT_MAP_TYPE = "satellite";
-const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 100, 200, 250];
+const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
 const DEFAULT_SETTINGS = {
   directionsProvider: "google",
   showRecommendedSpots: true,
@@ -33,8 +33,7 @@ const DEFAULT_PROFILE = {
 const normalizeProfile = (value) => {
   const safe = value && typeof value === "object" ? value : {};
   return {
-    displayName:
-      typeof safe.displayName === "string" ? safe.displayName : "",
+    displayName: typeof safe.displayName === "string" ? safe.displayName : "",
     avatarUrl: typeof safe.avatarUrl === "string" ? safe.avatarUrl : "",
     bio: typeof safe.bio === "string" ? safe.bio : "",
   };
@@ -45,8 +44,7 @@ const normalizeSettings = (value) => {
   const searchDistance = Number(safe.searchDistance);
   return {
     ...DEFAULT_SETTINGS,
-    directionsProvider:
-      safe.directionsProvider === "waze" ? "waze" : "google",
+    directionsProvider: safe.directionsProvider === "waze" ? "waze" : "google",
     showRecommendedSpots: safe.showRecommendedSpots !== false,
     lightOverlayEnabled: Boolean(safe.lightOverlayEnabled),
     autoCenterOnLocate: safe.autoCenterOnLocate !== false,
@@ -92,17 +90,13 @@ const isValidCoordinate = (value, min, max) =>
 const normalizeStargazeLocation = (value) => {
   if (!value || typeof value !== "object") return null;
 
-  const name =
-    typeof value.name === "string" ? value.name.trim() : "";
+  const name = typeof value.name === "string" ? value.name.trim() : "";
   const coordinates =
     value.coordinates && typeof value.coordinates === "object"
       ? value.coordinates
       : null;
   const lat = Number(
-    value.lat ??
-      value.latitude ??
-      coordinates?.lat ??
-      coordinates?.latitude
+    value.lat ?? value.latitude ?? coordinates?.lat ?? coordinates?.latitude
   );
   const lng = Number(
     value.lng ??
@@ -153,8 +147,8 @@ const normalizeStargazePayload = (payload) => {
   const locations = Array.isArray(payload)
     ? payload
     : Array.isArray(payload?.locations)
-      ? payload.locations
-      : [];
+    ? payload.locations
+    : [];
   return locations.map(normalizeStargazeLocation).filter(Boolean);
 };
 

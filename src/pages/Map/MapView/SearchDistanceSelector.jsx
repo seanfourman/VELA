@@ -5,7 +5,7 @@ export default function SearchDistanceSelector({ value, onChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
-  const OPTIONS = [10, 25, 50, 100, 200, 250];
+  const OPTIONS = [10, 25, 50, 75, 100];
 
   const toggleOpen = () => setIsOpen(!isOpen);
 
