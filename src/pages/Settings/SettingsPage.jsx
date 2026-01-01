@@ -13,9 +13,13 @@ const MAP_TYPE_OPTIONS = [
   { value: "satellite", label: "Satellite" },
 ];
 
-function SettingsToggle({ title, description, checked, onChange }) {
+function SettingsToggle({ title, description, checked, onChange, disabled }) {
   return (
-    <label className="settings-row settings-row--toggle">
+    <label
+      className={`settings-row settings-row--toggle${
+        disabled ? " settings-row--disabled" : ""
+      }`}
+    >
       <div className="settings-row__text">
         <div className="settings-row__title">{title}</div>
         {description ? (
@@ -26,6 +30,7 @@ function SettingsToggle({ title, description, checked, onChange }) {
         <input
           type="checkbox"
           checked={checked}
+          disabled={disabled}
           onChange={(event) => onChange?.(event.target.checked)}
         />
         <span className="settings-toggle__track" aria-hidden="true">
@@ -147,6 +152,12 @@ function SettingsPage({
             onChange={(value) =>
               onUpdateSettings?.({ showRecommendedSpots: value })
             }
+          />
+          <SettingsToggle
+            title="Light pollution overlay"
+            description="Temporarily disabled while the light map service is offline."
+            checked={false}
+            disabled={true}
           />
           <SettingsToggle
             title="Light pollution overlay"

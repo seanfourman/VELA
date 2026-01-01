@@ -46,6 +46,19 @@
   background: var(--settings-row-bg);
 }
 
+.settings-row--disabled {
+  opacity: 0.6;
+}
+
+.settings-row--disabled .settings-toggle__track {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--glass-border-subtle);
+}
+
+.settings-row--disabled .settings-toggle__thumb {
+  background: var(--surface-text-muted);
+}
+
 .settings-row__text {
   display: grid;
   gap: 4px;
