@@ -56,6 +56,8 @@ function skyQualityApiPlugin() {
     path.resolve(rootDir, "public", "World_Atlas_2015.tif"),
   ];
   const tifPath = candidatePaths.find((candidate) => fs.existsSync(candidate));
+  const lightmapTilesDir = path.resolve(rootDir, "lightmap-tiles");
+  const hasLightmapTiles = fs.existsSync(lightmapTilesDir);
 
   let imagePromise = null;
   const tileCache = new Map();
@@ -367,10 +369,55 @@ function skyQualityApiPlugin() {
     response.end(buffer);
   }
 
+  function handleStaticLightmapTileRequest(response, match) {
+    const [, zStr, xStr, yStr] = match;
+    const tilePath = path.join(lightmapTilesDir, zStr, xStr, `${yStr}.png`);
+
+    if (!tilePath.startsWith(lightmapTilesDir)) {
+      response.statusCode = 400;
+      response.setHeader("Content-Type", "application/json");
+      response.end(JSON.stringify({ error: "Invalid tile path" }));
+      return;
+    }
+
+    if (!fs.existsSync(tilePath)) {
+      response.statusCode = 404;
+      response.setHeader("Content-Type", "application/json");
+      response.end(JSON.stringify({ error: "Tile not found" }));
+      return;
+    }
+
+    response.statusCode = 200;
+    response.setHeader("Content-Type", "image/png");
+    response.setHeader("Cache-Control", "public, max-age=3600");
+    const stream = fs.createReadStream(tilePath);
+    stream.on("error", (error) => {
+      response.statusCode = 500;
+      response.setHeader("Content-Type", "application/json");
+      response.end(
+        JSON.stringify({
+          error:
+            error instanceof Error
+              ? error.message
+              : "Failed to read lightmap tile",
+        })
+      );
+    });
+    stream.pipe(response);
+  }
+
   function mount(server) {
     server.middlewares.use(async (request, response, next) => {
       try {
         const url = new URL(request.url || "", "http://localhost");
+        const staticLightmapMatch = url.pathname.match(
+          /^\/lightmap-tiles\/(\d+)\/(\d+)\/(\d+)\.png$/
+        );
+        if (staticLightmapMatch && hasLightmapTiles) {
+          handleStaticLightmapTileRequest(response, staticLightmapMatch);
+          return;
+        }
+
         const lightTileMatch = url.pathname.match(
           /^\/api\/lightmap\/(\d+)\/(\d+)\/(\d+)\.png$/
         );
