@@ -47,9 +47,7 @@ const LONG_PRESS_MS = 750;
 const MARKER_EXIT_MS = 280;
 const FAVORITE_EXIT_MS = 260;
 const STARGAZE_PANEL_EXIT_MS = 320;
-const LIGHT_TILE_URL = import.meta.env.VITE_LIGHT_TILE_URL;
-const LIGHT_TILE_MAX_NATIVE_ZOOM =
-  Number(import.meta.env.VITE_LIGHT_TILE_MAX_NATIVE_ZOOM) || 8;
+const LIGHT_TILE_URL = "/api/lightmap/{z}/{x}/{y}.png";
 
 const isCoarsePointerEnv = () => {
   if (typeof window === "undefined") return false;
@@ -1129,7 +1127,7 @@ const MapView = forwardRef(function MapView(
           }}
         />
 
-        {lightOverlayEnabled && LIGHT_TILE_URL && (
+        {lightOverlayEnabled && (
           <TileLayer
             url={LIGHT_TILE_URL}
             attribution="WA2015 artificial sky brightness"
@@ -1137,7 +1135,6 @@ const MapView = forwardRef(function MapView(
             zIndex={5}
             minZoom={MIN_ZOOM}
             maxZoom={MAX_ZOOM}
-            maxNativeZoom={LIGHT_TILE_MAX_NATIVE_ZOOM}
             tileSize={256}
           />
         )}
