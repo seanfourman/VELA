@@ -1,3 +1,5 @@
+import { buildVisiblePlanetsUrl } from "./awsEndpoints";
+
 const planetTexture = (fileName) =>
   new URL(`../assets/planets/${fileName}`, import.meta.url).href;
 
@@ -84,9 +86,7 @@ export async function fetchVisiblePlanets(lat, lng) {
   }
 
   try {
-    const response = await fetch(
-      `https://api.visibleplanets.dev/v3?latitude=${lat}&longitude=${lng}`
-    );
+    const response = await fetch(buildVisiblePlanetsUrl(lat, lng));
     if (!response.ok) {
       throw new Error(`Visible planets API failed: ${response.status}`);
     }

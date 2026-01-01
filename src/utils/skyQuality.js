@@ -1,3 +1,5 @@
+import { buildSkyQualityUrl } from "./awsEndpoints";
+
 const metricsCache = new Map();
 
 function buildCacheKey(lat, lon) {
@@ -38,14 +40,9 @@ export async function fetchSkyQualityMetrics(lat, lon) {
   const promise = (async () => {
     let response;
     try {
-      response = await fetch(
-        `/api/skyquality?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(
-          lon
-        )}`,
-        {
-          headers: { Accept: "application/json" },
-        }
-      );
+      response = await fetch(buildSkyQualityUrl(lat, lon), {
+        headers: { Accept: "application/json" },
+      });
     } catch (error) {
       let message =
         error instanceof Error && error.message
@@ -53,7 +50,7 @@ export async function fetchSkyQualityMetrics(lat, lon) {
           : "Failed to reach sky quality service";
       if (message === "Failed to fetch") {
         message =
-          "Sky quality service unavailable (is /api/skyquality configured?)";
+          "Sky quality service unavailable (is the sky quality endpoint configured?)";
       }
       throw new Error(message);
     }

@@ -1,3 +1,5 @@
+import { buildDarkSpotsUrl } from "./awsEndpoints";
+
 /**
  * Fetches stargazing locations (darkest spots) within a search radius.
  *
@@ -8,9 +10,7 @@
  */
 export async function fetchDarkSpots(lat, lon, searchDistance) {
   try {
-    const response = await fetch(
-      `/api/darkspots?lat=${lat}&lon=${lon}&searchDistance=${searchDistance}`
-    );
+    const response = await fetch(buildDarkSpotsUrl(lat, lon, searchDistance));
 
     if (!response.ok) {
       throw new Error(`Stargazing locations API error: ${response.status}`);
