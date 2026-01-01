@@ -133,12 +133,12 @@
 }
 
 .profile-action.admin {
-  color: var(--accent-warning);
+  color: #3a6feb;
   font-weight: 600;
 }
 
 .profile-action.admin:hover {
-  background: rgba(245, 158, 11, 0.12);
+  background: rgba(68, 125, 239, 0.12);
 }
 
 .profile-dropdown.open {
