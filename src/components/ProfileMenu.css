@@ -125,6 +125,7 @@
 
 .profile-action.logout {
   color: var(--accent-danger);
+  font-weight: 600;
 }
 
 .profile-action.logout:hover {
@@ -133,6 +134,7 @@
 
 .profile-action.admin {
   color: var(--accent-warning);
+  font-weight: 600;
 }
 
 .profile-action.admin:hover {
