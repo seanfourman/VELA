@@ -122,7 +122,7 @@ function AdminPage({
 
   return (
     <PageShell
-      title="Admin Panel"
+      title="Admin"
       subtitle="Access tools and manage system settings."
       isLight={isLight}
       className="admin-page"

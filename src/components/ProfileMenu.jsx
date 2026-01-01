@@ -105,11 +105,7 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
         aria-expanded={menuOpen}
       >
         {avatarUrl ? (
-          <img
-            src={avatarUrl}
-            alt="Profile"
-            className="profile-menu__avatar"
-          />
+          <img src={avatarUrl} alt="Profile" className="profile-menu__avatar" />
         ) : (
           <span className="profile-menu__initial">
             <img src={userIcon} alt="User" className="profile-menu__icon" />
@@ -126,7 +122,9 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
         >
           <div className="profile-meta">
             <div className="profile-name">{displayName || "Signed In"}</div>
-            {userEmail ? <div className="profile-email">{userEmail}</div> : null}
+            {userEmail ? (
+              <div className="profile-email">{userEmail}</div>
+            ) : null}
           </div>
 
           <div className="profile-actions">
@@ -150,7 +148,7 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
                 className="profile-action"
                 onClick={(event) => handleMenuNavigate(event, "/admin")}
               >
-                Admin Panel
+                Admin
               </a>
             ) : null}
             <button
