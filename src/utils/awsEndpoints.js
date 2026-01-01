@@ -1,8 +1,16 @@
 const AWS_ENDPOINTS = {
   visiblePlanets: import.meta.env.VITE_VISIBLE_PLANETS_URL,
-  skyQuality: import.meta.env.VITE_SKY_QUALITY_URL,
   darkSpots: import.meta.env.VITE_DARK_SPOTS_URL,
 };
+
+const normalizeBaseUrl = (value) => {
+  if (!value) return "";
+  return String(value).replace(/\/+$/, "");
+};
+
+const LIGHTMAP_API_BASE = normalizeBaseUrl(
+  import.meta.env.VITE_LIGHTMAP_API_BASE
+);
 
 const requireEndpoint = (value, envKey) => {
   if (!value) {
@@ -25,16 +33,21 @@ const joinQuery = (baseUrl, params) => {
 };
 
 export const buildVisiblePlanetsUrl = (lat, lng) =>
-  joinQuery(requireEndpoint(AWS_ENDPOINTS.visiblePlanets, "VITE_VISIBLE_PLANETS_URL"), {
-    latitude: lat,
-    longitude: lng,
-  });
+  joinQuery(
+    requireEndpoint(AWS_ENDPOINTS.visiblePlanets, "VITE_VISIBLE_PLANETS_URL"),
+    {
+      lat,
+      lon: lng,
+    }
+  );
 
 export const buildSkyQualityUrl = (lat, lon) =>
-  joinQuery(requireEndpoint(AWS_ENDPOINTS.skyQuality, "VITE_SKY_QUALITY_URL"), {
-    lat,
-    lon,
-  });
+  joinQuery(
+    LIGHTMAP_API_BASE
+      ? `${LIGHTMAP_API_BASE}/skyquality`
+      : "/api/skyquality",
+    { lat, lon }
+  );
 
 export const buildDarkSpotsUrl = (lat, lon, searchDistance) =>
   joinQuery(requireEndpoint(AWS_ENDPOINTS.darkSpots, "VITE_DARK_SPOTS_URL"), {
@@ -42,5 +55,10 @@ export const buildDarkSpotsUrl = (lat, lon, searchDistance) =>
     lon,
     searchDistance,
   });
+
+export const getLightmapTileUrlTemplate = () =>
+  LIGHTMAP_API_BASE
+    ? `${LIGHTMAP_API_BASE}/lightmap/{z}/{x}/{y}.png`
+    : "/api/lightmap/{z}/{x}/{y}.png";
 
 export { AWS_ENDPOINTS };

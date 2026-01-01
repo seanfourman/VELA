@@ -31,6 +31,7 @@ import usePlanets from "../../hooks/usePlanets";
 import { preloadAllPlanetTextures } from "../../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
 import { fetchDarkSpots } from "../../utils/darkSpots";
+import { getLightmapTileUrlTemplate } from "../../utils/awsEndpoints";
 import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
 import targetIcon from "../../assets/icons/target-icon.svg";
 import favoriteIcon from "../../assets/icons/favorite-icon.svg";
@@ -47,7 +48,7 @@ const LONG_PRESS_MS = 750;
 const MARKER_EXIT_MS = 280;
 const FAVORITE_EXIT_MS = 260;
 const STARGAZE_PANEL_EXIT_MS = 320;
-const LIGHT_TILE_URL = "/api/lightmap/{z}/{x}/{y}.png";
+const LIGHT_TILE_URL = getLightmapTileUrlTemplate();
 
 const isCoarsePointerEnv = () => {
   if (typeof window === "undefined") return false;
