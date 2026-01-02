@@ -32,6 +32,8 @@ import { preloadAllPlanetTextures } from "../../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
 import { fetchDarkSpots } from "../../utils/darkSpots";
 import { getLightmapTileUrlTemplate } from "../../utils/awsEndpoints";
+import { saveFavoriteSpot } from "../../utils/favoritesApi";
+import showPopup from "../../utils/popup";
 import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
 import targetIcon from "../../assets/icons/target-icon.svg";
 import favoriteIcon from "../../assets/icons/favorite-icon.svg";
@@ -340,6 +342,7 @@ const MapView = forwardRef(function MapView(
     setMapType,
     stargazeLocations = [],
     isAuthenticated,
+    authToken,
     directionsProvider = "google",
     showRecommendedSpots = true,
     lightOverlayEnabled = false,
@@ -840,10 +843,28 @@ const MapView = forwardRef(function MapView(
     }
   };
 
+  const persistFavoriteSpot = useCallback(
+    async (lat, lng) => {
+      if (!authToken) return;
+      try {
+        await saveFavoriteSpot({ lat, lon: lng, idToken: authToken });
+      } catch (error) {
+        showPopup(
+          error instanceof Error
+            ? error.message
+            : "Could not save favorite right now.",
+          "failure"
+        );
+      }
+    },
+    [authToken]
+  );
+
   const handleToggleDarkSpotFavorite = useCallback(
     (spot) => {
       if (!spot) return;
       const key = getSpotKey(spot.lat, spot.lon);
+      const isFavorite = favoriteSpotKeys.has(key);
       setFavoriteSpots((prev) => {
         const exists = prev.some((item) => item.key === key);
         if (exists) {
@@ -851,8 +872,11 @@ const MapView = forwardRef(function MapView(
         }
         return [...prev, { key, lat: spot.lat, lng: spot.lon }];
       });
+      if (!isFavorite) {
+        persistFavoriteSpot(spot.lat, spot.lon);
+      }
     },
-    [getSpotKey]
+    [favoriteSpotKeys, getSpotKey, persistFavoriteSpot]
   );
 
   useEffect(() => {
@@ -971,12 +995,13 @@ const MapView = forwardRef(function MapView(
       });
     } else {
       setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
+      persistFavoriteSpot(lat, lng);
     }
     setPlacedMarker((prev) => {
       if (!prev) return prev;
       return { ...prev, isFavorite: !prev.isFavorite };
     });
-  }, [favoriteSpotKeys, getSpotKey, placedMarker]);
+  }, [favoriteSpotKeys, getSpotKey, placedMarker, persistFavoriteSpot]);
 
   const handleTogglePinnedTarget = useCallback(() => {
     if (!placedMarker?.isFavorite) return;
@@ -1071,8 +1096,14 @@ const MapView = forwardRef(function MapView(
         ...prev,
         { key, lat: spot.lat, lng: spot.lng },
       ]);
+      persistFavoriteSpot(spot.lat, spot.lng);
     },
-    [favoriteSpotKeys, getSpotKey, handleRemoveFavoriteSpotAnimated]
+    [
+      favoriteSpotKeys,
+      getSpotKey,
+      handleRemoveFavoriteSpotAnimated,
+      persistFavoriteSpot,
+    ]
   );
 
   useImperativeHandle(ref, () => ({ zoomOutToMin }), [zoomOutToMin]);

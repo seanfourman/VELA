@@ -11,6 +11,9 @@ const normalizeBaseUrl = (value) => {
 const LIGHTMAP_API_BASE = normalizeBaseUrl(
   import.meta.env.VITE_LIGHTMAP_API_BASE
 );
+const FAVORITES_API_BASE = normalizeBaseUrl(
+  import.meta.env.VITE_FAVORITES_API_BASE
+);
 
 const requireEndpoint = (value, envKey) => {
   if (!value) {
@@ -55,6 +58,9 @@ export const buildDarkSpotsUrl = (lat, lon, searchDistance) =>
     lon,
     searchDistance,
   });
+
+export const buildFavoritesUrl = () =>
+  requireEndpoint(FAVORITES_API_BASE, "VITE_FAVORITES_API_BASE") + "/favorites";
 
 export const getLightmapTileUrlTemplate = () =>
   LIGHTMAP_API_BASE
