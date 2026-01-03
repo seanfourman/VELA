@@ -1747,6 +1747,9 @@ const MapView = forwardRef(function MapView(
               key={`favorite-${spot.key}`}
               position={[spot.lat, spot.lng]}
               icon={isExiting ? favoritePinIconRemoving : favoriteSpotIcon}
+              eventHandlers={{
+                popupopen: () => centerOnCoords(spot.lat, spot.lng),
+              }}
             >
               <Popup className={isExiting ? "popup-exiting" : undefined}>
                 <ContextMenuPopup
