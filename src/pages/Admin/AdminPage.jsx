@@ -252,7 +252,7 @@ function AdminPage({
 
           <form className="admin-location-form" onSubmit={handleSubmit}>
             <div className="admin-location-grid">
-              <label className="profile-field">
+              <label className="profile-field admin-grid-span-2">
                 <span className="profile-label">Name</span>
                 <input
                   className="profile-input"
@@ -262,7 +262,7 @@ function AdminPage({
                   placeholder="Joshua Tree National Park"
                 />
               </label>
-              <label className="profile-field">
+              <label className="profile-field admin-grid-span-2">
                 <span className="profile-label">Country</span>
                 <input
                   className="profile-input"
@@ -272,7 +272,7 @@ function AdminPage({
                   placeholder="Portugal"
                 />
               </label>
-              <label className="profile-field">
+              <label className="profile-field admin-grid-span-2">
                 <span className="profile-label">Region</span>
                 <input
                   className="profile-input"
@@ -282,7 +282,7 @@ function AdminPage({
                   placeholder="Alentejo (near Reguengos de Monsaraz)"
                 />
               </label>
-              <label className="profile-field">
+              <label className="profile-field admin-grid-span-3">
                 <span className="profile-label">Type</span>
                 <input
                   className="profile-input"
@@ -292,7 +292,7 @@ function AdminPage({
                   placeholder="Dark-sky observatory / stargazing center"
                 />
               </label>
-              <label className="profile-field">
+              <label className="profile-field admin-grid-span-3">
                 <span className="profile-label">Best time</span>
                 <input
                   className="profile-input"
@@ -302,7 +302,7 @@ function AdminPage({
                   placeholder="Clear summer nights; new Moon for deep-sky"
                 />
               </label>
-              <label className="profile-field">
+              <label className="profile-field admin-grid-span-3">
                 <span className="profile-label">Latitude</span>
                 <input
                   className="profile-input"
@@ -315,7 +315,7 @@ function AdminPage({
                   placeholder="34.1341"
                 />
               </label>
-              <label className="profile-field">
+              <label className="profile-field admin-grid-span-3">
                 <span className="profile-label">Longitude</span>
                 <input
                   className="profile-input"

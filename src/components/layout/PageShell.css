@@ -308,8 +308,16 @@
 
 .admin-location-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 14px;
+}
+
+.admin-location-grid .admin-grid-span-2 {
+  grid-column: span 2;
+}
+
+.admin-location-grid .admin-grid-span-3 {
+  grid-column: span 3;
 }
 
 .admin-location-note {
@@ -454,6 +462,11 @@
 
   .admin-location-grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin-location-grid .admin-grid-span-2,
+  .admin-location-grid .admin-grid-span-3 {
+    grid-column: auto;
   }
 
   .admin-location-card-header {
