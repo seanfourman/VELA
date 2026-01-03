@@ -628,12 +628,7 @@ const MapView = forwardRef(function MapView(
       return;
     }
     openStargazePanel(activeStargazeSpot);
-  }, [
-    activeStargazeSpot,
-    closeStargazePanel,
-    isMobileView,
-    openStargazePanel,
-  ]);
+  }, [activeStargazeSpot, closeStargazePanel, isMobileView, openStargazePanel]);
 
   useEffect(() => {
     if (!isMobileView) return;
@@ -868,7 +863,7 @@ const MapView = forwardRef(function MapView(
         showPopup(`Opened ${resolvedLabel} in Google Maps.`, "info", {
           duration: 2000,
         });
-      }, 2000);
+      }, 1500);
     },
     [buildShareUrl, showPopup]
   );
@@ -886,9 +881,7 @@ const MapView = forwardRef(function MapView(
   const handleGetDirections = () => {
     const target = placedMarker || contextMenu;
     if (!target) return;
-    const origin = location
-      ? { lat: location.lat, lng: location.lng }
-      : null;
+    const origin = location ? { lat: location.lat, lng: location.lng } : null;
     const url = buildDirectionsUrl(origin, target);
     if (!url) return;
     window.open(url, "_blank");
@@ -1406,7 +1399,9 @@ const MapView = forwardRef(function MapView(
                 onShareLocation={() =>
                   handleShareLocation(
                     placedMarker,
-                    placedMarker.isFavorite ? "Favorite spot" : "Pinned location"
+                    placedMarker.isFavorite
+                      ? "Favorite spot"
+                      : "Pinned location"
                   )
                 }
               />
@@ -1546,8 +1541,7 @@ const MapView = forwardRef(function MapView(
                     const canShare = true;
                     const toggleCount =
                       1 + Number(canFavorite) + Number(canShare);
-                    const toggleLayout =
-                      toggleCount > 1 ? "dual" : "single";
+                    const toggleLayout = toggleCount > 1 ? "dual" : "single";
                     return (
                       <div
                         className="target-toggle-row"
@@ -1638,7 +1632,10 @@ const MapView = forwardRef(function MapView(
                                 className="target-toggle-icon"
                               />
                             </button>
-                            <span className="target-toggle-label" aria-hidden="true">
+                            <span
+                              className="target-toggle-label"
+                              aria-hidden="true"
+                            >
                               Share
                             </span>
                           </div>
