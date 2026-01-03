@@ -8,7 +8,7 @@ import PopupPortal from "./components/PopupPortal";
 import { useCognitoAuth } from "./hooks/useCognitoAuth";
 import { showPopup } from "./utils/popup";
 import { isProbablyHardwareAccelerated } from "./utils/hardwareUtils";
-import stargazeSeed from "../data/stargazing_locations.json";
+import { fetchRecommendations } from "./utils/recommendationsApi";
 import "./App.css";
 
 const PROFILE_STORAGE_KEY = "vela:profile:settings";
@@ -152,8 +152,6 @@ const normalizeStargazePayload = (payload) => {
   return locations.map(normalizeStargazeLocation).filter(Boolean);
 };
 
-const STARGAZE_SEED_LOCATIONS = normalizeStargazePayload(stargazeSeed);
-
 const loadProfileSettings = () => {
   if (typeof window === "undefined") return { ...DEFAULT_PROFILE };
   try {
@@ -190,17 +188,6 @@ const loadStargazeLocations = () => {
   }
 };
 
-const mergeStargazeLocations = (seed, local) => {
-  const merged = new Map();
-  (Array.isArray(seed) ? seed : []).forEach((item) => {
-    merged.set(item.id, item);
-  });
-  (Array.isArray(local) ? local : []).forEach((item) => {
-    merged.set(item.id, item);
-  });
-  return Array.from(merged.values());
-};
-
 const normalizePath = (path = "/") => {
   const cleaned = String(path).replace(/\/+$/, "");
   return cleaned === "" ? "/" : cleaned;
@@ -234,6 +221,7 @@ function App() {
   const auth = useCognitoAuth();
   const mapViewRef = useRef(null);
   const transitionTimeoutRef = useRef(null);
+  const recommendationsToken = auth?.session?.id_token || null;
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState(() =>
     navigator.geolocation ? "searching" : "off"
@@ -245,8 +233,9 @@ function App() {
   const [profileSettings, setProfileSettings] = useState(() =>
     loadProfileSettings()
   );
-  const [stargazeLocations, setStargazeLocations] = useState(() =>
-    mergeStargazeLocations(STARGAZE_SEED_LOCATIONS, loadStargazeLocations())
+  const cachedStargazeRef = useRef(loadStargazeLocations());
+  const [stargazeLocations, setStargazeLocations] = useState(
+    cachedStargazeRef.current
   );
   const [route, setRoute] = useState(() =>
     normalizePath(window.location.pathname)
@@ -263,6 +252,43 @@ function App() {
       // Storage unavailable; ignore
     }
   }, [settings]);
+
+  const persistStargazeLocations = useCallback((next) => {
+    try {
+      localStorage.setItem(STARGAZE_STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      // Storage unavailable; ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await fetchRecommendations({ idToken: recommendationsToken });
+        const normalized = normalizeStargazePayload(data);
+        if (cancelled) return;
+        setStargazeLocations(normalized);
+        persistStargazeLocations(normalized);
+      } catch (error) {
+        if (cancelled) return;
+        if (cachedStargazeRef.current.length === 0) {
+          showPopup(
+            error instanceof Error
+              ? error.message
+              : "Could not load recommended spots right now.",
+            "failure",
+            { duration: 4500 }
+          );
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [persistStargazeLocations, recommendationsToken]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -369,14 +395,6 @@ function App() {
     try {
       localStorage.removeItem(SETTINGS_STORAGE_KEY);
       localStorage.removeItem("mapType");
-    } catch {
-      // Storage unavailable; ignore
-    }
-  }, []);
-
-  const persistStargazeLocations = useCallback((next) => {
-    try {
-      localStorage.setItem(STARGAZE_STORAGE_KEY, JSON.stringify(next));
     } catch {
       // Storage unavailable; ignore
     }

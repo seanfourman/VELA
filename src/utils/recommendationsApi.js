@@ -63,3 +63,28 @@ export async function saveRecommendation({ location, idToken }) {
   const data = await response.json().catch(() => null);
   return data ?? payload;
 }
+
+export async function fetchRecommendations({ idToken } = {}) {
+  const headers = { Accept: "application/json" };
+  if (idToken) {
+    headers.Authorization = `Bearer ${idToken}`;
+  }
+
+  const response = await fetch(buildRecommendationsUrl(), { headers });
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => "");
+    throw new Error(
+      message
+        ? `Recommendations API error: ${message}`
+        : `Recommendations API error: ${response.status}`
+    );
+  }
+
+  const data = await response.json().catch(() => null);
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.Items)) return data.Items;
+  if (Array.isArray(data?.recommendations)) return data.recommendations;
+  return [];
+}
