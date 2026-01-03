@@ -119,7 +119,7 @@ export default function MapQuickActions({
         title="Light pollution overlay is disabled"
         active={false}
         disabled={true}
-        /* DISABLED FOR NOW BECAUSE OF AWS LIMITS:
+        /* (***) DISABLED FOR NOW BECAUSE OF AWS LIMITS:
         title={
           lightOverlayEnabled
             ? "Hide light pollution overlay"
