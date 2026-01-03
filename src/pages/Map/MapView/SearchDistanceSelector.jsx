@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import "./SearchDistanceSelector.css";
 
-export default function SearchDistanceSelector({ value, onChange }) {
+export default function SearchDistanceSelector({ value, onChange, hidden = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -31,8 +31,17 @@ export default function SearchDistanceSelector({ value, onChange }) {
     };
   }, []);
 
+  useEffect(() => {
+    if (hidden) {
+      setIsOpen(false);
+    }
+  }, [hidden]);
+
   return (
-    <div className="search-distance-selector" ref={containerRef}>
+    <div
+      className={`search-distance-selector${hidden ? " hidden" : ""}`}
+      ref={containerRef}
+    >
       <button
         className={`glass-btn distance-toggle ${isOpen ? "active" : ""}`}
         onClick={toggleOpen}

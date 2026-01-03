@@ -13,6 +13,7 @@ const PlanetPanelContainer = forwardRef(
       mapType,
       reducedMotion = false,
       location,
+      onVisibilityChange,
     },
     ref
   ) => {
@@ -194,6 +195,12 @@ const PlanetPanelContainer = forwardRef(
       isMobile,
       revealPlanetPanel,
     ]);
+
+    useEffect(() => {
+      if (typeof onVisibilityChange === "function") {
+        onVisibilityChange(planetPanelVisible);
+      }
+    }, [onVisibilityChange, planetPanelVisible]);
 
     useEffect(() => {
       if (panelSource === "auto" && planetPanelVisible && !isHoveringPanel) {

@@ -369,6 +369,7 @@ const MapView = forwardRef(function MapView(
   const [favoriteSpots, setFavoriteSpots] = useState([]);
   const [stargazePanelSpot, setStargazePanelSpot] = useState(null);
   const [isStargazePanelOpen, setIsStargazePanelOpen] = useState(false);
+  const [isPlanetPanelOpen, setIsPlanetPanelOpen] = useState(false);
   const [isMobileView, setIsMobileView] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia?.("(max-width: 768px)")?.matches ?? false;
@@ -1216,6 +1217,7 @@ const MapView = forwardRef(function MapView(
         mapType={mapType}
         reducedMotion={reducedMotion}
         location={location}
+        onVisibilityChange={setIsPlanetPanelOpen}
       />
 
       <MapContainer
@@ -1713,6 +1715,7 @@ const MapView = forwardRef(function MapView(
       <SearchDistanceSelector
         value={searchDistance}
         onChange={handleSearchDistanceChange}
+        hidden={isPlanetPanelOpen}
       />
 
       <LocationSearchBar

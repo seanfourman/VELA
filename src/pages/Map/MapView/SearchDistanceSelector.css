@@ -11,6 +11,11 @@
   will-change: transform;
 }
 
+.search-distance-selector.hidden {
+  transform: translateX(calc(-100% - 32px));
+  pointer-events: none;
+}
+
 .distance-toggle {
   display: flex;
   align-items: center;
