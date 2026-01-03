@@ -82,6 +82,27 @@ const normalizeImageList = (value) => {
 const normalizeText = (value) =>
   typeof value === "string" ? value.trim() : "";
 
+const unwrapDdbValue = (value) => {
+  if (!value || typeof value !== "object") return value;
+  if (Object.prototype.hasOwnProperty.call(value, "S")) return value.S;
+  if (Object.prototype.hasOwnProperty.call(value, "N")) return value.N;
+  if (Object.prototype.hasOwnProperty.call(value, "BOOL")) return value.BOOL;
+  if (Object.prototype.hasOwnProperty.call(value, "NULL")) return null;
+  if (Object.prototype.hasOwnProperty.call(value, "SS")) return value.SS;
+  if (Object.prototype.hasOwnProperty.call(value, "NS")) return value.NS;
+  if (Object.prototype.hasOwnProperty.call(value, "L")) {
+    return Array.isArray(value.L) ? value.L.map(unwrapDdbValue) : [];
+  }
+  if (Object.prototype.hasOwnProperty.call(value, "M")) {
+    const mapped = {};
+    Object.entries(value.M || {}).forEach(([key, entry]) => {
+      mapped[key] = unwrapDdbValue(entry);
+    });
+    return mapped;
+  }
+  return value;
+};
+
 const normalizeLinkList = (value) => normalizeImageList(value);
 
 const isValidCoordinate = (value, min, max) =>
@@ -89,35 +110,47 @@ const isValidCoordinate = (value, min, max) =>
 
 const normalizeStargazeLocation = (value) => {
   if (!value || typeof value !== "object") return null;
+  const top = unwrapDdbValue(value);
+  const raw = unwrapDdbValue(top?.data ?? top);
 
-  const name = typeof value.name === "string" ? value.name.trim() : "";
+  const name = typeof raw?.name === "string" ? raw.name.trim() : "";
   const coordinates =
-    value.coordinates && typeof value.coordinates === "object"
-      ? value.coordinates
+    raw?.coordinates && typeof raw.coordinates === "object"
+      ? raw.coordinates
+      : null;
+  const coordArray =
+    Array.isArray(coordinates) && coordinates.length >= 2
+      ? { lat: coordinates[0], lon: coordinates[1] }
       : null;
   const lat = Number(
-    value.lat ?? value.latitude ?? coordinates?.lat ?? coordinates?.latitude
+    raw?.lat ??
+      raw?.latitude ??
+      coordinates?.lat ??
+      coordinates?.latitude ??
+      coordArray?.lat
   );
   const lng = Number(
-    value.lng ??
-      value.lon ??
-      value.longitude ??
+    raw?.lng ??
+      raw?.lon ??
+      raw?.longitude ??
       coordinates?.lng ??
       coordinates?.lon ??
-      coordinates?.longitude
+      coordinates?.longitude ??
+      coordArray?.lon
   );
-  const description = normalizeText(value.description);
-  const images = normalizeImageList(value.images);
+  const description = normalizeText(raw?.description);
+  const images = normalizeImageList(raw?.images);
   const photoLinks = normalizeLinkList(
-    value.photo_urls ?? value.photoLinks ?? value.photos
+    raw?.photo_urls ?? raw?.photoLinks ?? raw?.photos
   );
   const sourceLinks = normalizeLinkList(
-    value.source_urls ?? value.sourceLinks ?? value.sources
+    raw?.source_urls ?? raw?.sourceLinks ?? raw?.sources
   );
-  const country = normalizeText(value.country);
-  const region = normalizeText(value.region);
-  const type = normalizeText(value.type);
-  const bestTime = normalizeText(value.best_time ?? value.bestTime);
+  const country = normalizeText(raw?.country);
+  const region = normalizeText(raw?.region);
+  const type = normalizeText(raw?.type);
+  const bestTime = normalizeText(raw?.best_time ?? raw?.bestTime);
+  const fallbackId = normalizeText(top?.spotId ?? top?.id);
 
   if (!name) return null;
   if (!isValidCoordinate(lat, -90, 90) || !isValidCoordinate(lng, -180, 180)) {
@@ -126,9 +159,9 @@ const normalizeStargazeLocation = (value) => {
 
   return {
     id:
-      typeof value.id === "string" && value.id.trim()
-        ? value.id.trim()
-        : createStargazeId(),
+      typeof raw?.id === "string" && raw.id.trim()
+        ? raw.id.trim()
+        : fallbackId || createStargazeId(),
     name,
     lat,
     lng,
