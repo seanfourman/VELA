@@ -79,27 +79,6 @@ function AdminPage({
     setEditingId(null);
   };
 
-  const handleEditLocation = (location) => {
-    setEditingId(location.id);
-    setDraft({
-      id: location.id || "",
-      name: location.name || "",
-      country: location.country || "",
-      region: location.region || "",
-      type: location.type || "",
-      bestTime: location.bestTime || "",
-      lat: String(location.lat ?? ""),
-      lng: String(location.lng ?? ""),
-      description: location.description || "",
-      photoUrls: Array.isArray(location.photoLinks)
-        ? location.photoLinks.join("\n")
-        : "",
-      sourceUrls: Array.isArray(location.sourceLinks)
-        ? location.sourceLinks.join("\n")
-        : "",
-    });
-  };
-
   const handleDeleteLocation = async (location) => {
     const locationId = location?.id;
     if (!locationId) return;
@@ -396,13 +375,13 @@ function AdminPage({
                 className="glass-btn profile-action-btn profile-secondary"
                 onClick={resetForm}
               >
-                {editingId ? "Cancel edit" : "Clear"}
+                Clear
               </button>
               <button
                 type="submit"
                 className="glass-btn profile-action-btn profile-primary"
               >
-                {editingId ? "Update location" : "Add location"}
+                Add location
               </button>
             </div>
           </form>
@@ -441,16 +420,9 @@ function AdminPage({
                         ) : null}
                       </div>
                       <div className="admin-location-actions">
-                        <button
-                          type="button"
-                          className="glass-btn profile-action-btn profile-secondary"
-                          onClick={() => handleEditLocation(location)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          className="glass-btn profile-action-btn"
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn"
                         onClick={() => handleDeleteLocation(location)}
                         >
                           Remove
