@@ -5,11 +5,18 @@ import showPopup from "../../utils/popup";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
 
 const EMPTY_LOCATION = {
+  id: "",
   name: "",
+  country: "",
+  region: "",
+  type: "",
+  bestTime: "",
   lat: "",
   lng: "",
   description: "",
   images: "",
+  photoUrls: "",
+  sourceUrls: "",
 };
 
 const parseImageList = (value) =>
@@ -60,11 +67,22 @@ function AdminPage({
   const handleEditLocation = (location) => {
     setEditingId(location.id);
     setDraft({
+      id: location.id || "",
       name: location.name || "",
+      country: location.country || "",
+      region: location.region || "",
+      type: location.type || "",
+      bestTime: location.bestTime || "",
       lat: String(location.lat ?? ""),
       lng: String(location.lng ?? ""),
       description: location.description || "",
       images: Array.isArray(location.images) ? location.images.join("\n") : "",
+      photoUrls: Array.isArray(location.photoLinks)
+        ? location.photoLinks.join("\n")
+        : "",
+      sourceUrls: Array.isArray(location.sourceLinks)
+        ? location.sourceLinks.join("\n")
+        : "",
     });
   };
 
@@ -79,11 +97,18 @@ function AdminPage({
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const id = String(draft.id || "").trim();
     const name = String(draft.name || "").trim();
+    const country = String(draft.country || "").trim();
+    const region = String(draft.region || "").trim();
+    const type = String(draft.type || "").trim();
+    const bestTime = String(draft.bestTime || "").trim();
     const lat = Number.parseFloat(draft.lat);
     const lng = Number.parseFloat(draft.lng);
     const description = String(draft.description || "").trim();
     const images = parseImageList(draft.images);
+    const photoUrls = parseImageList(draft.photoUrls);
+    const sourceUrls = parseImageList(draft.sourceUrls);
 
     if (!name) {
       showPopup("Name is required.", "failure", { duration: 2400 });
@@ -103,12 +128,18 @@ function AdminPage({
     }
 
     onSaveStargazeLocation?.({
-      id: editingId || undefined,
+      id: id || editingId || undefined,
       name,
       lat,
       lng,
       description,
       images,
+      country,
+      region,
+      type,
+      best_time: bestTime,
+      photo_urls: photoUrls,
+      source_urls: sourceUrls,
     });
     showPopup(editingId ? "Location updated." : "Location added.", "success", {
       duration: 2400,
@@ -168,6 +199,17 @@ function AdminPage({
           <form className="admin-location-form" onSubmit={handleSubmit}>
             <div className="admin-location-grid">
               <label className="profile-field">
+                <span className="profile-label">ID</span>
+                <input
+                  className="profile-input"
+                  type="text"
+                  value={draft.id}
+                  onChange={handleFieldChange("id")}
+                  placeholder="dark_sky_alqueva_portugal"
+                  disabled={Boolean(editingId)}
+                />
+              </label>
+              <label className="profile-field">
                 <span className="profile-label">Name</span>
                 <input
                   className="profile-input"
@@ -175,6 +217,46 @@ function AdminPage({
                   value={draft.name}
                   onChange={handleFieldChange("name")}
                   placeholder="Joshua Tree National Park"
+                />
+              </label>
+              <label className="profile-field">
+                <span className="profile-label">Country</span>
+                <input
+                  className="profile-input"
+                  type="text"
+                  value={draft.country}
+                  onChange={handleFieldChange("country")}
+                  placeholder="Portugal"
+                />
+              </label>
+              <label className="profile-field">
+                <span className="profile-label">Region</span>
+                <input
+                  className="profile-input"
+                  type="text"
+                  value={draft.region}
+                  onChange={handleFieldChange("region")}
+                  placeholder="Alentejo (near Reguengos de Monsaraz)"
+                />
+              </label>
+              <label className="profile-field">
+                <span className="profile-label">Type</span>
+                <input
+                  className="profile-input"
+                  type="text"
+                  value={draft.type}
+                  onChange={handleFieldChange("type")}
+                  placeholder="Dark-sky observatory / stargazing center"
+                />
+              </label>
+              <label className="profile-field">
+                <span className="profile-label">Best time</span>
+                <input
+                  className="profile-input"
+                  type="text"
+                  value={draft.bestTime}
+                  onChange={handleFieldChange("bestTime")}
+                  placeholder="Clear summer nights; new Moon for deep-sky"
                 />
               </label>
               <label className="profile-field">
@@ -230,6 +312,34 @@ function AdminPage({
               </span>
             </label>
 
+            <label className="profile-field">
+              <span className="profile-label">Photo source URLs</span>
+              <textarea
+                className="profile-textarea"
+                rows="3"
+                value={draft.photoUrls}
+                onChange={handleFieldChange("photoUrls")}
+                placeholder="https://example.com/gallery"
+              />
+              <span className="admin-location-note">
+                Separate multiple URLs with commas or new lines.
+              </span>
+            </label>
+
+            <label className="profile-field">
+              <span className="profile-label">Source URLs</span>
+              <textarea
+                className="profile-textarea"
+                rows="3"
+                value={draft.sourceUrls}
+                onChange={handleFieldChange("sourceUrls")}
+                placeholder="https://example.com/official-site"
+              />
+              <span className="admin-location-note">
+                Separate multiple URLs with commas or new lines.
+              </span>
+            </label>
+
             <div className="admin-location-actions">
               <button
                 type="button"
@@ -251,53 +361,72 @@ function AdminPage({
             {locationList.length === 0 ? (
               <div className="profile-readonly">No curated locations yet.</div>
             ) : (
-              locationList.map((location) => (
-                <div key={location.id} className="admin-location-card">
-                  <div className="admin-location-card-header">
-                    <div>
-                      <div className="admin-location-title">
-                        {location.name}
+              locationList.map((location) => {
+                const metaDetails = [
+                  location.region,
+                  location.country,
+                  location.type,
+                  location.bestTime,
+                ].filter(Boolean);
+
+                return (
+                  <div key={location.id} className="admin-location-card">
+                    <div className="admin-location-card-header">
+                      <div>
+                        <div className="admin-location-title">
+                          {location.name}
+                        </div>
+                        <div className="admin-location-meta">
+                          {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                        </div>
+                        {location.id ? (
+                          <div className="admin-location-meta">
+                            {location.id}
+                          </div>
+                        ) : null}
+                        {metaDetails.length > 0 ? (
+                          <div className="admin-location-meta">
+                            {metaDetails.join(" | ")}
+                          </div>
+                        ) : null}
                       </div>
-                      <div className="admin-location-meta">
-                        {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                      <div className="admin-location-actions">
+                        <button
+                          type="button"
+                          className="glass-btn profile-action-btn profile-secondary"
+                          onClick={() => handleEditLocation(location)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          className="glass-btn profile-action-btn"
+                          onClick={() => handleDeleteLocation(location.id)}
+                        >
+                          Remove
+                        </button>
                       </div>
                     </div>
-                    <div className="admin-location-actions">
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn profile-secondary"
-                        onClick={() => handleEditLocation(location)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn"
-                        onClick={() => handleDeleteLocation(location.id)}
-                      >
-                        Remove
-                      </button>
-                    </div>
+                    {location.description ? (
+                      <div className="admin-location-description">
+                        {location.description}
+                      </div>
+                    ) : null}
+                    {location.images && location.images.length > 0 ? (
+                      <div className="admin-location-images">
+                        {location.images.slice(0, 4).map((image, index) => (
+                          <img
+                            key={`${location.id}-${index}`}
+                            src={image}
+                            alt={`${location.name} ${index + 1}`}
+                            loading="lazy"
+                          />
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
-                  {location.description ? (
-                    <div className="admin-location-description">
-                      {location.description}
-                    </div>
-                  ) : null}
-                  {location.images && location.images.length > 0 ? (
-                    <div className="admin-location-images">
-                      {location.images.slice(0, 4).map((image, index) => (
-                        <img
-                          key={`${location.id}-${index}`}
-                          src={image}
-                          alt={`${location.name} ${index + 1}`}
-                          loading="lazy"
-                        />
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </section>
