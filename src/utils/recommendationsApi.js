@@ -88,3 +88,27 @@ export async function fetchRecommendations({ idToken } = {}) {
   if (Array.isArray(data?.recommendations)) return data.recommendations;
   return [];
 }
+
+export async function deleteRecommendation({ spotId, idToken }) {
+  if (!spotId || !idToken) return;
+
+  const response = await fetch(
+    `${buildRecommendationsUrl()}/${encodeURIComponent(spotId)}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    const message = await response.text().catch(() => "");
+    throw new Error(
+      message
+        ? `Recommendations API error: ${message}`
+        : `Recommendations API error: ${response.status}`
+    );
+  }
+}

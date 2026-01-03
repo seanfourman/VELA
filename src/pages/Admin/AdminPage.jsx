@@ -2,7 +2,10 @@ import { useMemo, useState } from "react";
 import PageShell from "../../components/layout/PageShell";
 import MoonGlobe from "../../components/planets/MoonGlobe";
 import showPopup from "../../utils/popup";
-import { saveRecommendation } from "../../utils/recommendationsApi";
+import {
+  deleteRecommendation,
+  saveRecommendation,
+} from "../../utils/recommendationsApi";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
 
 const EMPTY_LOCATION = {
@@ -97,8 +100,31 @@ function AdminPage({
     });
   };
 
-  const handleDeleteLocation = (locationId) => {
+  const handleDeleteLocation = async (location) => {
+    const locationId = location?.id;
     if (!locationId) return;
+
+    const idToken = auth?.session?.id_token;
+    if (!idToken) {
+      showPopup("Please sign in again to delete this location.", "failure", {
+        duration: 2800,
+      });
+      return;
+    }
+
+    try {
+      await deleteRecommendation({ spotId: locationId, idToken });
+    } catch (error) {
+      showPopup(
+        error instanceof Error
+          ? error.message
+          : "Could not delete this location right now.",
+        "failure",
+        { duration: 3200 }
+      );
+      return;
+    }
+
     onDeleteStargazeLocation?.(locationId);
     if (editingId === locationId) {
       resetForm();
@@ -425,7 +451,7 @@ function AdminPage({
                         <button
                           type="button"
                           className="glass-btn profile-action-btn"
-                          onClick={() => handleDeleteLocation(location.id)}
+                        onClick={() => handleDeleteLocation(location)}
                         >
                           Remove
                         </button>
