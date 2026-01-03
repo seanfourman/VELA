@@ -12,7 +12,6 @@ import { fetchRecommendations } from "./utils/recommendationsApi";
 import "./App.css";
 
 const PROFILE_STORAGE_KEY = "vela:profile:settings";
-const STARGAZE_STORAGE_KEY = "vela:stargaze:locations";
 const SETTINGS_STORAGE_KEY = "vela:settings";
 const DEFAULT_MAP_TYPE = "satellite";
 const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
@@ -209,18 +208,6 @@ const loadSettings = () => {
   }
 };
 
-const loadStargazeLocations = () => {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STARGAZE_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return normalizeStargazePayload(parsed);
-  } catch {
-    return [];
-  }
-};
-
 const normalizePath = (path = "/") => {
   const cleaned = String(path).replace(/\/+$/, "");
   return cleaned === "" ? "/" : cleaned;
@@ -266,10 +253,7 @@ function App() {
   const [profileSettings, setProfileSettings] = useState(() =>
     loadProfileSettings()
   );
-  const cachedStargazeRef = useRef(loadStargazeLocations());
-  const [stargazeLocations, setStargazeLocations] = useState(
-    cachedStargazeRef.current
-  );
+  const [stargazeLocations, setStargazeLocations] = useState([]);
   const [route, setRoute] = useState(() =>
     normalizePath(window.location.pathname)
   );
@@ -286,14 +270,6 @@ function App() {
     }
   }, [settings]);
 
-  const persistStargazeLocations = useCallback((next) => {
-    try {
-      localStorage.setItem(STARGAZE_STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Storage unavailable; ignore
-    }
-  }, []);
-
   useEffect(() => {
     let cancelled = false;
 
@@ -303,25 +279,22 @@ function App() {
         const normalized = normalizeStargazePayload(data);
         if (cancelled) return;
         setStargazeLocations(normalized);
-        persistStargazeLocations(normalized);
       } catch (error) {
         if (cancelled) return;
-        if (cachedStargazeRef.current.length === 0) {
-          showPopup(
-            error instanceof Error
-              ? error.message
-              : "Could not load recommended spots right now.",
-            "failure",
-            { duration: 4500 }
-          );
-        }
+        showPopup(
+          error instanceof Error
+            ? error.message
+            : "Could not load recommended spots right now.",
+          "failure",
+          { duration: 4500 }
+        );
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [persistStargazeLocations, recommendationsToken]);
+  }, [recommendationsToken]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -443,22 +416,20 @@ function App() {
         const next = exists
           ? prev.map((item) => (item.id === normalized.id ? normalized : item))
           : [...prev, normalized];
-        persistStargazeLocations(next);
         return next;
       });
     },
-    [persistStargazeLocations]
+    []
   );
 
   const handleDeleteStargazeLocation = useCallback(
     (id) => {
       setStargazeLocations((prev) => {
         const next = prev.filter((item) => item.id !== id);
-        persistStargazeLocations(next);
         return next;
       });
     },
-    [persistStargazeLocations]
+    []
   );
 
   const isAdmin = isAdminUser(auth?.user);
