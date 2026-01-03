@@ -864,16 +864,6 @@ const MapView = forwardRef(function MapView(
         }
       }
 
-      if (navigator?.clipboard?.writeText) {
-        try {
-          await navigator.clipboard.writeText(url);
-          showPopup("Google Maps link copied.", "success", { duration: 2000 });
-          return;
-        } catch (error) {
-          // Fall back to opening the link directly.
-        }
-      }
-
       window.open(url, "_blank", "noopener,noreferrer");
       showPopup("Opened Google Maps.", "info", { duration: 2000 });
     },
