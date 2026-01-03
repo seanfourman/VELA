@@ -25,6 +25,17 @@ export default function ContextMenuPopup({
     event.stopPropagation();
   };
 
+  const flashShareToggle = (button) => {
+    if (!button) return;
+    button.classList.remove("share-flash");
+    // Force reflow so the animation restarts on repeat clicks.
+    void button.offsetHeight;
+    button.classList.add("share-flash");
+    window.setTimeout(() => {
+      button.classList.remove("share-flash");
+    }, 2000);
+  };
+
   const canFavorite = Boolean(isAuthenticated && onToggleFavorite);
   const canTarget = Boolean(onToggleTarget);
   const canShare = Boolean(onShareLocation);
@@ -127,6 +138,7 @@ export default function ContextMenuPopup({
               tabIndex={canShare ? 0 : -1}
               onClick={(event) => {
                 event.currentTarget.blur();
+                flashShareToggle(event.currentTarget);
                 onShareLocation?.();
               }}
             >

@@ -838,7 +838,7 @@ const MapView = forwardRef(function MapView(
   }, []);
 
   const handleShareLocation = useCallback(
-    async (coords, label = "Location") => {
+    (coords, label = "Location") => {
       const lat = Number(coords?.lat);
       const lng = Number(coords?.lng);
       const url = buildShareUrl({ lat, lng });
@@ -849,26 +849,39 @@ const MapView = forwardRef(function MapView(
         return;
       }
 
-      const coordsLabel = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-
-      if (navigator?.share) {
-        try {
-          await navigator.share({
-            title: label || "Location",
-            text: coordsLabel,
-            url,
-          });
+      const resolvedLabel = label || "Location";
+      window.setTimeout(() => {
+        const opened = window.open(url, "_blank");
+        if (!opened) {
+          showPopup(
+            "Pop-up blocked. Allow pop-ups to open Google Maps.",
+            "warning",
+            { duration: 2600 }
+          );
           return;
-        } catch (error) {
-          if (error?.name === "AbortError") return;
         }
-      }
-
-      window.open(url, "_blank", "noopener,noreferrer");
-      showPopup("Opened Google Maps.", "info", { duration: 2000 });
+        try {
+          opened.opener = null;
+        } catch (error) {
+          // Ignore if the browser prevents access to the new window handle.
+        }
+        showPopup(`Opened ${resolvedLabel} in Google Maps.`, "info", {
+          duration: 2000,
+        });
+      }, 2000);
     },
     [buildShareUrl, showPopup]
   );
+
+  const flashShareToggle = useCallback((button) => {
+    if (!button) return;
+    button.classList.remove("share-flash");
+    void button.offsetHeight;
+    button.classList.add("share-flash");
+    window.setTimeout(() => {
+      button.classList.remove("share-flash");
+    }, 2000);
+  }, []);
 
   const handleGetDirections = () => {
     const target = placedMarker || contextMenu;
@@ -1611,6 +1624,7 @@ const MapView = forwardRef(function MapView(
                               aria-label="Share this location"
                               onClick={(event) => {
                                 event.currentTarget.blur();
+                                flashShareToggle(event.currentTarget);
                                 handleShareLocation(
                                   { lat: spot.lat, lng: spot.lon },
                                   "Stargazing spot"

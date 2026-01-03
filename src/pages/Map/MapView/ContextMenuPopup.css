@@ -45,6 +45,40 @@
   }
 }
 
+@keyframes share-toggle-flash {
+  0% {
+    background: rgba(59, 130, 246, 0.9);
+    border-color: rgba(59, 130, 246, 0.95);
+    color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.45),
+      0 10px 24px rgba(59, 130, 246, 0.35);
+  }
+  45% {
+    background: rgba(59, 130, 246, 0.7);
+    border-color: rgba(59, 130, 246, 0.7);
+    box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.35),
+      0 10px 22px rgba(59, 130, 246, 0.25);
+  }
+  100% {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(15, 23, 42, 0.25);
+    color: var(--surface-text);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.7),
+      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  }
+}
+
+@keyframes share-icon-flash {
+  0%,
+  60% {
+    filter: brightness(0) invert(1);
+  }
+  100% {
+    filter: none;
+  }
+}
+
 .popup-actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -205,6 +239,14 @@
 
 .favorite-toggle.active:hover {
   background: rgba(236, 72, 153, 0.62);
+}
+
+.share-toggle.share-flash {
+  animation: share-toggle-flash 2s ease;
+}
+
+.share-toggle.share-flash .target-toggle-icon {
+  animation: share-icon-flash 2s ease;
 }
 
 .target-toggle-label {
