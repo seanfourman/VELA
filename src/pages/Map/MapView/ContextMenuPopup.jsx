@@ -1,6 +1,7 @@
 import SkyQualityInfo from "./SkyQualityInfo";
 import favoriteIcon from "../../../assets/icons/favorite-icon.svg";
 import targetIcon from "../../../assets/icons/target-icon.svg";
+import shareIcon from "../../../assets/icons/share-icon.svg";
 import "./ContextMenuPopup.css";
 
 export default function ContextMenuPopup({
@@ -16,6 +17,7 @@ export default function ContextMenuPopup({
   extraActionLabel,
   isTarget,
   onToggleTarget,
+  onShareLocation,
 }) {
   if (!coords) return null;
 
@@ -25,7 +27,8 @@ export default function ContextMenuPopup({
 
   const canFavorite = Boolean(isAuthenticated && onToggleFavorite);
   const canTarget = Boolean(onToggleTarget);
-  const toggleCount = Number(canTarget) + Number(canFavorite);
+  const canShare = Boolean(onShareLocation);
+  const toggleCount = Number(canTarget) + Number(canFavorite) + Number(canShare);
   const toggleLayout = toggleCount > 1 ? "dual" : "single";
   const favoriteButtonLabel = isFavorite
     ? "Remove from favorites"
@@ -35,6 +38,8 @@ export default function ContextMenuPopup({
     ? "This spot is the active target"
     : "Use this spot for quick actions";
   const targetLabel = isTarget ? "Active target" : "Set as target";
+  const shareButtonLabel = "Share this location";
+  const shareLabel = "Share";
   const resolvedCoordsLabel =
     coordsLabel || (isFavorite ? "Favorited spot" : "Pinned location");
   const resolvedRemoveLabel = removeLabel || "Remove Pin";
@@ -108,6 +113,32 @@ export default function ContextMenuPopup({
               aria-hidden="true"
             >
               {favoriteLabel}
+            </span>
+          </div>
+          <div
+            className="target-toggle-wrapper"
+            data-visible={canShare ? "true" : "false"}
+            aria-hidden={!canShare}
+          >
+            <button
+              className="target-toggle share-toggle"
+              aria-label={shareButtonLabel}
+              disabled={!canShare}
+              tabIndex={canShare ? 0 : -1}
+              onClick={(event) => {
+                event.currentTarget.blur();
+                onShareLocation?.();
+              }}
+            >
+              <img
+                src={shareIcon}
+                alt=""
+                aria-hidden="true"
+                className="target-toggle-icon"
+              />
+            </button>
+            <span className="target-toggle-label" aria-hidden="true">
+              {shareLabel}
             </span>
           </div>
         </div>

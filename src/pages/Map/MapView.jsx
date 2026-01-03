@@ -43,6 +43,7 @@ import targetIcon from "../../assets/icons/target-icon.svg";
 import favoriteIcon from "../../assets/icons/favorite-icon.svg";
 import favoriteFullIcon from "../../assets/icons/favorite-full-icon.svg";
 import starFullIcon from "../../assets/icons/star-full-icon.svg";
+import shareIcon from "../../assets/icons/share-icon.svg";
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
 const LOCATION_ZOOM = 16;
@@ -828,6 +829,57 @@ const MapView = forwardRef(function MapView(
     [directionsProvider]
   );
 
+  const buildShareUrl = useCallback((coords) => {
+    const lat = Number(coords?.lat);
+    const lng = Number(coords?.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+    const query = encodeURIComponent(`${lat},${lng}`);
+    return `https://www.google.com/maps/search/?api=1&query=${query}`;
+  }, []);
+
+  const handleShareLocation = useCallback(
+    async (coords, label = "Location") => {
+      const lat = Number(coords?.lat);
+      const lng = Number(coords?.lng);
+      const url = buildShareUrl({ lat, lng });
+      if (!url) {
+        showPopup("No coordinates available to share.", "warning", {
+          duration: 2200,
+        });
+        return;
+      }
+
+      const coordsLabel = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
+      if (navigator?.share) {
+        try {
+          await navigator.share({
+            title: label || "Location",
+            text: coordsLabel,
+            url,
+          });
+          return;
+        } catch (error) {
+          if (error?.name === "AbortError") return;
+        }
+      }
+
+      if (navigator?.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(url);
+          showPopup("Google Maps link copied.", "success", { duration: 2000 });
+          return;
+        } catch (error) {
+          // Fall back to opening the link directly.
+        }
+      }
+
+      window.open(url, "_blank", "noopener,noreferrer");
+      showPopup("Opened Google Maps.", "info", { duration: 2000 });
+    },
+    [buildShareUrl, showPopup]
+  );
+
   const handleGetDirections = () => {
     const target = placedMarker || contextMenu;
     if (!target) return;
@@ -1348,6 +1400,12 @@ const MapView = forwardRef(function MapView(
                 onToggleTarget={
                   placedMarker.isFavorite ? handleTogglePinnedTarget : null
                 }
+                onShareLocation={() =>
+                  handleShareLocation(
+                    placedMarker,
+                    placedMarker.isFavorite ? "Favorite spot" : "Pinned location"
+                  )
+                }
               />
             </Popup>
           </Marker>
@@ -1422,6 +1480,12 @@ const MapView = forwardRef(function MapView(
                     extraActionLabel="Details"
                     isTarget={Boolean(isTarget)}
                     onToggleTarget={() => handleToggleStargazeTarget(spot)}
+                    onShareLocation={() =>
+                      handleShareLocation(
+                        { lat: spot.lat, lng: spot.lng },
+                        spot.name || "Recommended spot"
+                      )
+                    }
                   />
                 </Popup>
               </Marker>
@@ -1475,10 +1539,16 @@ const MapView = forwardRef(function MapView(
                     const favoriteButtonLabel = isFavoriteSpot
                       ? "Remove from favorites"
                       : "Add to favorites";
+                    const canFavorite = Boolean(isAuthenticated);
+                    const canShare = true;
+                    const toggleCount =
+                      1 + Number(canFavorite) + Number(canShare);
+                    const toggleLayout =
+                      toggleCount > 1 ? "dual" : "single";
                     return (
                       <div
                         className="target-toggle-row"
-                        data-layout={isAuthenticated ? "dual" : "single"}
+                        data-layout={toggleLayout}
                       >
                         <div className="target-toggle-wrapper">
                           <button
@@ -1515,7 +1585,7 @@ const MapView = forwardRef(function MapView(
                             {hoverLabel}
                           </span>
                         </div>
-                        {isAuthenticated ? (
+                        {canFavorite ? (
                           <div className="target-toggle-wrapper">
                             <button
                               className={`target-toggle favorite-toggle${
@@ -1541,6 +1611,31 @@ const MapView = forwardRef(function MapView(
                               aria-hidden="true"
                             >
                               {favoriteLabel}
+                            </span>
+                          </div>
+                        ) : null}
+                        {canShare ? (
+                          <div className="target-toggle-wrapper">
+                            <button
+                              className="target-toggle share-toggle"
+                              aria-label="Share this location"
+                              onClick={(event) => {
+                                event.currentTarget.blur();
+                                handleShareLocation(
+                                  { lat: spot.lat, lng: spot.lon },
+                                  "Stargazing spot"
+                                );
+                              }}
+                            >
+                              <img
+                                src={shareIcon}
+                                alt=""
+                                aria-hidden="true"
+                                className="target-toggle-icon"
+                              />
+                            </button>
+                            <span className="target-toggle-label" aria-hidden="true">
+                              Share
                             </span>
                           </div>
                         ) : null}
@@ -1677,6 +1772,12 @@ const MapView = forwardRef(function MapView(
                   removeLabel="Remove Favorite"
                   isTarget={Boolean(isSelected)}
                   onToggleTarget={handleToggleTarget}
+                  onShareLocation={() =>
+                    handleShareLocation(
+                      { lat: spot.lat, lng: spot.lng },
+                      "Favorite spot"
+                    )
+                  }
                 />
               </Popup>
             </Marker>
