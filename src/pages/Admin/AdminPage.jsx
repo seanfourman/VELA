@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import PageShell from "../../components/layout/PageShell";
 import MoonGlobe from "../../components/planets/MoonGlobe";
 import showPopup from "../../utils/popup";
+import { saveRecommendation } from "../../utils/recommendationsApi";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
 
 const EMPTY_LOCATION = {
@@ -14,7 +15,6 @@ const EMPTY_LOCATION = {
   lat: "",
   lng: "",
   description: "",
-  images: "",
   photoUrls: "",
   sourceUrls: "",
 };
@@ -24,6 +24,18 @@ const parseImageList = (value) =>
     .split(/[\n,]+/)
     .map((entry) => entry.trim())
     .filter(Boolean);
+
+const slugify = (value) =>
+  String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+const buildLocationId = ({ name, country, region }) => {
+  const base = [name, country || region].filter(Boolean).join(" ");
+  const slug = slugify(base);
+  return slug || `spot_${Date.now()}`;
+};
 
 function AdminPage({
   auth,
@@ -76,7 +88,6 @@ function AdminPage({
       lat: String(location.lat ?? ""),
       lng: String(location.lng ?? ""),
       description: location.description || "",
-      images: Array.isArray(location.images) ? location.images.join("\n") : "",
       photoUrls: Array.isArray(location.photoLinks)
         ? location.photoLinks.join("\n")
         : "",
@@ -95,9 +106,8 @@ function AdminPage({
     showPopup("Location removed.", "info", { duration: 2200 });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const id = String(draft.id || "").trim();
     const name = String(draft.name || "").trim();
     const country = String(draft.country || "").trim();
     const region = String(draft.region || "").trim();
@@ -106,7 +116,6 @@ function AdminPage({
     const lat = Number.parseFloat(draft.lat);
     const lng = Number.parseFloat(draft.lng);
     const description = String(draft.description || "").trim();
-    const images = parseImageList(draft.images);
     const photoUrls = parseImageList(draft.photoUrls);
     const sourceUrls = parseImageList(draft.sourceUrls);
 
@@ -127,13 +136,53 @@ function AdminPage({
       return;
     }
 
+    const resolvedId =
+      editingId ||
+      String(draft.id || "").trim() ||
+      buildLocationId({ name, country, region });
+
+    const idToken = auth?.session?.id_token;
+    if (!idToken) {
+      showPopup("Please sign in again to save this location.", "failure", {
+        duration: 2800,
+      });
+      return;
+    }
+
+    try {
+      await saveRecommendation({
+        idToken,
+        location: {
+          id: resolvedId,
+          name,
+          lat,
+          lng,
+          description,
+          country,
+          region,
+          type,
+          best_time: bestTime,
+          photo_urls: photoUrls,
+          source_urls: sourceUrls,
+        },
+      });
+    } catch (error) {
+      showPopup(
+        error instanceof Error
+          ? error.message
+          : "Could not save this location right now.",
+        "failure",
+        { duration: 3200 }
+      );
+      return;
+    }
+
     onSaveStargazeLocation?.({
-      id: id || editingId || undefined,
+      id: resolvedId,
       name,
       lat,
       lng,
       description,
-      images,
       country,
       region,
       type,
@@ -198,17 +247,6 @@ function AdminPage({
 
           <form className="admin-location-form" onSubmit={handleSubmit}>
             <div className="admin-location-grid">
-              <label className="profile-field">
-                <span className="profile-label">ID</span>
-                <input
-                  className="profile-input"
-                  type="text"
-                  value={draft.id}
-                  onChange={handleFieldChange("id")}
-                  placeholder="dark_sky_alqueva_portugal"
-                  disabled={Boolean(editingId)}
-                />
-              </label>
               <label className="profile-field">
                 <span className="profile-label">Name</span>
                 <input
@@ -296,20 +334,6 @@ function AdminPage({
                 onChange={handleFieldChange("description")}
                 placeholder="High desert skies with minimal light pollution."
               />
-            </label>
-
-            <label className="profile-field">
-              <span className="profile-label">Image URLs</span>
-              <textarea
-                className="profile-textarea"
-                rows="3"
-                value={draft.images}
-                onChange={handleFieldChange("images")}
-                placeholder="https://example.com/photo-1.jpg"
-              />
-              <span className="admin-location-note">
-                Separate multiple URLs with commas or new lines.
-              </span>
             </label>
 
             <label className="profile-field">
@@ -412,21 +436,9 @@ function AdminPage({
                         {location.description}
                       </div>
                     ) : null}
-                    {location.images && location.images.length > 0 ? (
-                      <div className="admin-location-images">
-                        {location.images.slice(0, 4).map((image, index) => (
-                          <img
-                            key={`${location.id}-${index}`}
-                            src={image}
-                            alt={`${location.name} ${index + 1}`}
-                            loading="lazy"
-                          />
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })
+                </div>
+              );
+            })
             )}
           </div>
         </section>

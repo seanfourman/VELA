@@ -11,8 +11,12 @@ const normalizeBaseUrl = (value) => {
 const LIGHTMAP_API_BASE = normalizeBaseUrl(
   import.meta.env.VITE_LIGHTMAP_API_BASE
 );
+const API_BASE = normalizeBaseUrl(import.meta.env.VITE_API_BASE);
 const FAVORITES_API_BASE = normalizeBaseUrl(
   import.meta.env.VITE_FAVORITES_API_BASE
+);
+const RECOMMENDATIONS_API_BASE = normalizeBaseUrl(
+  import.meta.env.VITE_RECOMMENDATIONS_API_BASE
 );
 
 const requireEndpoint = (value, envKey) => {
@@ -20,6 +24,11 @@ const requireEndpoint = (value, envKey) => {
     throw new Error(`Missing ${envKey}. Set it in .env.`);
   }
   return value;
+};
+
+const resolveApiBase = (value, envKey) => {
+  if (API_BASE) return API_BASE;
+  return requireEndpoint(value, envKey);
 };
 
 const joinQuery = (baseUrl, params) => {
@@ -60,7 +69,13 @@ export const buildDarkSpotsUrl = (lat, lon, searchDistance) =>
   });
 
 export const buildFavoritesUrl = () =>
-  requireEndpoint(FAVORITES_API_BASE, "VITE_FAVORITES_API_BASE") + "/favorites";
+  resolveApiBase(FAVORITES_API_BASE, "VITE_FAVORITES_API_BASE") + "/favorites";
+
+export const buildRecommendationsUrl = () =>
+  resolveApiBase(
+    RECOMMENDATIONS_API_BASE,
+    "VITE_RECOMMENDATIONS_API_BASE"
+  ) + "/recommendations";
 
 export const getLightmapTileUrlTemplate = () =>
   LIGHTMAP_API_BASE
