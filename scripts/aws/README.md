@@ -1,48 +1,20 @@
-# AWS CLI install (Windows)
+# Windows setup
 
 1. Open PowerShell and run:
 
 ```powershell
 winget install -e --id Amazon.AWSCLI
-```
-
-2. Close and re-open PowerShell.
-3. Verify install:
-
-```powershell
-aws --version
-```
-
-# Python install (Windows)
-
-1. Open PowerShell and run:
-
-```powershell
 winget install -e --id Python.Python.3.12
-```
-
-2. Close and re-open PowerShell.
-3. Verify install:
-
-```powershell
-python --version
-```
-
-# Python deps (boto3)
-
-```powershell
 py -m pip install boto3
-```
-
-# Node.js install (for frontend build)
-
-```powershell
 winget install -e --id OpenJS.NodeJS.LTS
 ```
 
-Verify:
+2. Close and re-open PowerShell.
+3. Verify:
 
 ```powershell
+aws --version
+python --version
 npm --version
 ```
 
@@ -67,7 +39,7 @@ When prompted, paste the Access Key ID, Secret Access Key, region (ex: us-east-1
 
 # AWS deploy
 
-You must run these scripts locally (not in the AWS website). They need the local `.tif` and zip artifacts.
+You must run this locally (not in the AWS website). It needs the local `.tif` and zip artifacts.
 
 1. Put these files in `scripts/` or `scripts/aws/`:
 
@@ -79,11 +51,8 @@ You must run these scripts locally (not in the AWS website). They need the local
 
 ```
 AWS_REGION=us-east-1
-AWS_PROFILE=
 ADMIN_EMAIL=
 ADMIN_TEMP_PASSWORD=
-SKIP_TIF_UPLOAD=
-AUTO_CONFIRM_SIGNUP=1
 ```
 
 3. Install frontend dependencies if needed:
