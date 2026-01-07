@@ -1,4 +1,5 @@
 ﻿#!/usr/bin/env python3
+import atexit
 import json
 import mimetypes
 import os
@@ -7,6 +8,7 @@ import shutil
 import string
 import subprocess
 import sys
+import threading
 import time
 import zipfile
 from datetime import datetime, timezone
@@ -677,6 +679,16 @@ def deploy_all() -> None:
     ensure_artifacts_dir()
     config = load_env_file(CONFIG_PATH)
     outputs = load_env_file(OUTPUTS_PATH)
+
+    stop_event = threading.Event()
+    atexit.register(stop_event.set)
+
+    def heartbeat() -> None:
+        while not stop_event.is_set():
+            print("Deploy still running...")
+            stop_event.wait(5)
+
+    threading.Thread(target=heartbeat, daemon=True).start()
 
     print("Deploy starting. This can take around 10 minutes depending on AWS.")
 
