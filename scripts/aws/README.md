@@ -13,6 +13,39 @@ winget install -e --id Amazon.AWSCLI
 aws --version
 ```
 
+# Python install (Windows)
+
+1. Open PowerShell and run:
+
+```powershell
+winget install -e --id Python.Python.3.12
+```
+
+2. Close and re-open PowerShell.
+3. Verify install:
+
+```powershell
+python --version
+```
+
+# Python deps (boto3)
+
+```powershell
+py -m pip install boto3
+```
+
+# Node.js install (for frontend build)
+
+```powershell
+winget install -e --id OpenJS.NodeJS.LTS
+```
+
+Verify:
+
+```powershell
+npm --version
+```
+
 # AWS credentials (Access Key)
 
 1. Log in to the AWS console.
@@ -49,6 +82,7 @@ AWS_REGION=us-east-1
 AWS_PROFILE=
 ADMIN_EMAIL=
 ADMIN_TEMP_PASSWORD=
+SKIP_TIF_UPLOAD=
 ```
 
 3. Install frontend dependencies if needed:
@@ -59,16 +93,8 @@ npm install
 
 4. Run everything (creates IAM role, APIs, data tables, and CloudFront/S3 site):
 
-PowerShell:
-
 ```powershell
-bash ./scripts/aws/deploy-all.sh
-```
-
-Git Bash / WSL:
-
-```bash
-./scripts/aws/deploy-all.sh
+py scripts/aws/deploy.py
 ```
 
 5. Create a `.env` file in the project folder.
