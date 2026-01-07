@@ -3,6 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 
+"$SCRIPT_DIR/deploy-iam.sh"
 "$SCRIPT_DIR/deploy-auth.sh"
 "$SCRIPT_DIR/deploy-core.sh"
 "$SCRIPT_DIR/deploy-data.sh"

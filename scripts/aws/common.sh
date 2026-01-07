@@ -10,7 +10,8 @@ AWS_PROFILE=${AWS_PROFILE:-}
 OUTPUTS_FILE=${OUTPUTS_FILE:-"$ROOT_DIR/scripts/aws/outputs.env"}
 ARTIFACTS_DIR=${ARTIFACTS_DIR:-"$ROOT_DIR/scripts/aws/artifacts"}
 LAMBDA_SRC_DIR=${LAMBDA_SRC_DIR:-"$ROOT_DIR/scripts/aws/lambdas"}
-LAMBDA_ROLE_NAME=${LAMBDA_ROLE_NAME:-LabRole}
+LAMBDA_ROLE_NAME=${LAMBDA_ROLE_NAME:-vela-lambda-role}
+LAMBDA_POLICY_NAME=${LAMBDA_POLICY_NAME:-vela-lambda-access}
 
 mkdir -p "$ARTIFACTS_DIR"
 
@@ -49,7 +50,7 @@ resolve_lambda_role_arn() {
     --output text 2>/dev/null || true)
 
   if [[ -z "$arn" || "$arn" == "None" ]]; then
-    echo "Missing LAMBDA_ROLE_ARN and role '$LAMBDA_ROLE_NAME' not found." >&2
+    echo "Missing LAMBDA_ROLE_ARN and role '$LAMBDA_ROLE_NAME' not found. Run scripts/aws/deploy-iam.sh." >&2
     exit 1
   fi
 
@@ -259,10 +260,11 @@ create_stage() {
     --auto-deploy >/dev/null
 }
 
-add_lambda_permission() {
+add_lambda_permission_for_principal() {
   local function_name=$1
   local statement_id=$2
-  local source_arn=$3
+  local principal=$3
+  local source_arn=$4
 
   if aws_cli lambda get-policy --function-name "$function_name" >/dev/null 2>&1; then
     if aws_cli lambda get-policy --function-name "$function_name" | grep -q "$statement_id"; then
@@ -274,6 +276,18 @@ add_lambda_permission() {
     --function-name "$function_name" \
     --statement-id "$statement_id" \
     --action lambda:InvokeFunction \
-    --principal apigateway.amazonaws.com \
+    --principal "$principal" \
     --source-arn "$source_arn" >/dev/null
+}
+
+add_lambda_permission() {
+  local function_name=$1
+  local statement_id=$2
+  local source_arn=$3
+
+  add_lambda_permission_for_principal \
+    "$function_name" \
+    "$statement_id" \
+    "apigateway.amazonaws.com" \
+    "$source_arn"
 }

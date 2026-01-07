@@ -1,19 +1,23 @@
 # AWS deploy
 
-1) Put these files in `scripts/` or `scripts/aws/`:
+1. Put these files in `scripts/` or `scripts/aws/`:
+
 - `lightpollution-lambda.zip`
 - `skyquality-tiles-lambda.zip`
 - `World_Atlas_2015.tif`
 
-2) (Optional) export env vars if you need them:
-- `LAMBDA_ROLE_ARN` (uses `LabRole` if empty)
-- `COGNITO_CALLBACK_URL` (defaults to `http://localhost:5173`)
-- `COGNITO_LOGOUT_URL` (defaults to `http://localhost:5173`)
+2. Install frontend dependencies if needed:
 
-3) Run everything:
+```bash
+npm install
+```
+
+3. Run everything (creates IAM role, APIs, data tables, and CloudFront/S3 site):
 
 ```bash
 ./scripts/aws/deploy-all.sh
 ```
 
-4) Copy values from `scripts/aws/outputs.env` into `.env`.
+4. Create a `.env` file in the project folder.
+
+5. Copy values from `scripts/aws/outputs.env` into `.env` if you want local dev envs.

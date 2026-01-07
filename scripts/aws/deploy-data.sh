@@ -6,8 +6,8 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 . "$SCRIPT_DIR/common.sh"
 
 ensure_aws_cli
-resolve_lambda_role_arn
 load_outputs
+resolve_lambda_role_arn
 
 AWS_ACCOUNT_ID=$(aws_cli sts get-caller-identity --query Account --output text)
 
@@ -81,6 +81,12 @@ CREATE_USER_ARN=$(aws_cli lambda get-function --function-name "$CREATE_USER_LAMB
 aws_cli cognito-idp update-user-pool \
   --user-pool-id "$COGNITO_USER_POOL_ID" \
   --lambda-config "PostConfirmation=$CREATE_USER_ARN" >/dev/null
+
+add_lambda_permission_for_principal \
+  "$CREATE_USER_LAMBDA" \
+  "cognito-post-confirmation-${COGNITO_USER_POOL_ID}" \
+  "cognito-idp.amazonaws.com" \
+  "arn:aws:cognito-idp:$AWS_REGION:$AWS_ACCOUNT_ID:userpool/$COGNITO_USER_POOL_ID"
 
 FAVORITES_LAMBDA=${FAVORITES_LAMBDA:-FavoritesHandler}
 GET_FAVORITES_LAMBDA=${GET_FAVORITES_LAMBDA:-GetFavoritesHandler}

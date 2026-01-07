@@ -13,10 +13,7 @@ AWS_ACCOUNT_ID=$(aws_cli sts get-caller-identity --query Account --output text)
 BUILD_DIR=${BUILD_DIR:-"$ROOT_DIR/dist"}
 SITE_BUCKET_NAME=${SITE_BUCKET_NAME:-"vela-web-${AWS_ACCOUNT_ID}-$(date +%Y%m%d%H%M%S)"}
 OAC_NAME=${OAC_NAME:-"vela-oac"}
-
-if [[ "${SKIP_BUILD:-}" != "1" ]]; then
-  (cd "$ROOT_DIR" && npm run build)
-fi
+DIST_ID=${CLOUDFRONT_DISTRIBUTION_ID:-}
 
 if ! aws_cli s3api head-bucket --bucket "$SITE_BUCKET_NAME" >/dev/null 2>&1; then
   if [[ "$AWS_REGION" == "us-east-1" ]]; then
@@ -31,23 +28,28 @@ if ! aws_cli s3api head-bucket --bucket "$SITE_BUCKET_NAME" >/dev/null 2>&1; the
     --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true" >/dev/null
 fi
 
-aws_cli s3 sync "$BUILD_DIR" "s3://$SITE_BUCKET_NAME" --delete --no-progress >/dev/null
-
-OAC_ID=$(aws cloudfront list-origin-access-controls \
+OAC_ID=$(aws_cli cloudfront list-origin-access-controls \
   --query "OriginAccessControlList.Items[?Name=='$OAC_NAME'].Id | [0]" \
   --output text)
 
 if [[ -z "$OAC_ID" || "$OAC_ID" == "None" ]]; then
-  OAC_ID=$(aws cloudfront create-origin-access-control \
+  OAC_ID=$(aws_cli cloudfront create-origin-access-control \
     --origin-access-control-config "Name=$OAC_NAME,Description=VELA OAC,SigningProtocol=sigv4,SigningBehavior=always,OriginAccessControlOriginType=s3" \
     --query OriginAccessControl.Id \
     --output text)
 fi
 
-DIST_CONFIG_PATH="$ARTIFACTS_DIR/cloudfront-config.json"
-CALLER_REF="vela-$(date +%s)"
+if [[ -n "$DIST_ID" ]]; then
+  if ! aws_cli cloudfront get-distribution --id "$DIST_ID" >/dev/null 2>&1; then
+    DIST_ID=""
+  fi
+fi
 
-python - <<PY
+if [[ -z "$DIST_ID" ]]; then
+  DIST_CONFIG_PATH="$ARTIFACTS_DIR/cloudfront-config.json"
+  CALLER_REF="vela-$(date +%s)"
+
+  python - <<PY
 import json
 import pathlib
 
@@ -105,10 +107,11 @@ path = pathlib.Path("$DIST_CONFIG_PATH")
 path.write_text(json.dumps(config, indent=2))
 PY
 
-DIST_ID=$(aws cloudfront create-distribution --distribution-config "file://$DIST_CONFIG_PATH" \
-  --query Distribution.Id --output text)
+  DIST_ID=$(aws_cli cloudfront create-distribution --distribution-config "file://$DIST_CONFIG_PATH" \
+    --query Distribution.Id --output text)
+fi
 
-DIST_DOMAIN=$(aws cloudfront get-distribution --id "$DIST_ID" \
+DIST_DOMAIN=$(aws_cli cloudfront get-distribution --id "$DIST_ID" \
   --query "Distribution.DomainName" --output text)
 
 POLICY_PATH="$ARTIFACTS_DIR/cloudfront-bucket-policy.json"
@@ -161,6 +164,14 @@ if [[ -n "${COGNITO_USER_POOL_ID:-}" && -n "${COGNITO_APP_CLIENT_ID:-}" && "${SK
     --logout-urls "$SITE_URL" >/dev/null
   write_output VITE_COGNITO_REDIRECT_URI "$SITE_URL"
   write_output VITE_COGNITO_LOGOUT_URI "$SITE_URL"
+  export VITE_COGNITO_REDIRECT_URI="$SITE_URL"
+  export VITE_COGNITO_LOGOUT_URI="$SITE_URL"
 fi
+
+if [[ "${SKIP_BUILD:-}" != "1" ]]; then
+  (cd "$ROOT_DIR" && npm run build)
+fi
+
+aws_cli s3 sync "$BUILD_DIR" "s3://$SITE_BUCKET_NAME" --delete --no-progress >/dev/null
 
 echo "Frontend deployed. CloudFront domain: $SITE_URL"
