@@ -866,10 +866,36 @@ def deploy_all() -> None:
         package_python_lambda(module, LAMBDA_SRC_DIR / f"{module}.py", zip_path)
         upsert_lambda(lambda_client, function_name, py_runtime, handler, role_arn, zip_path, env_vars=env_vars)
 
+    auto_confirm_enabled = is_truthy(get_setting(config, "AUTO_CONFIRM_SIGNUP", "1"))
+    auto_confirm_arn = None
+    if auto_confirm_enabled:
+        auto_confirm_fn = get_setting(config, "AUTO_CONFIRM_LAMBDA", "AutoConfirmUser")
+        package_and_upsert("auto_confirm_user", auto_confirm_fn, "auto_confirm_user.lambda_handler")
+        auto_confirm_arn = get_lambda_arn(lambda_client, auto_confirm_fn)
+
     create_user_fn = get_setting(config, "CREATE_USER_LAMBDA", "CreateUserOnConfirm")
-    package_and_upsert("create_user_on_confirm", create_user_fn, "create_user_on_confirm.lambda_handler", env_vars={"USERS_TABLE": users_table})
+    package_and_upsert(
+        "create_user_on_confirm",
+        create_user_fn,
+        "create_user_on_confirm.lambda_handler",
+        env_vars={"USERS_TABLE": users_table},
+    )
     create_user_arn = get_lambda_arn(lambda_client, create_user_fn)
-    cognito.update_user_pool(UserPoolId=pool_id, LambdaConfig={"PostConfirmation": create_user_arn})
+
+    lambda_config = {"PostConfirmation": create_user_arn}
+    if auto_confirm_arn:
+        lambda_config["PreSignUp"] = auto_confirm_arn
+    cognito.update_user_pool(UserPoolId=pool_id, LambdaConfig=lambda_config)
+
+    if auto_confirm_arn:
+        add_lambda_permission(
+            lambda_client,
+            auto_confirm_fn,
+            f"cognito-pre-signup-{pool_id}",
+            "cognito-idp.amazonaws.com",
+            f"arn:aws:cognito-idp:{region}:{account_id}:userpool/{pool_id}",
+        )
+
     add_lambda_permission(
         lambda_client,
         create_user_fn,

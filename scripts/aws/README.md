@@ -83,6 +83,7 @@ AWS_PROFILE=
 ADMIN_EMAIL=
 ADMIN_TEMP_PASSWORD=
 SKIP_TIF_UPLOAD=
+AUTO_CONFIRM_SIGNUP=1
 ```
 
 3. Install frontend dependencies if needed:
@@ -100,3 +101,9 @@ py scripts/aws/deploy.py
 5. Create a `.env` file in the project folder.
 
 6. Copy values from `scripts/aws/outputs.env` into `.env` if you want local dev envs.
+
+# Cognito notes
+
+- Sign-ups are auto-confirmed by default (`AUTO_CONFIRM_SIGNUP=1`) so users don't need email verification.
+- If you already created users before enabling auto-confirm, go to Cognito -> Users and confirm them,
+  or delete and sign up again.
