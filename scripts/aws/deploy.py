@@ -678,6 +678,8 @@ def deploy_all() -> None:
     config = load_env_file(CONFIG_PATH)
     outputs = load_env_file(OUTPUTS_PATH)
 
+    print("Deploy starting. This can take around 10 minutes depending on AWS.")
+
     region = get_setting(config, "AWS_REGION", "us-east-1")
     profile = get_setting(config, "AWS_PROFILE", "").strip() or None
     session = boto_session(region, profile)
@@ -1130,7 +1132,11 @@ def deploy_all() -> None:
             raise RuntimeError(f"Build output not found: {build_dir}")
         upload_directory(s3, build_dir, site_bucket)
 
+    cloudfront_domain = outputs.get("CLOUDFRONT_DOMAIN", "")
     print(f"Deploy complete. Outputs saved to {OUTPUTS_PATH}")
+    print("Wait another minute or two for CloudFront to finish setting up.")
+    if cloudfront_domain:
+        print(f"Website: {cloudfront_domain}")
 
 
 if __name__ == "__main__":
