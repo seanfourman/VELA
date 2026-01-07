@@ -1,6 +1,7 @@
 import os
 import json
 import boto3
+from decimal import Decimal
 from boto3.dynamodb.conditions import Key
 
 dynamodb = boto3.resource("dynamodb")
@@ -31,8 +32,14 @@ def resp(status, body):
             "Content-Type": "application/json",
             "Access-Control-Allow-Origin": "*",
         },
-        "body": json.dumps(body),
+        "body": json.dumps(body, default=decimal_default),
     }
+
+
+def decimal_default(obj):
+    if isinstance(obj, Decimal):
+        return int(obj) if obj % 1 == 0 else float(obj)
+    raise TypeError
 
 
 def lambda_handler(event, context):

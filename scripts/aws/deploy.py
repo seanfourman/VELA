@@ -198,15 +198,67 @@ def find_user_pool_client_id(cognito, pool_id: str, client_name: str) -> str:
             return ""
 
 
-def ensure_user_pool_domain(cognito, domain_prefix: str, pool_id: str) -> None:
+def get_existing_user_pool_domain(cognito, pool_id: str) -> str:
+    try:
+        pool = cognito.describe_user_pool(UserPoolId=pool_id).get("UserPool", {})
+        domain = pool.get("Domain")
+        if domain:
+            return domain
+        custom_domain = pool.get("CustomDomain")
+        if custom_domain:
+            return custom_domain
+    except ClientError:
+        pass
+
+    list_fn = getattr(cognito, "list_user_pool_domains", None)
+    if list_fn:
+        token = None
+        while True:
+            kwargs = {"UserPoolId": pool_id, "MaxResults": 60}
+            if token:
+                kwargs["NextToken"] = token
+            try:
+                resp = list_fn(**kwargs)
+            except ClientError:
+                break
+            domains = resp.get("Domains") or resp.get("DomainDescriptions") or []
+            for item in domains:
+                if isinstance(item, str):
+                    return item
+                if isinstance(item, dict):
+                    if item.get("Domain"):
+                        return item["Domain"]
+                    if item.get("DomainName"):
+                        return item["DomainName"]
+            token = resp.get("NextToken")
+            if not token:
+                break
+    return ""
+
+
+def ensure_user_pool_domain(cognito, domain_prefix: str, pool_id: str) -> str:
+    if not domain_prefix:
+        return ""
+
     try:
         desc = cognito.describe_user_pool_domain(Domain=domain_prefix).get("DomainDescription")
         if desc and desc.get("UserPoolId") == pool_id:
-            return
+            return domain_prefix
     except ClientError as exc:
         if exc.response["Error"]["Code"] not in {"ResourceNotFoundException", "NotFoundException"}:
             raise
-    cognito.create_user_pool_domain(Domain=domain_prefix, UserPoolId=pool_id)
+
+    try:
+        cognito.create_user_pool_domain(Domain=domain_prefix, UserPoolId=pool_id)
+        return domain_prefix
+    except ClientError as exc:
+        message = exc.response["Error"].get("Message", "")
+        if exc.response["Error"]["Code"] == "InvalidParameterException" and "already has a domain configured" in message:
+            existing = get_existing_user_pool_domain(cognito, pool_id)
+            if existing:
+                return existing
+            return domain_prefix
+        raise
 
 
 def ensure_admin_group(cognito, pool_id: str) -> None:
@@ -690,7 +742,7 @@ def deploy_all() -> None:
             LogoutURLs=[logout_url],
         )
 
-    ensure_user_pool_domain(cognito, domain_prefix, pool_id)
+    domain_prefix = ensure_user_pool_domain(cognito, domain_prefix, pool_id) or domain_prefix
     ensure_admin_group(cognito, pool_id)
 
     admin_email = get_setting(config, "ADMIN_EMAIL", "").strip()
