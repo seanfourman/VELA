@@ -13,6 +13,7 @@ if [[ -f "$CONFIG_FILE" ]]; then
   set +a
 fi
 
+AWS_CLI_BIN=${AWS_CLI_BIN:-aws}
 AWS_REGION=${AWS_REGION:-us-east-1}
 AWS_PROFILE=${AWS_PROFILE:-}
 OUTPUTS_FILE=${OUTPUTS_FILE:-"$ROOT_DIR/scripts/aws/outputs.env"}
@@ -24,17 +25,41 @@ LAMBDA_POLICY_NAME=${LAMBDA_POLICY_NAME:-vela-lambda-access}
 mkdir -p "$ARTIFACTS_DIR"
 
 ensure_aws_cli() {
-  if ! command -v aws >/dev/null 2>&1; then
-    echo "aws CLI not found. Install it and retry." >&2
-    exit 1
+  if command -v "$AWS_CLI_BIN" >/dev/null 2>&1; then
+    return
   fi
+
+  if command -v aws >/dev/null 2>&1; then
+    AWS_CLI_BIN=aws
+    return
+  fi
+
+  if command -v aws.exe >/dev/null 2>&1; then
+    AWS_CLI_BIN=aws.exe
+    return
+  fi
+
+  local win_paths=(
+    "/c/Program Files/Amazon/AWSCLIV2/aws.exe"
+    "/c/Program Files (x86)/Amazon/AWSCLIV2/aws.exe"
+  )
+
+  for path in "${win_paths[@]}"; do
+    if [[ -x "$path" ]]; then
+      AWS_CLI_BIN="$path"
+      return
+    fi
+  done
+
+  echo "aws CLI not found. Install it and retry." >&2
+  exit 1
 }
 
 aws_cli() {
   if [[ -n "$AWS_PROFILE" ]]; then
-    aws --profile "$AWS_PROFILE" --region "$AWS_REGION" "$@"
+    "$AWS_CLI_BIN" --profile "$AWS_PROFILE" --region "$AWS_REGION" "$@"
   else
-    aws --region "$AWS_REGION" "$@"
+    "$AWS_CLI_BIN" --region "$AWS_REGION" "$@"
   fi
 }
 
