@@ -5,6 +5,14 @@ ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
 SCRIPTS_DIR="$ROOT_DIR/scripts"
 AWS_SCRIPTS_DIR="$ROOT_DIR/scripts/aws"
 
+CONFIG_FILE=${AWS_CONFIG_FILE:-"$AWS_SCRIPTS_DIR/config.env"}
+if [[ -f "$CONFIG_FILE" ]]; then
+  set -a
+  # shellcheck disable=SC1090
+  . "$CONFIG_FILE"
+  set +a
+fi
+
 AWS_REGION=${AWS_REGION:-us-east-1}
 AWS_PROFILE=${AWS_PROFILE:-}
 OUTPUTS_FILE=${OUTPUTS_FILE:-"$ROOT_DIR/scripts/aws/outputs.env"}
