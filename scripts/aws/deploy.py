@@ -1124,6 +1124,9 @@ def deploy_all() -> None:
             if not npm_bin:
                 raise RuntimeError("npm not found. Install Node.js or set NPM_BIN (or set SKIP_BUILD=1).")
             env["NPM_BIN"] = npm_bin
+            maptiler_key = get_setting(config, "VITE_MAPTILER_KEY", "").strip()
+            if maptiler_key:
+                env["VITE_MAPTILER_KEY"] = maptiler_key
             for key in [
                 "VITE_VISIBLE_PLANETS_URL",
                 "VITE_DARK_SPOTS_URL",

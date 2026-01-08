@@ -53,6 +53,7 @@ You must run this locally (not in the AWS website). It needs the local `.tif` an
 AWS_REGION=us-east-1
 ADMIN_EMAIL=
 ADMIN_TEMP_PASSWORD=
+VITE_MAPTILER_KEY=
 ```
 
 3. Install frontend dependencies if needed:
