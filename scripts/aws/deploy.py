@@ -683,14 +683,14 @@ def deploy_all() -> None:
     stop_event = threading.Event()
     atexit.register(stop_event.set)
 
+    print("Deploy starting. This can take around 10 minutes depending on AWS.")
+    
     def heartbeat() -> None:
         while not stop_event.is_set():
             print("Deploy still running...")
             stop_event.wait(25)
 
     threading.Thread(target=heartbeat, daemon=True).start()
-
-    print("Deploy starting. This can take around 10 minutes depending on AWS.")
 
     region = get_setting(config, "AWS_REGION", "us-east-1")
     profile = get_setting(config, "AWS_PROFILE", "").strip() or None
