@@ -396,7 +396,7 @@ def upsert_lambda(
             except ClientError as exc:
                 if exc.response["Error"]["Code"] != "ResourceConflictException":
                     raise
-                time.sleep(20)
+                time.sleep(5)
     except ClientError as exc:
         if exc.response["Error"]["Code"] != "ResourceNotFoundException":
             raise
@@ -686,7 +686,7 @@ def deploy_all() -> None:
     def heartbeat() -> None:
         while not stop_event.is_set():
             print("Deploy still running...")
-            stop_event.wait(5)
+            stop_event.wait(25)
 
     threading.Thread(target=heartbeat, daemon=True).start()
 
