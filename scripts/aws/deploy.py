@@ -396,7 +396,7 @@ def upsert_lambda(
             except ClientError as exc:
                 if exc.response["Error"]["Code"] != "ResourceConflictException":
                     raise
-                time.sleep(5)
+                time.sleep(20)
     except ClientError as exc:
         if exc.response["Error"]["Code"] != "ResourceNotFoundException":
             raise
