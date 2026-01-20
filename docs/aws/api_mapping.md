@@ -47,4 +47,4 @@ curl -X POST "${VITE_API_BASE}/favorites" \
 ```
 
 ## Verification
-- Confirm example requests match parsing logic in `scripts/aws/lambdas/*.py` (body parsing, required fields).
+- [ ] Confirm example requests match parsing logic in `scripts/aws/lambdas/*.py` (body parsing, required fields).
