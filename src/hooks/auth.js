@@ -74,7 +74,7 @@ const writeJsonToStorage = (key, value) => {
     }
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Ignore storage errors in local mode.
+    return;
   }
 };
 

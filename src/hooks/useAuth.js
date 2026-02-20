@@ -5,7 +5,7 @@ import {
   persistLocalSession,
   readLocalAuthState,
   registerLocalUser,
-} from "./localAuth";
+} from "./auth";
 
 export function useAuth() {
   const [localState, setLocalState] = useState(() => readLocalAuthState());
