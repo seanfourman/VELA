@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 import { PNG } from "pngjs";
 
 const NATURAL_MCD_M2 = 0.171168465;
@@ -27,6 +28,7 @@ const EMPTY_TILE = (() => {
   const png = new PNG({ width: LIGHT_TILE_SIZE, height: LIGHT_TILE_SIZE });
   return PNG.sync.write(png);
 })();
+const require = createRequire(import.meta.url);
 
 function roundTo(value, decimals) {
   const factor = 10 ** decimals;
@@ -94,6 +96,109 @@ function slugify(value) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
+}
+
+function ringContainsPoint(ring, lon, lat) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0];
+    const yi = ring[i][1];
+    const xj = ring[j][0];
+    const yj = ring[j][1];
+
+    const intersects =
+      yi > lat !== yj > lat &&
+      lon < ((xj - xi) * (lat - yi)) / (yj - yi + 0.0) + xi;
+    if (intersects) inside = !inside;
+  }
+  return inside;
+}
+
+function polygonContainsPoint(rings, lon, lat) {
+  if (!Array.isArray(rings) || rings.length === 0) return false;
+  if (!ringContainsPoint(rings[0], lon, lat)) return false;
+  for (let i = 1; i < rings.length; i++) {
+    if (ringContainsPoint(rings[i], lon, lat)) return false;
+  }
+  return true;
+}
+
+function toGeometryList(landSource) {
+  if (!landSource || typeof landSource !== "object") return [];
+  if (landSource.type === "FeatureCollection") {
+    return (landSource.features || [])
+      .map((feature) => feature?.geometry)
+      .filter(Boolean);
+  }
+  if (landSource.type === "Feature") {
+    return landSource.geometry ? [landSource.geometry] : [];
+  }
+  return [landSource];
+}
+
+function buildLandMask(landSource) {
+  const polygons = [];
+  const geometries = toGeometryList(landSource);
+  for (const geometry of geometries) {
+    if (geometry?.type === "Polygon") {
+      polygons.push(geometry.coordinates);
+      continue;
+    }
+    if (geometry?.type === "MultiPolygon") {
+      polygons.push(...geometry.coordinates);
+    }
+  }
+
+  const entries = polygons
+    .map((rings) => {
+      if (!Array.isArray(rings) || rings.length === 0) return null;
+      const outer = rings[0];
+      if (!Array.isArray(outer) || outer.length === 0) return null;
+
+      let minLon = Infinity;
+      let maxLon = -Infinity;
+      let minLat = Infinity;
+      let maxLat = -Infinity;
+      for (const point of outer) {
+        const lon = Number(point?.[0]);
+        const lat = Number(point?.[1]);
+        if (!Number.isFinite(lon) || !Number.isFinite(lat)) continue;
+        if (lon < minLon) minLon = lon;
+        if (lon > maxLon) maxLon = lon;
+        if (lat < minLat) minLat = lat;
+        if (lat > maxLat) maxLat = lat;
+      }
+      if (
+        !Number.isFinite(minLon) ||
+        !Number.isFinite(maxLon) ||
+        !Number.isFinite(minLat) ||
+        !Number.isFinite(maxLat)
+      ) {
+        return null;
+      }
+
+      return { rings, minLon, maxLon, minLat, maxLat };
+    })
+    .filter(Boolean);
+
+  return {
+    isLand(lon, lat) {
+      for (const entry of entries) {
+        if (
+          lon < entry.minLon ||
+          lon > entry.maxLon ||
+          lat < entry.minLat ||
+          lat > entry.maxLat
+        ) {
+          continue;
+        }
+        if (polygonContainsPoint(entry.rings, lon, lat)) {
+          return true;
+        }
+      }
+      return false;
+    },
+  };
 }
 
 async function readJsonBody(request) {
@@ -184,6 +289,7 @@ function skyQualityApiPlugin() {
     recommendationsCandidatePaths[0];
 
   let imagePromise = null;
+  let landMaskPromise = null;
   const tileCache = new Map();
 
   async function getImage() {
@@ -203,6 +309,30 @@ function skyQualityApiPlugin() {
       });
     }
     return imagePromise;
+  }
+
+  async function getLandMask() {
+    if (!landMaskPromise) {
+      landMaskPromise = (async () => {
+        const [topojsonClient, landTopologyRaw] = await Promise.all([
+          import("topojson-client"),
+          Promise.resolve(
+            JSON.parse(
+              fs.readFileSync(require.resolve("world-atlas/land-10m.json"), "utf8")
+            )
+          ),
+        ]);
+        const landFeature = topojsonClient.feature(
+          landTopologyRaw,
+          landTopologyRaw.objects.land
+        );
+        return buildLandMask(landFeature);
+      })().catch((error) => {
+        landMaskPromise = null;
+        throw error;
+      });
+    }
+    return landMaskPromise;
   }
 
   function readRecommendations() {
@@ -603,6 +733,7 @@ function skyQualityApiPlugin() {
       1,
       Math.floor(Math.sqrt((windowWidth * windowHeight) / maxSamples))
     );
+    const landMask = await getLandMask();
     const candidates = [];
     for (let row = 0; row < windowHeight; row += stride) {
       const worldRow = rowStart + row;
@@ -612,6 +743,7 @@ function skyQualityApiPlugin() {
         const sampleLon = minLon + (worldCol + 0.5) * xRes;
         const distanceKm = haversineKm(lat, lon, sampleLat, sampleLon);
         if (distanceKm > searchDistance) continue;
+        if (!landMask.isLand(sampleLon, sampleLat)) continue;
 
         const idx = row * windowWidth + col;
         const artificial = Number(data[idx]);
