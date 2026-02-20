@@ -76,7 +76,14 @@ const useMapStargaze = ({
   useEffect(() => {
     if (!activeStargazeId) return;
     if (activeStargazeSpot) return;
-    setActiveStargazeId(null);
+    const resetTimer = setTimeout(() => {
+      setActiveStargazeId((current) =>
+        current === activeStargazeId ? null : current
+      );
+    }, 0);
+    return () => {
+      clearTimeout(resetTimer);
+    };
   }, [activeStargazeId, activeStargazeSpot]);
 
   useEffect(() => {
@@ -89,18 +96,28 @@ const useMapStargaze = ({
 
   useEffect(() => {
     if (isMobileView) return;
-    if (!activeStargazeSpot) {
-      closeStargazePanel();
-      return;
-    }
-    openStargazePanel(activeStargazeSpot);
+    const panelTimer = setTimeout(() => {
+      if (!activeStargazeSpot) {
+        closeStargazePanel();
+        return;
+      }
+      openStargazePanel(activeStargazeSpot);
+    }, 0);
+    return () => {
+      clearTimeout(panelTimer);
+    };
   }, [activeStargazeSpot, closeStargazePanel, isMobileView, openStargazePanel]);
 
   useEffect(() => {
     if (!isMobileView) return;
     if (!activeStargazeSpot) return;
     if (isStargazePanelOpen) {
-      setStargazePanelSpot(activeStargazeSpot);
+      const panelSpotTimer = setTimeout(() => {
+        setStargazePanelSpot(activeStargazeSpot);
+      }, 0);
+      return () => {
+        clearTimeout(panelSpotTimer);
+      };
     }
   }, [activeStargazeSpot, isMobileView, isStargazePanelOpen]);
 

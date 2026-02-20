@@ -337,7 +337,9 @@ function FavoriteOnlyMarkers({
 export default function MapMarkers({
   location,
   isAuthenticated,
-  refs,
+  mapRef,
+  stargazeMarkerRefs,
+  placedMarkerRef,
   state,
   derived,
   ui,
@@ -352,7 +354,7 @@ export default function MapMarkers({
       <ExitingMarker exitingMarker={state.exitingMarker} />
       <PlacedMarker
         placedMarker={state.placedMarker}
-        placedMarkerRef={refs.placedMarkerRef}
+        placedMarkerRef={placedMarkerRef}
         isAuthenticated={isAuthenticated}
         isPinnedTarget={derived.isPinnedTarget}
         onGetDirections={handlers.handleGetDirections}
@@ -373,8 +375,8 @@ export default function MapMarkers({
         isMobileView={ui.isMobileView}
         favoriteSpotKeys={derived.favoriteSpotKeys}
         selectedDarkSpot={state.selectedDarkSpot}
-        stargazeMarkerRefs={refs.stargazeMarkerRefs}
-        mapRef={refs.mapRef}
+        stargazeMarkerRefs={stargazeMarkerRefs}
+        mapRef={mapRef}
         setActiveStargazeId={handlers.setActiveStargazeId}
         centerOnCoords={handlers.centerOnCoords}
         openStargazePanel={handlers.openStargazePanel}

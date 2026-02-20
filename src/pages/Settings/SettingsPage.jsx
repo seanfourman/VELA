@@ -54,7 +54,7 @@ function SettingsPage({
   const saturnVariant = "day";
   const mapTypeIndex = Math.max(
     0,
-    MAP_TYPE_OPTIONS.findIndex((option) => option.value === mapType)
+    MAP_TYPE_OPTIONS.findIndex((option) => option.value === mapType),
   );
   const mapTypeSwitcherStyle = {
     "--switch-index": mapTypeIndex,

@@ -15,7 +15,10 @@ import { getPasswordValidationError } from "../utils/passwordRules";
 const LOCAL_AUTH_USERS_KEY = "vela:local:auth:users";
 const LOCAL_AUTH_SESSION_KEY = "vela:local:auth:session";
 
-const normalizeLocalEmail = (value) => String(value || "").trim().toLowerCase();
+const normalizeLocalEmail = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase();
 
 const createLocalUserId = () => {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -167,6 +170,16 @@ const normalizeLocalSession = (value) => {
 const readLocalSession = () =>
   normalizeLocalSession(readJsonFromStorage(LOCAL_AUTH_SESSION_KEY, null));
 
+const readLocalAuthState = () => {
+  const users = readLocalUsers();
+  const session = readLocalSession();
+  if (session && !users.some((entry) => entry.id === session.userId)) {
+    persistLocalSession(null);
+    return { users, session: null };
+  }
+  return { users, session };
+};
+
 const persistLocalSession = (session) => {
   if (!session) {
     writeJsonToStorage(LOCAL_AUTH_SESSION_KEY, null);
@@ -192,29 +205,33 @@ const mapLocalUserToAuthUser = (localUser) => {
 
 export function useCognitoAuth() {
   const localOnlyMode =
-    String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !==
-    "false";
+    String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !== "false";
   const [session, setSession] = useState(() =>
-    localOnlyMode ? null : getStoredSession()
+    localOnlyMode ? null : getStoredSession(),
   );
-  const [localUsers, setLocalUsers] = useState(() =>
-    localOnlyMode ? readLocalUsers() : []
+  const [localState, setLocalState] = useState(() =>
+    localOnlyMode ? readLocalAuthState() : { users: [], session: null },
   );
-  const [localSession, setLocalSession] = useState(() =>
-    localOnlyMode ? readLocalSession() : null
-  );
-  const [isLoading, setIsLoading] = useState(() => !localOnlyMode);
+  const [remoteLoading, setRemoteLoading] = useState(() => !localOnlyMode);
+  const localUsers = localState.users;
+  const localSession = localState.session;
+  const isLoading = localOnlyMode ? false : remoteLoading;
+
+  const updateLocalUsers = useCallback((users) => {
+    setLocalState((prev) => ({ ...prev, users }));
+  }, []);
+
+  const updateLocalSession = useCallback((session) => {
+    setLocalState((prev) => ({ ...prev, session }));
+  }, []);
 
   useEffect(() => {
-    if (localOnlyMode) {
-      setIsLoading(false);
-      return undefined;
-    }
+    if (localOnlyMode) return undefined;
 
     let cancelled = false;
 
     (async () => {
-      setIsLoading(true);
+      setRemoteLoading(true);
 
       try {
         const result = await completeLoginFromRedirect();
@@ -223,34 +240,22 @@ export function useCognitoAuth() {
         }
       } catch (error) {
         const message =
-          error instanceof Error ? error.message : "Login failed. Please retry.";
+          error instanceof Error
+            ? error.message
+            : "Login failed. Please retry.";
         showPopup(message, "failure", { duration: 7000 });
       }
 
       const nextSession = await ensureValidSession();
       if (!cancelled) {
         setSession(nextSession);
-        setIsLoading(false);
+        setRemoteLoading(false);
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [localOnlyMode]);
-
-  useEffect(() => {
-    if (!localOnlyMode) return;
-    const users = readLocalUsers();
-    const existingSession = readLocalSession();
-    setLocalUsers(users);
-
-    if (existingSession && !users.some((entry) => entry.id === existingSession.userId)) {
-      persistLocalSession(null);
-      setLocalSession(null);
-      return;
-    }
-    setLocalSession(existingSession);
   }, [localOnlyMode]);
 
   const activeLocalUser = useMemo(() => {
@@ -272,7 +277,7 @@ export function useCognitoAuth() {
         "info",
         {
           duration: 3500,
-        }
+        },
       );
       return;
     }
@@ -288,7 +293,7 @@ export function useCognitoAuth() {
   const signOut = useCallback(() => {
     if (localOnlyMode) {
       persistLocalSession(null);
-      setLocalSession(null);
+      updateLocalSession(null);
       return;
     }
     try {
@@ -297,7 +302,7 @@ export function useCognitoAuth() {
     } catch {
       // Ignore sign-out errors in local mode.
     }
-  }, [localOnlyMode]);
+  }, [localOnlyMode, updateLocalSession]);
 
   const login = useCallback(
     async ({ email, password } = {}) => {
@@ -314,7 +319,7 @@ export function useCognitoAuth() {
       }
 
       const existingUser = localUsers.find(
-        (entry) => entry.email === normalizedEmail
+        (entry) => entry.email === normalizedEmail,
       );
       if (!existingUser) {
         throw new Error("Invalid email or password.");
@@ -325,7 +330,7 @@ export function useCognitoAuth() {
       if (existingUser.passwordHash && existingUser.passwordSalt) {
         const hashedInput = await hashPassword(
           normalizedPassword,
-          existingUser.passwordSalt
+          existingUser.passwordSalt,
         );
         passwordMatches = hashedInput === existingUser.passwordHash;
       } else if (existingUser.legacyPassword) {
@@ -334,7 +339,7 @@ export function useCognitoAuth() {
           const migratedSalt = createPasswordSalt();
           const migratedHash = await hashPassword(
             normalizedPassword,
-            migratedSalt
+            migratedSalt,
           );
           const migratedUsers = localUsers.map((entry) =>
             entry.id === existingUser.id
@@ -344,10 +349,10 @@ export function useCognitoAuth() {
                   passwordSalt: migratedSalt,
                   legacyPassword: "",
                 }
-              : entry
+              : entry,
           );
           persistLocalUsers(migratedUsers);
-          setLocalUsers(migratedUsers);
+          updateLocalUsers(migratedUsers);
           resolvedUser =
             migratedUsers.find((entry) => entry.id === existingUser.id) ||
             existingUser;
@@ -360,10 +365,10 @@ export function useCognitoAuth() {
 
       const nextSession = { userId: resolvedUser.id };
       persistLocalSession(nextSession);
-      setLocalSession(nextSession);
+      updateLocalSession(nextSession);
       return mapLocalUserToAuthUser(resolvedUser);
     },
-    [localOnlyMode, localUsers, signIn]
+    [localOnlyMode, localUsers, signIn, updateLocalSession, updateLocalUsers],
   );
 
   const register = useCallback(
@@ -408,14 +413,14 @@ export function useCognitoAuth() {
 
       const nextUsers = [...localUsers, nextUser];
       persistLocalUsers(nextUsers);
-      setLocalUsers(nextUsers);
+      updateLocalUsers(nextUsers);
 
       const nextSession = { userId: nextUser.id };
       persistLocalSession(nextSession);
-      setLocalSession(nextSession);
+      updateLocalSession(nextSession);
       return mapLocalUserToAuthUser(nextUser);
     },
-    [localOnlyMode, localUsers, signIn]
+    [localOnlyMode, localUsers, signIn, updateLocalSession, updateLocalUsers],
   );
 
   return {

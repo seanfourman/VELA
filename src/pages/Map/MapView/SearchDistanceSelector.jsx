@@ -7,7 +7,11 @@ export default function SearchDistanceSelector({ value, onChange, hidden = false
 
   const OPTIONS = [10, 25, 50, 75, 100];
 
-  const toggleOpen = () => setIsOpen(!isOpen);
+  const isMenuOpen = !hidden && isOpen;
+  const toggleOpen = () => {
+    if (hidden) return;
+    setIsOpen((prev) => !prev);
+  };
 
   const handleSelect = (dist) => {
     onChange(dist);
@@ -31,24 +35,18 @@ export default function SearchDistanceSelector({ value, onChange, hidden = false
     };
   }, []);
 
-  useEffect(() => {
-    if (hidden) {
-      setIsOpen(false);
-    }
-  }, [hidden]);
-
   return (
     <div
       className={`search-distance-selector${hidden ? " hidden" : ""}`}
       ref={containerRef}
     >
       <button
-        className={`glass-btn distance-toggle ${isOpen ? "active" : ""}`}
+        className={`glass-btn distance-toggle ${isMenuOpen ? "active" : ""}`}
         onClick={toggleOpen}
       >
         <span className="label">Radius: {value}km</span>
         <svg
-          className={`chevron ${isOpen ? "open" : ""}`}
+          className={`chevron ${isMenuOpen ? "open" : ""}`}
           width="12"
           height="12"
           viewBox="0 0 24 24"
@@ -62,7 +60,7 @@ export default function SearchDistanceSelector({ value, onChange, hidden = false
         </svg>
       </button>
 
-      <div className={`glass-panel distance-menu ${isOpen ? "open" : ""}`}>
+      <div className={`glass-panel distance-menu ${isMenuOpen ? "open" : ""}`}>
         {OPTIONS.map((dist) => (
           <button
             key={dist}

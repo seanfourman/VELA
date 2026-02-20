@@ -20,11 +20,11 @@ const useMapFavorites = ({
 
   const favoriteSpotKeys = useMemo(
     () => new Set(favoriteSpots.map((spot) => spot.key)),
-    [favoriteSpots]
+    [favoriteSpots],
   );
   const exitingFavoriteKeySet = useMemo(
     () => new Set(exitingFavoriteKeys),
-    [exitingFavoriteKeys]
+    [exitingFavoriteKeys],
   );
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const useMapFavorites = ({
           error instanceof Error
             ? error.message
             : "Could not load favorites right now.",
-          "failure"
+          "failure",
         );
       }
     })();
@@ -68,18 +68,19 @@ const useMapFavorites = ({
   }, [authToken, getSpotKey]);
 
   useEffect(() => {
+    const removalTimeouts = favoriteRemovalTimeoutsRef.current;
     return () => {
-      favoriteRemovalTimeoutsRef.current.forEach((timeoutId) => {
+      removalTimeouts.forEach((timeoutId) => {
         clearTimeout(timeoutId);
       });
-      favoriteRemovalTimeoutsRef.current.clear();
+      removalTimeouts.clear();
     };
   }, []);
 
   useEffect(() => {
     if (!placedMarker) return;
     const isFavorite = favoriteSpotKeys.has(
-      getSpotKey(placedMarker.lat, placedMarker.lng)
+      getSpotKey(placedMarker.lat, placedMarker.lng),
     );
     if (placedMarker.isFavorite === isFavorite) return;
     setPlacedMarker((prev) => {
@@ -97,11 +98,11 @@ const useMapFavorites = ({
           error instanceof Error
             ? error.message
             : "Could not save favorite right now.",
-          "failure"
+          "failure",
         );
       }
     },
-    [authToken]
+    [authToken],
   );
 
   const persistRemoveFavoriteSpot = useCallback(
@@ -113,11 +114,11 @@ const useMapFavorites = ({
           error instanceof Error
             ? error.message
             : "Could not remove favorite right now.",
-          "failure"
+          "failure",
         );
       }
     },
-    [authToken]
+    [authToken],
   );
 
   const handleToggleDarkSpotFavorite = useCallback(
@@ -143,7 +144,7 @@ const useMapFavorites = ({
       getSpotKey,
       persistFavoriteSpot,
       persistRemoveFavoriteSpot,
-    ]
+    ],
   );
 
   const handleRemoveFavoriteSpot = useCallback(
@@ -177,7 +178,7 @@ const useMapFavorites = ({
       persistRemoveFavoriteSpot,
       setPlacedMarker,
       setSelectedDarkSpot,
-    ]
+    ],
   );
 
   const handleRemoveFavoriteSpotAnimated = useCallback(
@@ -192,7 +193,7 @@ const useMapFavorites = ({
         return null;
       });
       setExitingFavoriteKeys((prev) =>
-        prev.includes(spotKey) ? prev : [...prev, spotKey]
+        prev.includes(spotKey) ? prev : [...prev, spotKey],
       );
 
       const timeoutId = setTimeout(() => {
@@ -203,7 +204,7 @@ const useMapFavorites = ({
 
       favoriteRemovalTimeoutsRef.current.set(spotKey, timeoutId);
     },
-    [getSpotKey, handleRemoveFavoriteSpot, setSelectedDarkSpot]
+    [getSpotKey, handleRemoveFavoriteSpot, setSelectedDarkSpot],
   );
 
   const handleToggleStargazeFavorite = useCallback(
@@ -226,7 +227,7 @@ const useMapFavorites = ({
       getSpotKey,
       handleRemoveFavoriteSpotAnimated,
       persistFavoriteSpot,
-    ]
+    ],
   );
 
   const handleTogglePinnedFavorite = useCallback(() => {

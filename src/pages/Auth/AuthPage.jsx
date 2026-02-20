@@ -8,6 +8,17 @@ import "./AuthPage.css";
 
 const AUTH_MODE_LOGIN = "login";
 const AUTH_MODE_REGISTER = "register";
+const AUTH_MODES = [
+  { value: AUTH_MODE_LOGIN, label: "Login" },
+  { value: AUTH_MODE_REGISTER, label: "Register" },
+];
+const PASSWORD_RULES = [
+  { key: "length", label: "8 or more characters" },
+  { key: "lowercase", label: "At least one lowercase letter" },
+  { key: "uppercase", label: "At least one uppercase letter" },
+  { key: "number", label: "At least one number" },
+  { key: "symbol", label: "At least one symbol" },
+];
 
 const isValidEmail = (value) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || "").trim());
@@ -23,15 +34,23 @@ function AuthPage({ auth, isLight, onNavigate }) {
 
   const isLocalMode = Boolean(auth?.localOnlyMode);
   const isAuthenticated = Boolean(auth?.isAuthenticated);
+  const isRegisterMode = mode === AUTH_MODE_REGISTER;
   const showHero = useMemo(() => isProbablyHardwareAccelerated(), []);
   const passwordChecks = useMemo(() => getPasswordChecks(password), [password]);
+  const showPasswordPopover = isRegisterMode && isPasswordFocused;
+  const showConfirmPassword = isRegisterMode && password.length > 0;
   const hero = showHero ? (
     <SaturnGlobe variant="day" className="profile-page__earth-canvas" />
   ) : null;
   const authSwitcherStyle = {
-    "--switch-index": mode === AUTH_MODE_REGISTER ? 1 : 0,
+    "--switch-index": isRegisterMode ? 1 : 0,
     "--switch-count": 2,
   };
+  const headingText = isRegisterMode ? "Create your account" : "Welcome back";
+  const supportingText = isRegisterMode
+    ? "Save your profile and keep your map preferences on this device."
+    : "Log in to continue to your profile and map.";
+  const submitText = isRegisterMode ? "Create account" : "Log in";
 
   const resetPasswords = () => {
     setPassword("");
@@ -62,22 +81,22 @@ function AuthPage({ auth, isLight, onNavigate }) {
       showPopup("Enter your password.", "failure", { duration: 2600 });
       return;
     }
-    if (mode === AUTH_MODE_REGISTER && !isStrongPassword(password)) {
+    if (isRegisterMode && !isStrongPassword(password)) {
       showPopup(
         "Use a stronger password: 8+ chars with upper, lower, number, and symbol.",
         "failure",
-        { duration: 3600 }
+        { duration: 3600 },
       );
       return;
     }
-    if (mode === AUTH_MODE_REGISTER && password !== confirmPassword) {
+    if (isRegisterMode && password !== confirmPassword) {
       showPopup("Passwords do not match.", "failure", { duration: 2800 });
       return;
     }
 
     setIsSubmitting(true);
     try {
-      if (mode === AUTH_MODE_REGISTER) {
+      if (isRegisterMode) {
         await auth?.register?.({
           name: displayName.trim(),
           email: trimmedEmail,
@@ -88,7 +107,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
         });
       } else {
         await auth?.login?.({ email: trimmedEmail, password });
-        showPopup("Welcome back.", "success", { duration: 2200 });
+        showPopup("Welcome back!", "success", { duration: 2200 });
       }
       resetPasswords();
       onNavigate?.("/");
@@ -96,7 +115,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
       showPopup(
         error instanceof Error ? error.message : "Authentication failed.",
         "failure",
-        { duration: 3600 }
+        { duration: 3600 },
       );
     } finally {
       setIsSubmitting(false);
@@ -117,7 +136,8 @@ function AuthPage({ auth, isLight, onNavigate }) {
           <>
             <h2 className="profile-section-title">You are signed in</h2>
             <p className="profile-section-copy">
-              Continue to your profile to edit your details, or jump back to the map.
+              Continue to your profile to edit your details, or jump back to the
+              map.
             </p>
             <div className="profile-actions">
               <button
@@ -156,15 +176,9 @@ function AuthPage({ auth, isLight, onNavigate }) {
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-headline">
               <h2 className="profile-section-title auth-title">
-                {mode === AUTH_MODE_REGISTER
-                  ? "Create your account"
-                  : "Welcome back"}
+                {headingText}
               </h2>
-              <p className="profile-section-copy">
-                {mode === AUTH_MODE_REGISTER
-                  ? "Save your profile and keep your map preferences on this device."
-                  : "Log in to continue to your profile and map."}
-              </p>
+              <p className="profile-section-copy">{supportingText}</p>
             </div>
 
             <div
@@ -173,33 +187,25 @@ function AuthPage({ auth, isLight, onNavigate }) {
               aria-label="Auth mode"
               style={authSwitcherStyle}
             >
-              <button
-                type="button"
-                className={`auth-mode-switch${
-                  mode === AUTH_MODE_LOGIN ? " active" : ""
-                }`}
-                role="tab"
-                aria-selected={mode === AUTH_MODE_LOGIN}
-                onClick={() => handleModeChange(AUTH_MODE_LOGIN)}
-              >
-                Login
-              </button>
-              <button
-                type="button"
-                className={`auth-mode-switch${
-                  mode === AUTH_MODE_REGISTER ? " active" : ""
-                }`}
-                role="tab"
-                aria-selected={mode === AUTH_MODE_REGISTER}
-                onClick={() => handleModeChange(AUTH_MODE_REGISTER)}
-              >
-                Register
-              </button>
+              {AUTH_MODES.map((authMode) => (
+                <button
+                  key={authMode.value}
+                  type="button"
+                  className={`auth-mode-switch${
+                    mode === authMode.value ? " active" : ""
+                  }`}
+                  role="tab"
+                  aria-selected={mode === authMode.value}
+                  onClick={() => handleModeChange(authMode.value)}
+                >
+                  {authMode.label}
+                </button>
+              ))}
             </div>
 
             <div className="auth-layout">
               <div className="profile-section auth-fields">
-                {mode === AUTH_MODE_REGISTER ? (
+                {isRegisterMode ? (
                   <label className="profile-field">
                     <span className="profile-label">Display name</span>
                     <input
@@ -235,65 +241,59 @@ function AuthPage({ auth, isLight, onNavigate }) {
                     onBlur={() => setIsPasswordFocused(false)}
                     placeholder="Enter password"
                     autoComplete={
-                      mode === AUTH_MODE_REGISTER ? "new-password" : "current-password"
+                      isRegisterMode ? "new-password" : "current-password"
                     }
                     minLength={8}
                     required
                   />
-                  {mode === AUTH_MODE_REGISTER ? (
+                  {isRegisterMode ? (
                     <div
                       className={`auth-password-popover${
-                        isPasswordFocused ? " is-visible" : ""
+                        showPasswordPopover ? " is-visible" : ""
                       }`}
                       role="status"
                       aria-live="polite"
-                      aria-hidden={!isPasswordFocused}
+                      aria-hidden={!showPasswordPopover}
                     >
                       <div className="auth-password-popover__title">
                         Password requirements
                       </div>
                       <ul className="auth-password-rules">
-                        <li className={passwordChecks.length ? "valid" : ""}>
-                          8 or more characters
-                        </li>
-                        <li className={passwordChecks.lowercase ? "valid" : ""}>
-                          At least one lowercase letter
-                        </li>
-                        <li className={passwordChecks.uppercase ? "valid" : ""}>
-                          At least one uppercase letter
-                        </li>
-                        <li className={passwordChecks.number ? "valid" : ""}>
-                          At least one number
-                        </li>
-                        <li className={passwordChecks.symbol ? "valid" : ""}>
-                          At least one symbol
-                        </li>
+                        {PASSWORD_RULES.map((rule) => (
+                          <li
+                            key={rule.key}
+                            className={passwordChecks[rule.key] ? "valid" : ""}
+                          >
+                            {rule.label}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   ) : null}
                 </label>
-                {mode === AUTH_MODE_REGISTER ? (
+                {isRegisterMode ? (
                   <label
                     className={`profile-field auth-field--wide auth-confirm-field${
-                      password.length > 0 ? " is-visible" : ""
+                      showConfirmPassword ? " is-visible" : ""
                     }`}
-                    aria-hidden={password.length === 0}
+                    aria-hidden={!showConfirmPassword}
                   >
                     <span className="profile-label">Confirm password</span>
                     <input
                       className="profile-input"
                       type="password"
                       value={confirmPassword}
-                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      onChange={(event) =>
+                        setConfirmPassword(event.target.value)
+                      }
                       placeholder="Repeat password"
                       autoComplete="new-password"
                       minLength={8}
-                      required={password.length > 0}
+                      required={showConfirmPassword}
                     />
                   </label>
                 ) : null}
               </div>
-
             </div>
 
             <div className="profile-actions auth-actions">
@@ -302,11 +302,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
                 className="glass-btn profile-action-btn profile-primary"
                 disabled={isSubmitting}
               >
-                {isSubmitting
-                  ? "Please wait..."
-                  : mode === AUTH_MODE_REGISTER
-                  ? "Create account"
-                  : "Log in"}
+                {isSubmitting ? "Please wait..." : submitText}
               </button>
             </div>
           </form>

@@ -207,9 +207,7 @@ function ProfilePage({
               Save changes
             </button>
           </div>
-          <p className="profile-account-id">
-            {user?.sub || "Not available"}
-          </p>
+          <p className="profile-account-id">{user?.sub || "Not available"}</p>
         </form>
       )}
     </PageShell>

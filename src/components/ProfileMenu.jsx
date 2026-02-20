@@ -87,13 +87,6 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
     return () => clearTimeout(timeout);
   }, [menuOpen, menuVisible]);
 
-  useEffect(() => {
-    if (!auth?.isAuthenticated) {
-      setMenuOpen(false);
-      setMenuVisible(false);
-    }
-  }, [auth?.isAuthenticated]);
-
   return (
     <div className="profile-menu-container">
       <button

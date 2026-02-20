@@ -62,6 +62,7 @@ const MapView = forwardRef(function MapView(
     searchDistance,
     onSearchDistanceChange,
   });
+  const { mapRef, planetPanelRef, stargazeMarkerRefs, placedMarkerRef } = refs;
 
   useImperativeHandle(
     ref,
@@ -78,7 +79,7 @@ const MapView = forwardRef(function MapView(
       }${ui.isPopupOpen ? " popup-open" : ""}`}
     >
       <PlanetPanelContainer
-        ref={refs.planetPanelRef}
+        ref={planetPanelRef}
         planets={planets.visiblePlanets}
         loading={planets.planetsLoading}
         error={planets.planetsError}
@@ -129,7 +130,7 @@ const MapView = forwardRef(function MapView(
           />
         )}
 
-        <MapController mapRef={refs.mapRef} />
+        <MapController mapRef={mapRef} />
         <DoubleClickHandler onDoubleClick={handlers.handleDoubleClick} />
         <LongPressHandler
           onLongPress={handlers.handleDoubleClick}
@@ -149,7 +150,9 @@ const MapView = forwardRef(function MapView(
         <MapMarkers
           location={location}
           isAuthenticated={isAuthenticated}
-          refs={refs}
+          mapRef={mapRef}
+          stargazeMarkerRefs={stargazeMarkerRefs}
+          placedMarkerRef={placedMarkerRef}
           state={state}
           derived={derived}
           ui={ui}

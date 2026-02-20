@@ -3,8 +3,6 @@ import markerIcon from "../../../assets/icons/marker-icon.svg";
 import mapLocationIcon from "../../../assets/icons/map-location-icon.svg";
 import "./LocationSearchBar.css";
 
-const SEARCH_DEBOUNCE_MS = 250;
-
 const parseCoordinates = (value) => {
   const trimmed = String(value || "").trim();
   if (!trimmed) return null;
@@ -30,18 +28,8 @@ export default function LocationSearchBar({
   placeholder = "Search coordinates or best stargazing spots",
 }) {
   const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [listOpen, setListOpen] = useState(false);
   const containerRef = useRef(null);
-  const suppressAutoOpenRef = useRef(false);
-
-  useEffect(() => {
-    const handle = setTimeout(() => {
-      setDebouncedQuery(query.trim());
-    }, SEARCH_DEBOUNCE_MS);
-
-    return () => clearTimeout(handle);
-  }, [query]);
 
   const buildResults = useCallback(
     (rawQuery) => {
@@ -74,7 +62,7 @@ export default function LocationSearchBar({
     [locations]
   );
 
-  const trimmedQuery = debouncedQuery.trim();
+  const trimmedQuery = query.trim();
   const results = useMemo(
     () => buildResults(trimmedQuery),
     [buildResults, trimmedQuery]
@@ -82,23 +70,10 @@ export default function LocationSearchBar({
   const hasQuery = Boolean(trimmedQuery);
   const isResultsOpen = listOpen && hasQuery;
 
-  useEffect(() => {
-    if (!debouncedQuery) {
-      setListOpen(false);
-      return;
-    }
-    if (suppressAutoOpenRef.current) {
-      suppressAutoOpenRef.current = false;
-      return;
-    }
-    setListOpen(true);
-  }, [debouncedQuery, results.length]);
-
   const handleInputChange = (event) => {
     const value = event.target.value;
     setQuery(value);
-    suppressAutoOpenRef.current = false;
-    setListOpen(false);
+    setListOpen(Boolean(value.trim()));
   };
 
   const handleKeyDown = (event) => {
@@ -116,19 +91,16 @@ export default function LocationSearchBar({
       }
       return;
     }
-    setDebouncedQuery(rawQuery);
     setListOpen(true);
   };
 
   const handleSelectLocation = (location) => {
-    suppressAutoOpenRef.current = true;
     onSelectLocation?.(location);
     setQuery(location?.name || "");
     setListOpen(false);
   };
 
   const handleSelectCoordinates = (coords) => {
-    suppressAutoOpenRef.current = true;
     onSelectCoordinates?.(coords);
     setQuery(formatCoords(coords.lat, coords.lng));
     setListOpen(false);
@@ -161,7 +133,7 @@ export default function LocationSearchBar({
               onKeyDown={handleKeyDown}
               onFocus={() => {
                 onFocusChange?.(true);
-                if (debouncedQuery) {
+                if (query.trim()) {
                   setListOpen(true);
                 }
               }}

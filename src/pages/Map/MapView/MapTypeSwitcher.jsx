@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./MapTypeSwitcher.css";
 
 const OPTION_META = (previewKey) => [
@@ -28,19 +28,8 @@ export default function MapTypeSwitcher({
   const [expanded, setExpanded] = useState(false);
   const options = OPTION_META(previewKey);
   const current = options.find((opt) => opt.id === mapType) || options[0];
-  const [previewSrc, setPreviewSrc] = useState(current.preview);
-  const [previewVersion, setPreviewVersion] = useState(0);
+  const previewSrc = latestGridShot || current.preview;
   const containerRef = useRef(null);
-
-  useEffect(() => {
-    setPreviewSrc(current.preview);
-  }, [current.preview]);
-
-  useEffect(() => {
-    if (!latestGridShot) return;
-    setPreviewSrc(latestGridShot);
-    setPreviewVersion((v) => v + 1);
-  }, [latestGridShot]);
 
   useEffect(() => {
     const handleOutside = (event) => {
@@ -78,7 +67,7 @@ export default function MapTypeSwitcher({
         onClick={toggleMenu}
       >
         <div
-          key={previewVersion}
+          key={previewSrc}
           className="map-type-fill fresh"
           style={{
             backgroundImage: `url('${previewSrc}')`,

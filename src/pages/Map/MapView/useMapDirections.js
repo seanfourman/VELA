@@ -37,7 +37,7 @@ const useMapDirections = ({
 
       return `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`;
     },
-    [directionsProvider]
+    [directionsProvider],
   );
 
   const buildShareUrl = useCallback((coords) => {
@@ -67,13 +67,13 @@ const useMapDirections = ({
           showPopup(
             "Pop-up blocked. Allow pop-ups to open Google Maps.",
             "warning",
-            { duration: 2600 }
+            { duration: 2600 },
           );
           return;
         }
         try {
           opened.opener = null;
-        } catch (error) {
+        } catch {
           // Ignore if the browser prevents access to the new window handle.
         }
         showPopup(`Opened ${resolvedLabel} in Google Maps.`, "info", {
@@ -81,7 +81,7 @@ const useMapDirections = ({
         });
       }, 1500);
     },
-    [buildShareUrl]
+    [buildShareUrl],
   );
 
   const flashShareToggle = useCallback((button) => {

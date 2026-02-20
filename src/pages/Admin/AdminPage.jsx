@@ -51,8 +51,7 @@ function AdminPage({
 }) {
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const isLocalOnlyMode =
-    String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !==
-    "false";
+    String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !== "false";
   const hasAdminAccess = isLocalOnlyMode || Boolean(isAdmin);
   const canUseAdminTools = isLocalOnlyMode || isAuthenticated;
   const [draft, setDraft] = useState(EMPTY_LOCATION);
@@ -62,7 +61,7 @@ function AdminPage({
   const locationList = useMemo(() => {
     if (!Array.isArray(stargazeLocations)) return [];
     return [...stargazeLocations].sort((a, b) =>
-      String(a?.name || "").localeCompare(String(b?.name || ""))
+      String(a?.name || "").localeCompare(String(b?.name || "")),
     );
   }, [stargazeLocations]);
 
@@ -99,7 +98,7 @@ function AdminPage({
           ? error.message
           : "Could not delete this location right now.",
         "failure",
-        { duration: 3200 }
+        { duration: 3200 },
       );
       return;
     }
@@ -169,7 +168,7 @@ function AdminPage({
           ? error.message
           : "Could not save this location right now.",
         "failure",
-        { duration: 3200 }
+        { duration: 3200 },
       );
       return;
     }
@@ -412,10 +411,10 @@ function AdminPage({
                         ) : null}
                       </div>
                       <div className="admin-location-actions">
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn"
-                        onClick={() => handleDeleteLocation(location)}
+                        <button
+                          type="button"
+                          className="glass-btn profile-action-btn"
+                          onClick={() => handleDeleteLocation(location)}
                         >
                           Remove
                         </button>
@@ -426,9 +425,9 @@ function AdminPage({
                         {location.description}
                       </div>
                     ) : null}
-                </div>
-              );
-            })
+                  </div>
+                );
+              })
             )}
           </div>
         </section>
