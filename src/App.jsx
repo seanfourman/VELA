@@ -18,7 +18,7 @@ const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
 const DEFAULT_SETTINGS = {
   directionsProvider: "google",
   showRecommendedSpots: true,
-  lightOverlayEnabled: false,
+  lightOverlayEnabled: true,
   autoCenterOnLocate: true,
   highAccuracyLocation: true,
   searchDistance: SEARCH_DISTANCE_OPTIONS[0],
@@ -28,6 +28,8 @@ const DEFAULT_PROFILE = {
   avatarUrl: "",
   bio: "",
 };
+const LOCAL_ONLY_MODE =
+  String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !== "false";
 
 const normalizeProfile = (value) => {
   const safe = value && typeof value === "object" ? value : {};
@@ -45,7 +47,10 @@ const normalizeSettings = (value) => {
     ...DEFAULT_SETTINGS,
     directionsProvider: safe.directionsProvider === "waze" ? "waze" : "google",
     showRecommendedSpots: safe.showRecommendedSpots !== false,
-    lightOverlayEnabled: Boolean(safe.lightOverlayEnabled),
+    lightOverlayEnabled:
+      safe.lightOverlayEnabled === undefined
+        ? DEFAULT_SETTINGS.lightOverlayEnabled
+        : Boolean(safe.lightOverlayEnabled),
     autoCenterOnLocate: safe.autoCenterOnLocate !== false,
     highAccuracyLocation: safe.highAccuracyLocation !== false,
     searchDistance: SEARCH_DISTANCE_OPTIONS.includes(searchDistance)
@@ -432,7 +437,7 @@ function App() {
     []
   );
 
-  const isAdmin = isAdminUser(auth?.user);
+  const isAdmin = LOCAL_ONLY_MODE || isAdminUser(auth?.user);
   const isLight = mapType === "light";
   const currentRoute = normalizePath(route);
 
@@ -484,7 +489,7 @@ function App() {
           locationStatus={locationStatus}
           mapType={mapType}
           setMapType={setMapType}
-          isAuthenticated={auth?.isAuthenticated}
+          isAuthenticated={LOCAL_ONLY_MODE || auth?.isAuthenticated}
           authToken={auth?.session?.id_token}
           stargazeLocations={stargazeLocations}
           directionsProvider={settings.directionsProvider}

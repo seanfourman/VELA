@@ -18,7 +18,6 @@ const useMapViewState = ({
   location,
   mapType,
   stargazeLocations = [],
-  isAuthenticated,
   authToken,
   directionsProvider = "google",
   showRecommendedSpots = true,
@@ -85,7 +84,6 @@ const useMapViewState = ({
 
   const favorites = useMapFavorites({
     authToken,
-    isAuthenticated,
     getSpotKey,
     placedMarker,
     setPlacedMarker,

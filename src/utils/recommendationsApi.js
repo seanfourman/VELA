@@ -1,4 +1,4 @@
-import { buildRecommendationsUrl } from "./awsEndpoints";
+import { buildRecommendationsUrl } from "./apiEndpoints";
 
 const normalizeString = (value) =>
   typeof value === "string" ? value.trim() : "";
@@ -38,16 +38,19 @@ const buildPayload = (location) => {
 };
 
 export async function saveRecommendation({ location, idToken }) {
-  if (!idToken) return;
   const payload = buildPayload(location);
   if (!payload) return;
 
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  if (idToken) {
+    headers.Authorization = `Bearer ${idToken}`;
+  }
+
   const response = await fetch(buildRecommendationsUrl(), {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(payload),
   });
 
@@ -90,16 +93,18 @@ export async function fetchRecommendations({ idToken } = {}) {
 }
 
 export async function deleteRecommendation({ spotId, idToken }) {
-  if (!spotId || !idToken) return;
+  if (!spotId) return;
+
+  const headers = { Accept: "application/json" };
+  if (idToken) {
+    headers.Authorization = `Bearer ${idToken}`;
+  }
 
   const response = await fetch(
     `${buildRecommendationsUrl()}/${encodeURIComponent(spotId)}`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-        Accept: "application/json",
-      },
+      headers,
     }
   );
 

@@ -5,8 +5,8 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULTS = {
-  domain: "https://us-east-1wpltpxn8i.auth.us-east-1.amazoncognito.com",
-  clientId: "60s12hrb2i7iapj56ag4lm7q6i",
+  domain: "",
+  clientId: "",
   scopes: ["email", "openid"],
 };
 
@@ -54,6 +54,20 @@ export function getCognitoConfig() {
     logoutUri: normalizeCognitoRedirectUri(logoutUri),
     scopes,
   };
+}
+
+export function isCognitoConfigured(config = getCognitoConfig()) {
+  return Boolean(config.domain && config.clientId);
+}
+
+function assertCognitoConfigured() {
+  const config = getCognitoConfig();
+  if (!isCognitoConfigured(config)) {
+    throw new Error(
+      "Cognito is not configured. Set VITE_COGNITO_DOMAIN and VITE_COGNITO_CLIENT_ID, or use local mode."
+    );
+  }
+  return config;
 }
 
 function base64UrlEncodeArrayBuffer(arrayBuffer) {
@@ -152,7 +166,7 @@ function clearPkceSession() {
 }
 
 export function buildLoginUrl({ codeChallenge, state } = {}) {
-  const { domain, clientId, redirectUri, scopes } = getCognitoConfig();
+  const { domain, clientId, redirectUri, scopes } = assertCognitoConfigured();
   const url = new URL(`${domain}/login`);
 
   url.searchParams.set("client_id", clientId);
@@ -172,7 +186,7 @@ export function buildLoginUrl({ codeChallenge, state } = {}) {
 }
 
 export function buildLogoutUrl() {
-  const { domain, clientId, logoutUri } = getCognitoConfig();
+  const { domain, clientId, logoutUri } = assertCognitoConfigured();
   const url = new URL(`${domain}/logout`);
   url.searchParams.set("client_id", clientId);
   url.searchParams.set("logout_uri", logoutUri);
@@ -192,7 +206,7 @@ export async function beginLogin() {
 }
 
 async function exchangeAuthCodeForTokens({ code, codeVerifier }) {
-  const { domain, clientId, redirectUri } = getCognitoConfig();
+  const { domain, clientId, redirectUri } = assertCognitoConfigured();
   const tokenUrl = `${domain}/oauth2/token`;
 
   const bodyParams = new URLSearchParams();
@@ -238,7 +252,7 @@ async function exchangeAuthCodeForTokens({ code, codeVerifier }) {
 }
 
 async function refreshSessionWithRefreshToken(refreshToken) {
-  const { domain, clientId } = getCognitoConfig();
+  const { domain, clientId } = assertCognitoConfigured();
   const tokenUrl = `${domain}/oauth2/token`;
 
   const bodyParams = new URLSearchParams();

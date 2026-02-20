@@ -1,4 +1,4 @@
-import { buildSkyQualityUrl } from "./awsEndpoints";
+import { buildSkyQualityUrl } from "./apiEndpoints";
 
 const metricsCache = new Map();
 

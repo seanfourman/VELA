@@ -1,4 +1,4 @@
-import { getLightmapTileUrlTemplate } from "../../../utils/awsEndpoints";
+import { getLightmapTileUrlTemplate } from "../../../utils/apiEndpoints";
 
 const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
 const LOCATION_ZOOM = 16;

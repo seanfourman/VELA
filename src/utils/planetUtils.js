@@ -1,4 +1,4 @@
-import { buildVisiblePlanetsUrl } from "./awsEndpoints";
+import { buildVisiblePlanetsUrl } from "./apiEndpoints";
 
 const planetTexture = (fileName) =>
   new URL(`../assets/planets/${fileName}`, import.meta.url).href;

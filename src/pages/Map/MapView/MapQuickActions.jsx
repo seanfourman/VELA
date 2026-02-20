@@ -116,17 +116,12 @@ export default function MapQuickActions({
       <QuickActionButton
         icon={lightmapIcon}
         label="Light map"
-        title="Light pollution overlay is disabled"
-        active={false}
-        disabled={true}
-        /* (***) DISABLED FOR NOW BECAUSE OF AWS LIMITS:
         title={
           lightOverlayEnabled
             ? "Hide light pollution overlay"
             : "Show light pollution overlay"
         }
         active={lightOverlayEnabled}
-        */
         onClick={onToggleLightOverlay}
       />
       <LocationStatusButton

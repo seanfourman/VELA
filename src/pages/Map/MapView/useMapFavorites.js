@@ -9,7 +9,6 @@ import { FAVORITE_EXIT_MS } from "./mapConstants";
 
 const useMapFavorites = ({
   authToken,
-  isAuthenticated,
   getSpotKey,
   placedMarker,
   setPlacedMarker,
@@ -30,11 +29,6 @@ const useMapFavorites = ({
 
   useEffect(() => {
     let cancelled = false;
-
-    if (!authToken || !isAuthenticated) {
-      setFavoriteSpots([]);
-      return undefined;
-    }
 
     (async () => {
       try {
@@ -71,7 +65,7 @@ const useMapFavorites = ({
     return () => {
       cancelled = true;
     };
-  }, [authToken, getSpotKey, isAuthenticated]);
+  }, [authToken, getSpotKey]);
 
   useEffect(() => {
     return () => {
@@ -96,7 +90,6 @@ const useMapFavorites = ({
 
   const persistFavoriteSpot = useCallback(
     async (lat, lng) => {
-      if (!authToken) return;
       try {
         await saveFavoriteSpot({ lat, lon: lng, idToken: authToken });
       } catch (error) {
@@ -113,7 +106,6 @@ const useMapFavorites = ({
 
   const persistRemoveFavoriteSpot = useCallback(
     async ({ lat, lng, spotId }) => {
-      if (!authToken) return;
       try {
         await deleteFavoriteSpot({ lat, lon: lng, spotId, idToken: authToken });
       } catch (error) {

@@ -50,6 +50,11 @@ function AdminPage({
   onDeleteStargazeLocation,
 }) {
   const isAuthenticated = Boolean(auth?.isAuthenticated);
+  const isLocalOnlyMode =
+    String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !==
+    "false";
+  const hasAdminAccess = isLocalOnlyMode || Boolean(isAdmin);
+  const canUseAdminTools = isLocalOnlyMode || isAuthenticated;
   const [draft, setDraft] = useState(EMPTY_LOCATION);
   const [editingId, setEditingId] = useState(null);
   const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
@@ -83,16 +88,11 @@ function AdminPage({
     const locationId = location?.id;
     if (!locationId) return;
 
-    const idToken = auth?.session?.id_token;
-    if (!idToken) {
-      showPopup("Please sign in again to delete this location.", "failure", {
-        duration: 2800,
-      });
-      return;
-    }
-
     try {
-      await deleteRecommendation({ spotId: locationId, idToken });
+      await deleteRecommendation({
+        spotId: locationId,
+        idToken: auth?.session?.id_token,
+      });
     } catch (error) {
       showPopup(
         error instanceof Error
@@ -146,17 +146,9 @@ function AdminPage({
       String(draft.id || "").trim() ||
       buildLocationId({ name, country, region });
 
-    const idToken = auth?.session?.id_token;
-    if (!idToken) {
-      showPopup("Please sign in again to save this location.", "failure", {
-        duration: 2800,
-      });
-      return;
-    }
-
     try {
       await saveRecommendation({
-        idToken,
+        idToken: auth?.session?.id_token,
         location: {
           id: resolvedId,
           name,
@@ -214,7 +206,7 @@ function AdminPage({
       onBack={handleBackToMap}
       hero={hero}
     >
-      {!isAuthenticated ? (
+      {!canUseAdminTools ? (
         <section className="profile-card glass-panel glass-panel-elevated">
           <h2 className="profile-section-title">Sign in required</h2>
           <p className="profile-section-copy">
@@ -228,7 +220,7 @@ function AdminPage({
             Sign In
           </button>
         </section>
-      ) : !isAdmin ? (
+      ) : !hasAdminAccess ? (
         <section className="profile-card glass-panel glass-panel-elevated">
           <h2 className="profile-section-title">Access restricted</h2>
           <p className="profile-section-copy">

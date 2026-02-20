@@ -1,4 +1,4 @@
-import { buildDarkSpotsUrl } from "./awsEndpoints";
+import { buildDarkSpotsUrl } from "./apiEndpoints";
 
 /**
  * Fetches stargazing locations (darkest spots) within a search radius.

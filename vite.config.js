@@ -13,6 +13,7 @@ const MIN_SQM = 16;
 const MAX_SQM = 22;
 const LIGHT_TILE_CACHE_LIMIT = 256;
 const LIGHT_TILE_CACHE_TTL_MS = 1000 * 60 * 10;
+const MAX_REQUEST_BODY_BYTES = 1024 * 1024;
 
 const LIGHT_GRADIENT = [
   // Low brightness -> green, high brightness -> red.
@@ -38,6 +39,23 @@ function clamp(value, min, max) {
   return value;
 }
 
+function toRadians(value) {
+  return (Number(value) * Math.PI) / 180;
+}
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const earthRadiusKm = 6371;
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return earthRadiusKm * c;
+}
+
 function bortleFromSqm(sqm) {
   if (sqm >= 21.99) return "class 1";
   if (sqm >= 21.89) return "class 2";
@@ -49,13 +67,121 @@ function bortleFromSqm(sqm) {
   return "class 8-9";
 }
 
+function parseBortleLevel(label) {
+  const match = String(label).match(/class\s*(\d+)/i);
+  if (match) return Number(match[1]);
+  return 9;
+}
+
+function sendJson(response, statusCode, payload, cacheControl = null) {
+  response.statusCode = statusCode;
+  response.setHeader("Content-Type", "application/json");
+  if (cacheControl) {
+    response.setHeader("Cache-Control", cacheControl);
+  }
+  response.end(JSON.stringify(payload));
+}
+
+function ensureStringArray(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((entry) => String(entry || "").trim())
+    .filter(Boolean);
+}
+
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+async function readJsonBody(request) {
+  return await new Promise((resolve, reject) => {
+    let raw = "";
+    request.on("data", (chunk) => {
+      raw += chunk;
+      if (raw.length > MAX_REQUEST_BODY_BYTES) {
+        reject(new Error("Request body too large"));
+      }
+    });
+    request.on("end", () => {
+      if (!raw.trim()) {
+        resolve({});
+        return;
+      }
+      try {
+        resolve(JSON.parse(raw));
+      } catch {
+        reject(new Error("Invalid JSON body"));
+      }
+    });
+    request.on("error", reject);
+  });
+}
+
+function normalizeRecommendationRecord(payload) {
+  const lat = Number(
+    payload?.coordinates?.lat ??
+      payload?.coordinates?.latitude ??
+      payload?.lat ??
+      payload?.latitude
+  );
+  const lon = Number(
+    payload?.coordinates?.lon ??
+      payload?.coordinates?.lng ??
+      payload?.coordinates?.longitude ??
+      payload?.lon ??
+      payload?.lng ??
+      payload?.longitude
+  );
+  const name = String(payload?.name || "").trim();
+  if (!name) {
+    throw new Error("Recommendation name is required");
+  }
+  if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+    throw new Error("Latitude must be between -90 and 90");
+  }
+  if (!Number.isFinite(lon) || lon < -180 || lon > 180) {
+    throw new Error("Longitude must be between -180 and 180");
+  }
+
+  const idSeed = `${name}_${lat.toFixed(4)}_${lon.toFixed(4)}`;
+  const id = String(payload?.id || payload?.spotId || "").trim() || slugify(idSeed);
+
+  return {
+    id,
+    name,
+    country: String(payload?.country || "").trim(),
+    region: String(payload?.region || "").trim(),
+    type: String(payload?.type || "").trim(),
+    description: String(payload?.description || "").trim(),
+    best_time: String(payload?.best_time ?? payload?.bestTime ?? "").trim(),
+    coordinates: {
+      lat: roundTo(lat, 6),
+      lon: roundTo(lon, 6),
+    },
+    photo_urls: ensureStringArray(payload?.photo_urls ?? payload?.photoUrls),
+    source_urls: ensureStringArray(payload?.source_urls ?? payload?.sourceUrls),
+  };
+}
+
 function skyQualityApiPlugin() {
   const rootDir = path.dirname(fileURLToPath(import.meta.url));
   const candidatePaths = [
     path.resolve(rootDir, "data", "World_Atlas_2015.tif"),
     path.resolve(rootDir, "public", "World_Atlas_2015.tif"),
+    path.resolve(rootDir, "scripts", "aws", "World_Atlas_2015.tif"),
   ];
   const tifPath = candidatePaths.find((candidate) => fs.existsSync(candidate));
+
+  const recommendationsCandidatePaths = [
+    path.resolve(rootDir, "data", "stargazing_locations.json"),
+    path.resolve(rootDir, "public", "stargazing_locations.json"),
+  ];
+  const recommendationsPath =
+    recommendationsCandidatePaths.find((candidate) => fs.existsSync(candidate)) ||
+    recommendationsCandidatePaths[0];
 
   let imagePromise = null;
   const tileCache = new Map();
@@ -63,7 +189,7 @@ function skyQualityApiPlugin() {
   async function getImage() {
     if (!tifPath) {
       throw new Error(
-        "World_Atlas_2015.tif not found (expected in data/ or public/)"
+        "World_Atlas_2015.tif not found (expected in data/, public/, or scripts/aws/)"
       );
     }
     if (!imagePromise) {
@@ -79,15 +205,50 @@ function skyQualityApiPlugin() {
     return imagePromise;
   }
 
+  function readRecommendations() {
+    if (!fs.existsSync(recommendationsPath)) {
+      return [];
+    }
+    try {
+      const raw = fs.readFileSync(recommendationsPath, "utf8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+      if (Array.isArray(parsed?.locations)) return parsed.locations;
+      return [];
+    } catch {
+      return [];
+    }
+  }
+
+  function writeRecommendations(locations) {
+    let existing = null;
+    if (fs.existsSync(recommendationsPath)) {
+      try {
+        existing = JSON.parse(fs.readFileSync(recommendationsPath, "utf8"));
+      } catch {
+        existing = null;
+      }
+    }
+
+    const payload = Array.isArray(existing)
+      ? locations
+      : {
+          ...(existing && typeof existing === "object" ? existing : {}),
+          generated_at_utc: new Date().toISOString(),
+          locations,
+        };
+
+    fs.mkdirSync(path.dirname(recommendationsPath), { recursive: true });
+    fs.writeFileSync(recommendationsPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  }
+
   async function handleSkyQualityRequest(request, response) {
     const url = new URL(request.url || "", "http://localhost");
     const lat = Number(url.searchParams.get("lat"));
     const lon = Number(url.searchParams.get("lon"));
 
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-      response.statusCode = 400;
-      response.setHeader("Content-Type", "application/json");
-      response.end(JSON.stringify({ error: "Invalid lat/lon query params" }));
+      sendJson(response, 400, { error: "Invalid lat/lon query params" });
       return;
     }
 
@@ -95,9 +256,7 @@ function skyQualityApiPlugin() {
     const [minLon, minLat, maxLon, maxLat] = image.getBoundingBox();
 
     if (lon < minLon || lon > maxLon || lat < minLat || lat > maxLat) {
-      response.statusCode = 400;
-      response.setHeader("Content-Type", "application/json");
-      response.end(JSON.stringify({ error: "Coordinates out of dataset bounds" }));
+      sendJson(response, 400, { error: "Coordinates out of dataset bounds" });
       return;
     }
 
@@ -122,9 +281,7 @@ function skyQualityApiPlugin() {
     const artificial = Number(sample);
 
     if (!Number.isFinite(artificial) || artificial === NODATA_F32) {
-      response.statusCode = 404;
-      response.setHeader("Content-Type", "application/json");
-      response.end(JSON.stringify({ error: "No data at this coordinate" }));
+      sendJson(response, 404, { error: "No data at this coordinate" });
       return;
     }
 
@@ -132,18 +289,18 @@ function skyQualityApiPlugin() {
     const sqm = Math.log10(total / SQM_DENOM) / -0.4;
     const ratio = artificial / NATURAL_MCD_M2;
 
-    response.statusCode = 200;
-    response.setHeader("Content-Type", "application/json");
-    response.setHeader("Cache-Control", "public, max-age=86400");
-    response.end(
-      JSON.stringify({
+    sendJson(
+      response,
+      200,
+      {
         Coordinates: [roundTo(lat, 5), roundTo(lon, 5)],
         SQM: roundTo(sqm, 2),
         Brightness_mcd_m2: roundTo(total, 1),
         Artif_bright_uccd_m2: Math.round(artificial * 1000),
         Ratio: roundTo(ratio, 1),
         Bortle: bortleFromSqm(sqm),
-      })
+      },
+      "public, max-age=86400"
     );
   }
 
@@ -230,9 +387,7 @@ function skyQualityApiPlugin() {
 
   async function handleLightTileRequest(request, response, match) {
     if (request.method !== "GET") {
-      response.statusCode = 405;
-      response.setHeader("Content-Type", "application/json");
-      response.end(JSON.stringify({ error: "Method not allowed" }));
+      sendJson(response, 405, { error: "Method not allowed" });
       return;
     }
 
@@ -251,9 +406,7 @@ function skyQualityApiPlugin() {
       x >= 2 ** z ||
       y >= 2 ** z
     ) {
-      response.statusCode = 400;
-      response.setHeader("Content-Type", "application/json");
-      response.end(JSON.stringify({ error: "Invalid tile coordinates" }));
+      sendJson(response, 400, { error: "Invalid tile coordinates" });
       return;
     }
 
@@ -268,8 +421,7 @@ function skyQualityApiPlugin() {
     }
 
     const image = await getImage();
-    const [dataMinLon, dataMinLat, dataMaxLon, dataMaxLat] =
-      image.getBoundingBox();
+    const [dataMinLon, dataMinLat, dataMaxLon, dataMaxLat] = image.getBoundingBox();
     const datasetBounds = {
       minLon: dataMinLon,
       maxLon: dataMaxLon,
@@ -321,16 +473,9 @@ function skyQualityApiPlugin() {
         resampleMethod: "bilinear",
       });
     } catch (error) {
-      response.statusCode = 500;
-      response.setHeader("Content-Type", "application/json");
-      response.end(
-        JSON.stringify({
-          error:
-            error instanceof Error
-              ? error.message
-              : "Failed to render light tile",
-        })
-      );
+      sendJson(response, 500, {
+        error: error instanceof Error ? error.message : "Failed to render light tile",
+      });
       return;
     }
 
@@ -367,6 +512,282 @@ function skyQualityApiPlugin() {
     response.end(buffer);
   }
 
+  async function handleDarkSpotsRequest(request, response) {
+    if (request.method !== "GET") {
+      sendJson(response, 405, { error: "Method not allowed" });
+      return;
+    }
+
+    const url = new URL(request.url || "", "http://localhost");
+    const lat = Number(url.searchParams.get("lat"));
+    const lon = Number(url.searchParams.get("lon"));
+    const searchDistance = clamp(
+      Number(url.searchParams.get("searchDistance")) || 25,
+      1,
+      250
+    );
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      sendJson(response, 400, { error: "Invalid lat/lon query params" });
+      return;
+    }
+
+    const image = await getImage();
+    const [minLon, minLat, maxLon, maxLat] = image.getBoundingBox();
+    if (lon < minLon || lon > maxLon || lat < minLat || lat > maxLat) {
+      sendJson(response, 400, { error: "Coordinates out of dataset bounds" });
+      return;
+    }
+
+    const width = image.getWidth();
+    const height = image.getHeight();
+    const xRes = (maxLon - minLon) / width;
+    const yRes = (maxLat - minLat) / height;
+
+    const latDelta = searchDistance / 110.574;
+    const lonDelta =
+      searchDistance / (111.32 * Math.max(Math.abs(Math.cos(toRadians(lat))), 0.2));
+
+    const clippedMinLon = clamp(lon - lonDelta, minLon, maxLon);
+    const clippedMaxLon = clamp(lon + lonDelta, minLon, maxLon);
+    const clippedMinLat = clamp(lat - latDelta, minLat, maxLat);
+    const clippedMaxLat = clamp(lat + latDelta, minLat, maxLat);
+
+    let colStart = Math.floor((clippedMinLon - minLon) / xRes);
+    let colEnd = Math.ceil((clippedMaxLon - minLon) / xRes);
+    let rowStart = Math.floor((maxLat - clippedMaxLat) / yRes);
+    let rowEnd = Math.ceil((maxLat - clippedMinLat) / yRes);
+
+    colStart = clamp(colStart, 0, width - 1);
+    colEnd = clamp(colEnd, colStart + 1, width);
+    rowStart = clamp(rowStart, 0, height - 1);
+    rowEnd = clamp(rowEnd, rowStart + 1, height);
+
+    const windowWidth = colEnd - colStart;
+    const windowHeight = rowEnd - rowStart;
+    if (windowWidth <= 0 || windowHeight <= 0) {
+      sendJson(response, 200, {
+        origin: { lat: roundTo(lat, 5), lon: roundTo(lon, 5) },
+        radius_km: searchDistance,
+        spots: [],
+      });
+      return;
+    }
+
+    let raster;
+    try {
+      raster = await image.readRasters({
+        window: [colStart, rowStart, colEnd, rowEnd],
+        samples: [0],
+        interleave: true,
+      });
+    } catch (error) {
+      sendJson(response, 500, {
+        error: error instanceof Error ? error.message : "Failed to scan dark spots",
+      });
+      return;
+    }
+
+    const data = Array.isArray(raster) ? raster[0] : raster;
+    if (!data || data.length === 0) {
+      sendJson(response, 200, {
+        origin: { lat: roundTo(lat, 5), lon: roundTo(lon, 5) },
+        radius_km: searchDistance,
+        spots: [],
+      });
+      return;
+    }
+
+    const maxSamples = 9000;
+    const stride = Math.max(
+      1,
+      Math.floor(Math.sqrt((windowWidth * windowHeight) / maxSamples))
+    );
+    const candidates = [];
+    for (let row = 0; row < windowHeight; row += stride) {
+      const worldRow = rowStart + row;
+      const sampleLat = maxLat - (worldRow + 0.5) * yRes;
+      for (let col = 0; col < windowWidth; col += stride) {
+        const worldCol = colStart + col;
+        const sampleLon = minLon + (worldCol + 0.5) * xRes;
+        const distanceKm = haversineKm(lat, lon, sampleLat, sampleLon);
+        if (distanceKm > searchDistance) continue;
+
+        const idx = row * windowWidth + col;
+        const artificial = Number(data[idx]);
+        if (!Number.isFinite(artificial) || artificial === NODATA_F32 || artificial < 0) {
+          continue;
+        }
+
+        const total = artificial + NATURAL_MCD_M2;
+        const sqm = Math.log10(total / SQM_DENOM) / -0.4;
+        const bortle = bortleFromSqm(sqm);
+        candidates.push({
+          lat: roundTo(sampleLat, 5),
+          lon: roundTo(sampleLon, 5),
+          level: parseBortleLevel(bortle),
+          light_value: roundTo(artificial, 3),
+          sqm: roundTo(sqm, 2),
+          distance_km: roundTo(distanceKm, 1),
+        });
+      }
+    }
+
+    candidates.sort(
+      (a, b) => a.light_value - b.light_value || a.distance_km - b.distance_km
+    );
+
+    const minSeparationKm = Math.max(3, searchDistance / 8);
+    const selectedSpots = [];
+    for (const candidate of candidates) {
+      const isFarEnough = selectedSpots.every(
+        (existing) =>
+          haversineKm(existing.lat, existing.lon, candidate.lat, candidate.lon) >=
+          minSeparationKm
+      );
+      if (!isFarEnough) continue;
+      selectedSpots.push(candidate);
+      if (selectedSpots.length >= 12) break;
+    }
+
+    sendJson(
+      response,
+      200,
+      {
+        origin: { lat: roundTo(lat, 5), lon: roundTo(lon, 5) },
+        radius_km: searchDistance,
+        spots: selectedSpots,
+      },
+      "public, max-age=600"
+    );
+  }
+
+  async function handleVisiblePlanetsRequest(request, response) {
+    if (request.method !== "GET") {
+      sendJson(response, 405, { error: "Method not allowed" });
+      return;
+    }
+
+    const url = new URL(request.url || "", "http://localhost");
+    const lat = Number(url.searchParams.get("lat"));
+    const lon = Number(url.searchParams.get("lon"));
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+      sendJson(response, 400, { error: "Invalid lat/lon query params" });
+      return;
+    }
+
+    const upstreamUrl = new URL("https://api.visibleplanets.dev/v3");
+    upstreamUrl.searchParams.set("latitude", String(lat));
+    upstreamUrl.searchParams.set("longitude", String(lon));
+
+    let upstreamResponse;
+    try {
+      upstreamResponse = await fetch(upstreamUrl.toString(), {
+        headers: { Accept: "application/json" },
+      });
+    } catch (error) {
+      sendJson(response, 502, {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Visible planets service is unavailable",
+      });
+      return;
+    }
+
+    const text = await upstreamResponse.text();
+    let payload = null;
+    try {
+      payload = text ? JSON.parse(text) : {};
+    } catch {
+      payload = { raw: text };
+    }
+
+    if (!upstreamResponse.ok) {
+      sendJson(response, upstreamResponse.status, {
+        error: "Visible planets lookup failed",
+        details: payload,
+      });
+      return;
+    }
+
+    sendJson(response, 200, payload, "public, max-age=600");
+  }
+
+  async function handleRecommendationsRequest(request, response, url) {
+    const entryMatch = url.pathname.match(/^\/api\/recommendations\/([^/]+)$/);
+    if (entryMatch) {
+      if (request.method !== "DELETE") {
+        sendJson(response, 405, { error: "Method not allowed" });
+        return;
+      }
+      const spotId = decodeURIComponent(entryMatch[1] || "").trim();
+      if (!spotId) {
+        sendJson(response, 400, { error: "Missing recommendation id" });
+        return;
+      }
+      const current = readRecommendations();
+      const next = current.filter(
+        (item) => String(item?.id || "").trim() !== spotId
+      );
+      if (next.length === current.length) {
+        sendJson(response, 404, { error: "Recommendation not found" });
+        return;
+      }
+      writeRecommendations(next);
+      sendJson(response, 200, { deleted: true, id: spotId });
+      return;
+    }
+
+    if (url.pathname !== "/api/recommendations") {
+      return;
+    }
+
+    if (request.method === "GET") {
+      sendJson(response, 200, { items: readRecommendations() }, "public, max-age=60");
+      return;
+    }
+
+    if (request.method === "POST") {
+      let payload = {};
+      try {
+        payload = await readJsonBody(request);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Invalid recommendation payload";
+        const statusCode =
+          message === "Request body too large" ? 413 : 400;
+        sendJson(response, statusCode, { error: message });
+        return;
+      }
+
+      let record;
+      try {
+        record = normalizeRecommendationRecord(payload);
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Invalid recommendation payload";
+        sendJson(response, 400, { error: message });
+        return;
+      }
+
+      const items = readRecommendations();
+      const index = items.findIndex(
+        (item) => String(item?.id || "").trim() === record.id
+      );
+      if (index >= 0) {
+        items[index] = record;
+      } else {
+        items.push(record);
+      }
+      writeRecommendations(items);
+      sendJson(response, index >= 0 ? 200 : 201, record);
+      return;
+    }
+
+    sendJson(response, 405, { error: "Method not allowed" });
+  }
+
   function mount(server) {
     server.middlewares.use(async (request, response, next) => {
       try {
@@ -384,21 +805,35 @@ function skyQualityApiPlugin() {
           return;
         }
 
+        if (url.pathname === "/api/darkspots") {
+          await handleDarkSpotsRequest(request, response);
+          return;
+        }
+
+        if (url.pathname === "/api/visible-planets") {
+          await handleVisiblePlanetsRequest(request, response);
+          return;
+        }
+
+        if (
+          url.pathname === "/api/recommendations" ||
+          /^\/api\/recommendations\/[^/]+$/.test(url.pathname)
+        ) {
+          await handleRecommendationsRequest(request, response, url);
+          return;
+        }
+
         return next();
       } catch (error) {
-        response.statusCode = 500;
-        response.setHeader("Content-Type", "application/json");
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Light data request failed";
-        response.end(JSON.stringify({ error: message }));
+        sendJson(response, 500, {
+          error: error instanceof Error ? error.message : "Local API request failed",
+        });
       }
     });
   }
 
   return {
-    name: "skyquality-api",
+    name: "local-sky-services",
     configureServer(server) {
       mount(server);
     },
@@ -411,14 +846,4 @@ function skyQualityApiPlugin() {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), skyQualityApiPlugin()],
-  server: {
-    proxy: {
-      "/api/darkspots": {
-        target:
-          "https://u33sdsncu9.execute-api.us-east-1.amazonaws.com/darkspots",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/darkspots/, ""),
-      },
-    },
-  },
 });

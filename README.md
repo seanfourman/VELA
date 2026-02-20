@@ -28,6 +28,7 @@ Required:
 - `VITE_MAPTILER_KEY` (MapTiler tiles)
 
 Optional (Cognito Hosted UI):
+- `VITE_LOCAL_ONLY` (`true` by default for local-first mode)
 - `VITE_COGNITO_DOMAIN`
 - `VITE_COGNITO_CLIENT_ID`
 - `VITE_COGNITO_REDIRECT_URI`
@@ -39,10 +40,12 @@ Optional (Cognito Hosted UI):
 - Light map and sky quality endpoints are served by the Vite dev/preview server
   (see `vite.config.js`). For static hosting, move those endpoints to a server.
 - The light pollution overlay uses `data/World_Atlas_2015.tif` (or a copy in
-  `public/`). The repo includes this file, but it is large.
-- Dark spot search is proxied via `/api/darkspots` in `vite.config.js`.
-- Visible planets are fetched from `https://api.visibleplanets.dev/v3`.
-- Curated locations live in `data/stargazing_locations.json`.
+  `public/` or `scripts/aws/`). The repo includes this file, but it is large.
+- Dark spot search is served locally at `/api/darkspots` in `vite.config.js`.
+- Visible planets are requested through the local endpoint
+  `/api/visible-planets`.
+- Curated locations are read/written via `/api/recommendations`, backed by
+  `data/stargazing_locations.json`.
 - User preferences and favorites are stored in localStorage.
 
 ## Scripts
