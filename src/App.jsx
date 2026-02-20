@@ -2,7 +2,7 @@ import { Suspense, lazy } from "react";
 import Navbar from "./components/Navbar";
 import MapView from "./pages/Map/MapView";
 import PopupPortal from "./components/PopupPortal";
-import useAppState from "./features/app/useAppState";
+import useAppState from "@/features/app/useAppState";
 import "./App.css";
 
 const AuthPage = lazy(() => import("./pages/Auth/AuthPage"));

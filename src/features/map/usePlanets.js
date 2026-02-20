@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { fetchVisiblePlanets } from "../utils/planetUtils";
+import { fetchVisiblePlanets } from "../../utils/planetUtils";
 
 const getPlanetList = (data) =>
   Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];

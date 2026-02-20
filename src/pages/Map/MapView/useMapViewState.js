@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import usePlanets from "../../../hooks/usePlanets";
+import usePlanets from "@/features/map/usePlanets";
 import { isProbablyHardwareAccelerated } from "../../../utils/hardwareUtils";
 import { preloadAllPlanetTextures } from "../../../utils/planetUtils";
 import {
@@ -11,7 +11,7 @@ import {
 } from "./mapViewDerived";
 import useMapDirections from "./useMapDirections";
 import useMapFavoriteTransition from "./useMapFavoriteTransition";
-import useMapFavorites from "../../../features/map/useMapFavorites";
+import useMapFavorites from "@/features/map/useMapFavorites";
 import useMapInteractions from "./useMapInteractions";
 import useMapStargaze from "./useMapStargaze";
 import useMapTargetToggleHandlers from "./useMapTargetToggleHandlers";
