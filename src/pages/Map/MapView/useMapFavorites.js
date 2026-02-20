@@ -8,7 +8,6 @@ import showPopup from "../../../utils/popup";
 import { FAVORITE_EXIT_MS } from "./mapConstants";
 
 const useMapFavorites = ({
-  authToken,
   getSpotKey,
   placedMarker,
   setPlacedMarker,
@@ -32,7 +31,7 @@ const useMapFavorites = ({
 
     (async () => {
       try {
-        const items = await fetchFavoriteSpots({ idToken: authToken });
+        const items = await fetchFavoriteSpots();
         if (cancelled) return;
 
         const unique = new Map();
@@ -65,7 +64,7 @@ const useMapFavorites = ({
     return () => {
       cancelled = true;
     };
-  }, [authToken, getSpotKey]);
+  }, [getSpotKey]);
 
   useEffect(() => {
     const removalTimeouts = favoriteRemovalTimeoutsRef.current;
@@ -92,7 +91,7 @@ const useMapFavorites = ({
   const persistFavoriteSpot = useCallback(
     async (lat, lng) => {
       try {
-        await saveFavoriteSpot({ lat, lon: lng, idToken: authToken });
+        await saveFavoriteSpot({ lat, lon: lng });
       } catch (error) {
         showPopup(
           error instanceof Error
@@ -102,13 +101,13 @@ const useMapFavorites = ({
         );
       }
     },
-    [authToken],
+    [],
   );
 
   const persistRemoveFavoriteSpot = useCallback(
     async ({ lat, lng, spotId }) => {
       try {
-        await deleteFavoriteSpot({ lat, lon: lng, spotId, idToken: authToken });
+        await deleteFavoriteSpot({ lat, lon: lng, spotId });
       } catch (error) {
         showPopup(
           error instanceof Error
@@ -118,7 +117,7 @@ const useMapFavorites = ({
         );
       }
     },
-    [authToken],
+    [],
   );
 
   const handleToggleDarkSpotFavorite = useCallback(

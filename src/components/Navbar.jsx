@@ -6,7 +6,6 @@ import ProfileMenu from "./ProfileMenu";
 function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
   const isLight = mapType === "light";
   const isAuthenticated = Boolean(auth?.isAuthenticated);
-  const isLoading = Boolean(auth?.isLoading);
   const currentPath =
     typeof currentRoute === "string"
       ? currentRoute
@@ -16,7 +15,6 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
   const logoSrc = !isHome ? velaLogo : isLight ? velaLogoBlack : velaLogo;
 
   function handleAuthClick() {
-    if (isLoading) return;
     onNavigate?.("/auth");
   }
 
@@ -67,7 +65,6 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
             <button
               className="auth-button"
               onClick={handleAuthClick}
-              disabled={isLoading}
               type="button"
             >
               Log In

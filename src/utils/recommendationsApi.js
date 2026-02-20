@@ -3,8 +3,6 @@ import { buildRecommendationsUrl } from "./apiEndpoints";
 const clean = (value) => (typeof value === "string" ? value.trim() : "");
 const cleanList = (value) =>
   Array.isArray(value) ? value.map(clean).filter(Boolean) : [];
-const withAuth = (idToken, headers = {}) =>
-  idToken ? { ...headers, Authorization: `Bearer ${idToken}` } : headers;
 
 const getError = async (response) => {
   const message = (await response.text().catch(() => "")).trim();
@@ -43,13 +41,13 @@ const buildPayload = (location) => {
   return payload.name ? payload : null;
 };
 
-export async function saveRecommendation({ location, idToken }) {
+export async function saveRecommendation({ location }) {
   const payload = buildPayload(location);
   if (!payload) return;
 
   const response = await fetch(buildRecommendationsUrl(), {
     method: "POST",
-    headers: withAuth(idToken, { "Content-Type": "application/json" }),
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
@@ -59,9 +57,9 @@ export async function saveRecommendation({ location, idToken }) {
   return data ?? payload;
 }
 
-export async function fetchRecommendations({ idToken } = {}) {
+export async function fetchRecommendations() {
   const response = await fetch(buildRecommendationsUrl(), {
-    headers: withAuth(idToken, { Accept: "application/json" }),
+    headers: { Accept: "application/json" },
   });
   if (!response.ok) throw new Error(await getError(response));
 
@@ -69,14 +67,14 @@ export async function fetchRecommendations({ idToken } = {}) {
   return parseLocations(data);
 }
 
-export async function deleteRecommendation({ spotId, idToken }) {
+export async function deleteRecommendation({ spotId }) {
   if (!spotId) return;
 
   const response = await fetch(
     `${buildRecommendationsUrl()}/${encodeURIComponent(spotId)}`,
     {
       method: "DELETE",
-      headers: withAuth(idToken, { Accept: "application/json" }),
+      headers: { Accept: "application/json" },
     }
   );
 

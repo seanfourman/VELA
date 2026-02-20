@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import showPopup from "../utils/popup";
 import {
   loginLocalUser,
   mapLocalUserToAuthUser,
@@ -28,10 +27,6 @@ export function useAuth() {
 
   const isAuthenticated = Boolean(activeLocalUser);
   const user = mapLocalUserToAuthUser(activeLocalUser);
-
-  const signIn = useCallback(() => {
-    showPopup("Open Log In to continue.", "info", { duration: 2800 });
-  }, []);
 
   const signOut = useCallback(() => {
     persistLocalSession(null);
@@ -75,8 +70,6 @@ export function useAuth() {
     session: localSession,
     user,
     isAuthenticated,
-    isLoading: false,
-    signIn,
     signOut,
     login,
     register,

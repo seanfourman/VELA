@@ -275,7 +275,6 @@ function App() {
         mapType={mapType}
         setMapType={setMapType}
         isAuthenticated={mapIsAuthenticated}
-        authToken={null}
         stargazeLocations={stargazeLocations}
         directionsProvider={settings.directionsProvider}
         showRecommendedSpots={settings.showRecommendedSpots}
