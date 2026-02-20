@@ -3,12 +3,12 @@ import { getPasswordValidationError } from "../utils/passwordRules";
 const LOCAL_AUTH_USERS_KEY = "vela:local:auth:users";
 const LOCAL_AUTH_SESSION_KEY = "vela:local:auth:session";
 
-const normalizeLocalEmail = (value) =>
+const normalizeEmail = (value) =>
   String(value || "")
     .trim()
     .toLowerCase();
 
-const createLocalUserId = () => {
+const createUserId = () => {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
     return crypto.randomUUID();
   }
@@ -78,11 +78,11 @@ const writeJsonToStorage = (key, value) => {
   }
 };
 
-const normalizeLocalUser = (value) => {
+const normalizeUser = (value) => {
   if (!value || typeof value !== "object") return null;
   const id =
     typeof value.id === "string" && value.id.trim() ? value.id.trim() : null;
-  const email = normalizeLocalEmail(value.email);
+  const email = normalizeEmail(value.email);
   const passwordHash =
     typeof value.passwordHash === "string" ? value.passwordHash : "";
   const passwordSalt =
@@ -110,8 +110,8 @@ const normalizeLocalUser = (value) => {
   };
 };
 
-const serializeLocalUser = (user) => {
-  const normalized = normalizeLocalUser(user);
+const serializeUser = (user) => {
+  const normalized = normalizeUser(user);
   if (!normalized) return null;
   return {
     id: normalized.id,
@@ -126,20 +126,20 @@ const serializeLocalUser = (user) => {
   };
 };
 
-const readLocalUsers = () => {
+const readUsers = () => {
   const parsed = readJsonFromStorage(LOCAL_AUTH_USERS_KEY, []);
   if (!Array.isArray(parsed)) return [];
-  return parsed.map(normalizeLocalUser).filter(Boolean);
+  return parsed.map(normalizeUser).filter(Boolean);
 };
 
-const persistLocalUsers = (users) => {
+const persistUsers = (users) => {
   const payload = Array.isArray(users)
-    ? users.map(serializeLocalUser).filter(Boolean)
+    ? users.map(serializeUser).filter(Boolean)
     : [];
   writeJsonToStorage(LOCAL_AUTH_USERS_KEY, payload);
 };
 
-const normalizeLocalSession = (value) => {
+const normalizeSession = (value) => {
   if (!value || typeof value !== "object") return null;
   const userId =
     typeof value.userId === "string" && value.userId.trim()
@@ -148,55 +148,55 @@ const normalizeLocalSession = (value) => {
   return userId ? { userId } : null;
 };
 
-const readLocalSession = () =>
-  normalizeLocalSession(readJsonFromStorage(LOCAL_AUTH_SESSION_KEY, null));
+const readSession = () =>
+  normalizeSession(readJsonFromStorage(LOCAL_AUTH_SESSION_KEY, null));
 
-export const readLocalAuthState = () => {
-  const users = readLocalUsers();
-  const session = readLocalSession();
+export const readAuthState = () => {
+  const users = readUsers();
+  const session = readSession();
   if (session && !users.some((entry) => entry.id === session.userId)) {
-    persistLocalSession(null);
+    persistAuthSession(null);
     return { users, session: null };
   }
   return { users, session };
 };
 
-export const persistLocalSession = (session) => {
+export const persistAuthSession = (session) => {
   if (!session) {
     writeJsonToStorage(LOCAL_AUTH_SESSION_KEY, null);
     return;
   }
-  writeJsonToStorage(LOCAL_AUTH_SESSION_KEY, normalizeLocalSession(session));
+  writeJsonToStorage(LOCAL_AUTH_SESSION_KEY, normalizeSession(session));
 };
 
-export const mapLocalUserToAuthUser = (localUser) => {
-  if (!localUser) return null;
-  const fallbackName = localUser.email.split("@")[0] || "Explorer";
+export const mapUserToAuthUser = (user) => {
+  if (!user) return null;
+  const fallbackName = user.email.split("@")[0] || "Explorer";
   return {
-    sub: localUser.id,
-    email: localUser.email,
-    name: localUser.name || fallbackName,
-    preferred_username: localUser.name || fallbackName,
-    is_admin: localUser.is_admin !== false,
-    roles: localUser.roles || ["admin"],
-    groups: localUser.groups || ["admin"],
+    sub: user.id,
+    email: user.email,
+    name: user.name || fallbackName,
+    preferred_username: user.name || fallbackName,
+    is_admin: user.is_admin !== false,
+    roles: user.roles || ["admin"],
+    groups: user.groups || ["admin"],
     auth_source: "local",
   };
 };
 
-export async function loginLocalUser({
-  localUsers,
+export async function loginUser({
+  users,
   email,
   password,
-  updateLocalUsers,
+  updateUsers,
 }) {
-  const normalizedEmail = normalizeLocalEmail(email);
+  const normalizedEmail = normalizeEmail(email);
   const normalizedPassword = typeof password === "string" ? password : "";
   if (!normalizedEmail || !normalizedPassword) {
     throw new Error("Email and password are required.");
   }
 
-  const existingUser = localUsers.find((entry) => entry.email === normalizedEmail);
+  const existingUser = users.find((entry) => entry.email === normalizedEmail);
   if (!existingUser) {
     throw new Error("Invalid email or password.");
   }
@@ -214,7 +214,7 @@ export async function loginLocalUser({
     if (passwordMatches) {
       const migratedSalt = createPasswordSalt();
       const migratedHash = await hashPassword(normalizedPassword, migratedSalt);
-      const migratedUsers = localUsers.map((entry) =>
+      const migratedUsers = users.map((entry) =>
         entry.id === existingUser.id
           ? {
               ...entry,
@@ -224,8 +224,8 @@ export async function loginLocalUser({
             }
           : entry,
       );
-      persistLocalUsers(migratedUsers);
-      updateLocalUsers(migratedUsers);
+      persistUsers(migratedUsers);
+      updateUsers(migratedUsers);
       resolvedUser =
         migratedUsers.find((entry) => entry.id === existingUser.id) ||
         existingUser;
@@ -239,15 +239,15 @@ export async function loginLocalUser({
   return resolvedUser;
 }
 
-export async function registerLocalUser({
-  localUsers,
+export async function registerUser({
+  users,
   name,
   email,
   password,
-  updateLocalUsers,
+  updateUsers,
 }) {
   const normalizedName = typeof name === "string" ? name.trim() : "";
-  const normalizedEmail = normalizeLocalEmail(email);
+  const normalizedEmail = normalizeEmail(email);
   const normalizedPassword = typeof password === "string" ? password : "";
 
   if (!normalizedEmail || !normalizedPassword) {
@@ -257,14 +257,14 @@ export async function registerLocalUser({
   const passwordError = getPasswordValidationError(normalizedPassword);
   if (passwordError) throw new Error(passwordError);
 
-  if (localUsers.some((entry) => entry.email === normalizedEmail)) {
+  if (users.some((entry) => entry.email === normalizedEmail)) {
     throw new Error("An account with that email already exists.");
   }
 
   const passwordSalt = createPasswordSalt();
   const passwordHash = await hashPassword(normalizedPassword, passwordSalt);
-  const nextUser = normalizeLocalUser({
-    id: createLocalUserId(),
+  const nextUser = normalizeUser({
+    id: createUserId(),
     email: normalizedEmail,
     passwordHash,
     passwordSalt,
@@ -279,8 +279,8 @@ export async function registerLocalUser({
     throw new Error("Unable to create local account.");
   }
 
-  const nextUsers = [...localUsers, nextUser];
-  persistLocalUsers(nextUsers);
-  updateLocalUsers(nextUsers);
+  const nextUsers = [...users, nextUser];
+  persistUsers(nextUsers);
+  updateUsers(nextUsers);
   return nextUser;
 }

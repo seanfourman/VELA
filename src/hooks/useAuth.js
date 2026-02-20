@@ -1,73 +1,73 @@
 import { useCallback, useMemo, useState } from "react";
 import {
-  loginLocalUser,
-  mapLocalUserToAuthUser,
-  persistLocalSession,
-  readLocalAuthState,
-  registerLocalUser,
+  loginUser,
+  mapUserToAuthUser,
+  persistAuthSession,
+  readAuthState,
+  registerUser,
 } from "./auth";
 
 export function useAuth() {
-  const [localState, setLocalState] = useState(() => readLocalAuthState());
-  const localUsers = localState.users;
-  const localSession = localState.session;
+  const [authState, setAuthState] = useState(() => readAuthState());
+  const users = authState.users;
+  const session = authState.session;
 
-  const updateLocalUsers = useCallback((users) => {
-    setLocalState((prev) => ({ ...prev, users }));
+  const updateUsers = useCallback((users) => {
+    setAuthState((prev) => ({ ...prev, users }));
   }, []);
 
-  const updateLocalSession = useCallback((nextSession) => {
-    setLocalState((prev) => ({ ...prev, session: nextSession }));
+  const updateSession = useCallback((nextSession) => {
+    setAuthState((prev) => ({ ...prev, session: nextSession }));
   }, []);
 
-  const activeLocalUser = useMemo(() => {
-    if (!localSession?.userId) return null;
-    return localUsers.find((entry) => entry.id === localSession.userId) || null;
-  }, [localSession, localUsers]);
+  const activeUser = useMemo(() => {
+    if (!session?.userId) return null;
+    return users.find((entry) => entry.id === session.userId) || null;
+  }, [session, users]);
 
-  const isAuthenticated = Boolean(activeLocalUser);
-  const user = mapLocalUserToAuthUser(activeLocalUser);
+  const isAuthenticated = Boolean(activeUser);
+  const user = mapUserToAuthUser(activeUser);
 
   const signOut = useCallback(() => {
-    persistLocalSession(null);
-    updateLocalSession(null);
-  }, [updateLocalSession]);
+    persistAuthSession(null);
+    updateSession(null);
+  }, [updateSession]);
 
   const login = useCallback(
     async ({ email, password } = {}) => {
-      const localUser = await loginLocalUser({
-        localUsers,
+      const authUser = await loginUser({
+        users,
         email,
         password,
-        updateLocalUsers,
+        updateUsers,
       });
-      const nextSession = { userId: localUser.id };
-      persistLocalSession(nextSession);
-      updateLocalSession(nextSession);
-      return mapLocalUserToAuthUser(localUser);
+      const nextSession = { userId: authUser.id };
+      persistAuthSession(nextSession);
+      updateSession(nextSession);
+      return mapUserToAuthUser(authUser);
     },
-    [localUsers, updateLocalSession, updateLocalUsers]
+    [users, updateSession, updateUsers]
   );
 
   const register = useCallback(
     async ({ name, email, password } = {}) => {
-      const localUser = await registerLocalUser({
-        localUsers,
+      const authUser = await registerUser({
+        users,
         name,
         email,
         password,
-        updateLocalUsers,
+        updateUsers,
       });
-      const nextSession = { userId: localUser.id };
-      persistLocalSession(nextSession);
-      updateLocalSession(nextSession);
-      return mapLocalUserToAuthUser(localUser);
+      const nextSession = { userId: authUser.id };
+      persistAuthSession(nextSession);
+      updateSession(nextSession);
+      return mapUserToAuthUser(authUser);
     },
-    [localUsers, updateLocalSession, updateLocalUsers]
+    [users, updateSession, updateUsers]
   );
 
   return {
-    session: localSession,
+    session,
     user,
     isAuthenticated,
     signOut,
