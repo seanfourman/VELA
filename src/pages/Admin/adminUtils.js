@@ -4,7 +4,7 @@ const slugify = (value) =>
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 
-export const parseImageList = (value) =>
+const parseImageList = (value) =>
   String(value || "")
     .split(/[\n,]+/)
     .map((entry) => entry.trim())

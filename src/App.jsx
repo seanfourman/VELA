@@ -3,7 +3,7 @@ import Navbar from "./components/Navbar";
 import MapView from "./pages/Map/MapView";
 import PopupPortal from "./components/PopupPortal";
 import { useAuth } from "./hooks/useAuth";
-import { showPopup } from "./utils/popup";
+import showPopup from "./utils/popup";
 import { isProbablyHardwareAccelerated } from "./utils/hardwareUtils";
 import { fetchRecommendations } from "./utils/recommendationsApi";
 import {

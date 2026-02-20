@@ -1,5 +1,4 @@
 const CACHE_NAME = "vela-map-tiles-v2";
-const TILE_CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 const TILE_PATTERNS = [
   /api\.maptiler\.com/,
   /basemaps\.cartocdn\.com/,

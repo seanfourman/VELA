@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { showPopup } from "../../utils/popup";
+import showPopup from "../../utils/popup";
 import PageShell from "../../components/layout/PageShell";
 import { getPasswordChecks, isStrongPassword } from "../../utils/passwordRules";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
