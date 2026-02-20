@@ -1,10 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react";
 import Navbar from "./components/Navbar";
 import MapView from "./pages/Map/MapView";
-import AuthPage from "./pages/Auth/AuthPage";
-import ProfilePage from "./pages/Profile/ProfilePage";
-import AdminPage from "./pages/Admin/AdminPage";
-import SettingsPage from "./pages/Settings/SettingsPage";
 import PopupPortal from "./components/PopupPortal";
 import { useCognitoAuth } from "./hooks/useCognitoAuth";
 import { showPopup } from "./utils/popup";
@@ -28,6 +24,10 @@ import {
 } from "./utils/appState";
 import "./App.css";
 
+const AuthPage = lazy(() => import("./pages/Auth/AuthPage"));
+const ProfilePage = lazy(() => import("./pages/Profile/ProfilePage"));
+const AdminPage = lazy(() => import("./pages/Admin/AdminPage"));
+const SettingsPage = lazy(() => import("./pages/Settings/SettingsPage"));
 const ZOOM_OUT_ROUTES = new Set(["/auth", "/profile", "/settings", "/admin"]);
 const safeSetJson = (key, value) => {
   try {
@@ -306,7 +306,7 @@ function App() {
         onNavigate={navigate}
         currentRoute={currentRoute}
       />
-      {currentPage}
+      <Suspense fallback={null}>{currentPage}</Suspense>
       <PopupPortal />
     </div>
   );

@@ -7,111 +7,27 @@ import {
   saveRecommendation,
 } from "../../utils/recommendationsApi";
 import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
+import AdminAccessNotice from "./AdminAccessNotice";
+import AdminLocationForm from "./AdminLocationForm";
+import AdminLocationList from "./AdminLocationList";
+import { EMPTY_LOCATION } from "./adminConstants";
+import { buildLocationFromDraft, buildLocationId } from "./adminUtils";
 
-const EMPTY_LOCATION = {
-  id: "",
-  name: "",
-  country: "",
-  region: "",
-  type: "",
-  bestTime: "",
-  lat: "",
-  lng: "",
-  description: "",
-  photoUrls: "",
-  sourceUrls: "",
-};
-
-const parseImageList = (value) =>
-  String(value || "")
-    .split(/[\n,]+/)
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-
-const slugify = (value) =>
-  String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-
-const buildLocationId = ({ name, country, region }) => {
-  const base = [name, country || region].filter(Boolean).join(" ");
-  const slug = slugify(base);
-  return slug || `spot_${Date.now()}`;
-};
-
-const INPUT_FIELDS = [
-  {
-    key: "name",
-    label: "Name",
-    className: "admin-grid-span-2",
-    placeholder: "Joshua Tree National Park",
-  },
-  {
-    key: "country",
-    label: "Country",
-    className: "admin-grid-span-2",
-    placeholder: "Portugal",
-  },
-  {
-    key: "region",
-    label: "Region",
-    className: "admin-grid-span-2",
-    placeholder: "Alentejo (near Reguengos de Monsaraz)",
-  },
-  {
-    key: "type",
-    label: "Type",
-    className: "admin-grid-span-3",
-    placeholder: "Dark-sky observatory / stargazing center",
-  },
-  {
-    key: "bestTime",
-    label: "Best time",
-    className: "admin-grid-span-3",
-    placeholder: "Clear summer nights; new Moon for deep-sky",
-  },
-  {
-    key: "lat",
-    label: "Latitude",
-    className: "admin-grid-span-3",
-    type: "number",
-    step: "0.0001",
-    min: "-90",
-    max: "90",
-    placeholder: "34.1341",
-  },
-  {
-    key: "lng",
-    label: "Longitude",
-    className: "admin-grid-span-3",
-    type: "number",
-    step: "0.0001",
-    min: "-180",
-    max: "180",
-    placeholder: "-116.3131",
-  },
-];
-
-const TEXTAREAS = [
-  {
-    key: "description",
-    label: "Description",
-    placeholder: "High desert skies with minimal light pollution.",
-  },
-  {
-    key: "photoUrls",
-    label: "Photo source URLs",
-    placeholder: "https://example.com/gallery",
-    note: "Separate multiple URLs with commas or new lines.",
-  },
-  {
-    key: "sourceUrls",
-    label: "Source URLs",
-    placeholder: "https://example.com/official-site",
-    note: "Separate multiple URLs with commas or new lines.",
-  },
-];
+function buildApiLocation(location, id) {
+  return {
+    id,
+    name: location.name,
+    lat: location.lat,
+    lng: location.lng,
+    description: location.description,
+    country: location.country,
+    region: location.region,
+    type: location.type,
+    best_time: location.bestTime,
+    photo_urls: location.photoUrls,
+    source_urls: location.sourceUrls,
+  };
+}
 
 function AdminPage({
   auth,
@@ -125,16 +41,15 @@ function AdminPage({
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const isLocalOnlyMode =
     String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !== "false";
-  const hasAdminAccess = isLocalOnlyMode || Boolean(isAdmin);
   const canUseAdminTools = isLocalOnlyMode || isAuthenticated;
+  const hasAdminAccess = isLocalOnlyMode || Boolean(isAdmin);
   const [draft, setDraft] = useState(EMPTY_LOCATION);
   const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
-  const moonVariant = isLight ? "day" : "night";
   const locationList = useMemo(() => {
     if (!Array.isArray(stargazeLocations)) return [];
     return [...stargazeLocations].sort((a, b) =>
-      String(a?.name || "").localeCompare(String(b?.name || "")),
-    );
+      String(a?.name || "").localeCompare(String(b?.name || ""),
+    ));
   }, [stargazeLocations]);
 
   const handleBackToMap = () => {
@@ -161,6 +76,8 @@ function AdminPage({
         spotId: locationId,
         idToken: auth?.session?.id_token,
       });
+      onDeleteStargazeLocation?.(locationId);
+      showPopup("Location removed.", "info", { duration: 2200 });
     } catch (error) {
       showPopup(
         error instanceof Error
@@ -169,37 +86,28 @@ function AdminPage({
         "failure",
         { duration: 3200 },
       );
-      return;
     }
-
-    onDeleteStargazeLocation?.(locationId);
-    showPopup("Location removed.", "info", { duration: 2200 });
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const name = String(draft.name || "").trim();
-    const country = String(draft.country || "").trim();
-    const region = String(draft.region || "").trim();
-    const type = String(draft.type || "").trim();
-    const bestTime = String(draft.bestTime || "").trim();
-    const lat = Number.parseFloat(draft.lat);
-    const lng = Number.parseFloat(draft.lng);
-    const description = String(draft.description || "").trim();
-    const photoUrls = parseImageList(draft.photoUrls);
-    const sourceUrls = parseImageList(draft.sourceUrls);
+    const location = buildLocationFromDraft(draft);
 
-    if (!name) {
+    if (!location.name) {
       showPopup("Name is required.", "failure", { duration: 2400 });
       return;
     }
-    if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+    if (!Number.isFinite(location.lat) || location.lat < -90 || location.lat > 90) {
       showPopup("Latitude must be between -90 and 90.", "failure", {
         duration: 2800,
       });
       return;
     }
-    if (!Number.isFinite(lng) || lng < -180 || lng > 180) {
+    if (
+      !Number.isFinite(location.lng) ||
+      location.lng < -180 ||
+      location.lng > 180
+    ) {
       showPopup("Longitude must be between -180 and 180.", "failure", {
         duration: 2800,
       });
@@ -207,25 +115,22 @@ function AdminPage({
     }
 
     const resolvedId =
-      String(draft.id || "").trim() || buildLocationId({ name, country, region });
+      String(draft.id || "").trim() ||
+      buildLocationId({
+        name: location.name,
+        country: location.country,
+        region: location.region,
+      });
+    const apiLocation = buildApiLocation(location, resolvedId);
 
     try {
       await saveRecommendation({
         idToken: auth?.session?.id_token,
-        location: {
-          id: resolvedId,
-          name,
-          lat,
-          lng,
-          description,
-          country,
-          region,
-          type,
-          best_time: bestTime,
-          photo_urls: photoUrls,
-          source_urls: sourceUrls,
-        },
+        location: apiLocation,
       });
+      onSaveStargazeLocation?.(apiLocation);
+      showPopup("Location added.", "success", { duration: 2400 });
+      resetForm();
     } catch (error) {
       showPopup(
         error instanceof Error
@@ -234,28 +139,14 @@ function AdminPage({
         "failure",
         { duration: 3200 },
       );
-      return;
     }
-
-    onSaveStargazeLocation?.({
-      id: resolvedId,
-      name,
-      lat,
-      lng,
-      description,
-      country,
-      region,
-      type,
-      best_time: bestTime,
-      photo_urls: photoUrls,
-      source_urls: sourceUrls,
-    });
-    showPopup("Location added.", "success", { duration: 2400 });
-    resetForm();
   };
 
   const hero = showPlanet ? (
-    <MoonGlobe variant={moonVariant} className="profile-page__earth-canvas" />
+    <MoonGlobe
+      variant={isLight ? "day" : "night"}
+      className="profile-page__earth-canvas"
+    />
   ) : null;
 
   return (
@@ -268,33 +159,19 @@ function AdminPage({
       hero={hero}
     >
       {!canUseAdminTools ? (
-        <section className="profile-card glass-panel glass-panel-elevated">
-          <h2 className="profile-section-title">Sign in required</h2>
-          <p className="profile-section-copy">
-            Sign in with an admin account to access this area.
-          </p>
-          <button
-            type="button"
-            className="glass-btn profile-action-btn"
-            onClick={() => auth?.signIn?.()}
-          >
-            Sign In
-          </button>
-        </section>
+        <AdminAccessNotice
+          title="Sign in required"
+          message="Sign in with an admin account to access this area."
+          buttonLabel="Sign In"
+          onAction={() => auth?.signIn?.()}
+        />
       ) : !hasAdminAccess ? (
-        <section className="profile-card glass-panel glass-panel-elevated">
-          <h2 className="profile-section-title">Access restricted</h2>
-          <p className="profile-section-copy">
-            You are signed in, but this account does not have admin access.
-          </p>
-          <button
-            type="button"
-            className="glass-btn profile-action-btn"
-            onClick={handleBackToMap}
-          >
-            Return to map
-          </button>
-        </section>
+        <AdminAccessNotice
+          title="Access restricted"
+          message="You are signed in, but this account does not have admin access."
+          buttonLabel="Return to map"
+          onAction={handleBackToMap}
+        />
       ) : (
         <section className="profile-card glass-panel glass-panel-elevated">
           <h2 className="profile-section-title">Stargazing locations</h2>
@@ -303,120 +180,17 @@ function AdminPage({
             map itself.
           </p>
 
-          <form className="admin-location-form" onSubmit={handleSubmit}>
-            <div className="admin-location-grid">
-              {INPUT_FIELDS.map(
-                ({
-                  key,
-                  label,
-                  className,
-                  type = "text",
-                  step,
-                  min,
-                  max,
-                  placeholder,
-                }) => (
-                  <label key={key} className={`profile-field ${className}`}>
-                    <span className="profile-label">{label}</span>
-                    <input
-                      className="profile-input"
-                      type={type}
-                      step={step}
-                      min={min}
-                      max={max}
-                      value={draft[key]}
-                      onChange={handleFieldChange(key)}
-                      placeholder={placeholder}
-                    />
-                  </label>
-                ),
-              )}
-            </div>
+          <AdminLocationForm
+            draft={draft}
+            onFieldChange={handleFieldChange}
+            onReset={resetForm}
+            onSubmit={handleSubmit}
+          />
 
-            {TEXTAREAS.map(({ key, label, placeholder, note }) => (
-              <label key={key} className="profile-field">
-                <span className="profile-label">{label}</span>
-                <textarea
-                  className="profile-textarea"
-                  rows="3"
-                  value={draft[key]}
-                  onChange={handleFieldChange(key)}
-                  placeholder={placeholder}
-                />
-                {note ? <span className="admin-location-note">{note}</span> : null}
-              </label>
-            ))}
-
-            <div className="admin-location-actions">
-              <button
-                type="button"
-                className="glass-btn profile-action-btn profile-secondary"
-                onClick={resetForm}
-              >
-                Clear
-              </button>
-              <button
-                type="submit"
-                className="glass-btn profile-action-btn profile-primary"
-              >
-                Add location
-              </button>
-            </div>
-          </form>
-
-          <div className="admin-location-list">
-            {locationList.length === 0 ? (
-              <div className="profile-readonly">No curated locations yet.</div>
-            ) : (
-              locationList.map((location) => {
-                const metaDetails = [
-                  location.region,
-                  location.country,
-                  location.type,
-                  location.bestTime,
-                ].filter(Boolean);
-
-                return (
-                  <div key={location.id} className="admin-location-card">
-                    <div className="admin-location-card-header">
-                      <div>
-                        <div className="admin-location-title">
-                          {location.name}
-                        </div>
-                        <div className="admin-location-meta">
-                          {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                        </div>
-                        {location.id ? (
-                          <div className="admin-location-meta">
-                            {location.id}
-                          </div>
-                        ) : null}
-                        {metaDetails.length > 0 ? (
-                          <div className="admin-location-meta">
-                            {metaDetails.join(" | ")}
-                          </div>
-                        ) : null}
-                      </div>
-                      <div className="admin-location-actions">
-                        <button
-                          type="button"
-                          className="glass-btn profile-action-btn"
-                          onClick={() => handleDeleteLocation(location)}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-                    {location.description ? (
-                      <div className="admin-location-description">
-                        {location.description}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })
-            )}
-          </div>
+          <AdminLocationList
+            locations={locationList}
+            onDeleteLocation={handleDeleteLocation}
+          />
         </section>
       )}
     </PageShell>

@@ -155,12 +155,6 @@ function SettingsPage({
           />
           <SettingsToggle
             title="Light pollution overlay"
-            description="Temporarily disabled while the light map service is offline."
-            checked={false}
-            disabled={true}
-          />
-          <SettingsToggle
-            title="Light pollution overlay"
             description="Enable the light map overlay by default."
             checked={lightOverlayEnabled}
             onChange={(value) =>
