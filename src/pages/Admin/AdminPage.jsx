@@ -40,6 +40,79 @@ const buildLocationId = ({ name, country, region }) => {
   return slug || `spot_${Date.now()}`;
 };
 
+const INPUT_FIELDS = [
+  {
+    key: "name",
+    label: "Name",
+    className: "admin-grid-span-2",
+    placeholder: "Joshua Tree National Park",
+  },
+  {
+    key: "country",
+    label: "Country",
+    className: "admin-grid-span-2",
+    placeholder: "Portugal",
+  },
+  {
+    key: "region",
+    label: "Region",
+    className: "admin-grid-span-2",
+    placeholder: "Alentejo (near Reguengos de Monsaraz)",
+  },
+  {
+    key: "type",
+    label: "Type",
+    className: "admin-grid-span-3",
+    placeholder: "Dark-sky observatory / stargazing center",
+  },
+  {
+    key: "bestTime",
+    label: "Best time",
+    className: "admin-grid-span-3",
+    placeholder: "Clear summer nights; new Moon for deep-sky",
+  },
+  {
+    key: "lat",
+    label: "Latitude",
+    className: "admin-grid-span-3",
+    type: "number",
+    step: "0.0001",
+    min: "-90",
+    max: "90",
+    placeholder: "34.1341",
+  },
+  {
+    key: "lng",
+    label: "Longitude",
+    className: "admin-grid-span-3",
+    type: "number",
+    step: "0.0001",
+    min: "-180",
+    max: "180",
+    placeholder: "-116.3131",
+  },
+];
+
+const TEXTAREAS = [
+  {
+    key: "description",
+    label: "Description",
+    placeholder: "High desert skies with minimal light pollution.",
+  },
+  {
+    key: "photoUrls",
+    label: "Photo source URLs",
+    placeholder: "https://example.com/gallery",
+    note: "Separate multiple URLs with commas or new lines.",
+  },
+  {
+    key: "sourceUrls",
+    label: "Source URLs",
+    placeholder: "https://example.com/official-site",
+    note: "Separate multiple URLs with commas or new lines.",
+  },
+];
+
 function AdminPage({
   auth,
   isAdmin,
@@ -55,7 +128,6 @@ function AdminPage({
   const hasAdminAccess = isLocalOnlyMode || Boolean(isAdmin);
   const canUseAdminTools = isLocalOnlyMode || isAuthenticated;
   const [draft, setDraft] = useState(EMPTY_LOCATION);
-  const [editingId, setEditingId] = useState(null);
   const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
   const moonVariant = isLight ? "day" : "night";
   const locationList = useMemo(() => {
@@ -78,10 +150,7 @@ function AdminPage({
     setDraft((current) => ({ ...current, [key]: value }));
   };
 
-  const resetForm = () => {
-    setDraft(EMPTY_LOCATION);
-    setEditingId(null);
-  };
+  const resetForm = () => setDraft(EMPTY_LOCATION);
 
   const handleDeleteLocation = async (location) => {
     const locationId = location?.id;
@@ -104,9 +173,6 @@ function AdminPage({
     }
 
     onDeleteStargazeLocation?.(locationId);
-    if (editingId === locationId) {
-      resetForm();
-    }
     showPopup("Location removed.", "info", { duration: 2200 });
   };
 
@@ -141,9 +207,7 @@ function AdminPage({
     }
 
     const resolvedId =
-      editingId ||
-      String(draft.id || "").trim() ||
-      buildLocationId({ name, country, region });
+      String(draft.id || "").trim() || buildLocationId({ name, country, region });
 
     try {
       await saveRecommendation({
@@ -186,9 +250,7 @@ function AdminPage({
       photo_urls: photoUrls,
       source_urls: sourceUrls,
     });
-    showPopup(editingId ? "Location updated." : "Location added.", "success", {
-      duration: 2400,
-    });
+    showPopup("Location added.", "success", { duration: 2400 });
     resetForm();
   };
 
@@ -243,122 +305,47 @@ function AdminPage({
 
           <form className="admin-location-form" onSubmit={handleSubmit}>
             <div className="admin-location-grid">
-              <label className="profile-field admin-grid-span-2">
-                <span className="profile-label">Name</span>
-                <input
-                  className="profile-input"
-                  type="text"
-                  value={draft.name}
-                  onChange={handleFieldChange("name")}
-                  placeholder="Joshua Tree National Park"
-                />
-              </label>
-              <label className="profile-field admin-grid-span-2">
-                <span className="profile-label">Country</span>
-                <input
-                  className="profile-input"
-                  type="text"
-                  value={draft.country}
-                  onChange={handleFieldChange("country")}
-                  placeholder="Portugal"
-                />
-              </label>
-              <label className="profile-field admin-grid-span-2">
-                <span className="profile-label">Region</span>
-                <input
-                  className="profile-input"
-                  type="text"
-                  value={draft.region}
-                  onChange={handleFieldChange("region")}
-                  placeholder="Alentejo (near Reguengos de Monsaraz)"
-                />
-              </label>
-              <label className="profile-field admin-grid-span-3">
-                <span className="profile-label">Type</span>
-                <input
-                  className="profile-input"
-                  type="text"
-                  value={draft.type}
-                  onChange={handleFieldChange("type")}
-                  placeholder="Dark-sky observatory / stargazing center"
-                />
-              </label>
-              <label className="profile-field admin-grid-span-3">
-                <span className="profile-label">Best time</span>
-                <input
-                  className="profile-input"
-                  type="text"
-                  value={draft.bestTime}
-                  onChange={handleFieldChange("bestTime")}
-                  placeholder="Clear summer nights; new Moon for deep-sky"
-                />
-              </label>
-              <label className="profile-field admin-grid-span-3">
-                <span className="profile-label">Latitude</span>
-                <input
-                  className="profile-input"
-                  type="number"
-                  step="0.0001"
-                  min="-90"
-                  max="90"
-                  value={draft.lat}
-                  onChange={handleFieldChange("lat")}
-                  placeholder="34.1341"
-                />
-              </label>
-              <label className="profile-field admin-grid-span-3">
-                <span className="profile-label">Longitude</span>
-                <input
-                  className="profile-input"
-                  type="number"
-                  step="0.0001"
-                  min="-180"
-                  max="180"
-                  value={draft.lng}
-                  onChange={handleFieldChange("lng")}
-                  placeholder="-116.3131"
-                />
-              </label>
+              {INPUT_FIELDS.map(
+                ({
+                  key,
+                  label,
+                  className,
+                  type = "text",
+                  step,
+                  min,
+                  max,
+                  placeholder,
+                }) => (
+                  <label key={key} className={`profile-field ${className}`}>
+                    <span className="profile-label">{label}</span>
+                    <input
+                      className="profile-input"
+                      type={type}
+                      step={step}
+                      min={min}
+                      max={max}
+                      value={draft[key]}
+                      onChange={handleFieldChange(key)}
+                      placeholder={placeholder}
+                    />
+                  </label>
+                ),
+              )}
             </div>
 
-            <label className="profile-field">
-              <span className="profile-label">Description</span>
-              <textarea
-                className="profile-textarea"
-                rows="3"
-                value={draft.description}
-                onChange={handleFieldChange("description")}
-                placeholder="High desert skies with minimal light pollution."
-              />
-            </label>
-
-            <label className="profile-field">
-              <span className="profile-label">Photo source URLs</span>
-              <textarea
-                className="profile-textarea"
-                rows="3"
-                value={draft.photoUrls}
-                onChange={handleFieldChange("photoUrls")}
-                placeholder="https://example.com/gallery"
-              />
-              <span className="admin-location-note">
-                Separate multiple URLs with commas or new lines.
-              </span>
-            </label>
-
-            <label className="profile-field">
-              <span className="profile-label">Source URLs</span>
-              <textarea
-                className="profile-textarea"
-                rows="3"
-                value={draft.sourceUrls}
-                onChange={handleFieldChange("sourceUrls")}
-                placeholder="https://example.com/official-site"
-              />
-              <span className="admin-location-note">
-                Separate multiple URLs with commas or new lines.
-              </span>
-            </label>
+            {TEXTAREAS.map(({ key, label, placeholder, note }) => (
+              <label key={key} className="profile-field">
+                <span className="profile-label">{label}</span>
+                <textarea
+                  className="profile-textarea"
+                  rows="3"
+                  value={draft[key]}
+                  onChange={handleFieldChange(key)}
+                  placeholder={placeholder}
+                />
+                {note ? <span className="admin-location-note">{note}</span> : null}
+              </label>
+            ))}
 
             <div className="admin-location-actions">
               <button

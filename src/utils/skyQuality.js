@@ -2,69 +2,53 @@ import { buildSkyQualityUrl } from "./apiEndpoints";
 
 const metricsCache = new Map();
 
-function buildCacheKey(lat, lon) {
-  return `${lat.toFixed(5)},${lon.toFixed(5)}`;
-}
+const buildCacheKey = (lat, lon) => `${lat.toFixed(5)},${lon.toFixed(5)}`;
+const isFiniteNumber = (value) =>
+  typeof value === "number" && Number.isFinite(value);
 
-async function parseErrorMessage(response) {
+async function readErrorMessage(response) {
   const contentType = response.headers.get("content-type") || "";
   if (contentType.includes("application/json")) {
-    try {
-      const data = await response.json();
-      if (data && typeof data.error === "string") return data.error;
-      if (data && typeof data.message === "string") return data.message;
-    } catch {
-      // Ignore JSON parse errors and fall back to text.
-    }
+    const data = await response.json().catch(() => null);
+    if (typeof data?.error === "string") return data.error;
+    if (typeof data?.message === "string") return data.message;
   }
-
-  try {
-    const text = await response.text();
-    if (text) return text;
-  } catch {
-    // Ignore.
-  }
-
-  return null;
+  return (await response.text().catch(() => null)) || null;
 }
 
 export async function fetchSkyQualityMetrics(lat, lon) {
-  if (typeof lat !== "number" || typeof lon !== "number") {
+  if (!isFiniteNumber(lat) || !isFiniteNumber(lon)) {
     throw new Error("Invalid coordinates");
   }
 
   const cacheKey = buildCacheKey(lat, lon);
-  const cached = metricsCache.get(cacheKey);
-  if (cached) return cached;
+  if (metricsCache.has(cacheKey)) return metricsCache.get(cacheKey);
 
-  const promise = (async () => {
-    let response;
-    try {
-      response = await fetch(buildSkyQualityUrl(lat, lon), {
-        headers: { Accept: "application/json" },
-      });
-    } catch (error) {
-      let message =
+  const promise = fetch(buildSkyQualityUrl(lat, lon), {
+    headers: { Accept: "application/json" },
+  })
+    .catch((error) => {
+      const message =
         error instanceof Error && error.message
           ? error.message
           : "Failed to reach sky quality service";
-      if (message === "Failed to fetch") {
-        message =
-          "Sky quality service unavailable (is the sky quality endpoint configured?)";
+      throw new Error(
+        message === "Failed to fetch"
+          ? "Sky quality service unavailable (is the sky quality endpoint configured?)"
+          : message,
+      );
+    })
+    .then(async (response) => {
+      if (!response.ok) {
+        const message = (await readErrorMessage(response))?.trim();
+        throw new Error(message || `Sky quality API error: ${response.status}`);
       }
-      throw new Error(message);
-    }
-
-    if (!response.ok) {
-      const message = (await parseErrorMessage(response))?.trim();
-      throw new Error(message || `Sky quality API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data;
-  })();
+      return response.json();
+    });
 
   metricsCache.set(cacheKey, promise);
-  promise.catch(() => metricsCache.delete(cacheKey));
+  promise.catch(() => {
+    metricsCache.delete(cacheKey);
+  });
   return promise;
 }

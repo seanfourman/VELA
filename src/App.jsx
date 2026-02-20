@@ -28,6 +28,15 @@ import {
 } from "./utils/appState";
 import "./App.css";
 
+const ZOOM_OUT_ROUTES = new Set(["/auth", "/profile", "/settings", "/admin"]);
+const safeSetJson = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Storage unavailable; ignore
+  }
+};
+
 function App() {
   const auth = useCognitoAuth();
   const mapViewRef = useRef(null);
@@ -37,9 +46,9 @@ function App() {
   const [locationStatus, setLocationStatus] = useState(() =>
     navigator.geolocation ? "searching" : "off",
   );
-  const [mapType, setMapType] = useState(() => {
-    return localStorage.getItem("mapType") || DEFAULT_MAP_TYPE;
-  });
+  const [mapType, setMapType] = useState(
+    () => localStorage.getItem("mapType") || DEFAULT_MAP_TYPE,
+  );
   const [settings, setSettings] = useState(() => loadSettings());
   const [profileSettings, setProfileSettings] = useState(() =>
     loadProfileSettings(),
@@ -54,11 +63,7 @@ function App() {
   }, [mapType]);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-    } catch {
-      // Storage unavailable; ignore
-    }
+    safeSetJson(SETTINGS_STORAGE_KEY, settings);
   }, [settings]);
 
   useEffect(() => {
@@ -150,9 +155,7 @@ function App() {
       }
       if (nextPath === route) return;
 
-      const shouldZoomOut =
-        normalizePath(route) === "/" &&
-        ["/auth", "/profile", "/settings", "/admin"].includes(nextPath);
+      const shouldZoomOut = normalizePath(route) === "/" && ZOOM_OUT_ROUTES.has(nextPath);
 
       if (shouldZoomOut) {
         if (mapViewRef.current?.zoomOutToMin) {
@@ -176,7 +179,7 @@ function App() {
   const handleSaveProfile = useCallback((nextProfile) => {
     const normalized = normalizeProfile(nextProfile);
     setProfileSettings(normalized);
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(normalized));
+    safeSetJson(PROFILE_STORAGE_KEY, normalized);
   }, []);
 
   const handleResetProfile = useCallback(() => {
@@ -205,18 +208,14 @@ function App() {
 
     setStargazeLocations((prev) => {
       const exists = prev.some((item) => item.id === normalized.id);
-      const next = exists
+      return exists
         ? prev.map((item) => (item.id === normalized.id ? normalized : item))
         : [...prev, normalized];
-      return next;
     });
   }, []);
 
   const handleDeleteStargazeLocation = useCallback((id) => {
-    setStargazeLocations((prev) => {
-      const next = prev.filter((item) => item.id !== id);
-      return next;
-    });
+    setStargazeLocations((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
   const currentRoute = normalizePath(route);
@@ -224,13 +223,15 @@ function App() {
   const isLight = mapType === "light";
   const mapIsAuthenticated = LOCAL_ONLY_MODE || Boolean(auth?.isAuthenticated);
 
-  let currentPage = null;
-  if (currentRoute === "/auth") {
-    currentPage = (
+  let currentPage;
+  switch (currentRoute) {
+    case "/auth":
+      currentPage = (
       <AuthPage auth={auth} isLight={isLight} onNavigate={navigate} />
-    );
-  } else if (currentRoute === "/profile") {
-    currentPage = (
+      );
+      break;
+    case "/profile":
+      currentPage = (
       <ProfilePage
         auth={auth}
         profile={profileSettings}
@@ -241,9 +242,10 @@ function App() {
         onReset={handleResetProfile}
         onNavigate={navigate}
       />
-    );
-  } else if (currentRoute === "/admin") {
-    currentPage = (
+      );
+      break;
+    case "/admin":
+      currentPage = (
       <AdminPage
         auth={auth}
         isAdmin={isAdmin}
@@ -253,9 +255,10 @@ function App() {
         onDeleteStargazeLocation={handleDeleteStargazeLocation}
         onNavigate={navigate}
       />
-    );
-  } else if (currentRoute === "/settings") {
-    currentPage = (
+      );
+      break;
+    case "/settings":
+      currentPage = (
       <SettingsPage
         mapType={mapType}
         isLight={isLight}
@@ -265,9 +268,10 @@ function App() {
         onMapTypeChange={setMapType}
         onNavigate={navigate}
       />
-    );
-  } else {
-    currentPage = (
+      );
+      break;
+    default:
+      currentPage = (
       <MapView
         ref={mapViewRef}
         location={location}
@@ -289,7 +293,7 @@ function App() {
         }
         autoCenterOnLocate={settings.autoCenterOnLocate}
       />
-    );
+      );
   }
 
   return (

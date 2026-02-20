@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { fetchVisiblePlanets } from "../utils/planetUtils";
 
-/**
- * Planet fetching + caching keyed by rounded lat/lng.
- */
+const getPlanetList = (data) =>
+  Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+
 export function usePlanets() {
   const lastPlanetKey = useRef(null);
   const [visiblePlanets, setVisiblePlanets] = useState([]);
@@ -32,18 +32,9 @@ export function usePlanets() {
 
       try {
         const data = await fetchVisiblePlanets(lat, lng);
+        if (!data) throw new Error("No visible planets data returned");
 
-        if (!data) {
-          throw new Error("No visible planets data returned");
-        }
-
-        const planetList = Array.isArray(data?.data)
-          ? data.data
-          : Array.isArray(data)
-          ? data
-          : [];
-
-        setVisiblePlanets(planetList);
+        setVisiblePlanets(getPlanetList(data));
         setPlanetQuery({ lat, lng, label, source });
         lastPlanetKey.current = roundedKey;
       } catch {

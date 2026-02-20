@@ -27,24 +27,25 @@ export const PLANET_TEXTURES = {
 export const resolvePlanetTexture = (name) => {
   if (!name) return PLANET_TEXTURES.default;
   const key = name.toLowerCase();
-
-  if (PLANET_TEXTURES[key]) return PLANET_TEXTURES[key];
-  if (key.includes("venus")) return PLANET_TEXTURES.venus;
-  if (key.includes("saturn")) return PLANET_TEXTURES.saturn;
-  if (key.includes("moon")) return PLANET_TEXTURES.moon;
-
-  return PLANET_TEXTURES.default;
+  return (
+    PLANET_TEXTURES[key] ||
+    (key.includes("venus") && PLANET_TEXTURES.venus) ||
+    (key.includes("saturn") && PLANET_TEXTURES.saturn) ||
+    (key.includes("moon") && PLANET_TEXTURES.moon) ||
+    PLANET_TEXTURES.default
+  );
 };
 
 const PLANETS_API_CACHE_KEY = "visiblePlanetsCache";
 const CACHE_DURATION = 24 * 60 * 60 * 1000;
 const texturePreloadCache = new Map();
+const cacheKey = (lat, lng) =>
+  `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(2)}`;
 
 export function preloadPlanetTexture(url) {
   if (!url) return Promise.resolve();
-  if (texturePreloadCache.has(url)) {
-    return texturePreloadCache.get(url);
-  }
+  if (texturePreloadCache.has(url)) return texturePreloadCache.get(url);
+
   const promise = new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(url);
@@ -56,52 +57,40 @@ export function preloadPlanetTexture(url) {
 }
 
 export function preloadAllPlanetTextures() {
-  const entries = Object.values(PLANET_TEXTURES);
-  return Promise.all(entries.map((url) => preloadPlanetTexture(url))).catch(
-    () => undefined
-  );
+  return Promise.all(
+    Object.values(PLANET_TEXTURES).map((url) => preloadPlanetTexture(url))
+  ).catch(() => undefined);
 }
 
 export async function fetchVisiblePlanets(lat, lng) {
-  const cacheKey = `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(
-    2
-  )}`;
-  let cached;
-
-  try {
-    cached = localStorage.getItem(cacheKey);
-  } catch {
-    cached = null;
-  }
-
-  if (cached) {
+  const key = cacheKey(lat, lng);
+  const cachedRaw = (() => {
     try {
-      const { data, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < CACHE_DURATION) {
-        return data;
-      }
+      return localStorage.getItem(key);
     } catch {
-      cached = null;
+      return null;
+    }
+  })();
+
+  if (cachedRaw) {
+    try {
+      const cached = JSON.parse(cachedRaw);
+      if (Date.now() - cached?.timestamp < CACHE_DURATION) return cached.data;
+    } catch {
+      // Ignore invalid cache payload.
     }
   }
 
   try {
     const response = await fetch(buildVisiblePlanetsUrl(lat, lng));
-    if (!response.ok) {
-      throw new Error(`Visible planets API failed: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`Visible planets API failed: ${response.status}`);
     const data = await response.json();
 
     try {
-      localStorage.setItem(
-        cacheKey,
-        JSON.stringify({ data, timestamp: Date.now() })
-      );
+      localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
     } catch {
       // Storage unavailable; continue without cache
     }
-
     return data;
   } catch {
     return null;
