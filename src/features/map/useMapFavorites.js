@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import showPopup from "../../utils/popup";
+import { FAVORITE_EXIT_MS } from "../../pages/Map/MapView/mapConstants";
 import {
-  deleteFavoriteSpot,
-  fetchFavoriteSpots,
-  saveFavoriteSpot,
-} from "../../../utils/favoritesApi";
-import showPopup from "../../../utils/popup";
-import { FAVORITE_EXIT_MS } from "./mapConstants";
+  loadFavoriteSpots,
+  removeFavorite,
+  saveFavorite,
+} from "./favoritesStorage";
 
 const useMapFavorites = ({
   getSpotKey,
@@ -31,25 +31,9 @@ const useMapFavorites = ({
 
     (async () => {
       try {
-        const items = await fetchFavoriteSpots();
+        const items = await loadFavoriteSpots(getSpotKey);
         if (cancelled) return;
-
-        const unique = new Map();
-        items.forEach((item) => {
-          const lat = Number(item.lat);
-          const lon = Number(item.lon);
-          if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-          const key = getSpotKey(lat, lon);
-          unique.set(key, {
-            key,
-            lat,
-            lng: lon,
-            spotId: item.spotId ?? null,
-            createdAt: item.createdAt ?? null,
-          });
-        });
-
-        setFavoriteSpots([...unique.values()]);
+        setFavoriteSpots(items);
       } catch (error) {
         if (cancelled) return;
         showPopup(
@@ -91,7 +75,7 @@ const useMapFavorites = ({
   const persistFavoriteSpot = useCallback(
     async (lat, lng) => {
       try {
-        await saveFavoriteSpot({ lat, lon: lng });
+        await saveFavorite(lat, lng);
       } catch (error) {
         showPopup(
           error instanceof Error
@@ -107,7 +91,7 @@ const useMapFavorites = ({
   const persistRemoveFavoriteSpot = useCallback(
     async ({ lat, lng, spotId }) => {
       try {
-        await deleteFavoriteSpot({ lat, lon: lng, spotId });
+        await removeFavorite({ lat, lng, spotId });
       } catch (error) {
         showPopup(
           error instanceof Error

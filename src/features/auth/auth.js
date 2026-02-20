@@ -1,7 +1,11 @@
-import { getPasswordValidationError } from "../utils/passwordRules";
-
-const AUTH_USERS_KEY = "vela:local:auth:users";
-const AUTH_SESSION_KEY = "vela:local:auth:session";
+import { getPasswordValidationError } from "../../utils/passwordRules";
+import { createPasswordSalt, hashPassword } from "./authCrypto";
+import {
+  persistStoredSession,
+  persistStoredUsers,
+  readStoredSession,
+  readStoredUsers,
+} from "./authStorage";
 
 const normalizeEmail = (value) =>
   String(value || "")
@@ -13,69 +17,6 @@ const createUserId = () => {
     return crypto.randomUUID();
   }
   return `local-${Date.now()}-${Math.round(Math.random() * 1000)}`;
-};
-
-const bytesToHex = (bytes) =>
-  Array.from(bytes)
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-
-const createPasswordSalt = () => {
-  const bytes = new Uint8Array(16);
-  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-    crypto.getRandomValues(bytes);
-    return bytesToHex(bytes);
-  }
-  for (let index = 0; index < bytes.length; index += 1) {
-    bytes[index] = Math.floor(Math.random() * 256);
-  }
-  return bytesToHex(bytes);
-};
-
-const fallbackHash = (value) => {
-  let hash = 0;
-  for (let i = 0; i < value.length; i += 1) {
-    hash = (hash << 5) - hash + value.charCodeAt(i);
-    hash |= 0;
-  }
-  return `f-${Math.abs(hash).toString(16)}-${value.length}`;
-};
-
-const hashPassword = async (password, salt) => {
-  const payload = `${String(salt || "")}:${String(password || "")}`;
-  if (
-    typeof crypto !== "undefined" &&
-    crypto.subtle &&
-    typeof TextEncoder !== "undefined"
-  ) {
-    const encoded = new TextEncoder().encode(payload);
-    const digestBuffer = await crypto.subtle.digest("SHA-256", encoded);
-    return bytesToHex(new Uint8Array(digestBuffer));
-  }
-  return fallbackHash(payload);
-};
-
-const readJsonFromStorage = (key, fallbackValue) => {
-  if (typeof window === "undefined") return fallbackValue;
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallbackValue;
-  } catch {
-    return fallbackValue;
-  }
-};
-
-const writeJsonToStorage = (key, value) => {
-  if (typeof window === "undefined") return;
-  try {
-    if (value === undefined || value === null) {
-      localStorage.removeItem(key);
-      return;
-    }
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    return;
-  }
 };
 
 const normalizeUser = (value) => {
@@ -126,19 +67,6 @@ const serializeUser = (user) => {
   };
 };
 
-const readUsers = () => {
-  const parsed = readJsonFromStorage(AUTH_USERS_KEY, []);
-  if (!Array.isArray(parsed)) return [];
-  return parsed.map(normalizeUser).filter(Boolean);
-};
-
-const persistUsers = (users) => {
-  const payload = Array.isArray(users)
-    ? users.map(serializeUser).filter(Boolean)
-    : [];
-  writeJsonToStorage(AUTH_USERS_KEY, payload);
-};
-
 const normalizeSession = (value) => {
   if (!value || typeof value !== "object") return null;
   const userId =
@@ -148,8 +76,9 @@ const normalizeSession = (value) => {
   return userId ? { userId } : null;
 };
 
-const readSession = () =>
-  normalizeSession(readJsonFromStorage(AUTH_SESSION_KEY, null));
+const readUsers = () => readStoredUsers(normalizeUser);
+const persistUsers = (users) => persistStoredUsers(users, serializeUser);
+const readSession = () => readStoredSession(normalizeSession);
 
 export const readAuthState = () => {
   const users = readUsers();
@@ -162,11 +91,7 @@ export const readAuthState = () => {
 };
 
 export const persistAuthSession = (session) => {
-  if (!session) {
-    writeJsonToStorage(AUTH_SESSION_KEY, null);
-    return;
-  }
-  writeJsonToStorage(AUTH_SESSION_KEY, normalizeSession(session));
+  persistStoredSession(session, normalizeSession);
 };
 
 export const mapUserToAuthUser = (user) => {
@@ -184,12 +109,7 @@ export const mapUserToAuthUser = (user) => {
   };
 };
 
-export async function loginUser({
-  users,
-  email,
-  password,
-  updateUsers,
-}) {
+export async function loginUser({ users, email, password, updateUsers }) {
   const normalizedEmail = normalizeEmail(email);
   const normalizedPassword = typeof password === "string" ? password : "";
   if (!normalizedEmail || !normalizedPassword) {
@@ -239,13 +159,7 @@ export async function loginUser({
   return resolvedUser;
 }
 
-export async function registerUser({
-  users,
-  name,
-  email,
-  password,
-  updateUsers,
-}) {
+export async function registerUser({ users, name, email, password, updateUsers }) {
   const normalizedName = typeof name === "string" ? name.trim() : "";
   const normalizedEmail = normalizeEmail(email);
   const normalizedPassword = typeof password === "string" ? password : "";

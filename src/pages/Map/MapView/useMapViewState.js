@@ -11,7 +11,7 @@ import {
 } from "./mapViewDerived";
 import useMapDirections from "./useMapDirections";
 import useMapFavoriteTransition from "./useMapFavoriteTransition";
-import useMapFavorites from "./useMapFavorites";
+import useMapFavorites from "../../../features/map/useMapFavorites";
 import useMapInteractions from "./useMapInteractions";
 import useMapStargaze from "./useMapStargaze";
 import useMapTargetToggleHandlers from "./useMapTargetToggleHandlers";
