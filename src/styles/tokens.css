@@ -1,0 +1,207 @@
+﻿/* ========================================
+   DESIGN TOKENS - Liquid Glass System
+   ======================================== */
+
+:root {
+  /* Typography */
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Color Scheme */
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.95);
+  background-color: #121218;
+
+  /* ===================
+     LIQUID GLASS TOKENS
+     =================== */
+
+  /* Glass Surface */
+  --glass-bg: rgba(255, 255, 255, 0.08);
+  --glass-bg-hover: rgba(255, 255, 255, 0.12);
+  --glass-bg-active: rgba(255, 255, 255, 0.16);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.1);
+
+  /* Glass Borders */
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-border-strong: rgba(255, 255, 255, 0.28);
+  --glass-border-subtle: rgba(255, 255, 255, 0.1);
+
+  /* Glass Blur Effects */
+  --glass-blur: blur(20px) saturate(180%);
+  --glass-blur-heavy: blur(28px) saturate(200%);
+  --glass-blur-light: blur(14px) saturate(150%); /* Might need to make it darker - brightness(0.75); */
+
+  /* Glass Shadows */
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+  --glass-shadow-elevated: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --glass-shadow-subtle: 0 4px 16px rgba(0, 0, 0, 0.18);
+
+  /* Glass Highlight (Apple liquid shine effect) */
+  --glass-highlight: radial-gradient(
+    ellipse 100% 60% at 50% -10%,
+    rgba(255, 255, 255, 0.2),
+    transparent 60%
+  );
+  --glass-highlight-strong: radial-gradient(
+    ellipse 100% 60% at 50% -10%,
+    rgba(255, 255, 255, 0.28),
+    transparent 60%
+  );
+  --glass-inner-glow:
+    radial-gradient(
+      circle at 12% 12%,
+      rgba(255, 255, 255, 0.25),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 88% 88%,
+      rgba(255, 255, 255, 0.18),
+      transparent 45%
+    );
+
+  /* Surface Colors */
+  --surface-text: rgba(255, 255, 255, 0.95);
+  --surface-text-muted: rgba(255, 255, 255, 0.65);
+  --surface-text-subtle: rgba(255, 255, 255, 0.45);
+  --placeholder-text: rgba(255, 255, 255, 0.45);
+
+  /* Accent Colors */
+  --accent-primary: #fff;
+  --accent-primary-hover: #e5e5e5;
+  --accent-success: #22c55e;
+  --accent-success-glow: rgba(34, 197, 94, 0.5);
+  --accent-warning: #f59e0b;
+  --accent-danger: #dc2626;
+  --accent-muted: #6b7280;
+
+  /* Spacing */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-pill: 50px;
+  --radius-round: 999px;
+
+  /* Animation */
+  --glass-appear-duration: 0.35s;
+  --glass-appear-timing: cubic-bezier(0.16, 1, 0.3, 1); /* Smooth ease-out */
+}
+
+/* ========================================
+   GLASS ANIMATIONS
+   ======================================== */
+
+/* 
+ * Note: backdrop-filter CANNOT be animated in CSS.
+ * The solution is to fade opacity - the blur is already applied,
+ * the opacity transition smoothly reveals it without a "snap".
+ */
+
+@keyframes glass-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes glass-fade-in-simple {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Slow fade for popups - blur snaps when nearly invisible, then slowly fades in */
+@keyframes glass-popup-reveal {
+  0% {
+    opacity: 0;
+  }
+  /* Stay invisible for first 15% while blur "snaps" */
+  15% {
+    opacity: 0.02;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* ========================================
+   LIGHT MODE OVERRIDES
+   ======================================== */
+
+.light,
+[data-theme="light"] {
+  color-scheme: light;
+  color: #0f172a;
+
+  /* Glass Surface - Light */
+  --glass-bg: rgba(255, 255, 255, 0.72);
+  --glass-bg-hover: rgba(241, 245, 249, 0.92);
+  --glass-bg-active: rgba(226, 232, 240, 0.5);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.88);
+
+  /* Glass Borders - Light */
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-border-strong: rgba(0, 0, 0, 0.14);
+  --glass-border-subtle: rgba(0, 0, 0, 0.05);
+
+  /* Glass Shadows - Light */
+  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.1);
+  --glass-shadow-elevated: 0 18px 48px rgba(15, 23, 42, 0.16);
+  --glass-shadow-subtle: 0 4px 16px rgba(15, 23, 42, 0.08);
+
+  /* Glass Highlight - Light */
+  --glass-highlight: radial-gradient(
+    ellipse 100% 60% at 50% -10%,
+    rgba(255, 255, 255, 0.45),
+    transparent 60%
+  );
+  --glass-highlight-strong: radial-gradient(
+    ellipse 100% 60% at 50% -10%,
+    rgba(255, 255, 255, 0.65),
+    transparent 60%
+  );
+  --glass-inner-glow:
+    radial-gradient(
+      circle at 12% 12%,
+      rgba(255, 255, 255, 0.55),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 88% 88%,
+      rgba(255, 255, 255, 0.35),
+      transparent 42%
+    );
+
+  /* Surface Colors - Light */
+  --surface-text: #0f172a;
+  --surface-text-muted: rgba(15, 23, 42, 0.65);
+  --surface-text-subtle: rgba(15, 23, 42, 0.45);
+  --placeholder-text: rgba(15, 23, 42, 0.45);
+
+  /* Accent Adjustments */
+  --accent-primary: #0f172a;
+  --accent-primary-hover: #1e293b;
+  --accent-success: #16a34a;
+  --accent-success-glow: rgba(22, 163, 74, 0.5);
+  --accent-muted: #9ca3af;
+}

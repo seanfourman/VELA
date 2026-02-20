@@ -1,0 +1,31 @@
+﻿/* ========================================
+   VELA - Global Styles & Design System
+   ======================================== */
+
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Global Size Transition - Smooth out layout shifts */
+div {
+  transition:
+    width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+    height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+    max-width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+    max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
+    padding 0.25s ease,
+    margin 0.25s ease,
+    flex-basis 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: width, height, max-width, max-height, flex-basis;
+}
+
+/* Remove default blue focus outline across the site */
+*:focus,
+*:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+

@@ -32,7 +32,6 @@ function AuthPage({ auth, isLight, onNavigate }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-  const isLocalMode = Boolean(auth?.localOnlyMode);
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const isRegisterMode = mode === AUTH_MODE_REGISTER;
   const showHero = useMemo(() => isProbablyHardwareAccelerated(), []);
@@ -66,11 +65,6 @@ function AuthPage({ auth, isLight, onNavigate }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (isSubmitting) return;
-
-    if (!isLocalMode) {
-      auth?.signIn?.();
-      return;
-    }
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!isValidEmail(trimmedEmail)) {
@@ -153,22 +147,6 @@ function AuthPage({ auth, isLight, onNavigate }) {
                 onClick={() => onNavigate?.("/profile")}
               >
                 Edit profile
-              </button>
-            </div>
-          </>
-        ) : !isLocalMode ? (
-          <>
-            <h2 className="profile-section-title">Sign in required</h2>
-            <p className="profile-section-copy">
-              Cloud sign-in is enabled. Continue to authenticate with Cognito.
-            </p>
-            <div className="profile-actions">
-              <button
-                type="button"
-                className="glass-btn profile-action-btn profile-primary"
-                onClick={() => auth?.signIn?.()}
-              >
-                Sign In
               </button>
             </div>
           </>

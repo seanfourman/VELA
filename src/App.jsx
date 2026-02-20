@@ -2,7 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useRef, useState } from "react"
 import Navbar from "./components/Navbar";
 import MapView from "./pages/Map/MapView";
 import PopupPortal from "./components/PopupPortal";
-import { useCognitoAuth } from "./hooks/useCognitoAuth";
+import { useAuth } from "./hooks/useAuth";
 import { showPopup } from "./utils/popup";
 import { isProbablyHardwareAccelerated } from "./utils/hardwareUtils";
 import { fetchRecommendations } from "./utils/recommendationsApi";
@@ -10,7 +10,6 @@ import {
   DEFAULT_MAP_TYPE,
   DEFAULT_PROFILE,
   DEFAULT_SETTINGS,
-  LOCAL_ONLY_MODE,
   PROFILE_STORAGE_KEY,
   SETTINGS_STORAGE_KEY,
   isAdminUser,
@@ -38,10 +37,9 @@ const safeSetJson = (key, value) => {
 };
 
 function App() {
-  const auth = useCognitoAuth();
+  const auth = useAuth();
   const mapViewRef = useRef(null);
   const transitionTimeoutRef = useRef(null);
-  const recommendationsToken = auth?.session?.id_token || null;
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState(() =>
     navigator.geolocation ? "searching" : "off",
@@ -71,9 +69,7 @@ function App() {
 
     (async () => {
       try {
-        const data = await fetchRecommendations({
-          idToken: recommendationsToken,
-        });
+        const data = await fetchRecommendations();
         const normalized = normalizeStargazePayload(data);
         if (cancelled) return;
         setStargazeLocations(normalized);
@@ -92,7 +88,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [recommendationsToken]);
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -221,7 +217,7 @@ function App() {
   const currentRoute = normalizePath(route);
   const isAdmin = isAdminUser(auth?.user);
   const isLight = mapType === "light";
-  const mapIsAuthenticated = LOCAL_ONLY_MODE || Boolean(auth?.isAuthenticated);
+  const mapIsAuthenticated = Boolean(auth?.isAuthenticated);
 
   let currentPage;
   switch (currentRoute) {
@@ -279,7 +275,7 @@ function App() {
         mapType={mapType}
         setMapType={setMapType}
         isAuthenticated={mapIsAuthenticated}
-        authToken={auth?.session?.id_token}
+        authToken={null}
         stargazeLocations={stargazeLocations}
         directionsProvider={settings.directionsProvider}
         showRecommendedSpots={settings.showRecommendedSpots}

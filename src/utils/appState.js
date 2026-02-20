@@ -15,8 +15,6 @@ export const DEFAULT_PROFILE = {
   avatarUrl: "",
   bio: "",
 };
-export const LOCAL_ONLY_MODE =
-  String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !== "false";
 
 export const normalizeProfile = (value) => {
   const safe = value && typeof value === "object" ? value : {};
@@ -221,9 +219,8 @@ export const isAdminUser = (user) => {
   if (!user) return false;
   if (user.is_admin === true || user.isAdmin === true) return true;
 
-  const groups = normalizeRoleList(user["cognito:groups"]);
   const roles = normalizeRoleList(user.roles || user.role || user.groups);
-  const allRoles = [...groups, ...roles].map((role) =>
+  const allRoles = roles.map((role) =>
     String(role).toLowerCase()
   );
   return allRoles.includes("admin") || allRoles.includes("administrator");

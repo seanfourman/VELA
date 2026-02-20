@@ -13,7 +13,6 @@ function localSkyServicesPlugin() {
   const candidatePaths = [
     path.resolve(rootDir, "data", "World_Atlas_2015.tif"),
     path.resolve(rootDir, "public", "World_Atlas_2015.tif"),
-    path.resolve(rootDir, "scripts", "aws", "World_Atlas_2015.tif"),
   ];
   const tifPath = candidatePaths.find((candidate) => fs.existsSync(candidate));
 
@@ -31,7 +30,7 @@ function localSkyServicesPlugin() {
   async function getImage() {
     if (!tifPath) {
       throw new Error(
-        "World_Atlas_2015.tif not found (expected in data/, public/, or scripts/aws/)",
+        "World_Atlas_2015.tif not found (expected in data/ or public/)",
       );
     }
     if (!imagePromise) {

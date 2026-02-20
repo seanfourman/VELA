@@ -53,7 +53,6 @@ const MapView = forwardRef(function MapView(
     location,
     mapType,
     stargazeLocations,
-    isAuthenticated,
     authToken,
     directionsProvider,
     showRecommendedSpots,

@@ -1,0 +1,227 @@
+﻿/* ========================================
+   GLASS UTILITY CLASSES
+   ======================================== */
+
+/* Base Glass Panel */
+.glass-panel {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  color: var(--surface-text);
+}
+
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-highlight);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Elevated Glass Panel (more prominent) */
+.glass-panel-elevated {
+  background: var(--glass-bg-elevated);
+  border-color: var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-elevated);
+}
+
+.glass-panel-elevated::before {
+  background: var(--glass-highlight-strong);
+}
+
+/* Glass Panel with Inner Glow (for large surfaces) */
+.glass-panel-glow::before {
+  background: var(--glass-inner-glow);
+  opacity: 0.9;
+}
+
+/* Glass Button */
+.glass-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  color: var(--surface-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 10px 24px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+}
+
+.glass-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.08) 30%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.08) 70%,
+    rgba(255, 255, 255, 0.35) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.glass-btn:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-strong);
+}
+
+.glass-btn:hover::before {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.12) 30%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.12) 70%,
+    rgba(255, 255, 255, 0.5) 100%
+  );
+}
+
+.glass-btn:active {
+  transform: scale(0.97);
+}
+
+.glass-btn:focus,
+.glass-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+/* Light mode glass button adjustments */
+.light .glass-btn::before,
+[data-theme="light"] .glass-btn::before {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.22) 0%,
+    rgba(0, 0, 0, 0.06) 30%,
+    rgba(0, 0, 0, 0.04) 50%,
+    rgba(0, 0, 0, 0.06) 70%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+}
+
+.light .glass-btn:hover::before,
+[data-theme="light"] .glass-btn:hover::before {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(0, 0, 0, 0.1) 30%,
+    rgba(0, 0, 0, 0.06) 50%,
+    rgba(0, 0, 0, 0.1) 70%,
+    rgba(0, 0, 0, 0.32) 100%
+  );
+}
+
+/* Glass Pill (small indicators, badges) */
+.glass-pill {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glass-shadow-subtle);
+  color: var(--surface-text);
+  padding: 8px 14px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Glass Icon Button (circular) */
+.glass-icon-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-round);
+  box-shadow: var(--glass-shadow);
+  color: var(--surface-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.glass-icon-btn:hover {
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-strong);
+}
+
+.glass-icon-btn:active {
+  transform: scale(0.97);
+}
+
+.glass-icon-btn:focus,
+.glass-icon-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Glass Card Container */
+.glass-card {
+  position: relative;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  color: var(--surface-text);
+  padding: 12px 14px;
+}
+
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--glass-highlight);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Glass Switcher (button group container) */
+.glass-switcher {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow);
+}

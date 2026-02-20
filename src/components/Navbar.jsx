@@ -17,11 +17,7 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
 
   function handleAuthClick() {
     if (isLoading) return;
-    if (auth?.localOnlyMode) {
-      onNavigate?.("/auth");
-      return;
-    }
-    auth?.signIn?.();
+    onNavigate?.("/auth");
   }
 
   const handleNavigate = (event, path) => {
@@ -74,7 +70,7 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
               disabled={isLoading}
               type="button"
             >
-              {auth?.localOnlyMode ? "Log In" : "Sign In"}
+              Log In
             </button>
           ) : null}
         </div>

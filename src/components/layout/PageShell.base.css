@@ -1,0 +1,208 @@
+﻿.profile-page {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 110px 32px 40px;
+  isolation: isolate;
+  --profile-stars-opacity: 0.72;
+  --profile-earth-opacity: 0.92;
+  background: radial-gradient(
+      120% 120% at 20% 0%,
+      rgba(255, 255, 255, 0.08),
+      rgba(18, 18, 24, 0.92)
+    ),
+    linear-gradient(160deg, rgba(8, 10, 22, 0.88), rgba(18, 18, 24, 0.96));
+}
+
+.profile-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image: url("../../assets/planets/2k_stars_milky_way.jpg");
+  background-size: cover;
+  background-position: 50% 40%;
+  opacity: 0;
+  transform: scale(1.04);
+  animation: profile-stars-fade 1.2s ease forwards,
+    profile-stars-drift 80s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.profile-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+      110% 90% at 50% 20%,
+      rgba(18, 18, 24, 0.08),
+      rgba(8, 10, 22, 0.82)
+    ),
+    linear-gradient(180deg, rgba(8, 10, 22, 0.2), rgba(8, 10, 22, 0.85));
+  pointer-events: none;
+  z-index: 1;
+}
+
+.profile-page.light {
+  --profile-stars-opacity: 0.68;
+  --profile-earth-opacity: 0.9;
+}
+
+.profile-page.light .profile-page__title {
+  color: rgba(248, 250, 252, 0.95);
+}
+
+.profile-page.light .profile-page__subtitle {
+  color: rgba(226, 232, 240, 0.75);
+}
+
+.profile-page__earth {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100vh;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: var(--profile-earth-opacity);
+  z-index: 2;
+}
+
+.profile-page__earth-canvas {
+  width: min(100vmin, 1000px);
+  height: min(100vmin, 1000px);
+  filter: drop-shadow(0 30px 90px rgba(0, 0, 0, 0.45));
+}
+
+.profile-page__content {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: relative;
+  z-index: 3;
+  min-height: calc(100vh - 150px);
+  justify-content: center;
+}
+
+.profile-page__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.profile-page__title {
+  font-size: 2.1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--surface-text);
+}
+
+.profile-page__subtitle {
+  margin-top: 6px;
+  color: var(--surface-text-muted);
+  max-width: 520px;
+}
+
+.profile-page__header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.profile-card {
+  padding: 24px;
+  display: grid;
+  gap: 22px;
+}
+
+.profile-card__header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border-strong);
+  background: var(--glass-bg);
+  box-shadow: var(--glass-shadow-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+}
+
+.profile-avatar__icon {
+  width: 32px;
+  height: 32px;
+  display: block;
+  filter: invert(1);
+  opacity: 0.9;
+}
+
+.profile-page.light .profile-avatar__icon {
+  filter: none;
+  opacity: 0.75;
+}
+
+.profile-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-preview__name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--surface-text);
+}
+
+.profile-preview__meta {
+  color: var(--surface-text-muted);
+  font-size: 0.9rem;
+}
+
+.profile-pill {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border-strong);
+  background: var(--glass-bg);
+  color: var(--surface-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.profile-section {
+  display: grid;
+  gap: 16px;
+}
+
+.profile-section-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--surface-text);
+}
+
+.profile-section-copy {
+  color: var(--surface-text-muted);
+}
+

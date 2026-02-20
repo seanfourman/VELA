@@ -39,10 +39,8 @@ function AdminPage({
   onDeleteStargazeLocation,
 }) {
   const isAuthenticated = Boolean(auth?.isAuthenticated);
-  const isLocalOnlyMode =
-    String(import.meta.env.VITE_LOCAL_ONLY ?? "true").toLowerCase() !== "false";
-  const canUseAdminTools = isLocalOnlyMode || isAuthenticated;
-  const hasAdminAccess = isLocalOnlyMode || Boolean(isAdmin);
+  const canUseAdminTools = isAuthenticated;
+  const hasAdminAccess = Boolean(isAdmin);
   const [draft, setDraft] = useState(EMPTY_LOCATION);
   const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
   const locationList = useMemo(() => {
@@ -74,7 +72,6 @@ function AdminPage({
     try {
       await deleteRecommendation({
         spotId: locationId,
-        idToken: auth?.session?.id_token,
       });
       onDeleteStargazeLocation?.(locationId);
       showPopup("Location removed.", "info", { duration: 2200 });
@@ -125,7 +122,6 @@ function AdminPage({
 
     try {
       await saveRecommendation({
-        idToken: auth?.session?.id_token,
         location: apiLocation,
       });
       onSaveStargazeLocation?.(apiLocation);
@@ -163,7 +159,7 @@ function AdminPage({
           title="Sign in required"
           message="Sign in with an admin account to access this area."
           buttonLabel="Sign In"
-          onAction={() => auth?.signIn?.()}
+          onAction={() => onNavigate?.("/auth")}
         />
       ) : !hasAdminAccess ? (
         <AdminAccessNotice

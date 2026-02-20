@@ -1,17 +1,20 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import usePlanets from "../../../hooks/usePlanets";
-import { preloadAllPlanetTextures } from "../../../utils/planetUtils";
 import { isProbablyHardwareAccelerated } from "../../../utils/hardwareUtils";
+import { preloadAllPlanetTextures } from "../../../utils/planetUtils";
+import {
+  getFavoriteOnlySpots,
+  getFavoriteStargazeSpots,
+  getPinnedTargetState,
+  getQuickActionTitles,
+  getSearchPlaceholder,
+} from "./mapViewDerived";
 import useMapDirections from "./useMapDirections";
+import useMapFavoriteTransition from "./useMapFavoriteTransition";
 import useMapFavorites from "./useMapFavorites";
 import useMapInteractions from "./useMapInteractions";
 import useMapStargaze from "./useMapStargaze";
+import useMapTargetToggleHandlers from "./useMapTargetToggleHandlers";
 import useMapViewUiState from "./useMapViewUiState";
 
 const useMapViewState = ({
@@ -29,8 +32,6 @@ const useMapViewState = ({
   const mapRef = useRef(null);
   const planetPanelRef = useRef(null);
   const placedMarkerRef = useRef(null);
-  const favoriteTransitionTimeoutRef = useRef(null);
-  const prevPlacedFavoriteRef = useRef(false);
 
   const [placedMarker, setPlacedMarker] = useState(null);
   const [exitingMarker, setExitingMarker] = useState(null);
@@ -40,7 +41,6 @@ const useMapViewState = ({
   const [latestGridShot, setLatestGridShot] = useState(null);
 
   const ui = useMapViewUiState();
-
   const {
     visiblePlanets,
     planetsLoading,
@@ -54,26 +54,14 @@ const useMapViewState = ({
     const prefersReducedMotion = window.matchMedia?.(
       "(prefers-reduced-motion: reduce)"
     )?.matches;
-    const hardwareOk = isProbablyHardwareAccelerated();
-    return prefersReducedMotion || !hardwareOk;
+    return prefersReducedMotion || !isProbablyHardwareAccelerated();
   }, []);
 
   useEffect(() => {
     preloadAllPlanetTextures();
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (favoriteTransitionTimeoutRef.current) {
-        clearTimeout(favoriteTransitionTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const getSpotKey = useCallback(
-    (lat, lng) => `${lat.toFixed(5)}:${lng.toFixed(5)}`,
-    []
-  );
+  const getSpotKey = useCallback((lat, lng) => `${lat.toFixed(5)}:${lng.toFixed(5)}`, []);
 
   const stargaze = useMapStargaze({
     stargazeLocations,
@@ -120,33 +108,7 @@ const useMapViewState = ({
     getSpotKey,
   });
 
-  useEffect(() => {
-    const isFavorite = Boolean(placedMarker?.isFavorite);
-    const hadFavorite = prevPlacedFavoriteRef.current;
-
-    if (!placedMarker) {
-      prevPlacedFavoriteRef.current = false;
-      return;
-    }
-
-    if (isFavorite && !hadFavorite) {
-      const marker = placedMarkerRef.current;
-      const element = marker?.getElement?.();
-      if (element) {
-        element.classList.remove("favorite-transition");
-        void element.offsetWidth;
-        element.classList.add("favorite-transition");
-        if (favoriteTransitionTimeoutRef.current) {
-          clearTimeout(favoriteTransitionTimeoutRef.current);
-        }
-        favoriteTransitionTimeoutRef.current = setTimeout(() => {
-          element.classList.remove("favorite-transition");
-        }, 360);
-      }
-    }
-
-    prevPlacedFavoriteRef.current = isFavorite;
-  }, [placedMarker]);
+  useMapFavoriteTransition({ placedMarker, placedMarkerRef });
 
   const handleToggleLightOverlay = useCallback(() => {
     onToggleLightOverlay?.(!lightOverlayEnabled);
@@ -159,130 +121,56 @@ const useMapViewState = ({
     [onSearchDistanceChange]
   );
 
-  const handleTogglePinnedTarget = useCallback(() => {
-    if (!placedMarker?.isFavorite) return;
-    const { lat, lng } = placedMarker;
-    const key = getSpotKey(lat, lng);
-    const isSelected =
-      selectedDarkSpot &&
-      getSpotKey(selectedDarkSpot.lat, selectedDarkSpot.lng) === key;
-    if (isSelected) {
-      setSelectedDarkSpot(null);
-      return;
-    }
-    setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
-  }, [getSpotKey, placedMarker, selectedDarkSpot]);
-
-  const handleToggleStargazeTarget = useCallback(
-    (spot) => {
-      if (!spot) return;
-      const spotKey = getSpotKey(spot.lat, spot.lng);
-      const isSelected =
-        selectedDarkSpot &&
-        getSpotKey(selectedDarkSpot.lat, selectedDarkSpot.lng) === spotKey;
-      if (isSelected) {
-        setSelectedDarkSpot(null);
-        return;
-      }
-      setSelectedDarkSpot({
-        lat: spot.lat,
-        lng: spot.lng,
-        label: spot.name || "Stargazing spot",
-      });
-    },
-    [getSpotKey, selectedDarkSpot]
-  );
-
-  const handleToggleDarkSpotTarget = useCallback(
-    (spot) => {
-      if (!spot) return;
-      const isSelected =
-        selectedDarkSpot &&
-        Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
-        Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6;
-      if (isSelected) {
-        setSelectedDarkSpot(null);
-        return;
-      }
-      setSelectedDarkSpot({
-        lat: spot.lat,
-        lng: spot.lon,
-        label: "Stargazing spot",
-      });
-    },
-    [selectedDarkSpot]
-  );
+  const targetHandlers = useMapTargetToggleHandlers({
+    placedMarker,
+    selectedDarkSpot,
+    getSpotKey,
+    setSelectedDarkSpot,
+  });
 
   const hasPinnedSpot = Boolean(placedMarker);
   const hasAnyLocation =
     hasPinnedSpot || Boolean(location) || Boolean(selectedDarkSpot);
-  const selectedTargetLabel = selectedDarkSpot?.label || "stargazing spot";
-  const selectedTargetLabelLower = selectedTargetLabel.toLowerCase();
-  const quickPlanetsTitle = selectedDarkSpot
-    ? `Visible planets from ${selectedTargetLabelLower}`
-    : hasPinnedSpot
-    ? "Visible planets from pinned spot"
-    : hasAnyLocation
-    ? "Visible planets from your location"
-    : "Drop a pin or enable location";
-  const quickDarkSpotsTitle = selectedDarkSpot
-    ? `Find spots near the ${selectedTargetLabelLower}`
-    : hasPinnedSpot
-    ? "Find stargazing spots near the pin"
-    : hasAnyLocation
-    ? "Find stargazing spots near you"
-    : "Drop a pin or enable location";
-  const searchPlaceholder = showRecommendedSpots
-    ? "Search coordinates or best stargazing spots"
-    : "Search coordinates";
-  const favoriteOnlySpots = useMemo(() => {
-    if (favorites.favoriteSpots.length === 0) return [];
-    const activeDarkSpotKeys = new Set(
-      darkSpots.map((spot) => getSpotKey(spot.lat, spot.lon))
-    );
-    const stargazeKeys = new Set(
-      stargaze.visibleStargazeLocations.map((spot) =>
-        getSpotKey(spot.lat, spot.lng)
-      )
-    );
-    const placedKey = placedMarker
-      ? getSpotKey(placedMarker.lat, placedMarker.lng)
-      : null;
-    return favorites.favoriteSpots.filter((spot) => {
-      if (placedKey && spot.key === placedKey) return false;
-      if (activeDarkSpotKeys.has(spot.key)) return false;
-      if (stargazeKeys.has(spot.key)) return false;
-      return true;
-    });
-  }, [
-    darkSpots,
-    favorites.favoriteSpots,
-    getSpotKey,
-    placedMarker,
-    stargaze.visibleStargazeLocations,
-  ]);
-  const favoriteStargazeSpots = useMemo(() => {
-    if (
-      !Array.isArray(stargaze.visibleStargazeLocations) ||
-      stargaze.visibleStargazeLocations.length === 0
-    ) {
-      return [];
-    }
-    if (favorites.favoriteSpotKeys.size === 0) return [];
-    return stargaze.visibleStargazeLocations.filter((spot) =>
-      favorites.favoriteSpotKeys.has(getSpotKey(spot.lat, spot.lng))
-    );
-  }, [
-    favorites.favoriteSpotKeys,
-    getSpotKey,
-    stargaze.visibleStargazeLocations,
-  ]);
+  const { quickPlanetsTitle, quickDarkSpotsTitle } = getQuickActionTitles({
+    selectedDarkSpot,
+    hasPinnedSpot,
+    hasAnyLocation,
+  });
+  const searchPlaceholder = getSearchPlaceholder(showRecommendedSpots);
 
-  const isPinnedTarget =
-    placedMarker?.isFavorite &&
-    selectedDarkSpot &&
-    getSpotKey(placedMarker.lat, placedMarker.lng) ===
-      getSpotKey(selectedDarkSpot.lat, selectedDarkSpot.lng);
+  const favoriteOnlySpots = useMemo(
+    () =>
+      getFavoriteOnlySpots({
+        favoriteSpots: favorites.favoriteSpots,
+        darkSpots,
+        visibleStargazeLocations: stargaze.visibleStargazeLocations,
+        placedMarker,
+        getSpotKey,
+      }),
+    [
+      darkSpots,
+      favorites.favoriteSpots,
+      getSpotKey,
+      placedMarker,
+      stargaze.visibleStargazeLocations,
+    ]
+  );
+
+  const favoriteStargazeSpots = useMemo(
+    () =>
+      getFavoriteStargazeSpots({
+        visibleStargazeLocations: stargaze.visibleStargazeLocations,
+        favoriteSpotKeys: favorites.favoriteSpotKeys,
+        getSpotKey,
+      }),
+    [favorites.favoriteSpotKeys, getSpotKey, stargaze.visibleStargazeLocations]
+  );
+
+  const isPinnedTarget = getPinnedTargetState({
+    placedMarker,
+    selectedDarkSpot,
+    getSpotKey,
+  });
 
   return {
     refs: {
@@ -362,10 +250,10 @@ const useMapViewState = ({
       handleGetDirections: directions.handleGetDirections,
       handleCloseContextMenu: interactions.handleCloseContextMenu,
       handleToggleDarkSpotFavorite: favorites.handleToggleDarkSpotFavorite,
-      handleToggleDarkSpotTarget,
+      handleToggleDarkSpotTarget: targetHandlers.handleToggleDarkSpotTarget,
       handleTogglePinnedFavorite: favorites.handleTogglePinnedFavorite,
-      handleTogglePinnedTarget,
-      handleToggleStargazeTarget,
+      handleTogglePinnedTarget: targetHandlers.handleTogglePinnedTarget,
+      handleToggleStargazeTarget: targetHandlers.handleToggleStargazeTarget,
       handleRemoveFavoriteSpotAnimated:
         favorites.handleRemoveFavoriteSpotAnimated,
       handleToggleStargazeFavorite: favorites.handleToggleStargazeFavorite,

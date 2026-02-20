@@ -1,0 +1,22 @@
+﻿@media (max-width: 768px) {
+  .location-search {
+    top: 80px;
+    bottom: auto;
+    width: min(92vw, 400px);
+  }
+
+  .location-search__panel {
+    flex-direction: column;
+  }
+
+  .location-search__results {
+    transform-origin: top;
+    border-bottom: 0;
+    border-top: 0 solid var(--glass-border);
+    --search-reveal-shift: -8px;
+  }
+
+  .location-search__results.open {
+    border-top-width: 1px;
+  }
+}
