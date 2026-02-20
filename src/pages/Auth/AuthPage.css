@@ -31,13 +31,35 @@
 }
 
 .auth-mode-switcher {
+  --switch-count: 2;
+  --switch-index: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  padding: 5px;
+  padding: 4px;
+  position: relative;
+  overflow: hidden;
   border-radius: var(--radius-pill);
   border: 1px solid var(--glass-border);
   background: var(--glass-bg);
+}
+
+.auth-mode-switcher::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc((100% - 8px) / var(--switch-count));
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-elevated);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow: var(--glass-shadow-subtle);
+  box-sizing: border-box;
+  transform: translateX(calc(var(--switch-index) * 100%));
+  transition: transform 0.25s ease;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .auth-mode-switch {
@@ -50,16 +72,18 @@
   padding: 11px 14px;
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  position: relative;
+  z-index: 1;
 }
 
 .auth-mode-switch:hover {
   color: var(--surface-text);
+  border-color: transparent;
 }
 
 .auth-mode-switch.active {
   color: var(--surface-text);
-  border-color: var(--glass-border-strong);
-  background: var(--glass-bg-elevated);
+  border-color: transparent;
 }
 
 .auth-mode-switch:focus-visible {

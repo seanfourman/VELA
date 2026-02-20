@@ -28,6 +28,10 @@ function AuthPage({ auth, isLight, onNavigate }) {
   const hero = showHero ? (
     <SaturnGlobe variant="day" className="profile-page__earth-canvas" />
   ) : null;
+  const authSwitcherStyle = {
+    "--switch-index": mode === AUTH_MODE_REGISTER ? 1 : 0,
+    "--switch-count": 2,
+  };
 
   const resetPasswords = () => {
     setPassword("");
@@ -87,7 +91,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
         showPopup("Welcome back.", "success", { duration: 2200 });
       }
       resetPasswords();
-      onNavigate?.("/profile");
+      onNavigate?.("/");
     } catch (error) {
       showPopup(
         error instanceof Error ? error.message : "Authentication failed.",
@@ -149,7 +153,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
             </div>
           </>
         ) : (
-          <form className="auth-form" onSubmit={handleSubmit}>
+          <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-headline">
               <h2 className="profile-section-title auth-title">
                 {mode === AUTH_MODE_REGISTER
@@ -163,7 +167,12 @@ function AuthPage({ auth, isLight, onNavigate }) {
               </p>
             </div>
 
-            <div className="auth-mode-switcher" role="tablist" aria-label="Auth mode">
+            <div
+              className="auth-mode-switcher"
+              role="tablist"
+              aria-label="Auth mode"
+              style={authSwitcherStyle}
+            >
               <button
                 type="button"
                 className={`auth-mode-switch${
