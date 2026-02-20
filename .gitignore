@@ -26,6 +26,7 @@ dist-ssr
 *.sln
 *.sw?
 
+docs
 data
 lightmap-tiles
 scripts/aws/World_Atlas_2015.tif
