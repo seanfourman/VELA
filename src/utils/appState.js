@@ -1,7 +1,7 @@
 export const PROFILE_STORAGE_KEY = "vela:profile:settings";
 export const SETTINGS_STORAGE_KEY = "vela:settings";
 export const DEFAULT_MAP_TYPE = "satellite";
-export const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
+const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
 export const DEFAULT_SETTINGS = {
   directionsProvider: "google",
   showRecommendedSpots: true,

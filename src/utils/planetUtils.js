@@ -42,7 +42,7 @@ const texturePreloadCache = new Map();
 const cacheKey = (lat, lng) =>
   `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(2)}`;
 
-export function preloadPlanetTexture(url) {
+function preloadPlanetTexture(url) {
   if (!url) return Promise.resolve();
   if (texturePreloadCache.has(url)) return texturePreloadCache.get(url);
 

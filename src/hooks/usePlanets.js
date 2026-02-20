@@ -4,7 +4,7 @@ import { fetchVisiblePlanets } from "../utils/planetUtils";
 const getPlanetList = (data) =>
   Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
 
-export function usePlanets() {
+function usePlanets() {
   const lastPlanetKey = useRef(null);
   const [visiblePlanets, setVisiblePlanets] = useState([]);
   const [planetsLoading, setPlanetsLoading] = useState(false);

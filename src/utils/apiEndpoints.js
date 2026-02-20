@@ -5,7 +5,6 @@ const normalizeBaseUrl = (value) => {
 
 const API_BASE = normalizeBaseUrl(import.meta.env.VITE_API_BASE);
 const LIGHTMAP_API_BASE = normalizeBaseUrl(import.meta.env.VITE_LIGHTMAP_API_BASE);
-const FAVORITES_API_BASE = normalizeBaseUrl(import.meta.env.VITE_FAVORITES_API_BASE);
 const RECOMMENDATIONS_API_BASE = normalizeBaseUrl(
   import.meta.env.VITE_RECOMMENDATIONS_API_BASE
 );
@@ -17,7 +16,6 @@ const LOCAL_ENDPOINTS = {
   darkSpots: "/api/darkspots",
   skyQuality: "/api/skyquality",
   lightMapTiles: "/api/lightmap/{z}/{x}/{y}.png",
-  favorites: "/api/favorites",
   recommendations: "/api/recommendations",
 };
 
@@ -57,12 +55,6 @@ export const buildDarkSpotsUrl = (lat, lon, searchDistance) =>
     lon,
     searchDistance,
   });
-
-export const buildFavoritesUrl = () =>
-  `${resolveBase(FAVORITES_API_BASE, LOCAL_ENDPOINTS.favorites).replace(
-    /\/favorites$/,
-    ""
-  )}/favorites`;
 
 export const buildRecommendationsUrl = () =>
   `${resolveBase(

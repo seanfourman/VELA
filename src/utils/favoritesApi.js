@@ -5,7 +5,7 @@ const parseCoord = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-export const buildSpotId = (lat, lon) => {
+const buildSpotId = (lat, lon) => {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
   return `${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`;
 };

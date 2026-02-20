@@ -28,7 +28,7 @@ function normalizeCognitoRedirectUri(uri) {
   return String(uri);
 }
 
-export function getCognitoConfig() {
+function getCognitoConfig() {
   const domain = normalizeDomain(
     import.meta.env.VITE_COGNITO_DOMAIN || DEFAULTS.domain
   );
@@ -156,7 +156,7 @@ function storeSession(session) {
   localStorage.setItem(STORAGE_KEYS.session, JSON.stringify(session));
 }
 
-export function clearStoredSession() {
+function clearStoredSession() {
   localStorage.removeItem(STORAGE_KEYS.session);
 }
 
@@ -165,7 +165,7 @@ function clearPkceSession() {
   sessionStorage.removeItem(STORAGE_KEYS.pkceState);
 }
 
-export function buildLoginUrl({ codeChallenge, state } = {}) {
+function buildLoginUrl({ codeChallenge, state } = {}) {
   const { domain, clientId, redirectUri, scopes } = assertCognitoConfigured();
   const url = new URL(`${domain}/login`);
 
@@ -185,7 +185,7 @@ export function buildLoginUrl({ codeChallenge, state } = {}) {
   return url.toString();
 }
 
-export function buildLogoutUrl() {
+function buildLogoutUrl() {
   const { domain, clientId, logoutUri } = assertCognitoConfigured();
   const url = new URL(`${domain}/logout`);
   url.searchParams.set("client_id", clientId);

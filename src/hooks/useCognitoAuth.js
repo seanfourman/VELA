@@ -435,5 +435,3 @@ export function useCognitoAuth() {
     register,
   };
 }
-
-export default useCognitoAuth;

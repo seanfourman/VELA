@@ -23,5 +23,3 @@ export function isProbablyHardwareAccelerated() {
 
   return cachedHwAcceleration;
 }
-
-export default isProbablyHardwareAccelerated;
