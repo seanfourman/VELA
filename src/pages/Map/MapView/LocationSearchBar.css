@@ -102,7 +102,7 @@
 }
 
 .location-search__input::placeholder {
-  color: var(--surface-text-muted);
+  color: var(--placeholder-text);
   text-align: center;
   transition: opacity 0.15s ease;
 }

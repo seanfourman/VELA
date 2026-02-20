@@ -128,7 +128,6 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
           </div>
 
           <div className="profile-actions">
-            {/* (***) DISABLED FOR NOW: Profile page is irrelevant for now.
             <a
               href="/profile"
               className="profile-action"
@@ -136,7 +135,6 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
             >
               Profile
             </a>
-            */}
             <a
               href="/settings"
               className="profile-action"

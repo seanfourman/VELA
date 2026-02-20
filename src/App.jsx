@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Navbar from "./components/Navbar";
 import MapView from "./pages/Map/MapView";
+import AuthPage from "./pages/Auth/AuthPage";
 import ProfilePage from "./pages/Profile/ProfilePage";
 import AdminPage from "./pages/Admin/AdminPage";
 import SettingsPage from "./pages/Settings/SettingsPage";
@@ -364,7 +365,7 @@ function App() {
 
       const shouldZoomOut =
         normalizePath(route) === "/" &&
-        ["/profile", "/settings", "/admin"].includes(nextPath);
+        ["/auth", "/profile", "/settings", "/admin"].includes(nextPath);
 
       if (shouldZoomOut) {
         if (mapViewRef.current?.zoomOutToMin) {
@@ -437,9 +438,9 @@ function App() {
     []
   );
 
-  const isAdmin = LOCAL_ONLY_MODE || isAdminUser(auth?.user);
-  const isLight = mapType === "light";
   const currentRoute = normalizePath(route);
+  const isAdmin = isAdminUser(auth?.user);
+  const isLight = mapType === "light";
 
   return (
     <div className="app">
@@ -451,7 +452,13 @@ function App() {
         onNavigate={navigate}
         currentRoute={currentRoute}
       />
-      {currentRoute === "/profile" ? (
+      {currentRoute === "/auth" ? (
+        <AuthPage
+          auth={auth}
+          isLight={isLight}
+          onNavigate={navigate}
+        />
+      ) : currentRoute === "/profile" ? (
         <ProfilePage
           auth={auth}
           profile={profileSettings}
@@ -489,7 +496,7 @@ function App() {
           locationStatus={locationStatus}
           mapType={mapType}
           setMapType={setMapType}
-          isAuthenticated={LOCAL_ONLY_MODE || auth?.isAuthenticated}
+          isAuthenticated={LOCAL_ONLY_MODE || Boolean(auth?.isAuthenticated)}
           authToken={auth?.session?.id_token}
           stargazeLocations={stargazeLocations}
           directionsProvider={settings.directionsProvider}

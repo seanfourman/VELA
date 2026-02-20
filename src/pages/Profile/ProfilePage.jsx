@@ -111,7 +111,13 @@ function ProfilePage({
           <button
             type="button"
             className="glass-btn profile-action-btn"
-            onClick={() => auth?.signIn?.()}
+            onClick={() => {
+              if (auth?.localOnlyMode) {
+                onNavigate?.("/auth");
+                return;
+              }
+              auth?.signIn?.();
+            }}
           >
             Sign In
           </button>
