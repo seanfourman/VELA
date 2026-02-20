@@ -3,7 +3,7 @@ import showPopup from "@/utils/popup";
 import PageShell from "@/components/layout/PageShell";
 import { getPasswordChecks, isStrongPassword } from "@/utils/passwordRules";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
-import SaturnGlobe from "@/components/planets/SaturnGlobe";
+import JupiterGlobe from "@/components/planets/JupiterGlobe";
 import "./AuthPage.css";
 
 const AUTH_MODE_LOGIN = "login";
@@ -39,7 +39,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
   const showPasswordPopover = isRegisterMode && isPasswordFocused;
   const showConfirmPassword = isRegisterMode && password.length > 0;
   const hero = showHero ? (
-    <SaturnGlobe variant="day" className="profile-page__earth-canvas" />
+    <JupiterGlobe variant="day" className="profile-page__earth-canvas" />
   ) : null;
   const authSwitcherStyle = {
     "--switch-index": isRegisterMode ? 1 : 0,
