@@ -1,7 +1,7 @@
 import { getPasswordValidationError } from "../utils/passwordRules";
 
-const LOCAL_AUTH_USERS_KEY = "vela:local:auth:users";
-const LOCAL_AUTH_SESSION_KEY = "vela:local:auth:session";
+const AUTH_USERS_KEY = "vela:local:auth:users";
+const AUTH_SESSION_KEY = "vela:local:auth:session";
 
 const normalizeEmail = (value) =>
   String(value || "")
@@ -127,7 +127,7 @@ const serializeUser = (user) => {
 };
 
 const readUsers = () => {
-  const parsed = readJsonFromStorage(LOCAL_AUTH_USERS_KEY, []);
+  const parsed = readJsonFromStorage(AUTH_USERS_KEY, []);
   if (!Array.isArray(parsed)) return [];
   return parsed.map(normalizeUser).filter(Boolean);
 };
@@ -136,7 +136,7 @@ const persistUsers = (users) => {
   const payload = Array.isArray(users)
     ? users.map(serializeUser).filter(Boolean)
     : [];
-  writeJsonToStorage(LOCAL_AUTH_USERS_KEY, payload);
+  writeJsonToStorage(AUTH_USERS_KEY, payload);
 };
 
 const normalizeSession = (value) => {
@@ -149,7 +149,7 @@ const normalizeSession = (value) => {
 };
 
 const readSession = () =>
-  normalizeSession(readJsonFromStorage(LOCAL_AUTH_SESSION_KEY, null));
+  normalizeSession(readJsonFromStorage(AUTH_SESSION_KEY, null));
 
 export const readAuthState = () => {
   const users = readUsers();
@@ -163,10 +163,10 @@ export const readAuthState = () => {
 
 export const persistAuthSession = (session) => {
   if (!session) {
-    writeJsonToStorage(LOCAL_AUTH_SESSION_KEY, null);
+    writeJsonToStorage(AUTH_SESSION_KEY, null);
     return;
   }
-  writeJsonToStorage(LOCAL_AUTH_SESSION_KEY, normalizeSession(session));
+  writeJsonToStorage(AUTH_SESSION_KEY, normalizeSession(session));
 };
 
 export const mapUserToAuthUser = (user) => {
