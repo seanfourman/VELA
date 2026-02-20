@@ -12,6 +12,7 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
       ? currentRoute
       : window.location.pathname;
   const isHome = currentPath === "/";
+  const isAuthScreen = currentPath === "/auth";
   const logoSrc = !isHome ? velaLogo : isLight ? velaLogoBlack : velaLogo;
 
   function handleAuthClick() {
@@ -66,7 +67,7 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
               isLight={isLight}
               onNavigate={onNavigate}
             />
-          ) : (
+          ) : !isAuthScreen ? (
             <button
               className="auth-button"
               onClick={handleAuthClick}
@@ -75,7 +76,7 @@ function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
             >
               {auth?.localOnlyMode ? "Log In" : "Sign In"}
             </button>
-          )}
+          ) : null}
         </div>
       </nav>
     </>
