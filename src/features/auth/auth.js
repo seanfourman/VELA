@@ -1,4 +1,4 @@
-import { getPasswordValidationError } from "../../utils/passwordRules";
+import { getPasswordValidationError } from "@/utils/passwordRules";
 import { createPasswordSalt, hashPassword } from "./authCrypto";
 import {
   persistStoredSession,

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import L from "leaflet";
-import { fetchDarkSpots } from "../../../utils/darkSpots";
+import { fetchDarkSpots } from "@/utils/darkSpots";
 import { isCoarsePointerEnv } from "./mapUtils";
 import { LOCATION_ZOOM, MARKER_EXIT_MS } from "./mapConstants";
 import {

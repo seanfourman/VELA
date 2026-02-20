@@ -1,6 +1,6 @@
 import "./Navbar.css";
-import velaLogo from "../assets/vela.svg";
-import velaLogoBlack from "../assets/vela-black.svg";
+import velaLogo from "@/assets/vela.svg";
+import velaLogoBlack from "@/assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
 
 function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {

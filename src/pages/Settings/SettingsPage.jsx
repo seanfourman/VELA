@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import SaturnGlobe from "../../components/planets/SaturnGlobe";
-import PageShell from "../../components/layout/PageShell";
-import showPopup from "../../utils/popup";
-import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
-import SearchDistanceSelector from "../Map/MapView/SearchDistanceSelector";
+import SaturnGlobe from "@/components/planets/SaturnGlobe";
+import PageShell from "@/components/layout/PageShell";
+import showPopup from "@/utils/popup";
+import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
+import SearchDistanceSelector from "@/pages/Map/MapView/SearchDistanceSelector";
 import "./SettingsPage.css";
 
 const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];

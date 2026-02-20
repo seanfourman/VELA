@@ -2,7 +2,7 @@ import {
   deleteFavoriteSpot,
   fetchFavoriteSpots,
   saveFavoriteSpot,
-} from "../../utils/favoritesApi";
+} from "@/utils/favoritesApi";
 
 export const loadFavoriteSpots = async (getSpotKey) => {
   const items = await fetchFavoriteSpots();

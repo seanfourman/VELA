@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchSkyQualityMetrics } from "../../../utils/skyQuality";
+import { fetchSkyQualityMetrics } from "@/utils/skyQuality";
 import "./SkyQualityInfo.css";
 
 function formatMaybeNumber(value, digits = 2) {

@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import showPopup from "../../utils/popup";
-import PageShell from "../../components/layout/PageShell";
-import { getPasswordChecks, isStrongPassword } from "../../utils/passwordRules";
-import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
-import SaturnGlobe from "../../components/planets/SaturnGlobe";
+import showPopup from "@/utils/popup";
+import PageShell from "@/components/layout/PageShell";
+import { getPasswordChecks, isStrongPassword } from "@/utils/passwordRules";
+import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
+import SaturnGlobe from "@/components/planets/SaturnGlobe";
 import "./AuthPage.css";
 
 const AUTH_MODE_LOGIN = "login";

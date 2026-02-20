@@ -8,8 +8,8 @@ import {
   SRGBColorSpace,
   Vector3,
 } from "three";
-import saturnMap from "../../assets/planets/2k_saturn.jpg";
-import saturnRingMap from "../../assets/planets/2k_saturn_ring_alpha.png";
+import saturnMap from "@/assets/planets/2k_saturn.jpg";
+import saturnRingMap from "@/assets/planets/2k_saturn_ring_alpha.png";
 
 const SATURN_TILT = 0.45;
 

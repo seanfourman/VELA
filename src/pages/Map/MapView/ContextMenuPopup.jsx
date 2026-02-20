@@ -1,7 +1,7 @@
 import SkyQualityInfo from "./SkyQualityInfo";
-import favoriteIcon from "../../../assets/icons/favorite-icon.svg";
-import targetIcon from "../../../assets/icons/target-icon.svg";
-import shareIcon from "../../../assets/icons/share-icon.svg";
+import favoriteIcon from "@/assets/icons/favorite-icon.svg";
+import targetIcon from "@/assets/icons/target-icon.svg";
+import shareIcon from "@/assets/icons/share-icon.svg";
 import "./ContextMenuPopup.css";
 
 export default function ContextMenuPopup({

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import usePlanets from "@/features/map/usePlanets";
-import { isProbablyHardwareAccelerated } from "../../../utils/hardwareUtils";
-import { preloadAllPlanetTextures } from "../../../utils/planetUtils";
+import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
+import { preloadAllPlanetTextures } from "@/utils/planetUtils";
 import {
   getFavoriteOnlySpots,
   getFavoriteStargazeSpots,

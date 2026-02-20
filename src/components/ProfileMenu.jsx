@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import userIcon from "../assets/icons/user-icon.svg";
+import userIcon from "@/assets/icons/user-icon.svg";
 import "./ProfileMenu.css";
 
 function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {

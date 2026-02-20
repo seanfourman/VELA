@@ -1,6 +1,6 @@
 import { Marker, Popup } from "react-leaflet";
-import { favoriteSpotIcon, pinIcon } from "../mapIcons";
-import { PinnedPopupContent } from "../MapPopups";
+import { favoriteSpotIcon, pinIcon } from "@/pages/Map/MapView/mapIcons";
+import { PinnedPopupContent } from "@/pages/Map/MapView/MapPopups";
 
 export default function PlacedMarker({
   placedMarker,

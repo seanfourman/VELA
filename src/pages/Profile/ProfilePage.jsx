@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import EarthGlobe from "../../components/planets/EarthGlobe";
-import PageShell from "../../components/layout/PageShell";
-import userIcon from "../../assets/icons/user-icon.svg";
-import showPopup from "../../utils/popup";
-import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
+import EarthGlobe from "@/components/planets/EarthGlobe";
+import PageShell from "@/components/layout/PageShell";
+import userIcon from "@/assets/icons/user-icon.svg";
+import showPopup from "@/utils/popup";
+import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 
 const EMPTY_PROFILE = {
   displayName: "",

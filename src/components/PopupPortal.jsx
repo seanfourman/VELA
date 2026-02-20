@@ -1,6 +1,6 @@
 import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
-import { POPUP_EVENT } from "../utils/popup";
+import { POPUP_EVENT } from "@/utils/popup";
 import "./Popup.css";
 
 function Popup({ popup }) {

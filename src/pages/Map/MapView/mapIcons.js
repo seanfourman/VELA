@@ -1,6 +1,6 @@
 import L from "leaflet";
-import favoriteFullIcon from "../../../assets/icons/favorite-full-icon.svg";
-import starFullIcon from "../../../assets/icons/star-full-icon.svg";
+import favoriteFullIcon from "@/assets/icons/favorite-full-icon.svg";
+import starFullIcon from "@/assets/icons/star-full-icon.svg";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({

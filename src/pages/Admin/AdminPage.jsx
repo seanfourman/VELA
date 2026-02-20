@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import PageShell from "../../components/layout/PageShell";
-import MoonGlobe from "../../components/planets/MoonGlobe";
-import showPopup from "../../utils/popup";
+import PageShell from "@/components/layout/PageShell";
+import MoonGlobe from "@/components/planets/MoonGlobe";
+import showPopup from "@/utils/popup";
 import {
   deleteRecommendation,
   saveRecommendation,
-} from "../../utils/recommendationsApi";
-import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
+} from "@/utils/recommendationsApi";
+import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import AdminAccessNotice from "./AdminAccessNotice";
 import AdminLocationForm from "./AdminLocationForm";
 import AdminLocationList from "./AdminLocationList";

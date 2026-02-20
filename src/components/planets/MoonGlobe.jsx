@@ -6,7 +6,7 @@ import {
   LinearMipmapLinearFilter,
   SRGBColorSpace,
 } from "three";
-import moonMap from "../../assets/planets/2k_moon.jpg";
+import moonMap from "@/assets/planets/2k_moon.jpg";
 
 const tuneTexture = (baseTexture, anisotropy = 4) => {
   if (!baseTexture) return baseTexture;

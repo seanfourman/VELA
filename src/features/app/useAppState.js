@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useAuth } from "../auth/useAuth";
-import showPopup from "../../utils/popup";
-import { isProbablyHardwareAccelerated } from "../../utils/hardwareUtils";
-import { fetchRecommendations } from "../../utils/recommendationsApi";
+import { useAuth } from "@/features/auth/useAuth";
+import showPopup from "@/utils/popup";
+import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
+import { fetchRecommendations } from "@/utils/recommendationsApi";
 import {
   DEFAULT_MAP_TYPE,
   DEFAULT_PROFILE,
@@ -17,7 +17,7 @@ import {
   normalizeSettings,
   normalizeStargazeLocation,
   normalizeStargazePayload,
-} from "../../utils/appState";
+} from "@/utils/appState";
 
 const ZOOM_OUT_ROUTES = new Set(["/auth", "/profile", "/settings", "/admin"]);
 

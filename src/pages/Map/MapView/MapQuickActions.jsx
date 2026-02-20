@@ -1,7 +1,7 @@
-import planetsIcon from "../../../assets/icons/planets-icon.svg";
-import stargazingIcon from "../../../assets/icons/stargazing-icon.svg";
-import locationIcon from "../../../assets/icons/location-icon.svg";
-import lightmapIcon from "../../../assets/icons/lightmap-icon.svg";
+import planetsIcon from "@/assets/icons/planets-icon.svg";
+import stargazingIcon from "@/assets/icons/stargazing-icon.svg";
+import locationIcon from "@/assets/icons/location-icon.svg";
+import lightmapIcon from "@/assets/icons/lightmap-icon.svg";
 import "./MapQuickActions.css";
 
 function QuickActionButton({

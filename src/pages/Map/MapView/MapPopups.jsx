@@ -1,8 +1,8 @@
 import ContextMenuPopup from "./ContextMenuPopup";
 import SkyQualityInfo from "./SkyQualityInfo";
-import targetIcon from "../../../assets/icons/target-icon.svg";
-import favoriteIcon from "../../../assets/icons/favorite-icon.svg";
-import shareIcon from "../../../assets/icons/share-icon.svg";
+import targetIcon from "@/assets/icons/target-icon.svg";
+import favoriteIcon from "@/assets/icons/favorite-icon.svg";
+import shareIcon from "@/assets/icons/share-icon.svg";
 
 function LocationPopupContent({ location }) {
   if (!location) return null;

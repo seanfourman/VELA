@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import showPopup from "../../utils/popup";
-import { FAVORITE_EXIT_MS } from "../../pages/Map/MapView/mapConstants";
+import showPopup from "@/utils/popup";
+import { FAVORITE_EXIT_MS } from "@/pages/Map/MapView/mapConstants";
 import {
   loadFavoriteSpots,
   removeFavorite,
