@@ -28,7 +28,7 @@
   color: var(--surface-text);
   font-size: 0.95rem;
   font-family: inherit;
-  text-align: center;
+  text-align: left;
 }
 
 .profile-input[type="number"]::-webkit-outer-spin-button,

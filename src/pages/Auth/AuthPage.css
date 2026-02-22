@@ -71,7 +71,10 @@
   font-weight: 700;
   padding: 11px 14px;
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
   position: relative;
   z-index: 1;
 }
@@ -111,7 +114,10 @@
   overflow: hidden;
   transform: translateY(-8px);
   margin-top: 0;
-  transition: max-height 220ms ease, opacity 180ms ease, transform 220ms ease,
+  transition:
+    max-height 220ms ease,
+    opacity 180ms ease,
+    transform 220ms ease,
     margin-top 220ms ease;
 }
 
@@ -141,9 +147,15 @@
   opacity: 0;
   overflow: hidden;
   transform: translateY(-6px);
-  transition: max-height 220ms ease, opacity 180ms ease, margin-top 220ms ease,
-    padding 220ms ease, border-color 220ms ease, background 220ms ease,
-    transform 220ms ease, box-shadow 220ms ease;
+  transition:
+    max-height 220ms ease,
+    opacity 180ms ease,
+    margin-top 220ms ease,
+    padding 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease,
+    transform 220ms ease,
+    box-shadow 220ms ease;
 }
 
 .auth-password-popover.is-visible {
