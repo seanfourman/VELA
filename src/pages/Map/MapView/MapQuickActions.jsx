@@ -34,6 +34,9 @@ function QuickActionButton({
         aria-pressed={active ?? undefined}
         type="button"
       >
+        {pulse ? (
+          <span className="quick-action-ping" aria-hidden="true" />
+        ) : null}
         <img src={icon} alt="" className="quick-action-icon" />
       </button>
       <span
