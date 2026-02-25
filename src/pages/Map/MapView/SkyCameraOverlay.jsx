@@ -73,7 +73,6 @@ const projectPlanetPoint = ({ azimuth, altitude }, heading, pitch) => {
 export default function SkyCameraOverlay({
   isOpen,
   planets = [],
-  location = null,
 }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
@@ -165,11 +164,7 @@ export default function SkyCameraOverlay({
   }, [stopOrientationTracking]);
 
   useEffect(() => {
-    if (!isOpen) {
-      stopCamera();
-      stopOrientationTracking();
-      return;
-    }
+    if (!isOpen) return undefined;
 
     void startCamera();
     void startOrientationTracking();
@@ -177,6 +172,8 @@ export default function SkyCameraOverlay({
     return () => {
       stopCamera();
       stopOrientationTracking();
+      setHeading(null);
+      setPitch(0);
     };
   }, [isOpen, startCamera, startOrientationTracking, stopCamera, stopOrientationTracking]);
 
@@ -201,7 +198,9 @@ export default function SkyCameraOverlay({
   }, [planets]);
 
   const projectedPlanets = useMemo(() => {
-    if (!isFiniteNumber(heading) || !isFiniteNumber(pitch)) return [];
+    if (!isFiniteNumber(heading) || !isFiniteNumber(pitch)) {
+      return [];
+    }
 
     return normalizedPlanets
       .map((planet) => {
@@ -211,10 +210,6 @@ export default function SkyCameraOverlay({
       })
       .filter(Boolean);
   }, [heading, normalizedPlanets, pitch]);
-
-  const locationLabel = isFiniteNumber(location?.lat) && isFiniteNumber(location?.lng)
-    ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
-    : "Location unavailable";
 
   if (!isOpen) return null;
 
@@ -231,33 +226,20 @@ export default function SkyCameraOverlay({
       <div className="sky-camera-overlay__gradient" aria-hidden="true" />
       <div className="sky-camera-overlay__crosshair" aria-hidden="true" />
 
-      <div className="sky-camera-overlay__hud">
-        <div className="sky-camera-overlay__status">
-          <div>Location: {locationLabel}</div>
-          <div>
-            Heading: {isFiniteNumber(heading) ? `${heading.toFixed(0)} deg` : "--"}
+      <div className="sky-camera-overlay__points" aria-hidden="true">
+        {projectedPlanets.map((planet) => (
+          <div
+            key={planet.id}
+            className="sky-camera-point"
+            style={{
+              left: `${planet.xPercent}%`,
+              top: `${planet.yPercent}%`,
+            }}
+          >
+            <span className="sky-camera-point__dot" />
+            <span className="sky-camera-point__label">{planet.name}</span>
           </div>
-          <div>Pitch: {isFiniteNumber(pitch) ? `${pitch.toFixed(0)} deg` : "--"}</div>
-          <div>
-            API planets: {normalizedPlanets.length} | In frame: {projectedPlanets.length}
-          </div>
-        </div>
-
-        <div className="sky-camera-overlay__points" aria-hidden="true">
-          {projectedPlanets.map((planet) => (
-            <div
-              key={planet.id}
-              className="sky-camera-point"
-              style={{
-                left: `${planet.xPercent}%`,
-                top: `${planet.yPercent}%`,
-              }}
-            >
-              <span className="sky-camera-point__dot" />
-              <span className="sky-camera-point__label">{planet.name}</span>
-            </div>
-          ))}
-        </div>
+        ))}
       </div>
     </div>
   );

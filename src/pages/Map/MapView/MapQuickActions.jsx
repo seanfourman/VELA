@@ -98,6 +98,7 @@ export default function MapQuickActions({
   onToggleSkyCamera,
   canShowPlanets,
   canFindDarkSpots,
+  showSkyCameraAction = false,
   canOpenSkyCamera,
   isSkyCameraOpen,
   planetsTitle,
@@ -124,15 +125,17 @@ export default function MapQuickActions({
         disabled={!canFindDarkSpots}
         onClick={onFindDarkSpots}
       />
-      <QuickActionButton
-        icon={cameraIcon}
-        label="Sky Cam"
-        title={skyCameraTitle}
-        disabled={!canOpenSkyCamera}
-        onClick={onToggleSkyCamera}
-        active={isSkyCameraOpen}
-        pulse={isSkyCameraOpen}
-      />
+      {showSkyCameraAction ? (
+        <QuickActionButton
+          icon={cameraIcon}
+          label="Sky Cam"
+          title={skyCameraTitle}
+          disabled={!canOpenSkyCamera}
+          onClick={onToggleSkyCamera}
+          active={isSkyCameraOpen}
+          pulse={isSkyCameraOpen}
+        />
+      ) : null}
       <QuickActionButton
         icon={lightmapIcon}
         label="Light map"

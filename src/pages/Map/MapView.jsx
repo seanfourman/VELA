@@ -177,6 +177,7 @@ const MapView = forwardRef(function MapView(
         onToggleSkyCamera={handlers.handleToggleSkyCamera}
         canShowPlanets={derived.hasAnyLocation}
         canFindDarkSpots={derived.hasAnyLocation}
+        showSkyCameraAction={derived.showSkyCameraAction}
         canOpenSkyCamera={derived.canOpenSkyCamera}
         isSkyCameraOpen={state.isSkyCameraOpen}
         planetsTitle={derived.quickPlanetsTitle}
