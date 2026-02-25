@@ -9,6 +9,7 @@ import MapQuickActions from "./MapView/MapQuickActions";
 import LocationSearchBar from "./MapView/LocationSearchBar";
 import StargazePanel from "./MapView/StargazePanel";
 import StargazePanelMobile from "./MapView/StargazePanelMobile";
+import SkyCameraOverlay from "./MapView/SkyCameraOverlay";
 import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
 import {
   DEFAULT_CENTER,
@@ -173,10 +174,18 @@ const MapView = forwardRef(function MapView(
       <MapQuickActions
         onShowPlanets={handlers.handleGetVisiblePlanets}
         onFindDarkSpots={handlers.handleFetchDarkSpots}
+        onToggleSkyCamera={handlers.handleToggleSkyCamera}
         canShowPlanets={derived.hasAnyLocation}
         canFindDarkSpots={derived.hasAnyLocation}
+        canOpenSkyCamera={derived.canOpenSkyCamera}
+        isSkyCameraOpen={state.isSkyCameraOpen}
         planetsTitle={derived.quickPlanetsTitle}
         darkSpotsTitle={derived.quickDarkSpotsTitle}
+        skyCameraTitle={
+          state.isSkyCameraOpen
+            ? "Close camera sky guide"
+            : "Open camera sky guide for your location"
+        }
         locationStatus={locationStatus}
         onSnapToLocation={
           locationStatus === "active" ? handlers.handleSnapToLocation : undefined
@@ -204,6 +213,14 @@ const MapView = forwardRef(function MapView(
         onChange={setMapType}
         previewKey={MAPTILER_KEY}
         latestGridShot={state.latestGridShot}
+      />
+
+      <SkyCameraOverlay
+        isOpen={state.isSkyCameraOpen}
+        planets={planets.visiblePlanets}
+        loading={planets.planetsLoading}
+        error={planets.planetsError}
+        location={location}
       />
     </div>
   );

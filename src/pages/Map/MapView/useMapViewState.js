@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import usePlanets from "@/features/map/usePlanets";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import { preloadAllPlanetTextures } from "@/utils/planetUtils";
+import showPopup from "@/utils/popup";
 import {
   getFavoriteOnlySpots,
   getFavoriteStargazeSpots,
@@ -38,6 +39,7 @@ const useMapViewState = ({
   const [darkSpots, setDarkSpots] = useState([]);
   const [selectedDarkSpot, setSelectedDarkSpot] = useState(null);
   const [latestGridShot, setLatestGridShot] = useState(null);
+  const [isSkyCameraOpen, setIsSkyCameraOpen] = useState(false);
 
   const ui = useMapViewUiState();
   const {
@@ -119,6 +121,34 @@ const useMapViewState = ({
     [onSearchDistanceChange]
   );
 
+  const fetchPlanetsForCurrentLocation = useCallback(
+    ({ force = false } = {}) => {
+      if (!location) return false;
+      fetchPlanetsForLocation(location.lat, location.lng, "Visible from your sky", {
+        force,
+        source: "location",
+      });
+      return true;
+    },
+    [fetchPlanetsForLocation, location]
+  );
+
+  const handleToggleSkyCamera = useCallback(() => {
+    if (isSkyCameraOpen) {
+      setIsSkyCameraOpen(false);
+      return;
+    }
+
+    const hasLocation = fetchPlanetsForCurrentLocation({ force: true });
+    if (!hasLocation) {
+      showPopup("Enable location first to align planets in the camera.", "warning", {
+        duration: 3200,
+      });
+      return;
+    }
+    setIsSkyCameraOpen(true);
+  }, [fetchPlanetsForCurrentLocation, isSkyCameraOpen]);
+
   const targetHandlers = useMapTargetToggleHandlers({
     placedMarker,
     selectedDarkSpot,
@@ -193,6 +223,7 @@ const useMapViewState = ({
       darkSpots,
       selectedDarkSpot,
       latestGridShot,
+      isSkyCameraOpen,
       activeStargazeId: stargaze.activeStargazeId,
       stargazePanelSpot: stargaze.stargazePanelSpot,
       isStargazePanelOpen: stargaze.isStargazePanelOpen,
@@ -207,6 +238,7 @@ const useMapViewState = ({
       quickPlanetsTitle,
       quickDarkSpotsTitle,
       searchPlaceholder,
+      canOpenSkyCamera: Boolean(location),
       favoriteOnlySpots,
       favoriteStargazeSpots,
       isPinnedTarget,
@@ -257,6 +289,7 @@ const useMapViewState = ({
       handleToggleStargazeFavorite: favorites.handleToggleStargazeFavorite,
       handleToggleLightOverlay,
       handleSearchDistanceChange,
+      handleToggleSkyCamera,
       zoomOutToMin: interactions.zoomOutToMin,
     },
   };

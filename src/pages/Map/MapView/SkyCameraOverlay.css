@@ -1,0 +1,168 @@
+.sky-camera-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1540;
+  background: #000;
+  overflow: hidden;
+}
+
+.sky-camera-overlay__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.sky-camera-overlay__gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgba(3, 4, 10, 0.7), rgba(3, 4, 10, 0.1) 38%, rgba(3, 4, 10, 0.56)),
+    radial-gradient(circle at 50% 60%, transparent 28%, rgba(3, 4, 10, 0.25) 100%);
+  pointer-events: none;
+}
+
+.sky-camera-overlay__crosshair {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sky-camera-overlay__crosshair::before,
+.sky-camera-overlay__crosshair::after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.sky-camera-overlay__crosshair::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.sky-camera-overlay__crosshair::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.sky-camera-overlay__hud {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+  gap: 14px;
+  color: #f8fafc;
+  pointer-events: none;
+}
+
+.sky-camera-overlay__btn {
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(11, 18, 32, 0.66);
+  color: #f8fafc;
+  padding: 7px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+}
+
+.sky-camera-overlay__btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.sky-camera-overlay__status {
+  align-self: flex-start;
+  display: grid;
+  gap: 4px;
+  margin-top: calc(68px + env(safe-area-inset-top, 0px));
+  padding: 10px 12px;
+  max-width: min(92vw, 420px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(2, 6, 18, 0.52);
+  backdrop-filter: blur(10px);
+}
+
+.sky-camera-overlay__points {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sky-camera-point {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.sky-camera-point__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f8fafc;
+  box-shadow: 0 0 0 5px rgba(14, 165, 233, 0.25), 0 0 12px rgba(14, 165, 233, 0.7);
+}
+
+.sky-camera-point__label {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(2, 6, 18, 0.66);
+  color: #f8fafc;
+  font-size: 0.74rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.sky-camera-overlay__messages {
+  display: grid;
+  gap: 4px;
+  max-width: min(92vw, 520px);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(2, 6, 18, 0.64);
+  font-size: 0.76rem;
+  font-weight: 550;
+  pointer-events: auto;
+}
+
+.sky-camera-overlay__messages .is-error {
+  color: #fecaca;
+}
+
+@media (max-width: 768px) {
+  .sky-camera-overlay__hud {
+    padding: 12px;
+  }
+
+  .sky-camera-overlay__status,
+  .sky-camera-overlay__messages {
+    max-width: 100%;
+    font-size: 0.72rem;
+  }
+
+  .sky-camera-overlay__status {
+    margin-top: calc(60px + env(safe-area-inset-top, 0px));
+  }
+
+  .sky-camera-point__label {
+    font-size: 0.68rem;
+    padding: 3px 7px;
+  }
+}

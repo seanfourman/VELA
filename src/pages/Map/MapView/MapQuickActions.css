@@ -114,8 +114,19 @@ body.map-ui-shifted-stargaze .map-quick-actions {
 }
 
 .quick-action-btn.active {
-  border-color: rgba(99, 102, 241, 0.8);
-  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35), var(--glass-shadow-elevated);
+  border-color: rgba(56, 189, 248, 0.88);
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35), var(--glass-shadow-elevated);
+}
+
+.quick-action-btn.pulse-active.active::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 2px solid rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.4);
+  animation: quick-action-pulse 1.7s infinite ease-out;
+  pointer-events: none;
 }
 
 .quick-action-btn:active,
@@ -216,6 +227,21 @@ body.map-ui-shifted-stargaze .map-quick-actions {
     transform: scale(1.45);
     opacity: 0;
     box-shadow: 0 0 0 10px transparent, 0 0 24px 14px transparent;
+  }
+}
+
+@keyframes quick-action-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.95;
+  }
+  60% {
+    transform: scale(1.22);
+    opacity: 0.18;
+  }
+  100% {
+    transform: scale(1.28);
+    opacity: 0;
   }
 }
 

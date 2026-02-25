@@ -2,6 +2,7 @@ import planetsIcon from "@/assets/icons/planets-icon.svg";
 import stargazingIcon from "@/assets/icons/stargazing-icon.svg";
 import locationIcon from "@/assets/icons/location-icon.svg";
 import lightmapIcon from "@/assets/icons/lightmap-icon.svg";
+import cameraIcon from "@/assets/icons/camera-icon.svg";
 import "./MapQuickActions.css";
 
 function QuickActionButton({
@@ -11,6 +12,7 @@ function QuickActionButton({
   disabled,
   onClick,
   active = undefined,
+  pulse = false,
 }) {
   const text = title || label;
 
@@ -23,7 +25,9 @@ function QuickActionButton({
   return (
     <div className="quick-action">
       <button
-        className={`glass-icon-btn quick-action-btn${active ? " active" : ""}`}
+        className={`glass-icon-btn quick-action-btn${active ? " active" : ""}${
+          pulse ? " pulse-active" : ""
+        }`}
         onClick={handleClick}
         disabled={disabled}
         aria-label={title || label}
@@ -88,10 +92,14 @@ function LocationStatusButton({ status, onClick }) {
 export default function MapQuickActions({
   onShowPlanets,
   onFindDarkSpots,
+  onToggleSkyCamera,
   canShowPlanets,
   canFindDarkSpots,
+  canOpenSkyCamera,
+  isSkyCameraOpen,
   planetsTitle,
   darkSpotsTitle,
+  skyCameraTitle,
   locationStatus,
   onSnapToLocation,
   lightOverlayEnabled,
@@ -112,6 +120,15 @@ export default function MapQuickActions({
         title={darkSpotsTitle}
         disabled={!canFindDarkSpots}
         onClick={onFindDarkSpots}
+      />
+      <QuickActionButton
+        icon={cameraIcon}
+        label="Sky Cam"
+        title={skyCameraTitle}
+        disabled={!canOpenSkyCamera}
+        onClick={onToggleSkyCamera}
+        active={isSkyCameraOpen}
+        pulse={isSkyCameraOpen}
       />
       <QuickActionButton
         icon={lightmapIcon}
