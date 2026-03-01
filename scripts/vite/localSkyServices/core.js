@@ -7,6 +7,8 @@ export const LIGHT_TILE_SIZE = 256;
 export const MIN_SQM = 16;
 export const MAX_SQM = 22;
 const MAX_REQUEST_BODY_BYTES = 1024 * 1024;
+const MAX_RECOMMENDATION_URLS = 20;
+const MAX_RECOMMENDATION_URL_LENGTH = 2048;
 
 export const LIGHT_GRADIENT = [
   // Low brightness -> green, high brightness -> red.
@@ -77,10 +79,54 @@ export function sendJson(response, statusCode, payload, cacheControl = null) {
 }
 
 const ensureStringArray = (value) => {
-  if (!Array.isArray(value)) return [];
-  return value
-    .map((entry) => String(entry || "").trim())
-    .filter(Boolean);
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => String(entry || "").trim())
+      .filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(/[\n,]+/)
+      .map((entry) => String(entry || "").trim())
+      .filter(Boolean);
+  }
+  return [];
+};
+
+const normalizeHttpUrlList = (value, fieldName) => {
+  const entries = ensureStringArray(value);
+  if (entries.length > MAX_RECOMMENDATION_URLS) {
+    throw new Error(`${fieldName} supports up to ${MAX_RECOMMENDATION_URLS} URLs`);
+  }
+
+  const normalizedUrls = [];
+  const seen = new Set();
+  for (const entry of entries) {
+    if (entry.length > MAX_RECOMMENDATION_URL_LENGTH) {
+      throw new Error(
+        `${fieldName} URLs must be ${MAX_RECOMMENDATION_URL_LENGTH} characters or fewer`
+      );
+    }
+
+    let parsed;
+    try {
+      parsed = new URL(entry);
+    } catch {
+      throw new Error(`${fieldName} must contain valid http(s) URLs only`);
+    }
+
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      throw new Error(`${fieldName} must contain valid http(s) URLs only`);
+    }
+
+    const normalized = parsed.toString();
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    normalizedUrls.push(normalized);
+  }
+
+  return normalizedUrls;
 };
 
 const slugify = (value) =>
@@ -257,7 +303,13 @@ export function normalizeRecommendationRecord(payload) {
       lat: roundTo(lat, 6),
       lon: roundTo(lon, 6),
     },
-    photo_urls: ensureStringArray(payload?.photo_urls ?? payload?.photoUrls),
-    source_urls: ensureStringArray(payload?.source_urls ?? payload?.sourceUrls),
+    photo_urls: normalizeHttpUrlList(
+      payload?.photo_urls ?? payload?.photoUrls,
+      "photo_urls"
+    ),
+    source_urls: normalizeHttpUrlList(
+      payload?.source_urls ?? payload?.sourceUrls,
+      "source_urls"
+    ),
   };
 }

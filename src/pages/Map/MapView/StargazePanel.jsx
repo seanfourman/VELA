@@ -21,7 +21,7 @@ export default function StargazePanel({
               <div className="stargaze-panel__title">{spot.name}</div>
               {spot.region || spot.country ? (
                 <div className="stargaze-panel__subtitle">
-                  {[spot.region, spot.country].filter(Boolean).join(" · ")}
+                  {[spot.region, spot.country].filter(Boolean).join(" - ")}
                 </div>
               ) : null}
               {spot.type ? (

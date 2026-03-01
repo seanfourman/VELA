@@ -246,8 +246,8 @@ function DarkSpotPopupContent({
             <span
               className="stat-help"
               tabIndex={0}
-              aria-label="Modeled brightness at the site (ucd/mA\u0131)"
-              data-tooltip="Modeled brightness at the site (ucd/mA\u0131)"
+              aria-label="Modeled brightness at the site (ucd/m^2)"
+              data-tooltip="Modeled brightness at the site (ucd/m^2)"
             >
               ?
             </span>

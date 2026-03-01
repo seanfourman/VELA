@@ -96,8 +96,8 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
                 <span
                   className="metric-help"
                   tabIndex={0}
-                  aria-label="Sky Quality Meter reading (mag/arcsec²)"
-                  data-tooltip="Sky Quality Meter reading (mag/arcsec²)"
+                  aria-label="Sky Quality Meter reading (mag/arcsec^2)"
+                  data-tooltip="Sky Quality Meter reading (mag/arcsec^2)"
                 >
                   ?
                 </span>
@@ -112,13 +112,13 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
             <div className="meta-row">
               <span>Brightness</span>
               <span>
-                {formatMaybeNumber(metrics.Brightness_mcd_m2, 1)} mcd/m²
+                {formatMaybeNumber(metrics.Brightness_mcd_m2, 1)} mcd/m^2
               </span>
             </div>
             <div className="meta-row">
               <span>Artificial</span>
               <span>
-                {formatMaybeNumber(metrics.Artif_bright_uccd_m2, 0)} ucd/m²
+                {formatMaybeNumber(metrics.Artif_bright_uccd_m2, 0)} ucd/m^2
               </span>
             </div>
             <div className="meta-row">

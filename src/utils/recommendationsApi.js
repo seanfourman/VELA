@@ -1,8 +1,58 @@
 import { buildRecommendationsUrl } from "./apiEndpoints";
 
 const clean = (value) => (typeof value === "string" ? value.trim() : "");
-const cleanList = (value) =>
-  Array.isArray(value) ? value.map(clean).filter(Boolean) : [];
+const MAX_URLS_PER_FIELD = 20;
+const MAX_URL_LENGTH = 2048;
+
+const toList = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") return value.split(/[\n,]+/);
+  return [];
+};
+
+const normalizeHttpUrl = (value) => {
+  const raw = clean(value);
+  if (!raw) return null;
+  if (raw.length > MAX_URL_LENGTH) return null;
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+};
+
+const cleanUrlList = (value, fieldLabel) => {
+  const entries = toList(value).map(clean).filter(Boolean);
+  if (entries.length > MAX_URLS_PER_FIELD) {
+    throw new Error(`${fieldLabel} supports up to ${MAX_URLS_PER_FIELD} URLs.`);
+  }
+
+  const invalidEntries = [];
+  const normalizedUrls = [];
+  const seen = new Set();
+
+  entries.forEach((entry) => {
+    const normalized = normalizeHttpUrl(entry);
+    if (!normalized) {
+      invalidEntries.push(entry);
+      return;
+    }
+    const key = normalized.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    normalizedUrls.push(normalized);
+  });
+
+  if (invalidEntries.length > 0) {
+    throw new Error(`${fieldLabel} must contain valid http(s) URLs only.`);
+  }
+
+  return normalizedUrls;
+};
 
 const getError = async (response) => {
   const message = (await response.text().catch(() => "")).trim();
@@ -35,8 +85,14 @@ const buildPayload = (location) => {
     description: clean(location.description) || undefined,
     best_time: clean(location.best_time ?? location.bestTime) || undefined,
     coordinates: { lat, lon },
-    photo_urls: cleanList(location.photo_urls ?? location.photoUrls),
-    source_urls: cleanList(location.source_urls ?? location.sourceUrls),
+    photo_urls: cleanUrlList(
+      location.photo_urls ?? location.photoUrls,
+      "photo_urls"
+    ),
+    source_urls: cleanUrlList(
+      location.source_urls ?? location.sourceUrls,
+      "source_urls"
+    ),
   };
   return payload.name ? payload : null;
 };

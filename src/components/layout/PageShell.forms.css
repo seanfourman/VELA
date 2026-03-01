@@ -126,6 +126,12 @@
   justify-content: flex-end;
 }
 
+.admin-location-editing {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--surface-text-muted);
+}
+
 .admin-location-list {
   display: grid;
   gap: 14px;
@@ -140,6 +146,13 @@
   border: 1px solid var(--glass-border);
   background: rgba(255, 255, 255, 0.05);
   box-shadow: var(--glass-shadow-subtle);
+}
+
+.admin-location-card.is-editing {
+  border-color: var(--glass-border-strong);
+  box-shadow:
+    0 0 0 1px var(--glass-border-strong),
+    var(--glass-shadow-subtle);
 }
 
 .admin-location-card-header {

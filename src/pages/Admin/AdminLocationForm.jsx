@@ -4,10 +4,22 @@ export default function AdminLocationForm({
   draft,
   onFieldChange,
   onReset,
+  onCancelEdit,
   onSubmit,
+  isEditing = false,
 }) {
+  const secondaryAction = isEditing ? onCancelEdit : onReset;
+  const secondaryLabel = isEditing ? "Cancel edit" : "Clear";
+  const submitLabel = isEditing ? "Save changes" : "Add location";
+
   return (
     <form className="admin-location-form" onSubmit={onSubmit}>
+      {isEditing ? (
+        <div className="profile-readonly admin-location-editing">
+          Editing location ID: {draft.id}
+        </div>
+      ) : null}
+
       <div className="admin-location-grid">
         {INPUT_FIELDS.map(
           ({
@@ -55,15 +67,15 @@ export default function AdminLocationForm({
         <button
           type="button"
           className="glass-btn profile-action-btn profile-secondary"
-          onClick={onReset}
+          onClick={secondaryAction}
         >
-          Clear
+          {secondaryLabel}
         </button>
         <button
           type="submit"
           className="glass-btn profile-action-btn profile-primary"
         >
-          Add location
+          {submitLabel}
         </button>
       </div>
     </form>

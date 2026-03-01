@@ -11,7 +11,11 @@ import AdminAccessNotice from "./AdminAccessNotice";
 import AdminLocationForm from "./AdminLocationForm";
 import AdminLocationList from "./AdminLocationList";
 import { EMPTY_LOCATION } from "./adminConstants";
-import { buildLocationFromDraft, buildLocationId } from "./adminUtils";
+import {
+  buildDraftFromLocation,
+  buildLocationFromDraft,
+  buildLocationId,
+} from "./adminUtils";
 
 function buildApiLocation(location, id) {
   return {
@@ -42,6 +46,8 @@ function AdminPage({
   const canUseAdminTools = isAuthenticated;
   const hasAdminAccess = Boolean(isAdmin);
   const [draft, setDraft] = useState(EMPTY_LOCATION);
+  const editingId = String(draft.id || "").trim();
+  const isEditing = Boolean(editingId);
   const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
   const locationList = useMemo(() => {
     if (!Array.isArray(stargazeLocations)) return [];
@@ -65,6 +71,13 @@ function AdminPage({
 
   const resetForm = () => setDraft(EMPTY_LOCATION);
 
+  const handleEditLocation = (location) => {
+    const nextDraft = buildDraftFromLocation(location);
+    if (!nextDraft) return;
+    setDraft(nextDraft);
+    showPopup("Editing selected location.", "info", { duration: 1800 });
+  };
+
   const handleDeleteLocation = async (location) => {
     const locationId = location?.id;
     if (!locationId) return;
@@ -74,6 +87,9 @@ function AdminPage({
         spotId: locationId,
       });
       onDeleteStargazeLocation?.(locationId);
+      if (editingId && editingId === String(locationId).trim()) {
+        resetForm();
+      }
       showPopup("Location removed.", "info", { duration: 2200 });
     } catch (error) {
       showPopup(
@@ -89,6 +105,8 @@ function AdminPage({
   const handleSubmit = async (event) => {
     event.preventDefault();
     const location = buildLocationFromDraft(draft);
+    const invalidPhotoCount = location.invalidPhotoUrls.length;
+    const invalidSourceCount = location.invalidSourceUrls.length;
 
     if (!location.name) {
       showPopup("Name is required.", "failure", { duration: 2400 });
@@ -110,6 +128,21 @@ function AdminPage({
       });
       return;
     }
+    if (invalidPhotoCount > 0 || invalidSourceCount > 0) {
+      const details = [];
+      if (invalidPhotoCount > 0) {
+        details.push(`photo URLs: ${invalidPhotoCount}`);
+      }
+      if (invalidSourceCount > 0) {
+        details.push(`source URLs: ${invalidSourceCount}`);
+      }
+      showPopup(
+        `Invalid URL list (${details.join(", ")}). Use valid http(s) URLs only.`,
+        "failure",
+        { duration: 4200 }
+      );
+      return;
+    }
 
     const resolvedId =
       String(draft.id || "").trim() ||
@@ -125,7 +158,11 @@ function AdminPage({
         location: apiLocation,
       });
       onSaveStargazeLocation?.(apiLocation);
-      showPopup("Location added.", "success", { duration: 2400 });
+      showPopup(
+        isEditing ? "Location updated." : "Location added.",
+        "success",
+        { duration: 2400 }
+      );
       resetForm();
     } catch (error) {
       showPopup(
@@ -180,12 +217,16 @@ function AdminPage({
             draft={draft}
             onFieldChange={handleFieldChange}
             onReset={resetForm}
+            onCancelEdit={resetForm}
             onSubmit={handleSubmit}
+            isEditing={isEditing}
           />
 
           <AdminLocationList
             locations={locationList}
             onDeleteLocation={handleDeleteLocation}
+            onEditLocation={handleEditLocation}
+            activeLocationId={editingId || null}
           />
         </section>
       )}
