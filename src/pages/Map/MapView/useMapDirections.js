@@ -54,7 +54,7 @@ const useMapDirections = ({
       const lng = Number(coords?.lng);
       const url = buildShareUrl({ lat, lng });
       if (!url) {
-        showPopup("No coordinates available to share.", "warning", {
+        showPopup("No coordinates available to share", "warning", {
           duration: 2200,
         });
         return;
@@ -65,7 +65,7 @@ const useMapDirections = ({
         const opened = window.open(url, "_blank");
         if (!opened) {
           showPopup(
-            "Pop-up blocked. Allow pop-ups to open Google Maps.",
+            "Pop-up blocked. Allow pop-ups to open Google Maps",
             "warning",
             { duration: 2600 },
           );
@@ -76,7 +76,7 @@ const useMapDirections = ({
         } catch {
           // Ignore if the browser prevents access to the new window handle.
         }
-        showPopup(`Opened ${resolvedLabel} in Google Maps.`, "info", {
+        showPopup(`Opened ${resolvedLabel} in Google Maps`, "info", {
           duration: 2000,
         });
       }, 1500);

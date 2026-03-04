@@ -75,7 +75,7 @@ function ProfilePage({
     };
 
     onSave(nextProfile);
-    showPopup("Profile updated.", "success", { duration: 2200 });
+    showPopup("Profile updated", "success", { duration: 2200 });
   };
 
   const handleReset = () => {
@@ -83,7 +83,7 @@ function ProfilePage({
       onReset();
     }
     setDraft({ ...EMPTY_PROFILE });
-    showPopup("Profile reset to defaults.", "info", { duration: 2200 });
+    showPopup("Profile reset to defaults", "info", { duration: 2200 });
   };
 
   const hero = showEarth ? (

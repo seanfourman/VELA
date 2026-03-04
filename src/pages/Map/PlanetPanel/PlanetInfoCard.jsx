@@ -157,11 +157,11 @@ export default function PlanetInfoCard({
         throw new Error("Clipboard unavailable");
       }
 
-      showPopup(`${planet?.name || "Planet"} info copied.`, "success", {
+      showPopup(`${planet?.name || "Planet"} info copied`, "success", {
         duration: 2000,
       });
     } catch {
-      showPopup("Could not copy planet info.", "warning", {
+      showPopup("Could not copy planet info", "warning", {
         duration: 2200,
       });
     }

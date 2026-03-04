@@ -75,7 +75,7 @@ function SettingsPage({
 
   const handleReset = () => {
     onResetSettings?.();
-    showPopup("Settings reset to defaults.", "info", { duration: 2200 });
+    showPopup("Settings reset to defaults", "info", { duration: 2200 });
   };
 
   const hero = showMoon ? (

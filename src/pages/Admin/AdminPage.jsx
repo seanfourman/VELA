@@ -75,7 +75,7 @@ function AdminPage({
     const nextDraft = buildDraftFromLocation(location);
     if (!nextDraft) return;
     setDraft(nextDraft);
-    showPopup("Editing selected location.", "info", { duration: 1800 });
+    showPopup("Editing selected location", "info", { duration: 1800 });
   };
 
   const handleDeleteLocation = async (location) => {
@@ -90,12 +90,12 @@ function AdminPage({
       if (editingId && editingId === String(locationId).trim()) {
         resetForm();
       }
-      showPopup("Location removed.", "info", { duration: 2200 });
+      showPopup("Location removed", "info", { duration: 2200 });
     } catch (error) {
       showPopup(
         error instanceof Error
           ? error.message
-          : "Could not delete this location right now.",
+          : "Could not delete this location right now",
         "failure",
         { duration: 3200 },
       );
@@ -109,11 +109,11 @@ function AdminPage({
     const invalidSourceCount = location.invalidSourceUrls.length;
 
     if (!location.name) {
-      showPopup("Name is required.", "failure", { duration: 2400 });
+      showPopup("Name is required", "failure", { duration: 2400 });
       return;
     }
     if (!Number.isFinite(location.lat) || location.lat < -90 || location.lat > 90) {
-      showPopup("Latitude must be between -90 and 90.", "failure", {
+      showPopup("Latitude must be between -90 and 90", "failure", {
         duration: 2800,
       });
       return;
@@ -123,7 +123,7 @@ function AdminPage({
       location.lng < -180 ||
       location.lng > 180
     ) {
-      showPopup("Longitude must be between -180 and 180.", "failure", {
+      showPopup("Longitude must be between -180 and 180", "failure", {
         duration: 2800,
       });
       return;
@@ -137,7 +137,7 @@ function AdminPage({
         details.push(`source URLs: ${invalidSourceCount}`);
       }
       showPopup(
-        `Invalid URL list (${details.join(", ")}). Use valid http(s) URLs only.`,
+        `Invalid URL list (${details.join(", ")}). Use valid http(s) URLs only`,
         "failure",
         { duration: 4200 }
       );
@@ -159,7 +159,7 @@ function AdminPage({
       });
       onSaveStargazeLocation?.(apiLocation);
       showPopup(
-        isEditing ? "Location updated." : "Location added.",
+        isEditing ? "Location updated" : "Location added",
         "success",
         { duration: 2400 }
       );
@@ -168,7 +168,7 @@ function AdminPage({
       showPopup(
         error instanceof Error
           ? error.message
-          : "Could not save this location right now.",
+          : "Could not save this location right now",
         "failure",
         { duration: 3200 },
       );

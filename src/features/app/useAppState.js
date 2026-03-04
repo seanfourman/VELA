@@ -71,7 +71,7 @@ const useAppState = () => {
         showPopup(
           error instanceof Error
             ? error.message
-            : "Could not load recommended spots right now.",
+            : "Could not load recommended spots right now",
           "failure",
           { duration: 4500 },
         );
@@ -120,7 +120,7 @@ const useAppState = () => {
   useEffect(() => {
     if (!isProbablyHardwareAccelerated()) {
       showPopup(
-        "Hardware acceleration appears to be disabled. Performance and visuals may be affected.",
+        "Hardware acceleration appears to be disabled. Performance and visuals may be affected",
         "failure",
         { duration: 6000 },
       );

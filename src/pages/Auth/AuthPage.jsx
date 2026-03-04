@@ -68,23 +68,23 @@ function AuthPage({ auth, isLight, onNavigate }) {
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!isValidEmail(trimmedEmail)) {
-      showPopup("Enter a valid email address.", "failure", { duration: 2800 });
+      showPopup("Enter a valid email address", "failure", { duration: 2800 });
       return;
     }
     if (!password) {
-      showPopup("Enter your password.", "failure", { duration: 2600 });
+      showPopup("Enter your password", "failure", { duration: 2600 });
       return;
     }
     if (isRegisterMode && !isStrongPassword(password)) {
       showPopup(
-        "Use a stronger password: 8+ chars with upper, lower, number, and symbol.",
+        "Use a stronger password: 8+ chars with upper, lower, number, and symbol",
         "failure",
         { duration: 3600 },
       );
       return;
     }
     if (isRegisterMode && password !== confirmPassword) {
-      showPopup("Passwords do not match.", "failure", { duration: 2800 });
+      showPopup("Passwords do not match", "failure", { duration: 2800 });
       return;
     }
 
@@ -96,7 +96,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
           email: trimmedEmail,
           password,
         });
-        showPopup("Account created. You are now logged in.", "success", {
+        showPopup("Account created. You are now logged in", "success", {
           duration: 2600,
         });
       } else {
@@ -107,7 +107,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
       onNavigate?.("/");
     } catch (error) {
       showPopup(
-        error instanceof Error ? error.message : "Authentication failed.",
+        error instanceof Error ? error.message : "Authentication failed",
         "failure",
         { duration: 3600 },
       );

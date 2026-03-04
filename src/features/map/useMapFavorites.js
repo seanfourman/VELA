@@ -39,7 +39,7 @@ const useMapFavorites = ({
         showPopup(
           error instanceof Error
             ? error.message
-            : "Could not load favorites right now.",
+            : "Could not load favorites right now",
           "failure",
         );
       }
@@ -80,7 +80,7 @@ const useMapFavorites = ({
         showPopup(
           error instanceof Error
             ? error.message
-            : "Could not save favorite right now.",
+            : "Could not save favorite right now",
           "failure",
         );
       }
@@ -96,7 +96,7 @@ const useMapFavorites = ({
         showPopup(
           error instanceof Error
             ? error.message
-            : "Could not remove favorite right now.",
+            : "Could not remove favorite right now",
           "failure",
         );
       }
