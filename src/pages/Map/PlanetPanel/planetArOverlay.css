@@ -231,7 +231,7 @@
   backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
   -webkit-backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.32);
-  padding: 12px 13px 12px 68px;
+  padding: 12px 84px 12px 66px;
   min-width: min(78vw, 290px);
   pointer-events: auto;
   overflow: hidden;
@@ -275,24 +275,54 @@
   color: rgba(241, 245, 249, 0.92);
 }
 
-.planet-ar-close {
+.planet-ar-object-badge {
   position: absolute;
-  top: 50%;
+  top: 38px;
   left: 12px;
   transform: translateY(-50%);
   z-index: 2;
-  border: 1px solid rgba(248, 113, 113, 0.7);
-  background: linear-gradient(
-    140deg,
-    rgba(220, 38, 38, 0.68),
-    rgba(185, 28, 28, 0.62)
-  );
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at 30% 22%,
+      rgba(255, 255, 255, 0.42) 0%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.02) 100%
+    ),
+    var(--planet-ar-badge-glow, rgba(148, 163, 184, 0.44));
+  box-shadow:
+    0 0 0 1px var(--planet-ar-badge-color, #94a3b8),
+    0 0 16px var(--planet-ar-badge-glow, rgba(148, 163, 184, 0.44));
+  pointer-events: none;
+}
+
+.planet-ar-object-badge-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1);
+}
+
+.planet-ar-close {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   color: #f8fafc;
   border-radius: 999px;
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   display: inline-flex;
   align-items: center;
@@ -303,16 +333,12 @@
 }
 
 .planet-ar-close:hover {
-  background: linear-gradient(
-    140deg,
-    rgba(239, 68, 68, 0.76),
-    rgba(220, 38, 38, 0.7)
-  );
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .planet-ar-close-icon {
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
   object-fit: contain;
   display: block;
   filter: brightness(0) invert(1);
@@ -496,16 +522,30 @@
   .planet-ar-meta {
     min-width: 0;
     width: 100%;
+    padding: 12px 78px 12px 60px;
   }
 
-  .planet-ar-close {
+  .planet-ar-object-badge {
+    top: 35px;
+    left: 10px;
     width: 40px;
     height: 40px;
   }
 
+  .planet-ar-object-badge-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .planet-ar-close {
+    right: 10px;
+    width: 46px;
+    height: 46px;
+  }
+
   .planet-ar-close-icon {
-    width: 19px;
-    height: 19px;
+    width: 24px;
+    height: 24px;
   }
 
   .planet-ar-status {
