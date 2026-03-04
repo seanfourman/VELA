@@ -7,7 +7,7 @@ import "@maplibre/maplibre-gl-leaflet";
 
 const MIN_PITCH = 0;
 const MAX_PITCH = 70;
-const DEFAULT_3D_PITCH = 52;
+const DEFAULT_3D_PITCH = 75;
 const PITCH_SENSITIVITY = 0.22;
 const TOUCH_PITCH_THRESHOLD = 8;
 const RTL_TEXT_PLUGIN_URL =
@@ -38,7 +38,7 @@ const ensureRtlTextPlugin = () => {
         console.warn("Failed to load RTL text plugin for 3D map labels", error);
       }
     },
-    true
+    true,
   );
 };
 
@@ -117,7 +117,7 @@ const attachAngleControls = (map, glMap) => {
     pendingPitch = clamp(
       startPitch - deltaY * PITCH_SENSITIVITY,
       MIN_PITCH,
-      MAX_PITCH
+      MAX_PITCH,
     );
 
     if (frameId == null) {
@@ -185,7 +185,7 @@ const attachAngleControls = (map, glMap) => {
     pendingPitch = clamp(
       touchStartPitch - deltaY * PITCH_SENSITIVITY,
       MIN_PITCH,
-      MAX_PITCH
+      MAX_PITCH,
     );
 
     if (frameId == null) {
