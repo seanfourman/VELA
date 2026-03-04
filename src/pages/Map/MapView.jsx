@@ -117,6 +117,7 @@ const MapView = forwardRef(function MapView(
         style={{ height: "100%", width: "100%" }}
         zoomControl={false}
         attributionControl={false}
+        tapHold={false}
         doubleClickZoom={false}
         minZoom={MIN_ZOOM}
         maxBounds={[

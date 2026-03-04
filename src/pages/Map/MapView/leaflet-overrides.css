@@ -4,6 +4,24 @@
   font-family: inherit;
 }
 
+/* Prevent iOS long-press copy/save callout on map content. */
+.leaflet-container,
+.leaflet-map-pane,
+.leaflet-tile-pane,
+.leaflet-overlay-pane,
+.leaflet-marker-pane,
+.leaflet-shadow-pane,
+.leaflet-container canvas,
+.leaflet-container img {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.leaflet-container img {
+  -webkit-user-drag: none;
+}
+
 .leaflet-grab {
   cursor: default !important;
 }
