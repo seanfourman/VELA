@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import showPopup from "@/utils/popup";
-import worldIcon from "@/assets/icons/world-1-svgrepo-com.svg";
 import "./planetArOverlay.css";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -346,6 +345,19 @@ export default function PlanetArOverlay({ planet, onClose }) {
     return "";
   }, [cameraError]);
 
+  const directionArrowState = useMemo(() => {
+    if (headingDelta === null || altitudeDelta === null) {
+      return { angle: 0, active: false };
+    }
+
+    if (aligned) {
+      return { angle: 0, active: false };
+    }
+
+    const angle = (Math.atan2(headingDelta, altitudeDelta) * 180) / Math.PI;
+    return { angle, active: true };
+  }, [aligned, altitudeDelta, headingDelta]);
+
   if (!portalTarget) return null;
 
   return createPortal(
@@ -411,12 +423,7 @@ export default function PlanetArOverlay({ planet, onClose }) {
                 onClick={onClose}
                 aria-label="Close AR mode"
               >
-                <img
-                  src={worldIcon}
-                  alt=""
-                  aria-hidden="true"
-                  className="planet-ar-close-icon"
-                />
+                <span aria-hidden="true">X</span>
               </button>
               <div className="planet-ar-name">{planet?.name || "Planet"}</div>
               <div className="planet-ar-sub">
@@ -430,7 +437,25 @@ export default function PlanetArOverlay({ planet, onClose }) {
           </div>
 
           <div className="planet-ar-status">
-            <div className="planet-ar-status-line">{guideText}</div>
+            <div className="planet-ar-status-head">
+              <div
+                className={`planet-ar-direction-btn ${
+                  directionArrowState.active ? "active" : ""
+                }`.trim()}
+                aria-hidden="true"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  className="planet-ar-direction-icon"
+                  style={{
+                    transform: `rotate(${directionArrowState.angle}deg)`,
+                  }}
+                >
+                  <path d="M12 3L20 13H14V21H10V13H4L12 3Z" />
+                </svg>
+              </div>
+              <div className="planet-ar-status-line">{guideText}</div>
+            </div>
             <div className="planet-ar-readings">
               <span>Heading {formatDegrees(heading)}</span>
               <span>Tilt {formatDegrees(deviceAltitude)}</span>
