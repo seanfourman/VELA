@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import showPopup from "@/utils/popup";
+import worldIcon from "@/assets/icons/world-1-svgrepo-com.svg";
 import "./planetArOverlay.css";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -383,6 +384,15 @@ export default function PlanetArOverlay({ planet, onClose }) {
             <span />
           </div>
           <div
+            className={`planet-ar-target-label ${targetOffset.visible ? "visible" : ""}`.trim()}
+            style={{
+              "--planet-ar-offset-x": `${targetOffset.x}px`,
+              "--planet-ar-offset-y": `${targetOffset.y}px`,
+            }}
+          >
+            {planet?.name || "Planet"}
+          </div>
+          <div
             className={`planet-ar-target ${targetOffset.visible ? "visible" : ""}`.trim()}
             style={{
               "--planet-ar-offset-x": `${targetOffset.x}px`,
@@ -392,8 +402,22 @@ export default function PlanetArOverlay({ planet, onClose }) {
         </div>
 
         <div className="planet-ar-ui">
+
           <div className="planet-ar-topbar">
             <div className="planet-ar-meta">
+              <button
+                type="button"
+                className="planet-ar-close"
+                onClick={onClose}
+                aria-label="Close AR mode"
+              >
+                <img
+                  src={worldIcon}
+                  alt=""
+                  aria-hidden="true"
+                  className="planet-ar-close-icon"
+                />
+              </button>
               <div className="planet-ar-name">{planet?.name || "Planet"}</div>
               <div className="planet-ar-sub">
                 {planet?.constellation || "Constellation unknown"}
@@ -403,14 +427,6 @@ export default function PlanetArOverlay({ planet, onClose }) {
                 <span>Alt {formatDegrees(targetAltitude)}</span>
               </div>
             </div>
-            <button
-              type="button"
-              className="planet-ar-close"
-              onClick={onClose}
-              aria-label="Close AR mode"
-            >
-              Close
-            </button>
           </div>
 
           <div className="planet-ar-status">

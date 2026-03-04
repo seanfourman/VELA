@@ -10,7 +10,7 @@
   inset: 0;
   pointer-events: auto;
   overflow: hidden;
-  background: #02050c;
+  background: #01040b;
   color: #f8fafc;
 }
 
@@ -35,15 +35,15 @@
   background:
     radial-gradient(
       circle at 50% 45%,
-      rgba(0, 0, 0, 0.08) 0%,
-      rgba(0, 0, 0, 0.18) 42%,
-      rgba(0, 0, 0, 0.54) 100%
+      rgba(0, 0, 0, 0.04) 0%,
+      rgba(0, 0, 0, 0.16) 40%,
+      rgba(0, 0, 0, 0.56) 100%
     ),
     linear-gradient(
       to bottom,
-      rgba(2, 6, 23, 0.5) 0%,
-      rgba(2, 6, 23, 0.15) 30%,
-      rgba(2, 6, 23, 0.52) 100%
+      rgba(2, 6, 23, 0.52) 0%,
+      rgba(2, 6, 23, 0.08) 32%,
+      rgba(2, 6, 23, 0.56) 100%
     );
 }
 
@@ -54,15 +54,44 @@
   transform: translate(-50%, -50%);
   min-width: 260px;
   max-width: min(90vw, 420px);
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.26);
-  background: rgba(15, 23, 42, 0.56);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.42);
-  padding: 14px 16px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
+  -webkit-backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.46);
+  padding: 16px 18px;
   text-align: center;
   z-index: 3;
+  overflow: hidden;
+}
+
+.planet-ar-camera-fallback::before,
+.planet-ar-meta::before,
+.planet-ar-status::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at 18% -8%,
+    rgba(255, 255, 255, 0.34),
+    rgba(255, 255, 255, 0.06) 45%,
+    transparent 68%
+  );
+  opacity: 0.72;
+}
+
+.planet-ar-camera-fallback::after,
+.planet-ar-meta::after,
+.planet-ar-status::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
 }
 
 .planet-ar-fallback-title {
@@ -117,15 +146,19 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 999px;
-  border: 2px solid rgba(34, 197, 94, 0.92);
-  background: rgba(34, 197, 94, 0.22);
-  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.32), 0 0 18px rgba(34, 197, 94, 0.45);
+  border: 2px solid rgba(16, 185, 129, 0.92);
+  background: rgba(34, 197, 94, 0.24);
+  box-shadow:
+    0 0 0 2px rgba(15, 23, 42, 0.38),
+    0 0 18px rgba(16, 185, 129, 0.5);
   opacity: 0;
   transform: translate(-50%, -50%);
-  transition: opacity 0.2s ease, transform 0.18s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.18s ease;
 }
 
 .planet-ar-target.visible {
@@ -135,6 +168,44 @@
       calc(-50% + var(--planet-ar-offset-y, 0px))
     )
     scale(1);
+}
+
+.planet-ar-target-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(
+    calc(-50% + var(--planet-ar-offset-x, 0px)),
+    calc(-50% + var(--planet-ar-offset-y, 0px) - 36px)
+  );
+  max-width: min(56vw, 220px);
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: rgba(241, 245, 249, 0.96);
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition:
+    opacity 0.2s ease,
+    transform 0.18s ease;
+}
+
+.planet-ar-target-label.visible {
+  opacity: 1;
 }
 
 .planet-ar-ui {
@@ -157,55 +228,92 @@
 }
 
 .planet-ar-meta {
+  position: relative;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(8, 15, 30, 0.48);
-  backdrop-filter: blur(16px) saturate(170%);
-  -webkit-backdrop-filter: blur(16px) saturate(170%);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
-  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.13);
+  backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
+  -webkit-backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.32);
+  padding: 12px 56px 12px 13px;
   min-width: min(78vw, 290px);
   pointer-events: auto;
+  overflow: hidden;
 }
 
 .planet-ar-name {
-  font-size: 1.02rem;
+  position: relative;
+  z-index: 1;
+  font-size: 1.04rem;
   font-weight: 700;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
 .planet-ar-sub {
+  position: relative;
+  z-index: 1;
   margin-top: 1px;
-  font-size: 0.76rem;
-  letter-spacing: 0.07em;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(248, 250, 252, 0.72);
+  color: rgba(226, 232, 240, 0.74);
 }
 
 .planet-ar-meta-row {
+  position: relative;
+  z-index: 1;
   margin-top: 8px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 0.82rem;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.planet-ar-meta-row span {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.16);
+  padding: 4px 9px;
+  font-size: 0.76rem;
+  font-weight: 600;
   color: rgba(241, 245, 249, 0.92);
 }
 
 .planet-ar-close {
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(15, 23, 42, 0.58);
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
   color: #f8fafc;
   border-radius: 999px;
-  min-width: 82px;
-  height: 40px;
-  padding: 0 14px;
-  font-weight: 600;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   pointer-events: auto;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 .planet-ar-close:hover {
-  background: rgba(15, 23, 42, 0.72);
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.planet-ar-close-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  pointer-events: none;
 }
 
 .planet-ar-close:focus,
@@ -215,47 +323,72 @@
 }
 
 .planet-ar-status {
+  position: relative;
   pointer-events: auto;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(8, 15, 30, 0.52);
-  backdrop-filter: blur(16px) saturate(175%);
-  -webkit-backdrop-filter: blur(16px) saturate(175%);
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
-  padding: 11px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
+  -webkit-backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
+  box-shadow: 0 20px 36px rgba(0, 0, 0, 0.34);
+  padding: 13px 14px;
   align-self: center;
   width: min(96vw, 600px);
+  overflow: hidden;
 }
 
 .planet-ar-status-line {
-  font-size: 0.91rem;
-  font-weight: 600;
+  position: relative;
+  z-index: 1;
+  font-size: 0.92rem;
+  font-weight: 700;
   color: rgba(248, 250, 252, 0.96);
+  letter-spacing: 0.01em;
 }
 
 .planet-ar-readings {
+  position: relative;
+  z-index: 1;
   margin-top: 8px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px 12px;
-  font-size: 0.78rem;
-  color: rgba(226, 232, 240, 0.88);
+}
+
+.planet-ar-readings span {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.16);
+  padding: 4px 9px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: rgba(226, 232, 240, 0.9);
 }
 
 .planet-ar-motion-btn {
+  position: relative;
+  z-index: 1;
   margin-top: 9px;
-  height: 36px;
+  height: 38px;
   border-radius: 999px;
-  border: 1px solid rgba(147, 197, 253, 0.52);
-  background: rgba(37, 99, 235, 0.26);
+  border: 1px solid rgba(147, 197, 253, 0.58);
+  background: linear-gradient(
+    140deg,
+    rgba(37, 99, 235, 0.34),
+    rgba(30, 64, 175, 0.28)
+  );
   color: #dbeafe;
-  padding: 0 12px;
+  padding: 0 14px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .planet-ar-motion-btn:hover {
-  background: rgba(37, 99, 235, 0.36);
+  background: linear-gradient(
+    140deg,
+    rgba(37, 99, 235, 0.44),
+    rgba(30, 64, 175, 0.36)
+  );
 }
 
 .planet-ar-motion-btn:focus,
@@ -265,9 +398,13 @@
 }
 
 .planet-ar-warning {
+  position: relative;
+  z-index: 1;
   margin-top: 8px;
   font-size: 0.78rem;
   color: rgba(254, 240, 138, 0.96);
+  text-align: center;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -288,7 +425,8 @@
   }
 
   .planet-ar-close {
-    width: 100%;
+    width: 40px;
+    height: 40px;
   }
 
   .planet-ar-status {
