@@ -133,7 +133,8 @@ const attachAngleControls = (map, glMap) => {
   };
 
   const handleContextMenu = (event) => {
-    if (!isAdjustingAngle && event.buttons !== 3) return;
+    // In 3D mode, suppress native context menu so two-button angle drag
+    // does not trigger a browser menu on mouse release.
     consume(event);
   };
 

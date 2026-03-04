@@ -142,7 +142,6 @@ export default function MapQuickActions({
       <LocationStatusButton
         status={locationStatus}
         onClick={onSnapToLocation}
-        disabled={disableOtherActions}
       />
     </div>
   );
