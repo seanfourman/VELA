@@ -114,7 +114,30 @@
   flex-direction: column;
   gap: 12px;
   overflow-y: auto;
-  padding-right: 6px;
+  padding-right: 12px;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(160, 160, 160, 0.82) transparent;
+}
+
+.space-weather-panel__content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.space-weather-panel__content::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 6px;
+}
+
+.space-weather-panel__content::-webkit-scrollbar-thumb {
+  background: rgba(160, 160, 160, 0.82);
+  background-clip: content-box;
+  border-radius: 999px;
+  border: 2px solid transparent;
+}
+
+.space-weather-panel__content::-webkit-scrollbar-thumb:hover {
+  background: rgba(190, 190, 190, 0.9);
 }
 
 .space-weather-panel__status {
