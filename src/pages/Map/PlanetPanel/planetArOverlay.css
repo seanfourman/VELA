@@ -302,8 +302,8 @@
 }
 
 .planet-ar-object-badge-icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   object-fit: contain;
   display: block;
   filter: brightness(0) invert(1);
@@ -533,8 +533,8 @@
   }
 
   .planet-ar-object-badge-icon {
-    width: 18px;
-    height: 18px;
+    width: 26px;
+    height: 26px;
   }
 
   .planet-ar-close {
