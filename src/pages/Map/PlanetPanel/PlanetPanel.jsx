@@ -12,7 +12,8 @@ import "./planetPanel.css";
 import "./planetCard.css";
 import "./planetInfoCard.css";
 
-const HOVER_DISMISS_DELAY_MS = 320;
+const HOVER_DISMISS_DELAY_MS = 1500;
+const AR_TOGGLE_DISMISS_GRACE_MS = 700;
 
 export default function PlanetPanel({
   planets,
@@ -33,13 +34,14 @@ export default function PlanetPanel({
   const hoverCloseTimeoutRef = useRef(null);
   const isStackHoveredRef = useRef(false);
   const isInfoCardHoveredRef = useRef(false);
+  const hoverDismissHoldUntilRef = useRef(0);
 
   const planetsToShow = useMemo(
     () =>
       (Array.isArray(planets) ? planets : []).filter(
-        (planet) => planet.aboveHorizon !== false
+        (planet) => planet.aboveHorizon !== false,
       ),
-    [planets]
+    [planets],
   );
 
   const PAGE_SIZE = 3;
@@ -83,14 +85,30 @@ export default function PlanetPanel({
 
   const scheduleHoverDismiss = useCallback(() => {
     cancelHoverDismiss();
+    const now = Date.now();
+    const holdRemaining = Math.max(0, hoverDismissHoldUntilRef.current - now);
+    const dismissDelay = Math.max(HOVER_DISMISS_DELAY_MS, holdRemaining);
+
     hoverCloseTimeoutRef.current = setTimeout(() => {
       if (isStackHoveredRef.current || isInfoCardHoveredRef.current) {
         return;
       }
       setHoveredCard(null);
       hoverCloseTimeoutRef.current = null;
-    }, HOVER_DISMISS_DELAY_MS);
+    }, dismissDelay);
   }, [cancelHoverDismiss]);
+
+  const extendHoverDismissGrace = useCallback(
+    (durationMs = AR_TOGGLE_DISMISS_GRACE_MS) => {
+      const now = Date.now();
+      hoverDismissHoldUntilRef.current = Math.max(
+        hoverDismissHoldUntilRef.current,
+        now + Math.max(0, durationMs),
+      );
+      cancelHoverDismiss();
+    },
+    [cancelHoverDismiss],
+  );
 
   const handlePlanetHover = useCallback(
     (planet, idx, event) => {
@@ -120,7 +138,7 @@ export default function PlanetPanel({
 
       setHoveredCard({ ...baseHover, top: relativeTop });
     },
-    [cancelHoverDismiss, safePage, hoverBlocked]
+    [cancelHoverDismiss, safePage, hoverBlocked],
   );
 
   useEffect(() => {
@@ -281,6 +299,7 @@ export default function PlanetPanel({
         hasArrow={hasArrow}
         onMouseEnter={handleInfoCardMouseEnter}
         onMouseLeave={handleInfoCardMouseLeave}
+        onHoverDismissDelay={extendHoverDismissGrace}
       />
     </div>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import showPopup from "@/utils/popup";
+import arZoneIcon from "@/assets/icons/ar-zone-svgrepo-com.svg";
 import "./planetInfoCard.css";
 
 const formatDegrees = (value) => {
@@ -97,6 +98,7 @@ export default function PlanetInfoCard({
   hasArrow,
   onMouseEnter,
   onMouseLeave,
+  onHoverDismissDelay,
 }) {
   const exitTimeoutRef = useRef(null);
   const [renderedCard, setRenderedCard] = useState(hoveredCard);
@@ -163,6 +165,12 @@ export default function PlanetInfoCard({
         duration: 2200,
       });
     }
+  };
+
+  const handleArToggle = (event) => {
+    setArGuideOpen((previous) => !previous);
+    onHoverDismissDelay?.();
+    event.currentTarget.blur();
   };
 
   const arHint = useMemo(() => {
@@ -233,8 +241,11 @@ export default function PlanetInfoCard({
         </div>
       </div>
 
-      {arGuideOpen && (
-        <div className="planet-info-ar-guide">
+      <div
+        className={`planet-info-ar-guide ${arGuideOpen ? "open" : ""}`.trim()}
+        aria-hidden={!arGuideOpen}
+      >
+        <div className="planet-info-ar-guide-inner">
           <div className="planet-info-ar-title">AR Sky Guide</div>
           <div className="planet-info-ar-hint">{arHint}</div>
           {hasAzimuth && (
@@ -247,7 +258,7 @@ export default function PlanetInfoCard({
             </div>
           )}
         </div>
-      )}
+      </div>
 
       <div className="planet-info-footer">
         <div className="planet-info-footnote">
@@ -259,30 +270,25 @@ export default function PlanetInfoCard({
           <button
             type="button"
             className={`planet-info-action-btn ${arGuideOpen ? "active" : ""}`.trim()}
-            onClick={() => setArGuideOpen((previous) => !previous)}
+            onClick={handleArToggle}
             aria-pressed={arGuideOpen}
             aria-label={arGuideOpen ? "Hide AR sky guide" : "Show AR sky guide"}
-            title={arGuideOpen ? "Hide AR sky guide" : "Show AR sky guide"}
           >
-            <svg
-              viewBox="0 0 24 24"
+            <img
+              src={arZoneIcon}
+              alt=""
               aria-hidden="true"
-              focusable="false"
-            >
-              <circle cx="12" cy="12" r="8" />
-              <path d="M12 6v2" />
-              <path d="M18 12h-2" />
-              <path d="M12 18v-2" />
-              <path d="M6 12h2" />
-              <path d="M9 15l6-6" />
-            </svg>
+              className="planet-info-action-icon"
+            />
           </button>
           <button
             type="button"
             className="planet-info-action-btn"
-            onClick={handleCopy}
+            onClick={(event) => {
+              handleCopy();
+              event.currentTarget.blur();
+            }}
             aria-label="Copy planet details"
-            title="Copy planet details"
           >
             <svg
               viewBox="0 0 24 24"

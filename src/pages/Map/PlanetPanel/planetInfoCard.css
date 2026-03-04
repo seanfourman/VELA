@@ -123,6 +123,18 @@
   line-height: 0;
 }
 
+.planet-info-action-icon {
+  width: 15px;
+  height: 15px;
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.light .planet-info-action-icon {
+  filter: none;
+}
+
 .planet-info-action-btn svg {
   width: 14px;
   height: 14px;
@@ -163,11 +175,47 @@
 }
 
 .planet-info-ar-guide {
-  margin-top: 8px;
-  padding: 9px 10px;
+  margin-top: 0;
+  padding: 0 10px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--glass-border);
   background: var(--glass-bg-hover);
+  border: 1px solid transparent;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-4px) scaleY(0.98);
+  transform-origin: top center;
+  pointer-events: none;
+  transition:
+    max-height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease,
+    transform 0.24s ease,
+    margin-top 0.22s ease,
+    padding-top 0.22s ease,
+    padding-bottom 0.22s ease,
+    border-color 0.2s ease;
+}
+
+.planet-info-ar-guide.open {
+  margin-top: 8px;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  border-color: var(--glass-border);
+  max-height: 180px;
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  pointer-events: auto;
+}
+
+.planet-info-ar-guide-inner {
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.18s ease, transform 0.2s ease;
+}
+
+.planet-info-ar-guide.open .planet-info-ar-guide-inner {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .planet-info-ar-title {
