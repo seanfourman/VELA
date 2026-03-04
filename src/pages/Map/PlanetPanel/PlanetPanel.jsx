@@ -12,6 +12,8 @@ import "./planetPanel.css";
 import "./planetCard.css";
 import "./planetInfoCard.css";
 
+const HOVER_DISMISS_DELAY_MS = 320;
+
 export default function PlanetPanel({
   planets,
   loading,
@@ -28,6 +30,9 @@ export default function PlanetPanel({
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoverBlocked, setHoverBlocked] = useState(false);
   const resetPageTimeoutRef = useRef(null);
+  const hoverCloseTimeoutRef = useRef(null);
+  const isStackHoveredRef = useRef(false);
+  const isInfoCardHoveredRef = useRef(false);
 
   const planetsToShow = useMemo(
     () =>
@@ -64,10 +69,34 @@ export default function PlanetPanel({
     }
   }, [planetsToShow.length, mapType, loading]);
 
+  const cancelHoverDismiss = useCallback(() => {
+    if (hoverCloseTimeoutRef.current) {
+      clearTimeout(hoverCloseTimeoutRef.current);
+      hoverCloseTimeoutRef.current = null;
+    }
+  }, []);
+
+  const clearHoverImmediately = useCallback(() => {
+    cancelHoverDismiss();
+    setHoveredCard(null);
+  }, [cancelHoverDismiss]);
+
+  const scheduleHoverDismiss = useCallback(() => {
+    cancelHoverDismiss();
+    hoverCloseTimeoutRef.current = setTimeout(() => {
+      if (isStackHoveredRef.current || isInfoCardHoveredRef.current) {
+        return;
+      }
+      setHoveredCard(null);
+      hoverCloseTimeoutRef.current = null;
+    }, HOVER_DISMISS_DELAY_MS);
+  }, [cancelHoverDismiss]);
+
   const handlePlanetHover = useCallback(
     (planet, idx, event) => {
       if (hoverBlocked) return;
       if (!planet) return;
+      cancelHoverDismiss();
 
       const pageStart = safePage * PAGE_SIZE;
       const indexWithinPage = idx - pageStart;
@@ -91,12 +120,14 @@ export default function PlanetPanel({
 
       setHoveredCard({ ...baseHover, top: relativeTop });
     },
-    [safePage, hoverBlocked]
+    [cancelHoverDismiss, safePage, hoverBlocked]
   );
 
-  const clearHover = useCallback(() => {
-    setHoveredCard(null);
-  }, []);
+  useEffect(() => {
+    return () => {
+      cancelHoverDismiss();
+    };
+  }, [cancelHoverDismiss]);
 
   const canScrollPrev =
     !loading && !error && totalPages > 1 && safePage > 0 && hasPlanets;
@@ -108,7 +139,7 @@ export default function PlanetPanel({
     hasPlanets;
 
   const handlePage = (direction) => {
-    setHoveredCard(null);
+    clearHoverImmediately();
     setHoverBlocked(true);
     setTimeout(() => setHoverBlocked(false), 250);
     setPage((prev) => {
@@ -117,6 +148,26 @@ export default function PlanetPanel({
       if (next < 0 || next > totalPages - 1) return current;
       return next;
     });
+  };
+
+  const handleStackMouseEnter = () => {
+    isStackHoveredRef.current = true;
+    cancelHoverDismiss();
+  };
+
+  const handleStackMouseLeave = () => {
+    isStackHoveredRef.current = false;
+    scheduleHoverDismiss();
+  };
+
+  const handleInfoCardMouseEnter = () => {
+    isInfoCardHoveredRef.current = true;
+    cancelHoverDismiss();
+  };
+
+  const handleInfoCardMouseLeave = () => {
+    isInfoCardHoveredRef.current = false;
+    scheduleHoverDismiss();
   };
 
   const pageHeight = cardHeight ? cardHeight * PAGE_SIZE : null;
@@ -156,7 +207,8 @@ export default function PlanetPanel({
       <div
         className="planet-stack"
         ref={planetStackRef}
-        onMouseLeave={clearHover}
+        onMouseEnter={handleStackMouseEnter}
+        onMouseLeave={handleStackMouseLeave}
       >
         {canScrollPrev && (
           <button
@@ -224,7 +276,12 @@ export default function PlanetPanel({
         )}
       </div>
 
-      <PlanetInfoCard hoveredCard={displayedHoverCard} hasArrow={hasArrow} />
+      <PlanetInfoCard
+        hoveredCard={displayedHoverCard}
+        hasArrow={hasArrow}
+        onMouseEnter={handleInfoCardMouseEnter}
+        onMouseLeave={handleInfoCardMouseLeave}
+      />
     </div>
   );
 }
