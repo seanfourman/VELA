@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import showPopup from "@/utils/popup";
+import exitFullscreenIcon from "@/assets/icons/exit-full-screen-svgrepo-com.svg";
 import "./planetArOverlay.css";
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -240,7 +241,8 @@ export default function PlanetArOverlay({ planet, onClose }) {
 
   const requestMotionAccess = useCallback(async () => {
     if (typeof window === "undefined") return;
-    const permissionRequester = window.DeviceOrientationEvent?.requestPermission;
+    const permissionRequester =
+      window.DeviceOrientationEvent?.requestPermission;
     if (typeof permissionRequester !== "function") {
       setMotionAccess("granted");
       setSensorError("");
@@ -249,7 +251,9 @@ export default function PlanetArOverlay({ planet, onClose }) {
     }
 
     try {
-      const result = await permissionRequester.call(window.DeviceOrientationEvent);
+      const result = await permissionRequester.call(
+        window.DeviceOrientationEvent,
+      );
       if (result === "granted") {
         setSensorError("");
         setSensorStatus("loading");
@@ -302,7 +306,7 @@ export default function PlanetArOverlay({ planet, onClose }) {
       return "Direction data is unavailable for this object right now";
     }
     if (headingDelta === null || altitudeDelta === null) {
-      return "Move your phone to calibrate compass and tilt";
+      return "Move your phone to calibrate direction sensors and find the object";
     }
     if (aligned) {
       return `${planet?.name || "Object"} should be close to the center marker`;
@@ -414,7 +418,6 @@ export default function PlanetArOverlay({ planet, onClose }) {
         </div>
 
         <div className="planet-ar-ui">
-
           <div className="planet-ar-topbar">
             <div className="planet-ar-meta">
               <button
@@ -423,7 +426,12 @@ export default function PlanetArOverlay({ planet, onClose }) {
                 onClick={onClose}
                 aria-label="Close AR mode"
               >
-                <span aria-hidden="true">X</span>
+                <img
+                  src={exitFullscreenIcon}
+                  alt=""
+                  aria-hidden="true"
+                  className="planet-ar-close-icon"
+                />
               </button>
               <div className="planet-ar-name">{planet?.name || "Planet"}</div>
               <div className="planet-ar-sub">
@@ -456,19 +464,21 @@ export default function PlanetArOverlay({ planet, onClose }) {
               </div>
               <div className="planet-ar-status-line">{guideText}</div>
             </div>
-            <div className="planet-ar-readings">
-              <span>Heading {formatDegrees(heading)}</span>
-              <span>Tilt {formatDegrees(deviceAltitude)}</span>
+            <div className="planet-ar-readings-row">
+              <div className="planet-ar-readings">
+                <span>Heading {formatDegrees(heading)}</span>
+                <span>Tilt {formatDegrees(deviceAltitude)}</span>
+              </div>
+              {motionAccess === "required" && (
+                <button
+                  type="button"
+                  className="planet-ar-motion-btn"
+                  onClick={requestMotionAccess}
+                >
+                  Enable motion access
+                </button>
+              )}
             </div>
-            {motionAccess === "required" && (
-              <button
-                type="button"
-                className="planet-ar-motion-btn"
-                onClick={requestMotionAccess}
-              >
-                Enable motion access
-              </button>
-            )}
             {motionAccess === "denied" && (
               <div className="planet-ar-warning">
                 Motion sensors are disabled. Compass guidance is limited

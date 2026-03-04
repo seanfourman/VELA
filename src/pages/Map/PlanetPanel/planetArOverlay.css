@@ -231,7 +231,7 @@
   backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
   -webkit-backdrop-filter: blur(24px) saturate(145%) brightness(1.04);
   box-shadow: 0 18px 34px rgba(0, 0, 0, 0.32);
-  padding: 12px 13px 12px 58px;
+  padding: 12px 13px 12px 68px;
   min-width: min(78vw, 290px);
   pointer-events: auto;
   overflow: hidden;
@@ -278,21 +278,22 @@
 .planet-ar-close {
   position: absolute;
   top: 50%;
-  left: 10px;
+  left: 12px;
   transform: translateY(-50%);
   z-index: 2;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(248, 113, 113, 0.7);
+  background: linear-gradient(
+    140deg,
+    rgba(220, 38, 38, 0.68),
+    rgba(185, 28, 28, 0.62)
+  );
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   color: #f8fafc;
   border-radius: 999px;
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   padding: 0;
-  font-weight: 700;
-  font-size: 1rem;
-  line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -302,11 +303,19 @@
 }
 
 .planet-ar-close:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: linear-gradient(
+    140deg,
+    rgba(239, 68, 68, 0.76),
+    rgba(220, 38, 38, 0.7)
+  );
 }
 
-.planet-ar-close span {
-  transform: translateY(-0.5px);
+.planet-ar-close-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1);
   pointer-events: none;
 }
 
@@ -379,13 +388,26 @@
   transition: transform 0.12s linear;
 }
 
-.planet-ar-readings {
+.planet-ar-readings-row {
   position: relative;
   z-index: 1;
   margin-top: 8px;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.planet-ar-readings {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 6px 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 38px;
 }
 
 .planet-ar-readings span {
@@ -401,26 +423,28 @@
 .planet-ar-motion-btn {
   position: relative;
   z-index: 1;
-  margin-top: 9px;
-  height: 38px;
+  margin-top: 0;
   border-radius: 999px;
-  border: 1px solid rgba(147, 197, 253, 0.58);
+  border: 1px solid rgba(251, 191, 36, 0.62);
   background: linear-gradient(
     140deg,
-    rgba(37, 99, 235, 0.34),
-    rgba(30, 64, 175, 0.28)
+    rgba(245, 158, 11, 0.38),
+    rgba(217, 119, 6, 0.34)
   );
-  color: #dbeafe;
-  padding: 0 14px;
+  color: #fffbeb;
+  padding: 4px 9px;
+  font-size: 0.76rem;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .planet-ar-motion-btn:hover {
   background: linear-gradient(
     140deg,
-    rgba(37, 99, 235, 0.44),
-    rgba(30, 64, 175, 0.36)
+    rgba(251, 191, 36, 0.5),
+    rgba(234, 88, 12, 0.42)
   );
 }
 
@@ -458,9 +482,13 @@
   }
 
   .planet-ar-close {
-    width: 34px;
-    height: 34px;
-    font-size: 0.94rem;
+    width: 40px;
+    height: 40px;
+  }
+
+  .planet-ar-close-icon {
+    width: 19px;
+    height: 19px;
   }
 
   .planet-ar-status {
@@ -479,5 +507,18 @@
 
   .planet-ar-status-line {
     min-height: 40px;
+  }
+
+  .planet-ar-readings-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .planet-ar-motion-btn {
+    margin-left: auto;
+  }
+
+  .planet-ar-readings {
+    min-height: 36px;
   }
 }
