@@ -156,9 +156,7 @@
     0 0 18px rgba(16, 185, 129, 0.5);
   opacity: 0;
   transform: translate(-50%, -50%);
-  transition:
-    opacity 0.2s ease,
-    transform 0.18s ease;
+  transition: opacity 0.1s linear;
 }
 
 .planet-ar-target.visible {
@@ -199,9 +197,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   opacity: 0;
-  transition:
-    opacity 0.2s ease,
-    transform 0.18s ease;
+  transition: opacity 0.1s linear;
 }
 
 .planet-ar-target-label.visible {
