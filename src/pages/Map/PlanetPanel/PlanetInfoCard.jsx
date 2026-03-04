@@ -233,24 +233,6 @@ export default function PlanetInfoCard({
         </div>
       </div>
 
-      <div className="planet-info-actions">
-        <button
-          type="button"
-          className={`planet-info-action-btn ${arGuideOpen ? "active" : ""}`.trim()}
-          onClick={() => setArGuideOpen((previous) => !previous)}
-          aria-pressed={arGuideOpen}
-        >
-          AR
-        </button>
-        <button
-          type="button"
-          className="planet-info-action-btn"
-          onClick={handleCopy}
-        >
-          Copy
-        </button>
-      </div>
-
       {arGuideOpen && (
         <div className="planet-info-ar-guide">
           <div className="planet-info-ar-title">AR Sky Guide</div>
@@ -259,17 +241,59 @@ export default function PlanetInfoCard({
             <div className="planet-info-ar-bearing">
               <span>Heading</span>
               <strong>
-                {directionLabel} ({normalizedAzimuth.toFixed(1)}\u00b0)
+                {directionLabel} ({normalizedAzimuth.toFixed(1)}
+                {"\u00b0"})
               </strong>
             </div>
           )}
         </div>
       )}
 
-      <div className="planet-info-footnote">
-        {planet?.aboveHorizon === false
-          ? "Below horizon right now"
-          : "Above the horizon"}
+      <div className="planet-info-footer">
+        <div className="planet-info-footnote">
+          {planet?.aboveHorizon === false
+            ? "Below horizon right now"
+            : "Above the horizon"}
+        </div>
+        <div className="planet-info-actions">
+          <button
+            type="button"
+            className={`planet-info-action-btn ${arGuideOpen ? "active" : ""}`.trim()}
+            onClick={() => setArGuideOpen((previous) => !previous)}
+            aria-pressed={arGuideOpen}
+            aria-label={arGuideOpen ? "Hide AR sky guide" : "Show AR sky guide"}
+            title={arGuideOpen ? "Hide AR sky guide" : "Show AR sky guide"}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="12" cy="12" r="8" />
+              <path d="M12 6v2" />
+              <path d="M18 12h-2" />
+              <path d="M12 18v-2" />
+              <path d="M6 12h2" />
+              <path d="M9 15l6-6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            className="planet-info-action-btn"
+            onClick={handleCopy}
+            aria-label="Copy planet details"
+            title="Copy planet details"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <rect x="9" y="9" width="10" height="10" rx="2" ry="2" />
+              <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   );
