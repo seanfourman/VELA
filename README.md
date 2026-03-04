@@ -10,6 +10,7 @@ VELA is a stargazing companion built with React, Vite, and Leaflet. It helps you
 - Curated stargazing locations with details and galleries.
 - Favorites, pinned spots, targets, and quick actions.
 - Visible planets panel powered by VisiblePlanets.
+- Space weather panel powered by NASA DONKI (geomagnetic storms and CME impact runs).
 - Profile, settings, and admin tools with local auth.
 
 ## Getting started
@@ -26,6 +27,9 @@ VELA is a stargazing companion built with React, Vite, and Leaflet. It helps you
 
 Required:
 - `VITE_MAPTILER_KEY` (MapTiler tiles)
+
+Optional:
+- `VITE_NASA_API_KEY` (NASA API key for DONKI/space weather, falls back to `DEMO_KEY`)
 
 ## Data and services
 
