@@ -1,0 +1,297 @@
+.planet-ar-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 2600;
+  pointer-events: none;
+}
+
+.planet-ar-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+  overflow: hidden;
+  background: #02050c;
+  color: #f8fafc;
+}
+
+.planet-ar-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.planet-ar-video.ready {
+  opacity: 1;
+}
+
+.planet-ar-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 50% 45%,
+      rgba(0, 0, 0, 0.08) 0%,
+      rgba(0, 0, 0, 0.18) 42%,
+      rgba(0, 0, 0, 0.54) 100%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(2, 6, 23, 0.5) 0%,
+      rgba(2, 6, 23, 0.15) 30%,
+      rgba(2, 6, 23, 0.52) 100%
+    );
+}
+
+.planet-ar-camera-fallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 260px;
+  max-width: min(90vw, 420px);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  background: rgba(15, 23, 42, 0.56);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.42);
+  padding: 14px 16px;
+  text-align: center;
+  z-index: 3;
+}
+
+.planet-ar-fallback-title {
+  font-size: 0.88rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.82);
+}
+
+.planet-ar-fallback-text {
+  margin-top: 5px;
+  font-size: 0.92rem;
+  color: rgba(248, 250, 252, 0.95);
+}
+
+.planet-ar-fallback-help {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: rgba(226, 232, 240, 0.88);
+}
+
+.planet-ar-target-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.planet-ar-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 2px solid rgba(241, 245, 249, 0.7);
+  box-shadow:
+    0 0 0 2px rgba(15, 23, 42, 0.38),
+    0 0 18px rgba(241, 245, 249, 0.22);
+  transform: translate(-50%, -50%);
+}
+
+.planet-ar-crosshair span {
+  position: absolute;
+  inset: 11px;
+  border-radius: 999px;
+  border: 1px dashed rgba(248, 250, 252, 0.55);
+}
+
+.planet-ar-target {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  border: 2px solid rgba(34, 197, 94, 0.92);
+  background: rgba(34, 197, 94, 0.22);
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.32), 0 0 18px rgba(34, 197, 94, 0.45);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.2s ease, transform 0.18s ease;
+}
+
+.planet-ar-target.visible {
+  opacity: 1;
+  transform: translate(
+      calc(-50% + var(--planet-ar-offset-x, 0px)),
+      calc(-50% + var(--planet-ar-offset-y, 0px))
+    )
+    scale(1);
+}
+
+.planet-ar-ui {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 12px
+    calc(env(safe-area-inset-bottom, 0px) + 12px);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.planet-ar-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.planet-ar-meta {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(8, 15, 30, 0.48);
+  backdrop-filter: blur(16px) saturate(170%);
+  -webkit-backdrop-filter: blur(16px) saturate(170%);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
+  padding: 10px 12px;
+  min-width: min(78vw, 290px);
+  pointer-events: auto;
+}
+
+.planet-ar-name {
+  font-size: 1.02rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.planet-ar-sub {
+  margin-top: 1px;
+  font-size: 0.76rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.72);
+}
+
+.planet-ar-meta-row {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.82rem;
+  color: rgba(241, 245, 249, 0.92);
+}
+
+.planet-ar-close {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(15, 23, 42, 0.58);
+  color: #f8fafc;
+  border-radius: 999px;
+  min-width: 82px;
+  height: 40px;
+  padding: 0 14px;
+  font-weight: 600;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.planet-ar-close:hover {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.planet-ar-close:focus,
+.planet-ar-close:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.planet-ar-status {
+  pointer-events: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(8, 15, 30, 0.52);
+  backdrop-filter: blur(16px) saturate(175%);
+  -webkit-backdrop-filter: blur(16px) saturate(175%);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.3);
+  padding: 11px 12px;
+  align-self: center;
+  width: min(96vw, 600px);
+}
+
+.planet-ar-status-line {
+  font-size: 0.91rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.96);
+}
+
+.planet-ar-readings {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 0.78rem;
+  color: rgba(226, 232, 240, 0.88);
+}
+
+.planet-ar-motion-btn {
+  margin-top: 9px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(147, 197, 253, 0.52);
+  background: rgba(37, 99, 235, 0.26);
+  color: #dbeafe;
+  padding: 0 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.planet-ar-motion-btn:hover {
+  background: rgba(37, 99, 235, 0.36);
+}
+
+.planet-ar-motion-btn:focus,
+.planet-ar-motion-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.planet-ar-warning {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: rgba(254, 240, 138, 0.96);
+}
+
+@media (max-width: 768px) {
+  .planet-ar-ui {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 10px);
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
+    gap: 8px;
+  }
+
+  .planet-ar-topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .planet-ar-meta {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .planet-ar-close {
+    width: 100%;
+  }
+
+  .planet-ar-status {
+    width: 100%;
+  }
+}

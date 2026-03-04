@@ -98,20 +98,13 @@ export default function PlanetInfoCard({
   hasArrow,
   onMouseEnter,
   onMouseLeave,
-  onHoverDismissDelay,
+  onOpenAr,
 }) {
   const exitTimeoutRef = useRef(null);
   const [renderedCard, setRenderedCard] = useState(hoveredCard);
   const [isExiting, setIsExiting] = useState(false);
-  const [arGuideOpen, setArGuideOpen] = useState(false);
   const planet = renderedCard?.planet ?? null;
-  const hoveredIndex = renderedCard?.index ?? null;
-  const normalizedAzimuth = normalizeAzimuth(Number(planet?.azimuth));
-  const directionLabel = formatDirection(planet?.azimuth);
   const copyPayload = useMemo(() => buildCopyPayload(planet), [planet]);
-  const altitudeValue = Number(planet?.altitude);
-  const hasAltitude = Number.isFinite(altitudeValue);
-  const hasAzimuth = normalizedAzimuth !== null;
 
   useEffect(() => {
     if (hoveredCard) {
@@ -143,10 +136,6 @@ export default function PlanetInfoCard({
     };
   }, []);
 
-  useEffect(() => {
-    setArGuideOpen(false);
-  }, [hoveredIndex]);
-
   const handleCopy = async () => {
     if (!renderedCard || !copyPayload) return;
 
@@ -167,26 +156,11 @@ export default function PlanetInfoCard({
     }
   };
 
-  const handleArToggle = (event) => {
-    setArGuideOpen((previous) => !previous);
-    onHoverDismissDelay?.();
+  const handleArOpen = (event) => {
+    if (!planet) return;
+    onOpenAr?.(planet);
     event.currentTarget.blur();
   };
-
-  const arHint = useMemo(() => {
-    if (!hasAzimuth || !hasAltitude) {
-      return "Direction data is unavailable for this object right now.";
-    }
-
-    const altitudeLabel =
-      altitudeValue >= 0
-        ? `${altitudeValue.toFixed(1)}\u00b0 above the horizon`
-        : `${Math.abs(altitudeValue).toFixed(1)}\u00b0 below the horizon`;
-
-    return `Face ${directionLabel} (${normalizedAzimuth.toFixed(
-      1
-    )}\u00b0) and tilt ${altitudeLabel}.`;
-  }, [altitudeValue, directionLabel, hasAltitude, hasAzimuth, normalizedAzimuth]);
 
   if (!renderedCard) return null;
 
@@ -241,25 +215,6 @@ export default function PlanetInfoCard({
         </div>
       </div>
 
-      <div
-        className={`planet-info-ar-guide ${arGuideOpen ? "open" : ""}`.trim()}
-        aria-hidden={!arGuideOpen}
-      >
-        <div className="planet-info-ar-guide-inner">
-          <div className="planet-info-ar-title">AR Sky Guide</div>
-          <div className="planet-info-ar-hint">{arHint}</div>
-          {hasAzimuth && (
-            <div className="planet-info-ar-bearing">
-              <span>Heading</span>
-              <strong>
-                {directionLabel} ({normalizedAzimuth.toFixed(1)}
-                {"\u00b0"})
-              </strong>
-            </div>
-          )}
-        </div>
-      </div>
-
       <div className="planet-info-footer">
         <div className="planet-info-footnote">
           {planet?.aboveHorizon === false
@@ -270,10 +225,9 @@ export default function PlanetInfoCard({
           <div className="planet-info-action-wrap">
             <button
               type="button"
-              className={`planet-info-action-btn ${arGuideOpen ? "active" : ""}`.trim()}
-              onClick={handleArToggle}
-              aria-pressed={arGuideOpen}
-              aria-label={arGuideOpen ? "Hide AR sky guide" : "Show AR sky guide"}
+              className="planet-info-action-btn"
+              onClick={handleArOpen}
+              aria-label="Open AR view"
             >
               <img
                 src={arZoneIcon}
@@ -283,7 +237,7 @@ export default function PlanetInfoCard({
               />
             </button>
             <span className="planet-info-action-label" aria-hidden="true">
-              {arGuideOpen ? "Hide AR guide" : "Show AR guide"}
+              Open AR view
             </span>
           </div>
           <div className="planet-info-action-wrap">

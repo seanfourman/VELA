@@ -8,6 +8,9 @@ import {
   useState,
 } from "react";
 import PlanetCard from "./PlanetCard";
+import PlanetArOverlay from "./PlanetArOverlay";
+import showPopup from "@/utils/popup";
+import arZoneIcon from "@/assets/icons/ar-zone-svgrepo-com.svg";
 import "./planetPanelMobile.css";
 
 const formatDegrees = (value) => {
@@ -45,6 +48,59 @@ const formatDeclination = (dec) => {
   return `${sign}${degrees}\u00b0 ${arcminutes}'`;
 };
 
+const normalizeAzimuth = (value) => {
+  if (!Number.isFinite(value)) return null;
+  return ((value % 360) + 360) % 360;
+};
+
+const formatDirection = (value) => {
+  const normalized = normalizeAzimuth(Number(value));
+  if (normalized === null) return "Unknown";
+  const labels = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  const index = Math.round(normalized / 45) % labels.length;
+  return labels[index];
+};
+
+const legacyCopyText = (text) => {
+  if (typeof document === "undefined") return false;
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  try {
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  } finally {
+    document.body.removeChild(textarea);
+  }
+};
+
+const buildCopyPayload = (planet) => {
+  const azimuth = formatDegrees(planet?.azimuth);
+  const direction = formatDirection(planet?.azimuth);
+  const magnitude = formatMagnitude(planet?.magnitude);
+  const rightAscension = formatRightAscension(planet?.rightAscension);
+  const declination = formatDeclination(planet?.declination);
+  const horizonStatus =
+    planet?.aboveHorizon === false ? "Below horizon right now" : "Above the horizon";
+
+  return [
+    `Name: ${planet?.name || "Planet"}`,
+    `Constellation: ${planet?.constellation || "Constellation unknown"}`,
+    `Visibility: ${planet?.nakedEyeObject ? "Naked eye" : "Needs optics"}`,
+    `Altitude: ${formatDegrees(planet?.altitude)}`,
+    `Azimuth: ${azimuth} (${direction})`,
+    `Magnitude: ${magnitude}`,
+    `RA / Dec: ${rightAscension} / ${declination}`,
+    `Status: ${horizonStatus}`,
+  ].join("\n");
+};
+
 export default function PlanetPanelMobile({
   planets,
   loading,
@@ -68,6 +124,8 @@ export default function PlanetPanelMobile({
   const [bounceDisabled, setBounceDisabled] = useState(false);
   const [slotReady, setSlotReady] = useState(false);
   const [sheetHeight, setSheetHeight] = useState(null);
+  const [arOverlayOpen, setArOverlayOpen] = useState(false);
+  const [arOverlayPlanet, setArOverlayPlanet] = useState(null);
   const resetActiveTimeoutRef = useRef(null);
   const sheetContentRef = useRef(null);
   const safeActiveIndex = Math.min(
@@ -190,6 +248,40 @@ export default function PlanetPanelMobile({
     }
   };
 
+  const handleArOpen = (event) => {
+    if (!currentPlanet) return;
+    setArOverlayPlanet(currentPlanet);
+    setArOverlayOpen(true);
+    event.currentTarget.blur();
+  };
+
+  const handleArClose = () => {
+    setArOverlayOpen(false);
+  };
+
+  const handleCopy = async (event) => {
+    if (!currentPlanet) return;
+    const copyPayload = buildCopyPayload(currentPlanet);
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(copyPayload);
+      } else if (!legacyCopyText(copyPayload)) {
+        throw new Error("Clipboard unavailable");
+      }
+
+      showPopup(`${currentPlanet?.name || "Planet"} info copied`, "success", {
+        duration: 2000,
+      });
+    } catch {
+      showPopup("Could not copy planet info", "warning", {
+        duration: 2200,
+      });
+    } finally {
+      event.currentTarget.blur();
+    }
+  };
+
   const panelClasses = `planet-panel-mobile ${
     panelVisible ? "open" : "collapsed"
   } ${bounceDisabled ? "bounce-disabled" : ""}`.trim();
@@ -309,15 +401,49 @@ export default function PlanetPanelMobile({
                 </div>
               </div>
 
-              <div className="planet-mobile-footnote">
-                {currentPlanet?.aboveHorizon === false
-                  ? "Below horizon right now"
-                  : "Above the horizon"}
+              <div className="planet-mobile-footer">
+                <div className="planet-mobile-footnote">
+                  {currentPlanet?.aboveHorizon === false
+                    ? "Below horizon right now"
+                    : "Above the horizon"}
+                </div>
+                <div className="planet-mobile-actions">
+                  <button
+                    type="button"
+                    className="planet-mobile-action-btn"
+                    onClick={handleArOpen}
+                    aria-label="Open AR view"
+                  >
+                    <img
+                      src={arZoneIcon}
+                      alt=""
+                      aria-hidden="true"
+                      className="planet-mobile-action-icon"
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    className="planet-mobile-action-btn"
+                    onClick={handleCopy}
+                    aria-label="Copy planet details"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <rect x="9" y="9" width="10" height="10" rx="2" ry="2" />
+                      <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
+      {arOverlayOpen && (
+        <PlanetArOverlay
+          planet={arOverlayPlanet}
+          onClose={handleArClose}
+        />
+      )}
     </div>
   );
 }

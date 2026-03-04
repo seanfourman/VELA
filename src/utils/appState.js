@@ -5,7 +5,7 @@ const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
 export const DEFAULT_SETTINGS = {
   directionsProvider: "google",
   showRecommendedSpots: true,
-  lightOverlayEnabled: true,
+  lightOverlayEnabled: false,
   autoCenterOnLocate: true,
   highAccuracyLocation: true,
   searchDistance: SEARCH_DISTANCE_OPTIONS[0],

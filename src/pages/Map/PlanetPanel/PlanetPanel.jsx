@@ -8,6 +8,7 @@ import {
 } from "react";
 import PlanetCard from "./PlanetCard";
 import PlanetInfoCard from "./PlanetInfoCard";
+import PlanetArOverlay from "./PlanetArOverlay";
 import "./planetPanel.css";
 import "./planetCard.css";
 import "./planetInfoCard.css";
@@ -30,6 +31,8 @@ export default function PlanetPanel({
   const [cardHeight, setCardHeight] = useState(null);
   const [hoveredCard, setHoveredCard] = useState(null);
   const [hoverBlocked, setHoverBlocked] = useState(false);
+  const [arOverlayPlanet, setArOverlayPlanet] = useState(null);
+  const [arOverlayOpen, setArOverlayOpen] = useState(false);
   const resetPageTimeoutRef = useRef(null);
   const hoverCloseTimeoutRef = useRef(null);
   const isStackHoveredRef = useRef(false);
@@ -188,6 +191,20 @@ export default function PlanetPanel({
     scheduleHoverDismiss();
   };
 
+  const handleOpenArOverlay = useCallback(
+    (planet) => {
+      if (!planet) return;
+      setArOverlayPlanet(planet);
+      setArOverlayOpen(true);
+      extendHoverDismissGrace(900);
+    },
+    [extendHoverDismissGrace],
+  );
+
+  const handleCloseArOverlay = useCallback(() => {
+    setArOverlayOpen(false);
+  }, []);
+
   const pageHeight = cardHeight ? cardHeight * PAGE_SIZE : null;
   const viewportHeight = pageHeight || 0;
   const trackTransform =
@@ -217,90 +234,99 @@ export default function PlanetPanel({
   ]);
 
   return (
-    <div
-      className={`planet-float-row ${mapType} ${
-        panelVisible ? "open" : "collapsed"
-      }`}
-    >
+    <>
       <div
-        className="planet-stack"
-        ref={planetStackRef}
-        onMouseEnter={handleStackMouseEnter}
-        onMouseLeave={handleStackMouseLeave}
+        className={`planet-float-row ${mapType} ${
+          panelVisible ? "open" : "collapsed"
+        }`}
       >
-        {canScrollPrev && (
-          <button
-            className="planet-scroll-btn prev"
-            onClick={() => handlePage(-1)}
-            aria-label="Previous planets"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M2 18L12 6M22 18L12 6" />
-            </svg>
-          </button>
-        )}
-
         <div
-          className="planet-cards-viewport"
-          style={{ height: viewportHeight }}
+          className="planet-stack"
+          ref={planetStackRef}
+          onMouseEnter={handleStackMouseEnter}
+          onMouseLeave={handleStackMouseLeave}
         >
-          <div className="planet-cards" style={{ transform: trackTransform }}>
-            {loading && null}
+          {canScrollPrev && (
+            <button
+              className="planet-scroll-btn prev"
+              onClick={() => handlePage(-1)}
+              aria-label="Previous planets"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M2 18L12 6M22 18L12 6" />
+              </svg>
+            </button>
+          )}
 
-            {!loading && error && (
-              <div className="planet-empty error" ref={firstCardRef}>
-                {error}
-              </div>
-            )}
+          <div
+            className="planet-cards-viewport"
+            style={{ height: viewportHeight }}
+          >
+            <div className="planet-cards" style={{ transform: trackTransform }}>
+              {loading && null}
 
-            {!loading &&
-              !error &&
-              planetsToShow.map((planet, idx) => (
-                <PlanetCard
-                  planet={planet}
-                  key={planet.name}
-                  cardRef={idx === 0 ? firstCardRef : undefined}
-                  onHover={(event) => handlePlanetHover(planet, idx, event)}
-                  reducedMotion={reducedMotion}
-                />
-              ))}
+              {!loading && error && (
+                <div className="planet-empty error" ref={firstCardRef}>
+                  {error}
+                </div>
+              )}
+
+              {!loading &&
+                !error &&
+                planetsToShow.map((planet, idx) => (
+                  <PlanetCard
+                    planet={planet}
+                    key={planet.name}
+                    cardRef={idx === 0 ? firstCardRef : undefined}
+                    onHover={(event) => handlePlanetHover(planet, idx, event)}
+                    reducedMotion={reducedMotion}
+                  />
+                ))}
+            </div>
           </div>
+
+          {canScrollNext && (
+            <button
+              className="planet-scroll-btn next"
+              onClick={() => handlePage(1)}
+              aria-label="Next planets"
+            >
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M2 6L12 18M22 6L12 18" />
+              </svg>
+            </button>
+          )}
         </div>
 
-        {canScrollNext && (
-          <button
-            className="planet-scroll-btn next"
-            onClick={() => handlePage(1)}
-            aria-label="Next planets"
-          >
-            <svg
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M2 6L12 18M22 6L12 18" />
-            </svg>
-          </button>
-        )}
+        <PlanetInfoCard
+          hoveredCard={displayedHoverCard}
+          hasArrow={hasArrow}
+          onMouseEnter={handleInfoCardMouseEnter}
+          onMouseLeave={handleInfoCardMouseLeave}
+          onOpenAr={handleOpenArOverlay}
+        />
       </div>
 
-      <PlanetInfoCard
-        hoveredCard={displayedHoverCard}
-        hasArrow={hasArrow}
-        onMouseEnter={handleInfoCardMouseEnter}
-        onMouseLeave={handleInfoCardMouseLeave}
-        onHoverDismissDelay={extendHoverDismissGrace}
-      />
-    </div>
+      {arOverlayOpen && (
+        <PlanetArOverlay
+          planet={arOverlayPlanet}
+          onClose={handleCloseArOverlay}
+        />
+      )}
+    </>
   );
 }

@@ -5,6 +5,15 @@ import localSkyServicesPlugin from "./scripts/vite/localSkyServicesPlugin.js";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), localSkyServicesPlugin()],
+  server: {
+    host: true,
+    allowedHosts: [
+      ".trycloudflare.com",
+      ".ngrok-free.app",
+      ".ngrok.io",
+      "localhost",
+    ],
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

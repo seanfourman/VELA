@@ -87,7 +87,8 @@ const PlanetPanelContainer = forwardRef(
         if (panelRoot.contains(target)) return;
         if (
           target instanceof Element &&
-          target.closest(".map-quick-actions")
+          (target.closest(".map-quick-actions") ||
+            target.closest("#planet-ar-overlay-root"))
         ) {
           return; // allow map quick actions without hiding the panel
         }
