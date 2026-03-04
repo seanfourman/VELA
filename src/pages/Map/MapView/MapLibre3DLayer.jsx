@@ -7,6 +7,7 @@ import "@maplibre/maplibre-gl-leaflet";
 
 const MIN_PITCH = 0;
 const MAX_PITCH = 70;
+const DEFAULT_3D_PITCH = 52;
 const PITCH_SENSITIVITY = 0.22;
 const TOUCH_PITCH_THRESHOLD = 8;
 const RTL_TEXT_PLUGIN_URL =
@@ -276,6 +277,24 @@ export default function MapLibre3DLayer({ apiKey }) {
         throw new Error("MapLibre map instance was not created");
       }
 
+      const ensureDefaultPitch = () => {
+        const currentPitch = glMap.getPitch?.() ?? 0;
+        if (currentPitch >= DEFAULT_3D_PITCH - 0.5) return;
+
+        try {
+          if (typeof glMap.jumpTo === "function") {
+            glMap.jumpTo({ pitch: DEFAULT_3D_PITCH });
+          } else {
+            glMap.setPitch?.(DEFAULT_3D_PITCH);
+          }
+        } catch {
+          glMap.setPitch?.(DEFAULT_3D_PITCH);
+        }
+      };
+
+      // Apply pitch as early as possible so 3D mode enters with angle immediately.
+      ensureDefaultPitch();
+
       const lockInteractions = () => {
         glMap.dragPan?.disable?.();
         glMap.scrollZoom?.disable?.();
@@ -285,6 +304,7 @@ export default function MapLibre3DLayer({ apiKey }) {
         glMap.keyboard?.disable?.();
         glMap.touchZoomRotate?.disable?.();
         glMap.touchZoomRotate?.disableRotation?.();
+        ensureDefaultPitch();
       };
 
       if (glMap.isStyleLoaded?.()) {
