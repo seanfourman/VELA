@@ -267,38 +267,48 @@ export default function PlanetInfoCard({
             : "Above the horizon"}
         </div>
         <div className="planet-info-actions">
-          <button
-            type="button"
-            className={`planet-info-action-btn ${arGuideOpen ? "active" : ""}`.trim()}
-            onClick={handleArToggle}
-            aria-pressed={arGuideOpen}
-            aria-label={arGuideOpen ? "Hide AR sky guide" : "Show AR sky guide"}
-          >
-            <img
-              src={arZoneIcon}
-              alt=""
-              aria-hidden="true"
-              className="planet-info-action-icon"
-            />
-          </button>
-          <button
-            type="button"
-            className="planet-info-action-btn"
-            onClick={(event) => {
-              handleCopy();
-              event.currentTarget.blur();
-            }}
-            aria-label="Copy planet details"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-              focusable="false"
+          <div className="planet-info-action-wrap">
+            <button
+              type="button"
+              className={`planet-info-action-btn ${arGuideOpen ? "active" : ""}`.trim()}
+              onClick={handleArToggle}
+              aria-pressed={arGuideOpen}
+              aria-label={arGuideOpen ? "Hide AR sky guide" : "Show AR sky guide"}
             >
-              <rect x="9" y="9" width="10" height="10" rx="2" ry="2" />
-              <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
-            </svg>
-          </button>
+              <img
+                src={arZoneIcon}
+                alt=""
+                aria-hidden="true"
+                className="planet-info-action-icon"
+              />
+            </button>
+            <span className="planet-info-action-label" aria-hidden="true">
+              {arGuideOpen ? "Hide AR guide" : "Show AR guide"}
+            </span>
+          </div>
+          <div className="planet-info-action-wrap">
+            <button
+              type="button"
+              className="planet-info-action-btn"
+              onClick={(event) => {
+                handleCopy();
+                event.currentTarget.blur();
+              }}
+              aria-label="Copy planet details"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <rect x="9" y="9" width="10" height="10" rx="2" ry="2" />
+                <path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+              </svg>
+            </button>
+            <span className="planet-info-action-label" aria-hidden="true">
+              Copy details
+            </span>
+          </div>
         </div>
       </div>
     </div>

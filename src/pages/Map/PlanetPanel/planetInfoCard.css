@@ -17,7 +17,7 @@
   pointer-events: auto;
   transition: transform 0.2s ease, opacity 0.2s ease;
   isolation: isolate;
-  overflow: hidden;
+  overflow: visible;
   animation: glass-fade-in-simple var(--glass-appear-duration)
     var(--glass-appear-timing);
 }
@@ -105,6 +105,14 @@
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+  overflow: visible;
+}
+
+.planet-info-action-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .planet-info-action-btn {
@@ -144,6 +152,32 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
+}
+
+.planet-info-action-label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 12px);
+  transform: translate(-50%, -4px);
+  padding: 6px 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 12, 20, 0.92);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  color: var(--surface-text);
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.18s ease;
+  z-index: 1300;
+}
+
+.planet-info-action-wrap:hover .planet-info-action-label,
+.planet-info-action-wrap:focus-within .planet-info-action-label {
+  opacity: 1;
+  transform: translate(-50%, 0);
 }
 
 .planet-info-action-btn:hover {
