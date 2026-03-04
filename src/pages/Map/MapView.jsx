@@ -1,4 +1,10 @@
-import { forwardRef, useImperativeHandle } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useState,
+} from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapView/mapView.css";
@@ -10,6 +16,7 @@ import LocationSearchBar from "./MapView/LocationSearchBar";
 import StargazePanel from "./MapView/StargazePanel";
 import StargazePanelMobile from "./MapView/StargazePanelMobile";
 import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
+import MapLibre3DLayer from "./MapView/MapLibre3DLayer";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -45,9 +52,12 @@ const MapView = forwardRef(function MapView(
     searchDistance = 10,
     onSearchDistanceChange,
     autoCenterOnLocate = true,
+    onThreeDModeChange,
   },
   ref
 ) {
+  const [isThreeDMode, setIsThreeDMode] = useState(false);
+
   const { refs, ui, state, derived, handlers, planets } = useMapViewState({
     location,
     mapType,
@@ -60,6 +70,21 @@ const MapView = forwardRef(function MapView(
     onSearchDistanceChange,
   });
   const { mapRef, planetPanelRef, stargazeMarkerRefs, placedMarkerRef } = refs;
+  const mapTypeClass = isThreeDMode ? "light three-d" : mapType;
+
+  const handleToggleThreeD = useCallback(() => {
+    setIsThreeDMode((prev) => !prev);
+  }, []);
+
+  useEffect(() => {
+    onThreeDModeChange?.(isThreeDMode);
+  }, [isThreeDMode, onThreeDModeChange]);
+
+  useEffect(() => {
+    return () => {
+      onThreeDModeChange?.(false);
+    };
+  }, [onThreeDModeChange]);
 
   useImperativeHandle(
     ref,
@@ -71,7 +96,7 @@ const MapView = forwardRef(function MapView(
 
   return (
     <div
-      className={`map-container visible ${mapType}${
+      className={`map-container visible ${mapTypeClass}${
         ui.isSearchFocused ? " search-focused" : ""
       }${ui.isPopupOpen ? " popup-open" : ""}`}
     >
@@ -101,21 +126,25 @@ const MapView = forwardRef(function MapView(
         maxBoundsViscosity={1.0}
         maxZoom={MAX_ZOOM}
       >
-        <TileLayer
-          key={mapType}
-          attribution={MAP_TILES[mapType].attribution}
-          url={MAP_TILES[mapType].url}
-          maxZoom={MAX_ZOOM}
-          keepBuffer={4}
-          updateWhenIdle={true}
-          updateWhenZooming={false}
-          noWrap={true}
-          eventHandlers={{
-            tileload: handlers.handleTileLoad,
-          }}
-        />
+        {isThreeDMode ? (
+          <MapLibre3DLayer apiKey={MAPTILER_KEY} />
+        ) : (
+          <TileLayer
+            key={mapType}
+            attribution={MAP_TILES[mapType].attribution}
+            url={MAP_TILES[mapType].url}
+            maxZoom={MAX_ZOOM}
+            keepBuffer={4}
+            updateWhenIdle={true}
+            updateWhenZooming={false}
+            noWrap={true}
+            eventHandlers={{
+              tileload: handlers.handleTileLoad,
+            }}
+          />
+        )}
 
-        {lightOverlayEnabled && (
+        {lightOverlayEnabled && !isThreeDMode && (
           <TileLayer
             url={LIGHT_TILE_URL}
             attribution="WA2015 artificial sky brightness"
@@ -128,15 +157,19 @@ const MapView = forwardRef(function MapView(
         )}
 
         <MapController mapRef={mapRef} />
-        <DoubleClickHandler onDoubleClick={handlers.handleDoubleClick} />
-        <LongPressHandler
-          onLongPress={handlers.handleDoubleClick}
-          delayMs={LONG_PRESS_MS}
-        />
-        <PopupStateHandler
-          onPopupStateChange={ui.setIsPopupOpen}
-          onPopupClose={handlers.handlePopupClose}
-        />
+        {!isThreeDMode && (
+          <>
+            <DoubleClickHandler onDoubleClick={handlers.handleDoubleClick} />
+            <LongPressHandler
+              onLongPress={handlers.handleDoubleClick}
+              delayMs={LONG_PRESS_MS}
+            />
+            <PopupStateHandler
+              onPopupStateChange={ui.setIsPopupOpen}
+              onPopupClose={handlers.handlePopupClose}
+            />
+          </>
+        )}
         {location && (
           <MapAnimator
             location={location}
@@ -144,17 +177,19 @@ const MapView = forwardRef(function MapView(
           />
         )}
 
-        <MapMarkers
-          location={location}
-          isAuthenticated={isAuthenticated}
-          mapRef={mapRef}
-          stargazeMarkerRefs={stargazeMarkerRefs}
-          placedMarkerRef={placedMarkerRef}
-          state={state}
-          derived={derived}
-          ui={ui}
-          handlers={handlers}
-        />
+        {!isThreeDMode && (
+          <MapMarkers
+            location={location}
+            isAuthenticated={isAuthenticated}
+            mapRef={mapRef}
+            stargazeMarkerRefs={stargazeMarkerRefs}
+            placedMarkerRef={placedMarkerRef}
+            state={state}
+            derived={derived}
+            ui={ui}
+            handlers={handlers}
+          />
+        )}
       </MapContainer>
 
       <StargazePanel
@@ -171,6 +206,8 @@ const MapView = forwardRef(function MapView(
       />
 
       <MapQuickActions
+        isThreeDMode={isThreeDMode}
+        onToggleThreeDMode={handleToggleThreeD}
         onShowPlanets={handlers.handleGetVisiblePlanets}
         onFindDarkSpots={handlers.handleFetchDarkSpots}
         canShowPlanets={derived.hasAnyLocation}

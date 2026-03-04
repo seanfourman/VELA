@@ -3,8 +3,16 @@ import velaLogo from "@/assets/vela.svg";
 import velaLogoBlack from "@/assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
 
-function Navbar({ mapType, auth, profile, isAdmin, onNavigate, currentRoute }) {
-  const isLight = mapType === "light";
+function Navbar({
+  mapType,
+  forceLight = false,
+  auth,
+  profile,
+  isAdmin,
+  onNavigate,
+  currentRoute,
+}) {
+  const isLight = forceLight || mapType === "light";
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const currentPath =
     typeof currentRoute === "string"

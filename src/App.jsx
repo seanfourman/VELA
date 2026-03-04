@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useState } from "react";
 import Navbar from "./components/Navbar";
 import MapView from "./pages/Map/MapView";
 import PopupPortal from "./components/PopupPortal";
@@ -11,6 +11,7 @@ const AdminPage = lazy(() => import("./pages/Admin/AdminPage"));
 const SettingsPage = lazy(() => import("./pages/Settings/SettingsPage"));
 
 function App() {
+  const [isThreeDModeActive, setIsThreeDModeActive] = useState(false);
   const {
     auth,
     mapViewRef,
@@ -85,6 +86,7 @@ function App() {
       currentPage = (
         <MapView
           ref={mapViewRef}
+          onThreeDModeChange={setIsThreeDModeActive}
           location={location}
           locationStatus={locationStatus}
           mapType={mapType}
@@ -110,6 +112,7 @@ function App() {
     <div className="app">
       <Navbar
         mapType={mapType}
+        forceLight={currentRoute === "/" && isThreeDModeActive}
         auth={auth}
         profile={profileSettings}
         isAdmin={isAdmin}

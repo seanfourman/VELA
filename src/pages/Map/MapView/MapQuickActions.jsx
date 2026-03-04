@@ -2,6 +2,7 @@ import planetsIcon from "@/assets/icons/planets-icon.svg";
 import stargazingIcon from "@/assets/icons/stargazing-icon.svg";
 import locationIcon from "@/assets/icons/location-icon.svg";
 import lightmapIcon from "@/assets/icons/lightmap-icon.svg";
+import cubeIcon from "@/assets/icons/cube-svgrepo-com.svg";
 import "./MapQuickActions.css";
 
 function QuickActionButton({
@@ -42,7 +43,7 @@ function QuickActionButton({
   );
 }
 
-function LocationStatusButton({ status, onClick }) {
+function LocationStatusButton({ status, onClick, disabled = false }) {
   const isActive = status === "active";
   const isSearching = status === "searching";
   const statusClass = isActive ? "active" : isSearching ? "searching" : "off";
@@ -59,7 +60,7 @@ function LocationStatusButton({ status, onClick }) {
     : "Location off";
 
   const handleClick = (event) => {
-    if (!isActive) return;
+    if (!isActive || disabled) return;
     onClick?.(event);
     event.currentTarget.blur();
   };
@@ -69,23 +70,27 @@ function LocationStatusButton({ status, onClick }) {
       <button
         className={`glass-icon-btn location-btn ${statusClass}`}
         onClick={handleClick}
-        disabled={!isActive}
+        disabled={!isActive || disabled}
         aria-label={label}
       >
         <span className="location-ping" aria-hidden="true" />
         <img src={locationIcon} alt="" className="quick-action-icon" />
       </button>
       <span
-        className={`quick-action-label${!isActive ? " disabled" : ""}`}
+        className={`quick-action-label${
+          !isActive || disabled ? " disabled" : ""
+        }`}
         aria-hidden="true"
       >
-        {hoverLabel}
+        {disabled ? "Disabled in 3D mode" : hoverLabel}
       </span>
     </div>
   );
 }
 
 export default function MapQuickActions({
+  isThreeDMode = false,
+  onToggleThreeDMode,
   onShowPlanets,
   onFindDarkSpots,
   canShowPlanets,
@@ -97,20 +102,29 @@ export default function MapQuickActions({
   lightOverlayEnabled,
   onToggleLightOverlay,
 }) {
+  const disableOtherActions = isThreeDMode;
+
   return (
     <div className="map-quick-actions">
+      <QuickActionButton
+        icon={cubeIcon}
+        label="3D"
+        title={isThreeDMode ? "Disable 3D view" : "Enable 3D view"}
+        active={isThreeDMode}
+        onClick={onToggleThreeDMode}
+      />
       <QuickActionButton
         icon={planetsIcon}
         label="Planets"
         title={planetsTitle}
-        disabled={!canShowPlanets}
+        disabled={disableOtherActions || !canShowPlanets}
         onClick={onShowPlanets}
       />
       <QuickActionButton
         icon={stargazingIcon}
         label="Stargaze"
         title={darkSpotsTitle}
-        disabled={!canFindDarkSpots}
+        disabled={disableOtherActions || !canFindDarkSpots}
         onClick={onFindDarkSpots}
       />
       <QuickActionButton
@@ -121,12 +135,14 @@ export default function MapQuickActions({
             ? "Hide light pollution overlay"
             : "Show light pollution overlay"
         }
-        active={lightOverlayEnabled}
+        active={Boolean(lightOverlayEnabled && !disableOtherActions)}
+        disabled={disableOtherActions}
         onClick={onToggleLightOverlay}
       />
       <LocationStatusButton
         status={locationStatus}
         onClick={onSnapToLocation}
+        disabled={disableOtherActions}
       />
     </div>
   );
