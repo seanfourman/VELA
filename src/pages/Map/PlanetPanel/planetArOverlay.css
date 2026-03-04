@@ -438,6 +438,7 @@
   font-weight: 600;
   white-space: nowrap;
   flex: 0 0 auto;
+  animation: planet-ar-motion-btn-glow 1.4s ease-in-out infinite;
 }
 
 .planet-ar-motion-btn:hover {
@@ -452,6 +453,22 @@
 .planet-ar-motion-btn:focus-visible {
   outline: none;
   box-shadow: none;
+}
+
+@keyframes planet-ar-motion-btn-glow {
+  0%,
+  100% {
+    border-color: rgba(251, 191, 36, 0.62);
+    box-shadow:
+      0 0 0 0 rgba(251, 191, 36, 0),
+      0 0 0 0 rgba(245, 158, 11, 0);
+  }
+  50% {
+    border-color: rgba(251, 191, 36, 0.9);
+    box-shadow:
+      0 0 0 1px rgba(251, 191, 36, 0.36),
+      0 0 14px 2px rgba(245, 158, 11, 0.46);
+  }
 }
 
 .planet-ar-warning {
