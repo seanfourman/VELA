@@ -92,6 +92,14 @@ const buildCopyPayload = (planet) => {
 };
 
 const EXIT_ANIMATION_MS = 180;
+const DESKTOP_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
+
+const hasDesktopPointer = () => {
+  if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    return false;
+  }
+  return window.matchMedia(DESKTOP_POINTER_QUERY).matches;
+};
 
 export default function PlanetInfoCard({
   hoveredCard,
@@ -103,8 +111,10 @@ export default function PlanetInfoCard({
   const exitTimeoutRef = useRef(null);
   const [renderedCard, setRenderedCard] = useState(hoveredCard);
   const [isExiting, setIsExiting] = useState(false);
+  const [desktopPointer, setDesktopPointer] = useState(() => hasDesktopPointer());
   const planet = renderedCard?.planet ?? null;
   const copyPayload = useMemo(() => buildCopyPayload(planet), [planet]);
+  const arDisabled = desktopPointer;
 
   useEffect(() => {
     if (hoveredCard) {
@@ -136,6 +146,27 @@ export default function PlanetInfoCard({
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia(DESKTOP_POINTER_QUERY);
+    const handleChange = (event) => {
+      setDesktopPointer(event.matches);
+    };
+
+    setDesktopPointer(mediaQuery.matches);
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
   const handleCopy = async () => {
     if (!renderedCard || !copyPayload) return;
 
@@ -157,7 +188,7 @@ export default function PlanetInfoCard({
   };
 
   const handleArOpen = (event) => {
-    if (!planet) return;
+    if (!planet || arDisabled) return;
     onOpenAr?.(planet);
     event.currentTarget.blur();
   };
@@ -227,7 +258,8 @@ export default function PlanetInfoCard({
               type="button"
               className="planet-info-action-btn"
               onClick={handleArOpen}
-              aria-label="Open AR view"
+              aria-label={arDisabled ? "AR is mobile only" : "Open AR view"}
+              disabled={arDisabled}
             >
               <img
                 src={arZoneIcon}
@@ -237,7 +269,7 @@ export default function PlanetInfoCard({
               />
             </button>
             <span className="planet-info-action-label" aria-hidden="true">
-              Open AR view
+              {arDisabled ? "Mobile only function" : "Open AR view"}
             </span>
           </div>
           <div className="planet-info-action-wrap">
