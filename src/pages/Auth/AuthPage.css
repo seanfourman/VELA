@@ -181,7 +181,7 @@
   position: relative;
   padding-left: 18px;
   font-size: 0.82rem;
-  color: rgba(223, 232, 255, 0.72);
+  color: var(--surface-text-muted);
 }
 
 .auth-password-rules li::before {
@@ -192,15 +192,23 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(190, 205, 255, 0.45);
+  background: var(--surface-text-subtle);
 }
 
 .auth-password-rules li.valid {
-  color: rgba(147, 246, 187, 0.96);
+  color: var(--accent-success);
 }
 
 .auth-password-rules li.valid::before {
-  background: rgba(88, 233, 154, 0.96);
+  background: var(--accent-success);
+}
+
+.profile-page.light .auth-password-rules li {
+  color: rgba(15, 23, 42, 0.8);
+}
+
+.profile-page.light .auth-password-rules li.valid {
+  color: #15803d;
 }
 
 .auth-actions {
