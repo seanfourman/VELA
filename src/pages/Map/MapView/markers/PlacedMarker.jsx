@@ -12,6 +12,7 @@ export default function PlacedMarker({
   onToggleFavorite,
   onToggleTarget,
   onShareLocation,
+  onOpenSpaceWeather,
   centerOnCoords,
 }) {
   if (!placedMarker) return null;
@@ -38,6 +39,7 @@ export default function PlacedMarker({
           onToggleFavorite={onToggleFavorite}
           onToggleTarget={onToggleTarget}
           onShareLocation={onShareLocation}
+          onOpenSpaceWeather={onOpenSpaceWeather}
         />
       </Popup>
     </Marker>

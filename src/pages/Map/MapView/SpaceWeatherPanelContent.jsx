@@ -22,7 +22,7 @@ function SpaceWeatherPanelContent({
   location,
   loading,
   error,
-  onRefresh,
+  focusLabel,
 }) {
   const stats = snapshot?.stats ?? null;
   const latestKp = stats?.latestKp ?? null;
@@ -37,6 +37,14 @@ function SpaceWeatherPanelContent({
 
   const recentStorms = snapshot?.gstEvents?.slice(0, 5) ?? [];
   const recentEarthCmes = snapshot?.earthDirectedCmes?.slice(0, 4) ?? [];
+  const hasCoords =
+    typeof location?.lat === "number" &&
+    Number.isFinite(location.lat) &&
+    typeof location?.lng === "number" &&
+    Number.isFinite(location.lng);
+  const coordsText = hasCoords
+    ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`
+    : "No coordinates selected";
 
   return (
     <div className="space-weather-panel__content">
@@ -44,14 +52,13 @@ function SpaceWeatherPanelContent({
         <span className={`space-weather-badge ${kpCategory.tone}`}>
           {kpCategory.shortLabel}
         </span>
-        <button
-          type="button"
-          className="space-weather-refresh"
-          onClick={onRefresh}
-          disabled={loading}
-        >
-          {loading ? "Updating..." : "Refresh"}
-        </button>
+      </div>
+
+      <div className="space-weather-focus">
+        <div className="space-weather-focus__label">
+          {focusLabel || "Selected location"}
+        </div>
+        <div className="space-weather-focus__coords">{coordsText}</div>
       </div>
 
       {error ? (
@@ -61,6 +68,10 @@ function SpaceWeatherPanelContent({
             If this keeps failing, check `VITE_NASA_API_KEY` in your `.env`.
           </div>
         </div>
+      ) : null}
+
+      {loading ? (
+        <div className="space-weather-loading">Loading latest DONKI snapshot...</div>
       ) : null}
 
       <div className="space-weather-grid">

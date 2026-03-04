@@ -61,6 +61,7 @@ const MapView = forwardRef(function MapView(
 ) {
   const [isThreeDMode, setIsThreeDMode] = useState(false);
   const [isSpaceWeatherOpen, setIsSpaceWeatherOpen] = useState(false);
+  const [spaceWeatherFocus, setSpaceWeatherFocus] = useState(null);
   const spaceWeather = useSpaceWeather();
 
   const { refs, ui, state, derived, handlers, planets } = useMapViewState({
@@ -93,16 +94,28 @@ const MapView = forwardRef(function MapView(
     };
   }, [onThreeDModeChange]);
 
-  const handleToggleSpaceWeather = useCallback(() => {
-    setIsSpaceWeatherOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        ensureSpaceWeatherLoaded();
-        closeStargazePanel?.();
+  const handleOpenSpaceWeatherAt = useCallback(
+    (coords, label) => {
+      if (
+        !coords ||
+        typeof coords.lat !== "number" ||
+        !Number.isFinite(coords.lat) ||
+        typeof coords.lng !== "number" ||
+        !Number.isFinite(coords.lng)
+      ) {
+        return;
       }
-      return next;
-    });
-  }, [closeStargazePanel, ensureSpaceWeatherLoaded]);
+      setSpaceWeatherFocus({
+        lat: coords.lat,
+        lng: coords.lng,
+        label: typeof label === "string" ? label : "Selected location",
+      });
+      ensureSpaceWeatherLoaded();
+      closeStargazePanel?.();
+      setIsSpaceWeatherOpen(true);
+    },
+    [closeStargazePanel, ensureSpaceWeatherLoaded],
+  );
 
   const handleCloseSpaceWeather = useCallback(() => {
     setIsSpaceWeatherOpen(false);
@@ -211,6 +224,7 @@ const MapView = forwardRef(function MapView(
             derived={derived}
             ui={ui}
             handlers={handlers}
+            onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
           />
         )}
       </MapContainer>
@@ -232,19 +246,19 @@ const MapView = forwardRef(function MapView(
         isOpen={isSpaceWeatherOpen && !ui.isMobileView}
         onClose={handleCloseSpaceWeather}
         snapshot={spaceWeather.snapshot}
-        location={location}
+        location={spaceWeatherFocus || location}
         loading={spaceWeather.loading}
         error={spaceWeather.error}
-        onRefresh={spaceWeather.refresh}
+        focusLabel={spaceWeatherFocus?.label || null}
       />
       <SpaceWeatherPanelMobile
         isOpen={isSpaceWeatherOpen && ui.isMobileView}
         onClose={handleCloseSpaceWeather}
         snapshot={spaceWeather.snapshot}
-        location={location}
+        location={spaceWeatherFocus || location}
         loading={spaceWeather.loading}
         error={spaceWeather.error}
-        onRefresh={spaceWeather.refresh}
+        focusLabel={spaceWeatherFocus?.label || null}
       />
 
       <MapQuickActions
@@ -252,13 +266,10 @@ const MapView = forwardRef(function MapView(
         onToggleThreeDMode={handleToggleThreeD}
         onShowPlanets={handlers.handleGetVisiblePlanets}
         onFindDarkSpots={handlers.handleFetchDarkSpots}
-        onToggleSpaceWeather={handleToggleSpaceWeather}
         canShowPlanets={derived.hasAnyLocation}
         canFindDarkSpots={derived.hasAnyLocation}
         planetsTitle={derived.quickPlanetsTitle}
         darkSpotsTitle={derived.quickDarkSpotsTitle}
-        spaceWeatherTitle={spaceWeather.quickTitle}
-        spaceWeatherActive={isSpaceWeatherOpen}
         locationStatus={locationStatus}
         onSnapToLocation={
           locationStatus === "active" ? handlers.handleSnapToLocation : undefined

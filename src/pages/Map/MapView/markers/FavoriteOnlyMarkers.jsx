@@ -13,6 +13,7 @@ export default function FavoriteOnlyMarkers({
   buildDirectionsUrl,
   getDirectionsOrigin,
   setSelectedDarkSpot,
+  onOpenSpaceWeatherAt,
 }) {
   if (!Array.isArray(favoriteOnlySpots)) return null;
 
@@ -62,6 +63,12 @@ export default function FavoriteOnlyMarkers({
             onToggleTarget={handleToggleTarget}
             onShareLocation={() =>
               handleShareLocation(
+                { lat: spot.lat, lng: spot.lng },
+                "Favorite spot",
+              )
+            }
+            onOpenSpaceWeather={() =>
+              onOpenSpaceWeatherAt?.(
                 { lat: spot.lat, lng: spot.lng },
                 "Favorite spot",
               )

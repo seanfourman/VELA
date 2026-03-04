@@ -8,7 +8,7 @@ export default function SpaceWeatherPanel({
   location,
   loading,
   error,
-  onRefresh,
+  focusLabel,
 }) {
   return (
     <aside
@@ -39,7 +39,7 @@ export default function SpaceWeatherPanel({
         location={location}
         loading={loading}
         error={error}
-        onRefresh={onRefresh}
+        focusLabel={focusLabel}
       />
     </aside>
   );

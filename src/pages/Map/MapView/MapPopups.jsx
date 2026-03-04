@@ -4,7 +4,7 @@ import targetIcon from "@/assets/icons/target-icon.svg";
 import favoriteIcon from "@/assets/icons/favorite-icon.svg";
 import shareIcon from "@/assets/icons/share-icon.svg";
 
-function LocationPopupContent({ location }) {
+function LocationPopupContent({ location, onOpenSpaceWeather }) {
   if (!location) return null;
 
   return (
@@ -17,6 +17,14 @@ function LocationPopupContent({ location }) {
       </div>
 
       <SkyQualityInfo lat={location.lat} lng={location.lng} variant="compact" />
+
+      {onOpenSpaceWeather ? (
+        <div className="popup-actions">
+          <button className="popup-btn" onClick={onOpenSpaceWeather}>
+            Get Space Weather
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -30,6 +38,7 @@ function PinnedPopupContent({
   onToggleFavorite,
   onToggleTarget,
   onShareLocation,
+  onOpenSpaceWeather,
 }) {
   if (!placedMarker) return null;
 
@@ -47,6 +56,7 @@ function PinnedPopupContent({
       isTarget={Boolean(isPinnedTarget)}
       onToggleTarget={placedMarker.isFavorite ? onToggleTarget : null}
       onShareLocation={onShareLocation}
+      onOpenSpaceWeather={onOpenSpaceWeather}
     />
   );
 }
@@ -62,6 +72,7 @@ function StargazePopupContent({
   onToggleFavorite,
   onToggleTarget,
   onShareLocation,
+  onOpenSpaceWeather,
 }) {
   if (!spot) return null;
 
@@ -78,6 +89,7 @@ function StargazePopupContent({
       isTarget={Boolean(isTarget)}
       onToggleTarget={onToggleTarget}
       onShareLocation={onShareLocation}
+      onOpenSpaceWeather={onOpenSpaceWeather}
     />
   );
 }
@@ -90,6 +102,7 @@ function FavoritePopupContent({
   onRemoveFavorite,
   onToggleTarget,
   onShareLocation,
+  onOpenSpaceWeather,
 }) {
   if (!spot) return null;
 
@@ -106,6 +119,7 @@ function FavoritePopupContent({
       isTarget={Boolean(isSelected)}
       onToggleTarget={onToggleTarget}
       onShareLocation={onShareLocation}
+      onOpenSpaceWeather={onOpenSpaceWeather}
     />
   );
 }
@@ -118,6 +132,7 @@ function DarkSpotPopupContent({
   onToggleTarget,
   onToggleFavorite,
   onShareLocation,
+  onOpenSpaceWeather,
   flashShareToggle,
   buildDirectionsUrl,
   getDirectionsOrigin,
@@ -282,6 +297,11 @@ function DarkSpotPopupContent({
             </button>
           );
         })()}
+        {onOpenSpaceWeather ? (
+          <button className="popup-btn" onClick={onOpenSpaceWeather}>
+            Get Space Weather
+          </button>
+        ) : null}
       </div>
     </div>
   );

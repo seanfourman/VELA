@@ -9,7 +9,7 @@ export default function SpaceWeatherPanelMobile({
   location,
   loading,
   error,
-  onRefresh,
+  focusLabel,
 }) {
   useEffect(() => {
     if (typeof document === "undefined") return undefined;
@@ -60,7 +60,7 @@ export default function SpaceWeatherPanelMobile({
           location={location}
           loading={loading}
           error={error}
-          onRefresh={onRefresh}
+          focusLabel={focusLabel}
         />
       </div>
     </div>

@@ -16,12 +16,14 @@ export default function MapMarkers({
   derived,
   ui,
   handlers,
+  onOpenSpaceWeatherAt,
 }) {
   return (
     <>
       <LocationMarker
         location={location}
         centerOnCoords={handlers.centerOnCoords}
+        onOpenSpaceWeatherAt={onOpenSpaceWeatherAt}
       />
       <ExitingMarker exitingMarker={state.exitingMarker} />
       <PlacedMarker
@@ -36,6 +38,15 @@ export default function MapMarkers({
         onShareLocation={() =>
           handlers.handleShareLocation(
             state.placedMarker,
+            state.placedMarker?.isFavorite ? "Favorite spot" : "Pinned location",
+          )
+        }
+        onOpenSpaceWeather={() =>
+          onOpenSpaceWeatherAt?.(
+            {
+              lat: state.placedMarker?.lat,
+              lng: state.placedMarker?.lng,
+            },
             state.placedMarker?.isFavorite ? "Favorite spot" : "Pinned location",
           )
         }
@@ -58,6 +69,7 @@ export default function MapMarkers({
         buildDirectionsUrl={handlers.buildDirectionsUrl}
         getDirectionsOrigin={handlers.getDirectionsOrigin}
         getSpotKey={handlers.getSpotKey}
+        onOpenSpaceWeatherAt={onOpenSpaceWeatherAt}
       />
       <FavoriteStargazeMarkers
         spots={derived.favoriteStargazeSpots}
@@ -77,6 +89,7 @@ export default function MapMarkers({
         buildDirectionsUrl={handlers.buildDirectionsUrl}
         getDirectionsOrigin={handlers.getDirectionsOrigin}
         getSpotKey={handlers.getSpotKey}
+        onOpenSpaceWeatherAt={onOpenSpaceWeatherAt}
       />
       <FavoriteOnlyMarkers
         favoriteOnlySpots={derived.favoriteOnlySpots}
@@ -91,6 +104,7 @@ export default function MapMarkers({
         buildDirectionsUrl={handlers.buildDirectionsUrl}
         getDirectionsOrigin={handlers.getDirectionsOrigin}
         setSelectedDarkSpot={handlers.setSelectedDarkSpot}
+        onOpenSpaceWeatherAt={onOpenSpaceWeatherAt}
       />
     </>
   );

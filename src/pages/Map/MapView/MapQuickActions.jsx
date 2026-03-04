@@ -3,7 +3,6 @@ import stargazingIcon from "@/assets/icons/stargazing-icon.svg";
 import locationIcon from "@/assets/icons/location-icon.svg";
 import lightmapIcon from "@/assets/icons/lightmap-icon.svg";
 import cubeIcon from "@/assets/icons/cube-svgrepo-com.svg";
-import spaceWeatherIcon from "@/assets/icons/space-weather-icon.svg";
 import "./MapQuickActions.css";
 
 function QuickActionButton({
@@ -94,13 +93,10 @@ export default function MapQuickActions({
   onToggleThreeDMode,
   onShowPlanets,
   onFindDarkSpots,
-  onToggleSpaceWeather,
   canShowPlanets,
   canFindDarkSpots,
   planetsTitle,
   darkSpotsTitle,
-  spaceWeatherTitle = "Space weather outlook",
-  spaceWeatherActive = false,
   locationStatus,
   onSnapToLocation,
   lightOverlayEnabled,
@@ -130,13 +126,6 @@ export default function MapQuickActions({
         title={darkSpotsTitle}
         disabled={disableOtherActions || !canFindDarkSpots}
         onClick={onFindDarkSpots}
-      />
-      <QuickActionButton
-        icon={spaceWeatherIcon}
-        label="Weather"
-        title={spaceWeatherTitle}
-        active={spaceWeatherActive}
-        onClick={onToggleSpaceWeather}
       />
       <QuickActionButton
         icon={lightmapIcon}

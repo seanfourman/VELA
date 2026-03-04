@@ -9,6 +9,7 @@ export default function ContextMenuPopup({
   onGetDirections,
   onRemovePin,
   onExtraAction,
+  onOpenSpaceWeather,
   isAuthenticated,
   isFavorite,
   onToggleFavorite,
@@ -170,6 +171,11 @@ export default function ContextMenuPopup({
         {onGetDirections && (
           <button className="popup-btn" onClick={onGetDirections}>
             Get Directions
+          </button>
+        )}
+        {onOpenSpaceWeather && (
+          <button className="popup-btn" onClick={onOpenSpaceWeather}>
+            Get Space Weather
           </button>
         )}
         {onExtraAction && (
