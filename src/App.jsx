@@ -22,6 +22,7 @@ function App() {
     settings,
     profileSettings,
     stargazeLocations,
+    starPartyEvents,
     currentRoute,
     isAdmin,
     isLight,
@@ -33,6 +34,10 @@ function App() {
     handleResetSettings,
     handleSaveStargazeLocation,
     handleDeleteStargazeLocation,
+    handleSaveStarPartyEvent,
+    handleDeleteStarPartyEvent,
+    handleSetStarPartyEventStatus,
+    handleToggleStarPartyRsvp,
   } = useAppState();
 
   let currentPage;
@@ -63,8 +68,12 @@ function App() {
           isAdmin={isAdmin}
           isLight={isLight}
           stargazeLocations={stargazeLocations}
+          starPartyEvents={starPartyEvents}
           onSaveStargazeLocation={handleSaveStargazeLocation}
           onDeleteStargazeLocation={handleDeleteStargazeLocation}
+          onSaveStarPartyEvent={handleSaveStarPartyEvent}
+          onDeleteStarPartyEvent={handleDeleteStarPartyEvent}
+          onSetStarPartyEventStatus={handleSetStarPartyEventStatus}
           onNavigate={navigate}
         />
       );
@@ -92,7 +101,9 @@ function App() {
           mapType={mapType}
           setMapType={setMapType}
           isAuthenticated={mapIsAuthenticated}
+          authUser={auth?.user}
           stargazeLocations={stargazeLocations}
+          starPartyEvents={starPartyEvents}
           directionsProvider={settings.directionsProvider}
           showRecommendedSpots={settings.showRecommendedSpots}
           lightOverlayEnabled={settings.lightOverlayEnabled}
@@ -104,6 +115,7 @@ function App() {
             handleUpdateSettings({ searchDistance: next })
           }
           autoCenterOnLocate={settings.autoCenterOnLocate}
+          onToggleStarPartyRsvp={handleToggleStarPartyRsvp}
         />
       );
   }

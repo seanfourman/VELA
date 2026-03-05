@@ -12,6 +12,31 @@ export const EMPTY_LOCATION = {
   sourceUrls: "",
 };
 
+export const EMPTY_EVENT = {
+  id: "",
+  title: "",
+  eventType: "party",
+  status: "draft",
+  startsAt: "",
+  endsAt: "",
+  lat: "",
+  lng: "",
+  meetupDetails: "",
+  description: "",
+  hostChecklist: "",
+};
+
+export const EVENT_TYPE_OPTIONS = [
+  { value: "party", label: "Star party" },
+  { value: "special_event", label: "Special event" },
+];
+
+export const EVENT_STATUS_OPTIONS = [
+  { value: "draft", label: "Draft" },
+  { value: "published", label: "Published" },
+  { value: "cancelled", label: "Cancelled" },
+];
+
 export const INPUT_FIELDS = [
   {
     key: "name",

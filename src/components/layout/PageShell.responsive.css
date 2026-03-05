@@ -74,9 +74,39 @@
     grid-template-columns: 1fr;
   }
 
+  .admin-event-grid {
+    grid-template-columns: 1fr;
+  }
+
   .admin-location-grid .admin-grid-span-2,
   .admin-location-grid .admin-grid-span-3 {
     grid-column: auto;
+  }
+
+  .admin-event-grid .admin-grid-span-2,
+  .admin-event-grid .admin-grid-span-3 {
+    grid-column: auto;
+  }
+
+  .admin-workspace-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-view-switcher,
+  .admin-form-switcher {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .admin-inline-switch-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-date-picker__menu {
+    width: 100%;
+    max-width: none;
   }
 
   .admin-location-card-header {

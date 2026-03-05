@@ -1,6 +1,7 @@
 import L from "leaflet";
 import favoriteFullIcon from "@/assets/icons/favorite-full-icon.svg";
 import starFullIcon from "@/assets/icons/star-full-icon.svg";
+import stargazingIcon from "@/assets/icons/stargazing-icon.svg";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -110,6 +111,32 @@ const favoriteSpotIconTransition = new L.DivIcon({
   iconAnchor: [15, 15],
 });
 
+const starPartyEventIcon = new L.DivIcon({
+  className: "custom-marker party-event-marker",
+  html: `
+    <div class="marker-pin party-event-pin">
+      <div class="marker-dot party-event-dot">
+        <img class="party-event-symbol" src="${stargazingIcon}" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  `,
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+});
+
+const specialEventIcon = new L.DivIcon({
+  className: "custom-marker special-event-marker",
+  html: `
+    <div class="marker-pin special-event-pin">
+      <div class="marker-dot special-event-dot">
+        <img class="special-event-symbol" src="${stargazingIcon}" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  `,
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+});
+
 export {
   customIcon,
   pinIcon,
@@ -119,4 +146,6 @@ export {
   stargazeIcon,
   favoriteSpotIcon,
   favoriteSpotIconTransition,
+  starPartyEventIcon,
+  specialEventIcon,
 };

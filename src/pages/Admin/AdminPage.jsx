@@ -10,7 +10,15 @@ import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import AdminAccessNotice from "./AdminAccessNotice";
 import AdminLocationForm from "./AdminLocationForm";
 import AdminLocationList from "./AdminLocationList";
-import { EMPTY_LOCATION } from "./adminConstants";
+import AdminEventForm from "./AdminEventForm";
+import AdminEventList from "./AdminEventList";
+import "@/pages/Settings/SettingsPage.css";
+import { EMPTY_EVENT, EMPTY_LOCATION } from "./adminConstants";
+import {
+  buildDraftFromEvent,
+  buildEventFromDraft,
+  buildEventId,
+} from "./adminEventUtils";
 import {
   buildDraftFromLocation,
   buildLocationFromDraft,
@@ -39,15 +47,23 @@ function AdminPage({
   isLight,
   onNavigate,
   stargazeLocations,
+  starPartyEvents,
   onSaveStargazeLocation,
   onDeleteStargazeLocation,
+  onSaveStarPartyEvent,
+  onDeleteStarPartyEvent,
+  onSetStarPartyEventStatus,
 }) {
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const canUseAdminTools = isAuthenticated;
   const hasAdminAccess = Boolean(isAdmin);
-  const [draft, setDraft] = useState(EMPTY_LOCATION);
-  const editingId = String(draft.id || "").trim();
-  const isEditing = Boolean(editingId);
+  const [locationDraft, setLocationDraft] = useState(EMPTY_LOCATION);
+  const [eventDraft, setEventDraft] = useState(EMPTY_EVENT);
+  const [activeView, setActiveView] = useState("locations");
+  const editingLocationId = String(locationDraft.id || "").trim();
+  const editingEventId = String(eventDraft.id || "").trim();
+  const isEditingLocation = Boolean(editingLocationId);
+  const isEditingEvent = Boolean(editingEventId);
   const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
   const locationList = useMemo(() => {
     if (!Array.isArray(stargazeLocations)) return [];
@@ -55,6 +71,32 @@ function AdminPage({
       String(a?.name || "").localeCompare(String(b?.name || ""),
     ));
   }, [stargazeLocations]);
+  const eventList = useMemo(() => {
+    if (!Array.isArray(starPartyEvents)) return [];
+    return [...starPartyEvents].sort((a, b) => {
+      const aTime = new Date(a.startsAt || 0).getTime();
+      const bTime = new Date(b.startsAt || 0).getTime();
+      if (aTime !== bTime) return aTime - bTime;
+      return String(a.title || "").localeCompare(String(b.title || ""));
+    });
+  }, [starPartyEvents]);
+  const publishedEventsCount = useMemo(
+    () => eventList.filter((event) => event.status === "published").length,
+    [eventList],
+  );
+  const totalRsvps = useMemo(
+    () =>
+      eventList.reduce(
+        (sum, event) => sum + (Array.isArray(event.rsvps) ? event.rsvps.length : 0),
+        0,
+      ),
+    [eventList],
+  );
+  const activeViewIndex = activeView === "events" ? 1 : 0;
+  const viewSwitcherStyle = {
+    "--switch-index": activeViewIndex,
+    "--switch-count": 2,
+  };
 
   const handleBackToMap = () => {
     if (onNavigate) {
@@ -64,18 +106,31 @@ function AdminPage({
     window.location.assign("/");
   };
 
-  const handleFieldChange = (key) => (event) => {
+  const handleLocationFieldChange = (key) => (event) => {
     const value = event.target.value;
-    setDraft((current) => ({ ...current, [key]: value }));
+    setLocationDraft((current) => ({ ...current, [key]: value }));
   };
 
-  const resetForm = () => setDraft(EMPTY_LOCATION);
+  const handleEventFieldChange = (key) => (event) => {
+    const value = event.target.value;
+    setEventDraft((current) => ({ ...current, [key]: value }));
+  };
+
+  const resetLocationForm = () => setLocationDraft(EMPTY_LOCATION);
+  const resetEventForm = () => setEventDraft(EMPTY_EVENT);
 
   const handleEditLocation = (location) => {
     const nextDraft = buildDraftFromLocation(location);
     if (!nextDraft) return;
-    setDraft(nextDraft);
+    setLocationDraft(nextDraft);
     showPopup("Editing selected location", "info", { duration: 1800 });
+  };
+
+  const handleEditEvent = (event) => {
+    const nextDraft = buildDraftFromEvent(event);
+    if (!nextDraft) return;
+    setEventDraft(nextDraft);
+    showPopup("Editing selected event", "info", { duration: 1800 });
   };
 
   const handleDeleteLocation = async (location) => {
@@ -87,8 +142,8 @@ function AdminPage({
         spotId: locationId,
       });
       onDeleteStargazeLocation?.(locationId);
-      if (editingId && editingId === String(locationId).trim()) {
-        resetForm();
+      if (editingLocationId && editingLocationId === String(locationId).trim()) {
+        resetLocationForm();
       }
       showPopup("Location removed", "info", { duration: 2200 });
     } catch (error) {
@@ -102,9 +157,19 @@ function AdminPage({
     }
   };
 
-  const handleSubmit = async (event) => {
+  const handleDeleteEvent = (event) => {
+    const eventId = String(event?.id || "").trim();
+    if (!eventId) return;
+    onDeleteStarPartyEvent?.(eventId);
+    if (editingEventId && editingEventId === eventId) {
+      resetEventForm();
+    }
+    showPopup("Event removed", "info", { duration: 2200 });
+  };
+
+  const handleSubmitLocation = async (event) => {
     event.preventDefault();
-    const location = buildLocationFromDraft(draft);
+    const location = buildLocationFromDraft(locationDraft);
     const invalidPhotoCount = location.invalidPhotoUrls.length;
     const invalidSourceCount = location.invalidSourceUrls.length;
 
@@ -145,7 +210,7 @@ function AdminPage({
     }
 
     const resolvedId =
-      String(draft.id || "").trim() ||
+      String(locationDraft.id || "").trim() ||
       buildLocationId({
         name: location.name,
         country: location.country,
@@ -159,11 +224,11 @@ function AdminPage({
       });
       onSaveStargazeLocation?.(apiLocation);
       showPopup(
-        isEditing ? "Location updated" : "Location added",
+        isEditingLocation ? "Location updated" : "Location added",
         "success",
         { duration: 2400 }
       );
-      resetForm();
+      resetLocationForm();
     } catch (error) {
       showPopup(
         error instanceof Error
@@ -173,6 +238,80 @@ function AdminPage({
         { duration: 3200 },
       );
     }
+  };
+
+  const handleSubmitEvent = async (event) => {
+    event.preventDefault();
+    const eventData = buildEventFromDraft(eventDraft);
+
+    if (!eventData.title) {
+      showPopup("Event title is required", "failure", { duration: 2400 });
+      return;
+    }
+    if (!eventData.startsAt) {
+      showPopup("Event start time is required", "failure", { duration: 2400 });
+      return;
+    }
+    if (!Number.isFinite(eventData.lat) || eventData.lat < -90 || eventData.lat > 90) {
+      showPopup("Latitude must be between -90 and 90", "failure", {
+        duration: 2800,
+      });
+      return;
+    }
+    if (
+      !Number.isFinite(eventData.lng) ||
+      eventData.lng < -180 ||
+      eventData.lng > 180
+    ) {
+      showPopup("Longitude must be between -180 and 180", "failure", {
+        duration: 2800,
+      });
+      return;
+    }
+
+    if (eventData.endsAt) {
+      const startMs = Date.parse(eventData.startsAt);
+      const endMs = Date.parse(eventData.endsAt);
+      if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs < startMs) {
+        showPopup("Event end time must be after start time", "failure", {
+          duration: 2800,
+        });
+        return;
+      }
+    }
+
+    const resolvedId =
+      eventData.id ||
+      buildEventId({ title: eventData.title, startsAt: eventData.startsAt });
+    const payload = {
+      ...eventData,
+      id: resolvedId,
+    };
+
+    try {
+      await Promise.resolve(onSaveStarPartyEvent?.(payload));
+      showPopup(isEditingEvent ? "Event updated" : "Event created", "success", {
+        duration: 2400,
+      });
+      resetEventForm();
+    } catch (error) {
+      showPopup(
+        error instanceof Error
+          ? error.message
+          : "Could not save this event right now",
+        "failure",
+        { duration: 3200 },
+      );
+    }
+  };
+
+  const handleSetEventStatus = (eventId, status) => {
+    if (!eventId || !status) return;
+    onSetStarPartyEventStatus?.({ eventId, status });
+    if (editingEventId && editingEventId === String(eventId).trim()) {
+      setEventDraft((current) => ({ ...current, status }));
+    }
+    showPopup(`Event status set to ${status}`, "info", { duration: 1800 });
   };
 
   const hero = showPlanet ? (
@@ -206,28 +345,88 @@ function AdminPage({
           onAction={handleBackToMap}
         />
       ) : (
-        <section className="profile-card glass-panel glass-panel-elevated">
-          <h2 className="profile-section-title">Stargazing locations</h2>
-          <p className="profile-section-copy">
-            Curate the best stargazing spots shown in the map search and on the
-            map itself.
-          </p>
+        <section className="profile-card glass-panel glass-panel-elevated admin-workspace">
+          <div className="admin-workspace-header">
+            <div>
+              <h2 className="profile-section-title">Admin tools</h2>
+              <p className="profile-section-copy">
+                Manage curated map spots and admin-created star party events.
+              </p>
+            </div>
+            <div
+              className="settings-switcher admin-view-switcher"
+              role="group"
+              aria-label="Admin view"
+              style={viewSwitcherStyle}
+            >
+              <button
+                type="button"
+                className={`settings-switch${
+                  activeView === "locations" ? " active" : ""
+                }`}
+                aria-pressed={activeView === "locations"}
+                onClick={() => setActiveView("locations")}
+              >
+                Locations
+              </button>
+              <button
+                type="button"
+                className={`settings-switch${
+                  activeView === "events" ? " active" : ""
+                }`}
+                aria-pressed={activeView === "events"}
+                onClick={() => setActiveView("events")}
+              >
+                Events
+              </button>
+            </div>
+          </div>
 
-          <AdminLocationForm
-            draft={draft}
-            onFieldChange={handleFieldChange}
-            onReset={resetForm}
-            onCancelEdit={resetForm}
-            onSubmit={handleSubmit}
-            isEditing={isEditing}
-          />
+          <div className="admin-summary-row">
+            <span className="profile-pill">Spots {locationList.length}</span>
+            <span className="profile-pill">Events {eventList.length}</span>
+            <span className="profile-pill">Published {publishedEventsCount}</span>
+            <span className="profile-pill">RSVPs {totalRsvps}</span>
+          </div>
 
-          <AdminLocationList
-            locations={locationList}
-            onDeleteLocation={handleDeleteLocation}
-            onEditLocation={handleEditLocation}
-            activeLocationId={editingId || null}
-          />
+          {activeView === "locations" ? (
+            <>
+              <AdminLocationForm
+                draft={locationDraft}
+                onFieldChange={handleLocationFieldChange}
+                onReset={resetLocationForm}
+                onCancelEdit={resetLocationForm}
+                onSubmit={handleSubmitLocation}
+                isEditing={isEditingLocation}
+              />
+
+              <AdminLocationList
+                locations={locationList}
+                onDeleteLocation={handleDeleteLocation}
+                onEditLocation={handleEditLocation}
+                activeLocationId={editingLocationId || null}
+              />
+            </>
+          ) : (
+            <>
+              <AdminEventForm
+                draft={eventDraft}
+                onFieldChange={handleEventFieldChange}
+                onSubmit={handleSubmitEvent}
+                onReset={resetEventForm}
+                onCancelEdit={resetEventForm}
+                isEditing={isEditingEvent}
+              />
+
+              <AdminEventList
+                events={eventList}
+                onEditEvent={handleEditEvent}
+                onDeleteEvent={handleDeleteEvent}
+                onSetStatus={handleSetEventStatus}
+                activeEventId={editingEventId || null}
+              />
+            </>
+          )}
         </section>
       )}
     </PageShell>

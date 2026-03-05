@@ -5,10 +5,12 @@ import StargazeMarkers from "./markers/StargazeMarkers";
 import FavoriteStargazeMarkers from "./markers/FavoriteStargazeMarkers";
 import DarkSpotMarkers from "./markers/DarkSpotMarkers";
 import FavoriteOnlyMarkers from "./markers/FavoriteOnlyMarkers";
+import StarPartyMarkers from "./markers/StarPartyMarkers";
 
 export default function MapMarkers({
   location,
   isAuthenticated,
+  activeUserRsvpId,
   mapRef,
   stargazeMarkerRefs,
   placedMarkerRef,
@@ -16,6 +18,8 @@ export default function MapMarkers({
   derived,
   ui,
   handlers,
+  starPartyEvents,
+  onToggleStarPartyRsvp,
   onOpenSpaceWeatherAt,
 }) {
   return (
@@ -105,6 +109,16 @@ export default function MapMarkers({
         getDirectionsOrigin={handlers.getDirectionsOrigin}
         setSelectedDarkSpot={handlers.setSelectedDarkSpot}
         onOpenSpaceWeatherAt={onOpenSpaceWeatherAt}
+      />
+      <StarPartyMarkers
+        events={starPartyEvents}
+        isAuthenticated={isAuthenticated}
+        activeUserRsvpId={activeUserRsvpId}
+        centerOnCoords={handlers.centerOnCoords}
+        handleShareLocation={handlers.handleShareLocation}
+        buildDirectionsUrl={handlers.buildDirectionsUrl}
+        getDirectionsOrigin={handlers.getDirectionsOrigin}
+        onToggleRsvp={onToggleStarPartyRsvp}
       />
     </>
   );

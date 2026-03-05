@@ -307,10 +307,101 @@ function DarkSpotPopupContent({
   );
 }
 
+const formatEventDateTime = (value) => {
+  if (!value) return "TBD";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "TBD";
+  return parsed.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+function StarPartyPopupContent({
+  event,
+  isAuthenticated,
+  isJoined,
+  rsvpCount,
+  onToggleRsvp,
+  onShareLocation,
+  onGetDirections,
+}) {
+  if (!event) return null;
+
+  const eventTypeLabel =
+    event.eventType === "special_event" ? "Special event" : "Star party";
+
+  return (
+    <div className="context-menu-popup star-party-popup">
+      <div className="star-party-popup__header">
+        <span className="star-party-popup__type">{eventTypeLabel}</span>
+        <h4 className="star-party-popup__title">{event.title}</h4>
+        <div className="star-party-popup__time">
+          {formatEventDateTime(event.startsAt)}
+          {event.endsAt ? ` - ${formatEventDateTime(event.endsAt)}` : ""}
+        </div>
+      </div>
+
+      <div className="popup-coords">
+        <span className="popup-coords-label">Meetup pin</span>
+        <span className="popup-coords-value">
+          {event.lat.toFixed(4)}, {event.lng.toFixed(4)}
+        </span>
+      </div>
+
+      <div className="star-party-popup__stats">
+        <span className="star-party-popup__chip">RSVP {rsvpCount}</span>
+      </div>
+
+      {event.description ? (
+        <p className="star-party-popup__description">{event.description}</p>
+      ) : null}
+
+      {Array.isArray(event.hostChecklist) && event.hostChecklist.length > 0 ? (
+        <div className="star-party-popup__checklist">
+          <div className="star-party-popup__checklist-title">Host checklist</div>
+          <ul>
+            {event.hostChecklist.slice(0, 3).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div className="popup-actions">
+        <button
+          className={`popup-btn${!isAuthenticated ? " danger" : ""}`}
+          onClick={onToggleRsvp}
+          disabled={!onToggleRsvp}
+        >
+          {!isAuthenticated
+            ? "Sign in to RSVP"
+            : isJoined
+              ? "Leave event"
+              : "RSVP"}
+        </button>
+        {onShareLocation ? (
+          <button className="popup-btn" onClick={onShareLocation}>
+            Share meetup pin
+          </button>
+        ) : null}
+        {onGetDirections ? (
+          <button className="popup-btn" onClick={onGetDirections}>
+            Get Directions
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 export {
   LocationPopupContent,
   PinnedPopupContent,
   StargazePopupContent,
   FavoritePopupContent,
   DarkSpotPopupContent,
+  StarPartyPopupContent,
 };

@@ -3,6 +3,7 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useState,
 } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
@@ -39,6 +40,8 @@ import {
 import MapMarkers from "./MapView/MapMarkers";
 import useMapViewState from "./MapView/useMapViewState";
 import useSpaceWeather from "@/features/spaceWeather/useSpaceWeather";
+import showPopup from "@/utils/popup";
+import { getRsvpUserId } from "@/features/starParty/starPartyStorage";
 
 const MapView = forwardRef(function MapView(
   {
@@ -47,7 +50,9 @@ const MapView = forwardRef(function MapView(
     mapType,
     setMapType,
     stargazeLocations = [],
+    starPartyEvents = [],
     isAuthenticated,
+    authUser,
     directionsProvider = "google",
     showRecommendedSpots = true,
     lightOverlayEnabled = false,
@@ -56,6 +61,7 @@ const MapView = forwardRef(function MapView(
     onSearchDistanceChange,
     autoCenterOnLocate = true,
     onThreeDModeChange,
+    onToggleStarPartyRsvp,
   },
   ref
 ) {
@@ -79,6 +85,15 @@ const MapView = forwardRef(function MapView(
   const mapTypeClass = isThreeDMode ? "light three-d" : mapType;
   const closeStargazePanel = handlers.handleCloseStargazePanel;
   const ensureSpaceWeatherLoaded = spaceWeather.ensureLoaded;
+  const activeUserRsvpId = getRsvpUserId(authUser);
+  const visibleStarPartyEvents = useMemo(() => {
+    if (!Array.isArray(starPartyEvents)) return [];
+    return starPartyEvents.filter((event) => {
+      if (!event || event.status !== "published") return false;
+      if (!Number.isFinite(event.lat) || !Number.isFinite(event.lng)) return false;
+      return true;
+    });
+  }, [starPartyEvents]);
 
   const handleToggleThreeD = useCallback(() => {
     setIsThreeDMode((prev) => !prev);
@@ -120,6 +135,25 @@ const MapView = forwardRef(function MapView(
   const handleCloseSpaceWeather = useCallback(() => {
     setIsSpaceWeatherOpen(false);
   }, []);
+
+  const handleToggleEventRsvp = useCallback(
+    (event) => {
+      if (!event?.id) return;
+      if (!isAuthenticated || !activeUserRsvpId) {
+        showPopup("Sign in to RSVP to events", "failure", { duration: 2400 });
+        return;
+      }
+      const currentRsvps = Array.isArray(event.rsvps) ? event.rsvps : [];
+      const isAlreadyJoined = currentRsvps.some(
+        (entry) => entry.userId === activeUserRsvpId,
+      );
+      onToggleStarPartyRsvp?.({ eventId: event.id, user: authUser });
+      showPopup(isAlreadyJoined ? "RSVP removed" : "RSVP confirmed", "success", {
+        duration: 1800,
+      });
+    },
+    [activeUserRsvpId, authUser, isAuthenticated, onToggleStarPartyRsvp],
+  );
 
   useImperativeHandle(
     ref,
@@ -225,6 +259,9 @@ const MapView = forwardRef(function MapView(
             ui={ui}
             handlers={handlers}
             onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
+            starPartyEvents={visibleStarPartyEvents}
+            activeUserRsvpId={activeUserRsvpId}
+            onToggleStarPartyRsvp={handleToggleEventRsvp}
           />
         )}
       </MapContainer>

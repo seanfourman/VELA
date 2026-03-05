@@ -11,6 +11,13 @@ export default function AdminLocationForm({
   const secondaryAction = isEditing ? onCancelEdit : onReset;
   const secondaryLabel = isEditing ? "Cancel edit" : "Clear";
   const submitLabel = isEditing ? "Save changes" : "Add location";
+  const primaryFieldKeys = new Set(["name", "country", "region", "lat", "lng"]);
+  const primaryFields = INPUT_FIELDS.filter((field) => primaryFieldKeys.has(field.key));
+  const advancedFields = INPUT_FIELDS.filter(
+    (field) => !primaryFieldKeys.has(field.key),
+  );
+  const primaryTextareas = TEXTAREAS.filter((item) => item.key === "description");
+  const advancedTextareas = TEXTAREAS.filter((item) => item.key !== "description");
 
   return (
     <form className="admin-location-form" onSubmit={onSubmit}>
@@ -21,7 +28,7 @@ export default function AdminLocationForm({
       ) : null}
 
       <div className="admin-location-grid">
-        {INPUT_FIELDS.map(
+        {primaryFields.map(
           ({
             key,
             label,
@@ -49,7 +56,7 @@ export default function AdminLocationForm({
         )}
       </div>
 
-      {TEXTAREAS.map(({ key, label, placeholder, note }) => (
+      {primaryTextareas.map(({ key, label, placeholder, note }) => (
         <label key={key} className="profile-field">
           <span className="profile-label">{label}</span>
           <textarea
@@ -62,6 +69,54 @@ export default function AdminLocationForm({
           {note ? <span className="admin-location-note">{note}</span> : null}
         </label>
       ))}
+
+      <details className="admin-advanced-block">
+        <summary>Advanced details</summary>
+        <div className="admin-advanced-content">
+          <div className="admin-location-grid">
+            {advancedFields.map(
+              ({
+                key,
+                label,
+                className,
+                type = "text",
+                step,
+                min,
+                max,
+                placeholder,
+              }) => (
+                <label key={key} className={`profile-field ${className}`}>
+                  <span className="profile-label">{label}</span>
+                  <input
+                    className="profile-input"
+                    type={type}
+                    step={step}
+                    min={min}
+                    max={max}
+                    value={draft[key]}
+                    onChange={onFieldChange(key)}
+                    placeholder={placeholder}
+                  />
+                </label>
+              ),
+            )}
+          </div>
+
+          {advancedTextareas.map(({ key, label, placeholder, note }) => (
+            <label key={key} className="profile-field">
+              <span className="profile-label">{label}</span>
+              <textarea
+                className="profile-textarea"
+                rows="3"
+                value={draft[key]}
+                onChange={onFieldChange(key)}
+                placeholder={placeholder}
+              />
+              {note ? <span className="admin-location-note">{note}</span> : null}
+            </label>
+          ))}
+        </div>
+      </details>
 
       <div className="admin-location-actions">
         <button

@@ -4,6 +4,14 @@ import showPopup from "@/utils/popup";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import { fetchRecommendations } from "@/utils/recommendationsApi";
 import {
+  deleteEventById,
+  getRsvpUserId,
+  readEventsFromStorage,
+  saveEvent,
+  toggleRsvp,
+  writeEventsToStorage,
+} from "@/features/starParty/starPartyStorage";
+import {
   DEFAULT_MAP_TYPE,
   DEFAULT_PROFILE,
   DEFAULT_SETTINGS,
@@ -45,6 +53,9 @@ const useAppState = () => {
     loadProfileSettings(),
   );
   const [stargazeLocations, setStargazeLocations] = useState([]);
+  const [starPartyEvents, setStarPartyEvents] = useState(() =>
+    readEventsFromStorage(),
+  );
   const [route, setRoute] = useState(() =>
     normalizePath(window.location.pathname),
   );
@@ -56,6 +67,10 @@ const useAppState = () => {
   useEffect(() => {
     safeSetJson(SETTINGS_STORAGE_KEY, settings);
   }, [settings]);
+
+  useEffect(() => {
+    writeEventsToStorage(starPartyEvents);
+  }, [starPartyEvents]);
 
   useEffect(() => {
     let cancelled = false;
@@ -208,6 +223,59 @@ const useAppState = () => {
     setStargazeLocations((prev) => prev.filter((item) => item.id !== id));
   }, []);
 
+  const handleSaveStarPartyEvent = useCallback(
+    (draft) => {
+      const activeUser = auth?.user;
+      if (!isAdminUser(activeUser)) return;
+      const host = {
+        id: getRsvpUserId(activeUser),
+        name:
+          String(activeUser?.name || activeUser?.preferred_username || "").trim() ||
+          "Admin",
+        email: String(activeUser?.email || "").trim(),
+      };
+      setStarPartyEvents((prev) => saveEvent({ events: prev, draft, host }).events);
+    },
+    [auth?.user],
+  );
+
+  const handleDeleteStarPartyEvent = useCallback(
+    (eventId) => {
+      const activeUser = auth?.user;
+      if (!isAdminUser(activeUser)) return;
+      setStarPartyEvents((prev) => deleteEventById({ events: prev, eventId }));
+    },
+    [auth?.user],
+  );
+
+  const handleSetStarPartyEventStatus = useCallback(
+    ({ eventId, status }) => {
+      const activeUser = auth?.user;
+      if (!isAdminUser(activeUser)) return;
+      setStarPartyEvents((prev) => {
+        const target = prev.find((event) => event.id === eventId);
+        if (!target) return prev;
+        return saveEvent({
+          events: prev,
+          draft: { ...target, status },
+          host: target.host || {
+            id: getRsvpUserId(activeUser),
+            name:
+              String(
+                activeUser?.name || activeUser?.preferred_username || ""
+              ).trim() || "Admin",
+            email: String(activeUser?.email || "").trim(),
+          },
+        }).events;
+      });
+    },
+    [auth?.user],
+  );
+
+  const handleToggleStarPartyRsvp = useCallback(({ eventId, user }) => {
+    setStarPartyEvents((prev) => toggleRsvp({ events: prev, eventId, user }).events);
+  }, []);
+
   const currentRoute = normalizePath(route);
   const isAdmin = isAdminUser(auth?.user);
   const isLight = mapType === "light";
@@ -223,6 +291,7 @@ const useAppState = () => {
     settings,
     profileSettings,
     stargazeLocations,
+    starPartyEvents,
     currentRoute,
     isAdmin,
     isLight,
@@ -234,6 +303,10 @@ const useAppState = () => {
     handleResetSettings,
     handleSaveStargazeLocation,
     handleDeleteStargazeLocation,
+    handleSaveStarPartyEvent,
+    handleDeleteStarPartyEvent,
+    handleSetStarPartyEventStatus,
+    handleToggleStarPartyRsvp,
   };
 };
 
