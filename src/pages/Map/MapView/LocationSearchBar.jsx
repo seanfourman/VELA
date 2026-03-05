@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import markerIcon from "@/assets/icons/marker-icon.svg";
 import mapLocationIcon from "@/assets/icons/map-location-icon.svg";
 import partyHornIcon from "@/assets/icons/party-horn-svgrepo-com.svg";
+import eventIcon from "@/assets/icons/event-svgrepo-com.svg";
 import "./LocationSearchBar.css";
 
 const parseCoordinates = (value) => {
@@ -208,19 +209,25 @@ export default function LocationSearchBar({
                   }
 
                   if (result.type === "event") {
+                    const isSpecialEvent =
+                      result.event.eventType === "special_event";
                     const eventTypeLabel =
-                      result.event.eventType === "special_event"
-                        ? "Special event"
-                        : "Star party";
+                      isSpecialEvent ? "Special event" : "Star party";
+                    const eventClassName = isSpecialEvent
+                      ? " location-search__item--event-special"
+                      : " location-search__item--event-party";
+                    const eventTypeIcon = isSpecialEvent
+                      ? eventIcon
+                      : partyHornIcon;
                     return (
                       <button
                         key={result.id}
                         type="button"
-                        className="location-search__item location-search__item--event"
+                        className={`location-search__item location-search__item--event${eventClassName}`}
                         onClick={() => handleSelectEvent(result.event)}
                       >
                         <span className="location-search__item-icon">
-                          <img src={partyHornIcon} alt="" aria-hidden="true" />
+                          <img src={eventTypeIcon} alt="" aria-hidden="true" />
                         </span>
                         <span className="location-search__details">
                           <span className="location-search__name">

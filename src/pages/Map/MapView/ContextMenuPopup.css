@@ -272,15 +272,15 @@
 }
 
 .rsvp-toggle.special.active {
-  background: rgba(6, 182, 212, 0.56);
-  border-color: rgba(6, 182, 212, 0.92);
+  background: rgba(99, 102, 241, 0.56);
+  border-color: rgba(99, 102, 241, 0.92);
   box-shadow:
-    0 0 0 1px rgba(6, 182, 212, 0.4),
-    0 10px 24px rgba(6, 182, 212, 0.26);
+    0 0 0 1px rgba(99, 102, 241, 0.4),
+    0 10px 24px rgba(99, 102, 241, 0.26);
 }
 
 .rsvp-toggle.special.active:hover {
-  background: rgba(6, 182, 212, 0.66);
+  background: rgba(99, 102, 241, 0.66);
 }
 
 .share-toggle.share-flash {
@@ -339,11 +339,11 @@
 }
 
 .rsvp-toggle-label.special.active {
-  color: #cffafe;
-  border-color: rgba(6, 182, 212, 0.62);
+  color: #e0e7ff;
+  border-color: rgba(99, 102, 241, 0.62);
   box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(6, 182, 212, 0.35);
+    0 0 0 1px rgba(99, 102, 241, 0.35);
 }
 
 .target-toggle-wrapper:hover .target-toggle-label,
@@ -412,7 +412,7 @@
 }
 
 .star-party-popup.is-special-event .star-party-popup__title-block .popup-coords-label {
-  color: #67e8f9;
+  color: #a5b4fc;
 }
 
 .star-party-popup__title-block .popup-coords-value {
@@ -470,9 +470,9 @@
 }
 
 .star-party-popup.is-special-event .star-party-popup__chip {
-  border-color: rgba(6, 182, 212, 0.5);
-  background: rgba(6, 182, 212, 0.14);
-  color: #cffafe;
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.14);
+  color: #e0e7ff;
 }
 
 .star-party-popup__chip.warning {

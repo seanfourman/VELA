@@ -80,6 +80,14 @@
   --search-item-accent: #fb923c;
 }
 
+.location-search__item--event-party {
+  --search-item-accent: #fb923c;
+}
+
+.location-search__item--event-special {
+  --search-item-accent: #6366f1;
+}
+
 .location-search__item--location .location-search__item-icon {
   border-color: rgba(250, 204, 21, 0.6);
   background: rgba(250, 204, 21, 0.22);
@@ -88,6 +96,16 @@
 .location-search__item--event .location-search__item-icon {
   border-color: rgba(251, 146, 60, 0.6);
   background: rgba(251, 146, 60, 0.22);
+}
+
+.location-search__item--event-party .location-search__item-icon {
+  border-color: rgba(251, 146, 60, 0.6);
+  background: rgba(251, 146, 60, 0.22);
+}
+
+.location-search__item--event-special .location-search__item-icon {
+  border-color: rgba(99, 102, 241, 0.62);
+  background: rgba(99, 102, 241, 0.22);
 }
 
 .location-search__item--coords .location-search__meta,
@@ -105,6 +123,16 @@
   color: #fb923c;
 }
 
+.location-search__item--event-party .location-search__meta,
+.location-search__item--event-party .location-search__coords {
+  color: #fb923c;
+}
+
+.location-search__item--event-special .location-search__meta,
+.location-search__item--event-special .location-search__coords {
+  color: #a5b4fc;
+}
+
 .location-search__item--coords .location-search__coords {
   border-color: rgba(34, 211, 238, 0.65);
   background: rgba(34, 211, 238, 0.18);
@@ -118,6 +146,16 @@
 .location-search__item--event .location-search__coords {
   border-color: rgba(251, 146, 60, 0.7);
   background: rgba(251, 146, 60, 0.22);
+}
+
+.location-search__item--event-party .location-search__coords {
+  border-color: rgba(251, 146, 60, 0.7);
+  background: rgba(251, 146, 60, 0.22);
+}
+
+.location-search__item--event-special .location-search__coords {
+  border-color: rgba(99, 102, 241, 0.72);
+  background: rgba(99, 102, 241, 0.22);
 }
 
 .map-container.dark .location-search__item-icon img,
