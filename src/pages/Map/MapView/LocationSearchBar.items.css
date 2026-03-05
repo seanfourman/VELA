@@ -85,7 +85,7 @@
 }
 
 .location-search__item--event-special {
-  --search-item-accent: #6366f1;
+  --search-item-accent: #ef4444;
 }
 
 .location-search__item--location .location-search__item-icon {
@@ -104,8 +104,8 @@
 }
 
 .location-search__item--event-special .location-search__item-icon {
-  border-color: rgba(99, 102, 241, 0.62);
-  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(239, 68, 68, 0.62);
+  background: rgba(239, 68, 68, 0.22);
 }
 
 .location-search__item--coords .location-search__meta,
@@ -130,7 +130,7 @@
 
 .location-search__item--event-special .location-search__meta,
 .location-search__item--event-special .location-search__coords {
-  color: #a5b4fc;
+  color: #fca5a5;
 }
 
 .location-search__item--coords .location-search__coords {
@@ -154,8 +154,8 @@
 }
 
 .location-search__item--event-special .location-search__coords {
-  border-color: rgba(99, 102, 241, 0.72);
-  background: rgba(99, 102, 241, 0.22);
+  border-color: rgba(239, 68, 68, 0.72);
+  background: rgba(239, 68, 68, 0.22);
 }
 
 .map-container.dark .location-search__item-icon img,

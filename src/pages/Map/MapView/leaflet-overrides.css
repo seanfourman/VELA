@@ -368,33 +368,33 @@
 }
 
 .special-event-marker.rsvp-confetti-pop .marker-pin::before {
-  background: #6366f1;
+  background: #ef4444;
   box-shadow:
-    -20px -9px 0 0 #818cf8,
-    -12px -18px 0 0 #60a5fa,
-    0 -23px 0 0 #a78bfa,
-    13px -17px 0 0 #4f46e5,
-    22px -7px 0 0 #8b5cf6,
-    -18px 9px 0 0 #3b82f6,
-    -6px 18px 0 0 #c4b5fd,
-    8px 19px 0 0 #6366f1,
-    19px 8px 0 0 #0ea5e9;
+    -20px -9px 0 0 #fca5a5,
+    -12px -18px 0 0 #f87171,
+    0 -23px 0 0 #fb7185,
+    13px -17px 0 0 #ef4444,
+    22px -7px 0 0 #dc2626,
+    -18px 9px 0 0 #f97316,
+    -6px 18px 0 0 #fb7185,
+    8px 19px 0 0 #f43f5e,
+    19px 8px 0 0 #f59e0b;
   animation: party-rsvp-confetti-burst 0.7s ease-out forwards;
 }
 
 .special-event-marker.rsvp-confetti-pop .marker-pin::after {
-  background: #a5b4fc;
+  background: #fca5a5;
   box-shadow:
-    -15px -15px 0 0 #c7d2fe,
-    -4px -22px 0 0 #93c5fd,
-    7px -20px 0 0 #a78bfa,
-    18px -12px 0 0 #6366f1,
-    23px 0 0 0 #a5b4fc,
-    16px 13px 0 0 #8b5cf6,
-    4px 22px 0 0 #60a5fa,
-    -8px 20px 0 0 #4f46e5,
-    -19px 11px 0 0 #c4b5fd,
-    -23px 1px 0 0 #3b82f6;
+    -15px -15px 0 0 #fecaca,
+    -4px -22px 0 0 #f87171,
+    7px -20px 0 0 #fb7185,
+    18px -12px 0 0 #ef4444,
+    23px 0 0 0 #fca5a5,
+    16px 13px 0 0 #f43f5e,
+    4px 22px 0 0 #dc2626,
+    -8px 20px 0 0 #f97316,
+    -19px 11px 0 0 #fda4af,
+    -23px 1px 0 0 #f59e0b;
   animation: party-rsvp-confetti-burst 0.76s ease-out forwards;
   animation-delay: 0.04s;
 }
@@ -404,9 +404,9 @@
 }
 
 .special-event-marker .marker-dot.special-event-dot {
-  --marker-color: #6366f1;
-  --marker-glow: rgba(99, 102, 241, 0.62);
-  --marker-ring: rgba(99, 102, 241, 0.38);
+  --marker-color: #ef4444;
+  --marker-glow: rgba(239, 68, 68, 0.62);
+  --marker-ring: rgba(239, 68, 68, 0.38);
   box-shadow: 0 0 16px var(--marker-glow);
   border-color: rgba(255, 255, 255, 0.95);
   display: flex;
@@ -420,7 +420,7 @@
   width: 14px;
   height: 14px;
   display: block;
-  filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(99, 102, 241, 0.8));
+  filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(239, 68, 68, 0.8));
   pointer-events: none;
 }
 
