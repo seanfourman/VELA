@@ -22,7 +22,7 @@ const useMapCameraHandlers = ({
       const map = mapRef.current;
       const zoom = map.getZoom();
       const targetPoint = map.latLngToContainerPoint([lat, lng]);
-      const verticalOffset = Math.min(180, map.getSize().y);
+      const verticalOffset = Math.min(240, map.getSize().y);
       const adjustedLatLng = map.containerPointToLatLng([
         targetPoint.x,
         targetPoint.y - verticalOffset,

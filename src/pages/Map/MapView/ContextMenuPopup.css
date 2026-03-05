@@ -427,8 +427,13 @@
 .star-party-popup__stats {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 6px;
+  position: absolute;
+  top: 2px;
+  left: 0;
+  z-index: 3;
+  pointer-events: none;
 }
 
 .star-party-popup__chip {
