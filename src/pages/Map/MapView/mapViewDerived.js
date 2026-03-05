@@ -21,10 +21,8 @@ export function getQuickActionTitles({ selectedDarkSpot, hasPinnedSpot, hasAnyLo
   return { quickPlanetsTitle, quickDarkSpotsTitle };
 }
 
-export function getSearchPlaceholder(showRecommendedSpots) {
-  return showRecommendedSpots
-    ? "Search coordinates, stargazing spots, or star parties"
-    : "Search coordinates or star parties";
+export function getSearchPlaceholder() {
+  return "Search anything";
 }
 
 export function getFavoriteOnlySpots({
