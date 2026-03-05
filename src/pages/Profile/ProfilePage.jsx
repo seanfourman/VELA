@@ -2,22 +2,39 @@ import { useEffect, useMemo, useState } from "react";
 import EarthGlobe from "@/components/planets/EarthGlobe";
 import PageShell from "@/components/layout/PageShell";
 import userIcon from "@/assets/icons/user-icon.svg";
+import { DEFAULT_PROFILE, normalizeProfile } from "@/utils/appState";
+import { getRsvpUserId } from "@/features/starParty/starPartyStorage";
 import showPopup from "@/utils/popup";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
+import "./ProfilePage.css";
 
-const EMPTY_PROFILE = {
-  displayName: "",
-  avatarUrl: "",
-  bio: "",
-};
+const PROFILE_KEYS = [
+  "displayName",
+  "avatarUrl",
+  "bio",
+  "locationLabel",
+  "favoriteTargets",
+  "equipment",
+];
 
-const normalizeProfile = (value) => {
-  const safe = value && typeof value === "object" ? value : {};
-  return {
-    displayName: typeof safe.displayName === "string" ? safe.displayName : "",
-    avatarUrl: typeof safe.avatarUrl === "string" ? safe.avatarUrl : "",
-    bio: typeof safe.bio === "string" ? safe.bio : "",
-  };
+const PROFILE_COMPLETION_KEYS = [
+  "displayName",
+  "avatarUrl",
+  "bio",
+  "locationLabel",
+  "favoriteTargets",
+];
+
+const formatEventTime = (value) => {
+  if (!value) return "TBD";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "TBD";
+  return parsed.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 };
 
 function ProfilePage({
@@ -26,11 +43,13 @@ function ProfilePage({
   isLight,
   isAdmin,
   mapType,
+  starPartyEvents = [],
   onSave,
   onReset,
   onNavigate,
 }) {
   const [draft, setDraft] = useState(() => normalizeProfile(profile));
+  const [nowMs] = useState(() => Date.now());
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const user = auth?.user || {};
   const userEmail = user?.email;
@@ -46,18 +65,66 @@ function ProfilePage({
 
   const draftNormalized = normalizeProfile(draft);
   const profileNormalized = normalizeProfile(profile);
-  const hasChanges =
-    draftNormalized.displayName !== profileNormalized.displayName ||
-    draftNormalized.avatarUrl !== profileNormalized.avatarUrl ||
-    draftNormalized.bio !== profileNormalized.bio;
+  const hasChanges = PROFILE_KEYS.some(
+    (key) => draftNormalized[key] !== profileNormalized[key],
+  );
 
   const displayName =
-    draftNormalized.displayName.trim() ||
+    draftNormalized.displayName ||
     user?.name ||
     user?.email ||
     user?.preferred_username ||
     userName;
-  const avatarUrl = draftNormalized.avatarUrl.trim() || user?.picture || "";
+  const avatarUrl = draftNormalized.avatarUrl || user?.picture || "";
+  const userRsvpId = getRsvpUserId(user);
+
+  const joinedEvents = useMemo(() => {
+    if (!userRsvpId || !Array.isArray(starPartyEvents)) return [];
+    return starPartyEvents.filter((event) =>
+      Array.isArray(event?.rsvps)
+        ? event.rsvps.some(
+            (entry) => String(entry?.userId || "").toLowerCase() === userRsvpId,
+          )
+        : false,
+    );
+  }, [starPartyEvents, userRsvpId]);
+
+  const hostedEventsCount = useMemo(() => {
+    if (!userRsvpId || !Array.isArray(starPartyEvents)) return 0;
+    return starPartyEvents.filter(
+      (event) => String(event?.host?.id || "").toLowerCase() === userRsvpId,
+    ).length;
+  }, [starPartyEvents, userRsvpId]);
+
+  const upcomingJoinedEvents = useMemo(() => {
+    return [...joinedEvents]
+      .filter((event) => {
+        const startsAtMs = Date.parse(event.startsAt || "");
+        return Number.isFinite(startsAtMs) && startsAtMs >= nowMs;
+      })
+      .sort(
+        (a, b) =>
+          Date.parse(a.startsAt || Number.MAX_SAFE_INTEGER) -
+          Date.parse(b.startsAt || Number.MAX_SAFE_INTEGER),
+      );
+  }, [joinedEvents, nowMs]);
+
+  const recentJoinedEvents = useMemo(
+    () =>
+      [...joinedEvents].sort(
+        (a, b) =>
+          Date.parse(b.startsAt || 0) - Date.parse(a.startsAt || 0),
+      ),
+    [joinedEvents],
+  );
+
+  const completionScore = PROFILE_COMPLETION_KEYS.reduce(
+    (count, key) => count + Number(Boolean(String(draftNormalized[key] || "").trim())),
+    0,
+  );
+  const completionPercent = Math.round(
+    (completionScore / PROFILE_COMPLETION_KEYS.length) * 100,
+  );
 
   const handleFieldChange = (key) => (event) => {
     const value = event.target.value;
@@ -66,23 +133,13 @@ function ProfilePage({
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!onSave) return;
-
-    const nextProfile = {
-      displayName: draftNormalized.displayName.trim(),
-      avatarUrl: draftNormalized.avatarUrl.trim(),
-      bio: draftNormalized.bio.trim(),
-    };
-
-    onSave(nextProfile);
+    onSave?.(draftNormalized);
     showPopup("Profile updated", "success", { duration: 2200 });
   };
 
   const handleReset = () => {
-    if (onReset) {
-      onReset();
-    }
-    setDraft({ ...EMPTY_PROFILE });
+    onReset?.();
+    setDraft({ ...DEFAULT_PROFILE });
     showPopup("Profile reset to defaults", "info", { duration: 2200 });
   };
 
@@ -96,8 +153,8 @@ function ProfilePage({
 
   return (
     <PageShell
-      title="Profile"
-      subtitle="Update your public details and manage the info shown in VELA."
+      title="Community Profile"
+      subtitle="Show who you are, what you observe, and your event activity."
       isLight={isLight}
       onNavigate={onNavigate}
       hero={hero}
@@ -106,7 +163,7 @@ function ProfilePage({
         <section className="profile-card glass-panel glass-panel-elevated">
           <h2 className="profile-section-title">Sign in to edit</h2>
           <p className="profile-section-copy">
-            Sign in to customize your display name, avatar, and profile details.
+            Sign in to create your community profile and join stargazing events.
           </p>
           <button
             type="button"
@@ -120,7 +177,7 @@ function ProfilePage({
         </section>
       ) : (
         <form
-          className="profile-card glass-panel glass-panel-elevated"
+          className="profile-card glass-panel glass-panel-elevated profile-workspace"
           onSubmit={handleSubmit}
         >
           <div className="profile-card__header">
@@ -136,54 +193,163 @@ function ProfilePage({
               )}
             </div>
             <div className="profile-preview">
-              <div className="profile-preview__name">
-                {displayName || "Signed In"}
-              </div>
+              <div className="profile-preview__name">{displayName}</div>
               {userEmail ? (
                 <div className="profile-preview__meta">{userEmail}</div>
               ) : null}
-              {isAdmin ? (
-                <span className="profile-pill">Admin access</span>
-              ) : null}
+              {isAdmin ? <span className="profile-pill">Admin access</span> : null}
+              <div className="profile-completion">
+                <div className="profile-completion__label">
+                  Profile completion {completionPercent}%
+                </div>
+                <div className="profile-completion__bar" aria-hidden="true">
+                  <span style={{ width: `${completionPercent}%` }} />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="profile-section">
-            <h2 className="profile-section-title">Public profile</h2>
-            <div className="profile-grid">
+          <div className="profile-metrics">
+            <article className="profile-metric">
+              <div className="profile-metric__label">Events joined</div>
+              <div className="profile-metric__value">{joinedEvents.length}</div>
+            </article>
+            <article className="profile-metric">
+              <div className="profile-metric__label">Events hosted</div>
+              <div className="profile-metric__value">{hostedEventsCount}</div>
+            </article>
+            <article className="profile-metric">
+              <div className="profile-metric__label">Upcoming</div>
+              <div className="profile-metric__value">
+                {upcomingJoinedEvents.length}
+              </div>
+            </article>
+          </div>
+
+          <div className="profile-layout-grid">
+            <section className="profile-panel">
+              <h2 className="profile-section-title">About you</h2>
+              <div className="profile-grid">
+                <label className="profile-field">
+                  <span className="profile-label">Display name</span>
+                  <input
+                    className="profile-input"
+                    type="text"
+                    value={draftNormalized.displayName}
+                    onChange={handleFieldChange("displayName")}
+                    placeholder={userName}
+                    autoComplete="name"
+                  />
+                </label>
+                <label className="profile-field">
+                  <span className="profile-label">Avatar URL</span>
+                  <input
+                    className="profile-input"
+                    type="url"
+                    value={draftNormalized.avatarUrl}
+                    onChange={handleFieldChange("avatarUrl")}
+                    placeholder="https://example.com/avatar.png"
+                  />
+                </label>
+              </div>
               <label className="profile-field">
-                <span className="profile-label">Display name</span>
+                <span className="profile-label">Bio</span>
+                <textarea
+                  className="profile-textarea"
+                  rows="3"
+                  value={draftNormalized.bio}
+                  onChange={handleFieldChange("bio")}
+                  placeholder="Tell the community what you like observing."
+                  maxLength={180}
+                />
+              </label>
+              <label className="profile-field">
+                <span className="profile-label">Home sky</span>
                 <input
                   className="profile-input"
                   type="text"
-                  value={draftNormalized.displayName}
-                  onChange={handleFieldChange("displayName")}
-                  placeholder={userName}
-                  autoComplete="name"
+                  value={draftNormalized.locationLabel}
+                  onChange={handleFieldChange("locationLabel")}
+                  placeholder="Negev ridge, Israel"
+                />
+              </label>
+            </section>
+
+            <section className="profile-panel">
+              <h2 className="profile-section-title">Stargazing identity</h2>
+              <label className="profile-field">
+                <span className="profile-label">Favorite targets</span>
+                <textarea
+                  className="profile-textarea"
+                  rows="3"
+                  value={draftNormalized.favoriteTargets}
+                  onChange={handleFieldChange("favoriteTargets")}
+                  placeholder="Orion Nebula, Pleiades, Andromeda"
                 />
               </label>
               <label className="profile-field">
-                <span className="profile-label">Avatar URL</span>
-                <input
-                  className="profile-input"
-                  type="url"
-                  value={draftNormalized.avatarUrl}
-                  onChange={handleFieldChange("avatarUrl")}
-                  placeholder="https://example.com/avatar.png"
+                <span className="profile-label">Equipment</span>
+                <textarea
+                  className="profile-textarea"
+                  rows="3"
+                  value={draftNormalized.equipment}
+                  onChange={handleFieldChange("equipment")}
+                  placeholder="Telescope, tracker, camera, filters"
                 />
               </label>
-            </div>
-            <label className="profile-field">
-              <span className="profile-label">Bio</span>
-              <textarea
-                className="profile-textarea"
-                rows="3"
-                value={draftNormalized.bio}
-                onChange={handleFieldChange("bio")}
-                placeholder="Tell us about your stargazing setup."
-                maxLength={180}
-              />
-            </label>
+            </section>
+
+            <section className="profile-panel">
+              <h2 className="profile-section-title">Upcoming events</h2>
+              {upcomingJoinedEvents.length === 0 ? (
+                <div className="profile-event-empty">
+                  No upcoming RSVP events yet
+                </div>
+              ) : (
+                <div className="profile-event-list">
+                  {upcomingJoinedEvents.slice(0, 4).map((event) => (
+                    <article key={event.id} className="profile-event-item">
+                      <div className="profile-event-head">
+                        <div className="profile-event-title">{event.title}</div>
+                        <span className="profile-event-chip">
+                          {event.eventType === "special_event"
+                            ? "Special"
+                            : "Party"}
+                        </span>
+                      </div>
+                      <div className="profile-event-meta">
+                        {formatEventTime(event.startsAt)}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="profile-panel">
+              <h2 className="profile-section-title">Recent activity</h2>
+              {recentJoinedEvents.length === 0 ? (
+                <div className="profile-event-empty">No joined events yet</div>
+              ) : (
+                <div className="profile-event-list">
+                  {recentJoinedEvents.slice(0, 4).map((event) => (
+                    <article key={event.id} className="profile-event-item">
+                      <div className="profile-event-head">
+                        <div className="profile-event-title">{event.title}</div>
+                        <span className="profile-event-chip">
+                          {event.eventType === "special_event"
+                            ? "Special"
+                            : "Party"}
+                        </span>
+                      </div>
+                      <div className="profile-event-meta">
+                        {formatEventTime(event.startsAt)}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
 
           <div className="profile-actions">

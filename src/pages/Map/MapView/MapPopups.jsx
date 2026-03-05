@@ -345,8 +345,8 @@ function StarPartyPopupContent({
     }, 2000);
   };
 
-  const eventTypeLabel =
-    event.eventType === "special_event" ? "Special event" : "Star party";
+  const isSpecialEvent = event.eventType === "special_event";
+  const eventTypeLabel = isSpecialEvent ? "Special event" : "Star party";
   const canRsvp = Boolean(onToggleRsvp);
   const canShare = Boolean(onShareLocation);
   const toggleCount = Number(canRsvp) + Number(canShare);
@@ -364,7 +364,9 @@ function StarPartyPopupContent({
 
   return (
     <div
-      className="context-menu-popup star-party-popup"
+      className={`context-menu-popup star-party-popup${
+        isSpecialEvent ? " is-special-event" : ""
+      }`}
       onPointerDown={stopPopupEvent}
       onClick={stopPopupEvent}
     >
@@ -376,7 +378,9 @@ function StarPartyPopupContent({
             aria-hidden={!canRsvp}
           >
             <button
-              className={`target-toggle rsvp-toggle${isJoined ? " active" : ""}`}
+              className={`target-toggle rsvp-toggle${
+                isSpecialEvent ? " special" : ""
+              }${isJoined ? " active" : ""}`}
               aria-label={rsvpActionLabel}
               disabled={!canRsvp}
               tabIndex={canRsvp ? 0 : -1}
@@ -394,6 +398,8 @@ function StarPartyPopupContent({
             </button>
             <span
               className={`target-toggle-label rsvp-toggle-label${
+                isSpecialEvent ? " special" : ""
+              }${
                 isJoined ? " active" : ""
               }`}
               aria-hidden="true"
@@ -431,6 +437,10 @@ function StarPartyPopupContent({
         </div>
       ) : null}
 
+      <div className="star-party-popup__stats">
+        <span className="star-party-popup__chip">RSVP {rsvpCount}</span>
+      </div>
+
       <div className="popup-coords star-party-popup__title-block">
         <span className="popup-coords-label star-party-popup__type">
           {eventTypeLabel}
@@ -452,10 +462,6 @@ function StarPartyPopupContent({
       </div>
 
       <SkyQualityInfo lat={event.lat} lng={event.lng} variant="compact" />
-
-      <div className="star-party-popup__stats">
-        <span className="star-party-popup__chip">RSVP {rsvpCount}</span>
-      </div>
 
       {event.description ? (
         <p className="star-party-popup__description">{event.description}</p>
