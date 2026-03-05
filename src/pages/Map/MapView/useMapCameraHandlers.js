@@ -72,6 +72,15 @@ const useMapCameraHandlers = ({
     [flyToCoordinates, setActiveStargazeId]
   );
 
+  const handleStarPartySearch = useCallback(
+    (eventItem) => {
+      if (!eventItem) return;
+      setActiveStargazeId(null);
+      flyToCoordinates(eventItem.lat, eventItem.lng, LOCATION_ZOOM);
+    },
+    [flyToCoordinates, setActiveStargazeId],
+  );
+
   const handleTileLoad = useCallback(
     (event) => {
       const src = event?.tile?.src;
@@ -107,6 +116,7 @@ const useMapCameraHandlers = ({
     flyToCoordinates,
     handleCoordinateSearch,
     handleStargazeSearch,
+    handleStarPartySearch,
     handleTileLoad,
     zoomOutToMin,
   };

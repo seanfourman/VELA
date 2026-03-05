@@ -323,9 +323,11 @@ const MapView = forwardRef(function MapView(
 
       <LocationSearchBar
         locations={derived.visibleStargazeLocations}
+        events={visibleStarPartyEvents}
         placeholder={derived.searchPlaceholder}
         onSelectCoordinates={handlers.handleCoordinateSearch}
         onSelectLocation={handlers.handleStargazeSearch}
+        onSelectEvent={handlers.handleStarPartySearch}
         onFocusChange={ui.setIsSearchFocused}
       />
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import markerIcon from "@/assets/icons/marker-icon.svg";
 import mapLocationIcon from "@/assets/icons/map-location-icon.svg";
+import partyHornIcon from "@/assets/icons/party-horn-svgrepo-com.svg";
 import "./LocationSearchBar.css";
 
 const parseCoordinates = (value) => {
@@ -22,8 +23,10 @@ const formatCoords = (lat, lng) => `${lat.toFixed(2)}, ${lng.toFixed(2)}`;
 
 export default function LocationSearchBar({
   locations = [],
+  events = [],
   onSelectCoordinates,
   onSelectLocation,
+  onSelectEvent,
   onFocusChange,
   placeholder = "Search coordinates or best stargazing spots",
 }) {
@@ -42,6 +45,11 @@ export default function LocationSearchBar({
           .toLowerCase()
           .includes(lowered)
       );
+      const eventMatches = events.filter((event) =>
+        String(event?.title || "")
+          .toLowerCase()
+          .includes(lowered)
+      );
       const items = [];
       if (coords) {
         items.push({
@@ -57,9 +65,16 @@ export default function LocationSearchBar({
           location,
         });
       });
+      eventMatches.forEach((event) => {
+        items.push({
+          type: "event",
+          id: `event-${event.id}`,
+          event,
+        });
+      });
       return items;
     },
-    [locations]
+    [events, locations]
   );
 
   const trimmedQuery = query.trim();
@@ -86,6 +101,8 @@ export default function LocationSearchBar({
       const result = immediateResults[0];
       if (result.type === "coords") {
         handleSelectCoordinates(result.coords);
+      } else if (result.type === "event") {
+        handleSelectEvent(result.event);
       } else {
         handleSelectLocation(result.location);
       }
@@ -103,6 +120,12 @@ export default function LocationSearchBar({
   const handleSelectCoordinates = (coords) => {
     onSelectCoordinates?.(coords);
     setQuery(formatCoords(coords.lat, coords.lng));
+    setListOpen(false);
+  };
+
+  const handleSelectEvent = (event) => {
+    onSelectEvent?.(event);
+    setQuery(event?.title || "");
     setListOpen(false);
   };
 
@@ -179,6 +202,36 @@ export default function LocationSearchBar({
                         </span>
                         <span className="location-search__coords">
                           {coordsLabel}
+                        </span>
+                      </button>
+                    );
+                  }
+
+                  if (result.type === "event") {
+                    const eventTypeLabel =
+                      result.event.eventType === "special_event"
+                        ? "Special event"
+                        : "Star party";
+                    return (
+                      <button
+                        key={result.id}
+                        type="button"
+                        className="location-search__item location-search__item--event"
+                        onClick={() => handleSelectEvent(result.event)}
+                      >
+                        <span className="location-search__item-icon">
+                          <img src={partyHornIcon} alt="" aria-hidden="true" />
+                        </span>
+                        <span className="location-search__details">
+                          <span className="location-search__name">
+                            {result.event.title || "Untitled event"}
+                          </span>
+                          <span className="location-search__meta">
+                            {eventTypeLabel}
+                          </span>
+                        </span>
+                        <span className="location-search__coords">
+                          {formatCoords(result.event.lat, result.event.lng)}
                         </span>
                       </button>
                     );

@@ -234,6 +234,7 @@ const useMapViewState = ({
       closeStargazePanel: stargaze.closeStargazePanel,
       handleCoordinateSearch: interactions.handleCoordinateSearch,
       handleStargazeSearch: interactions.handleStargazeSearch,
+      handleStarPartySearch: interactions.handleStarPartySearch,
       handleCloseStargazePanel: stargaze.handleCloseStargazePanel,
       handlePopupClose: stargaze.handlePopupClose,
       handleTileLoad: interactions.handleTileLoad,
