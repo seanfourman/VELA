@@ -2,6 +2,7 @@ import L from "leaflet";
 import favoriteFullIcon from "@/assets/icons/favorite-full-icon.svg";
 import starFullIcon from "@/assets/icons/star-full-icon.svg";
 import stargazingIcon from "@/assets/icons/stargazing-icon.svg";
+import partyHornIcon from "@/assets/icons/party-horn-svgrepo-com.svg";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -116,7 +117,7 @@ const starPartyEventIcon = new L.DivIcon({
   html: `
     <div class="marker-pin party-event-pin">
       <div class="marker-dot party-event-dot">
-        <img class="party-event-symbol" src="${stargazingIcon}" alt="" aria-hidden="true" />
+        <img class="party-event-symbol" src="${partyHornIcon}" alt="" aria-hidden="true" />
       </div>
     </div>
   `,
