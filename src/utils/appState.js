@@ -14,22 +14,14 @@ export const DEFAULT_PROFILE = {
   displayName: "",
   avatarUrl: "",
   bio: "",
-  locationLabel: "",
-  favoriteTargets: "",
-  equipment: "",
 };
 
 export const normalizeProfile = (value) => {
   const safe = value && typeof value === "object" ? value : {};
-  const readText = (key) =>
-    typeof safe[key] === "string" ? safe[key].trim() : "";
   return {
-    displayName: readText("displayName"),
-    avatarUrl: readText("avatarUrl"),
-    bio: readText("bio"),
-    locationLabel: readText("locationLabel"),
-    favoriteTargets: readText("favoriteTargets"),
-    equipment: readText("equipment"),
+    displayName: typeof safe.displayName === "string" ? safe.displayName : "",
+    avatarUrl: typeof safe.avatarUrl === "string" ? safe.avatarUrl : "",
+    bio: typeof safe.bio === "string" ? safe.bio : "",
   };
 };
 
