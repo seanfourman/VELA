@@ -69,6 +69,15 @@ const useAppState = () => {
   }, [settings]);
 
   useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    root.classList.toggle("a11y-mode", Boolean(settings.accessibilityMode));
+    return () => {
+      root.classList.remove("a11y-mode");
+    };
+  }, [settings.accessibilityMode]);
+
+  useEffect(() => {
     writeEventsToStorage(starPartyEvents);
   }, [starPartyEvents]);
 

@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS = {
   autoCenterOnLocate: true,
   highAccuracyLocation: true,
   searchDistance: SEARCH_DISTANCE_OPTIONS[0],
+  accessibilityMode: false,
 };
 export const DEFAULT_PROFILE = {
   displayName: "",
@@ -41,6 +42,10 @@ export const normalizeSettings = (value) => {
     searchDistance: SEARCH_DISTANCE_OPTIONS.includes(searchDistance)
       ? searchDistance
       : DEFAULT_SETTINGS.searchDistance,
+    accessibilityMode:
+      safe.accessibilityMode === undefined
+        ? DEFAULT_SETTINGS.accessibilityMode
+        : Boolean(safe.accessibilityMode),
   };
 };
 

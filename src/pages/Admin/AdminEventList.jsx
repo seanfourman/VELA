@@ -1,15 +1,4 @@
-const formatDateTime = (value) => {
-  if (!value) return "TBD";
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return "TBD";
-  return parsed.toLocaleString([], {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
+import { formatDateTime } from "@/utils/dateTime";
 
 const typeLabel = (value) =>
   value === "special_event" ? "Special event" : "Star party";
@@ -51,8 +40,10 @@ export default function AdminEventList({
               <div>
                 <div className="admin-location-title">{event.title}</div>
                 <div className="admin-location-meta">
-                  {formatDateTime(event.startsAt)}
-                  {event.endsAt ? ` - ${formatDateTime(event.endsAt)}` : ""}
+                  {formatDateTime(event.startsAt, { includeYear: true })}
+                  {event.endsAt
+                    ? ` - ${formatDateTime(event.endsAt, { includeYear: true })}`
+                    : ""}
                 </div>
                 <div className="admin-location-meta">
                   {event.lat.toFixed(4)}, {event.lng.toFixed(4)}

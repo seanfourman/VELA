@@ -1,0 +1,26 @@
+import SkyQualityInfo from "../SkyQualityInfo";
+
+export default function LocationPopupContent({ location, onOpenSpaceWeather }) {
+  if (!location) return null;
+
+  return (
+    <div className="context-menu-popup">
+      <div className="popup-coords">
+        <span className="popup-coords-label">Your location</span>
+        <span className="popup-coords-value">
+          {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+        </span>
+      </div>
+
+      <SkyQualityInfo lat={location.lat} lng={location.lng} variant="compact" />
+
+      {onOpenSpaceWeather ? (
+        <div className="popup-actions">
+          <button className="popup-btn" onClick={onOpenSpaceWeather}>
+            Get Space Weather
+          </button>
+        </div>
+      ) : null}
+    </div>
+  );
+}

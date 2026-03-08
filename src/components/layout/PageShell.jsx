@@ -1,4 +1,5 @@
 import "./PageShell.css";
+import { navigateToMapHome } from "@/utils/navigation";
 
 export default function PageShell({
   title,
@@ -24,11 +25,7 @@ export default function PageShell({
       onBack();
       return;
     }
-    if (onNavigate) {
-      onNavigate("/");
-      return;
-    }
-    window.location.assign("/");
+    navigateToMapHome({ navigate: onNavigate });
   };
 
   return (

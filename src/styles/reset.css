@@ -9,7 +9,7 @@
   box-sizing: border-box;
 }
 
-/* Global Size Transition - Smooth out layout shifts */
+/* Global size transition - default visual style. */
 div {
   transition:
     width 0.35s cubic-bezier(0.25, 0.8, 0.25, 1),
@@ -22,9 +22,35 @@ div {
   will-change: width, height, max-width, max-height, flex-basis;
 }
 
-/* Remove default blue focus outline across the site */
+/* Default focus handling - original visual style. */
 *:focus,
 *:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Accessibility mode: reduce motion and show a strong focus ring. */
+html.a11y-mode div {
+  transition: none !important;
+  will-change: auto;
+}
+
+html.a11y-mode *,
+html.a11y-mode *::before,
+html.a11y-mode *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+html.a11y-mode :focus-visible {
+  outline: 2px solid rgba(96, 165, 250, 0.95) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.35) !important;
+}
+
+html.a11y-mode :focus:not(:focus-visible) {
   outline: none !important;
   box-shadow: none !important;
 }

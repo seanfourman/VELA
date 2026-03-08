@@ -67,6 +67,7 @@ function SettingsPage({
     autoCenterOnLocate = true,
     highAccuracyLocation = true,
     searchDistance = SEARCH_DISTANCE_OPTIONS[0],
+    accessibilityMode = false,
   } = settings || {};
   const directionsSwitcherStyle = {
     "--switch-index": directionsProvider === "waze" ? 1 : 0,
@@ -225,6 +226,20 @@ function SettingsPage({
               }
             />
           </div>
+        </div>
+
+        <div className="settings-divider" role="presentation" />
+
+        <div className="settings-section">
+          <h2 className="profile-section-title">Accessibility</h2>
+          <SettingsToggle
+            title="Accessibility mode"
+            description="Disables aggressive UI motion and restores clear keyboard focus outlines."
+            checked={accessibilityMode}
+            onChange={(value) =>
+              onUpdateSettings?.({ accessibilityMode: value })
+            }
+          />
         </div>
 
         <div className="settings-actions">

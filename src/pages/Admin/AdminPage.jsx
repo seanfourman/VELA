@@ -24,22 +24,12 @@ import {
   buildLocationFromDraft,
   buildLocationId,
 } from "./adminUtils";
-
-function buildApiLocation(location, id) {
-  return {
-    id,
-    name: location.name,
-    lat: location.lat,
-    lng: location.lng,
-    description: location.description,
-    country: location.country,
-    region: location.region,
-    type: location.type,
-    best_time: location.bestTime,
-    photo_urls: location.photoUrls,
-    source_urls: location.sourceUrls,
-  };
-}
+import { navigateToMapHome } from "@/utils/navigation";
+import {
+  buildApiLocation,
+  validateEventDraft,
+  validateLocationDraft,
+} from "./adminSubmission";
 
 function AdminPage({
   auth,
@@ -96,14 +86,6 @@ function AdminPage({
   const viewSwitcherStyle = {
     "--switch-index": activeViewIndex,
     "--switch-count": 2,
-  };
-
-  const handleBackToMap = () => {
-    if (onNavigate) {
-      onNavigate("/");
-      return;
-    }
-    window.location.assign("/");
   };
 
   const handleLocationFieldChange = (key) => (event) => {
@@ -170,42 +152,10 @@ function AdminPage({
   const handleSubmitLocation = async (event) => {
     event.preventDefault();
     const location = buildLocationFromDraft(locationDraft);
-    const invalidPhotoCount = location.invalidPhotoUrls.length;
-    const invalidSourceCount = location.invalidSourceUrls.length;
 
-    if (!location.name) {
-      showPopup("Name is required", "failure", { duration: 2400 });
-      return;
-    }
-    if (!Number.isFinite(location.lat) || location.lat < -90 || location.lat > 90) {
-      showPopup("Latitude must be between -90 and 90", "failure", {
-        duration: 2800,
-      });
-      return;
-    }
-    if (
-      !Number.isFinite(location.lng) ||
-      location.lng < -180 ||
-      location.lng > 180
-    ) {
-      showPopup("Longitude must be between -180 and 180", "failure", {
-        duration: 2800,
-      });
-      return;
-    }
-    if (invalidPhotoCount > 0 || invalidSourceCount > 0) {
-      const details = [];
-      if (invalidPhotoCount > 0) {
-        details.push(`photo URLs: ${invalidPhotoCount}`);
-      }
-      if (invalidSourceCount > 0) {
-        details.push(`source URLs: ${invalidSourceCount}`);
-      }
-      showPopup(
-        `Invalid URL list (${details.join(", ")}). Use valid http(s) URLs only`,
-        "failure",
-        { duration: 4200 }
-      );
+    const validation = validateLocationDraft(location);
+    if (validation) {
+      showPopup(validation.message, "failure", { duration: validation.duration });
       return;
     }
 
@@ -244,40 +194,10 @@ function AdminPage({
     event.preventDefault();
     const eventData = buildEventFromDraft(eventDraft);
 
-    if (!eventData.title) {
-      showPopup("Event title is required", "failure", { duration: 2400 });
+    const validation = validateEventDraft(eventData);
+    if (validation) {
+      showPopup(validation.message, "failure", { duration: validation.duration });
       return;
-    }
-    if (!eventData.startsAt) {
-      showPopup("Event start time is required", "failure", { duration: 2400 });
-      return;
-    }
-    if (!Number.isFinite(eventData.lat) || eventData.lat < -90 || eventData.lat > 90) {
-      showPopup("Latitude must be between -90 and 90", "failure", {
-        duration: 2800,
-      });
-      return;
-    }
-    if (
-      !Number.isFinite(eventData.lng) ||
-      eventData.lng < -180 ||
-      eventData.lng > 180
-    ) {
-      showPopup("Longitude must be between -180 and 180", "failure", {
-        duration: 2800,
-      });
-      return;
-    }
-
-    if (eventData.endsAt) {
-      const startMs = Date.parse(eventData.startsAt);
-      const endMs = Date.parse(eventData.endsAt);
-      if (Number.isFinite(startMs) && Number.isFinite(endMs) && endMs < startMs) {
-        showPopup("Event end time must be after start time", "failure", {
-          duration: 2800,
-        });
-        return;
-      }
     }
 
     const resolvedId =
@@ -327,7 +247,7 @@ function AdminPage({
       subtitle="Access tools and manage system settings."
       isLight={isLight}
       className="admin-page"
-      onBack={handleBackToMap}
+      onBack={() => navigateToMapHome({ navigate: onNavigate })}
       hero={hero}
     >
       {!canUseAdminTools ? (
@@ -342,7 +262,7 @@ function AdminPage({
           title="Access restricted"
           message="You are signed in, but this account does not have admin access."
           buttonLabel="Return to map"
-          onAction={handleBackToMap}
+          onAction={() => navigateToMapHome({ navigate: onNavigate })}
         />
       ) : (
         <section className="profile-card glass-panel glass-panel-elevated admin-workspace">
