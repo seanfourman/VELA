@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef } from "react";
 import L from "leaflet";
 import { fetchDarkSpots } from "@/utils/darkSpots";
-import { isCoarsePointerEnv } from "./mapUtils";
-import { LOCATION_ZOOM, MARKER_EXIT_MS } from "./mapConstants";
+import { isCoarsePointerEnv } from "../core/mapUtils";
+import { LOCATION_ZOOM, MARKER_EXIT_MS } from "../core/mapConfig";
 import {
   buildPlanetRequestMeta,
   getPrimaryTarget,
   isPinnedPlanetSource,
-} from "./mapInteractionTargets";
+} from "../core/mapInteractionTargets";
 
 const useMapActionHandlers = ({
   mapRef,

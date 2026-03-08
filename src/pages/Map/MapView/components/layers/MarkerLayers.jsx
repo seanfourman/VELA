@@ -7,7 +7,7 @@ import DarkSpotMarkers from "./markers/DarkSpotMarkers";
 import FavoriteOnlyMarkers from "./markers/FavoriteOnlyMarkers";
 import StarPartyMarkers from "./markers/StarPartyMarkers";
 
-export default function MapMarkers({
+export default function MarkerLayers({
   location,
   isAuthenticated,
   activeUserRsvpId,

@@ -8,7 +8,7 @@ import {
   getPinnedTargetState,
   getQuickActionTitles,
   getSearchPlaceholder,
-} from "./mapViewDerived";
+} from "../core/mapDerivedState";
 import useMapDirections from "./useMapDirections";
 import useMapFavoriteTransition from "./useMapFavoriteTransition";
 import useMapFavorites from "@/features/map/useMapFavorites";

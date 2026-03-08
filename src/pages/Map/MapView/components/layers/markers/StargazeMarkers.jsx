@@ -1,6 +1,6 @@
 import { Marker, Popup } from "react-leaflet";
-import { stargazeIcon } from "@/pages/Map/MapView/mapIcons";
-import { StargazePopupContent } from "@/pages/Map/MapView/MapPopups";
+import { stargazeIcon } from "@/pages/Map/MapView/core/markerIcons";
+import { StargazePopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 export default function StargazeMarkers({
   spots,

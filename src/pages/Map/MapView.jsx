@@ -8,18 +8,18 @@ import {
 } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import "./MapView/mapView.css";
-import "./MapView/leaflet-overrides.css";
+import "./MapView/styles/map-layout.css";
+import "./MapView/styles/leaflet-overrides.css";
 import PlanetPanelContainer from "./PlanetPanel/PlanetPanelContainer";
-import MapTypeSwitcher from "./MapView/MapTypeSwitcher";
-import MapQuickActions from "./MapView/MapQuickActions";
-import LocationSearchBar from "./MapView/LocationSearchBar";
-import StargazePanel from "./MapView/StargazePanel";
-import StargazePanelMobile from "./MapView/StargazePanelMobile";
-import SpaceWeatherPanel from "./MapView/SpaceWeatherPanel";
-import SpaceWeatherPanelMobile from "./MapView/SpaceWeatherPanelMobile";
-import SearchDistanceSelector from "./MapView/SearchDistanceSelector";
-import MapLibre3DLayer from "./MapView/MapLibre3DLayer";
+import MapTypeSwitcher from "./MapView/components/controls/MapTypeSwitcher";
+import MapQuickActions from "./MapView/components/controls/MapQuickActions";
+import LocationSearchBar from "./MapView/components/search/LocationSearchBar";
+import StargazePanel from "./MapView/components/panels/stargaze/StargazePanel";
+import StargazePanelMobile from "./MapView/components/panels/stargaze/StargazePanelMobile";
+import SpaceWeatherPanel from "./MapView/components/panels/spaceWeather/SpaceWeatherPanel";
+import SpaceWeatherPanelMobile from "./MapView/components/panels/spaceWeather/SpaceWeatherPanelMobile";
+import SearchDistanceSelector from "./MapView/components/controls/SearchDistanceSelector";
+import MapLibre3DLayer from "./MapView/components/layers/MapLibre3DLayer";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -29,16 +29,16 @@ import {
   MAPTILER_KEY,
   MAX_ZOOM,
   MIN_ZOOM,
-} from "./MapView/mapConstants";
+} from "./MapView/core/mapConfig";
 import {
   DoubleClickHandler,
   LongPressHandler,
   MapAnimator,
   MapController,
   PopupStateHandler,
-} from "./MapView/MapEventHandlers";
-import MapMarkers from "./MapView/MapMarkers";
-import useMapViewState from "./MapView/useMapViewState";
+} from "./MapView/core/MapInteractionHandlers";
+import MarkerLayers from "./MapView/components/layers/MarkerLayers";
+import useMapViewState from "./MapView/hooks/useMapViewState";
 import useSpaceWeather from "@/features/spaceWeather/useSpaceWeather";
 import showPopup from "@/utils/popup";
 import { getRsvpUserId } from "@/features/starParty/starPartyStorage";
@@ -248,7 +248,7 @@ const MapView = forwardRef(function MapView(
         )}
 
         {!isThreeDMode && (
-          <MapMarkers
+          <MarkerLayers
             location={location}
             isAuthenticated={isAuthenticated}
             mapRef={mapRef}

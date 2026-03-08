@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { LOCATION_ZOOM, MIN_ZOOM } from "./mapConstants";
+import { LOCATION_ZOOM, MIN_ZOOM } from "../core/mapConfig";
 
 const GRIDSHOT_THROTTLE_MS = 3000;
 

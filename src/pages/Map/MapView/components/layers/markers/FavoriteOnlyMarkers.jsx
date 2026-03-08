@@ -1,6 +1,6 @@
 import { Marker, Popup } from "react-leaflet";
-import { favoritePinIconRemoving, favoriteSpotIcon } from "@/pages/Map/MapView/mapIcons";
-import { FavoritePopupContent } from "@/pages/Map/MapView/MapPopups";
+import { favoritePinIconRemoving, favoriteSpotIcon } from "@/pages/Map/MapView/core/markerIcons";
+import { FavoritePopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 export default function FavoriteOnlyMarkers({
   favoriteOnlySpots,

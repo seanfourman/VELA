@@ -3,8 +3,8 @@ import { Marker, Popup } from "react-leaflet";
 import {
   specialEventIcon,
   starPartyEventIcon,
-} from "@/pages/Map/MapView/mapIcons";
-import { StarPartyPopupContent } from "@/pages/Map/MapView/MapPopups";
+} from "@/pages/Map/MapView/core/markerIcons";
+import { StarPartyPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 const RSVP_CONFETTI_MS = 900;
 

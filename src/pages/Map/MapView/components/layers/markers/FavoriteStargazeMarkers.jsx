@@ -1,5 +1,5 @@
 import { Marker } from "react-leaflet";
-import { favoritePinIconRemoving, favoriteSpotIconTransition } from "@/pages/Map/MapView/mapIcons";
+import { favoritePinIconRemoving, favoriteSpotIconTransition } from "@/pages/Map/MapView/core/markerIcons";
 
 export default function FavoriteStargazeMarkers({
   spots,

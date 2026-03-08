@@ -1,6 +1,6 @@
 import { Marker, Popup } from "react-leaflet";
-import { customIcon } from "@/pages/Map/MapView/mapIcons";
-import { LocationPopupContent } from "@/pages/Map/MapView/MapPopups";
+import { customIcon } from "@/pages/Map/MapView/core/markerIcons";
+import { LocationPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 export default function LocationMarker({
   location,

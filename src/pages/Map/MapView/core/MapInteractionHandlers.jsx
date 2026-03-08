@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import { isCoarsePointerEnv } from "./mapUtils";
-import { LOCATION_ZOOM, LONG_PRESS_MS } from "./mapConstants";
+import { LOCATION_ZOOM, LONG_PRESS_MS } from "./mapConfig";
 
 function MapAnimator({ location, shouldAutoCenter }) {
   const map = useMap();

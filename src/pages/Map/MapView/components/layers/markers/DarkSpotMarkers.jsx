@@ -1,6 +1,6 @@
 import { Marker, Popup } from "react-leaflet";
-import { darkSpotIcon, favoriteSpotIcon } from "@/pages/Map/MapView/mapIcons";
-import { DarkSpotPopupContent } from "@/pages/Map/MapView/MapPopups";
+import { darkSpotIcon, favoriteSpotIcon } from "@/pages/Map/MapView/core/markerIcons";
+import { DarkSpotPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 export default function DarkSpotMarkers({
   darkSpots,

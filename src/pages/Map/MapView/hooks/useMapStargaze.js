@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { STARGAZE_PANEL_EXIT_MS } from "./mapConstants";
+import { STARGAZE_PANEL_EXIT_MS } from "../core/mapConfig";
 
 const useMapStargaze = ({
   stargazeLocations = [],
