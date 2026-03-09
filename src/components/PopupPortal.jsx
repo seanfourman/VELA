@@ -1,7 +1,7 @@
-import { createPortal } from "react-dom";
+﻿import { createPortal } from "react-dom";
 import { useEffect, useMemo, useState } from "react";
 import { POPUP_EVENT } from "@/utils/popup";
-import "./Popup.css";
+import "./styles/Popup.css";
 
 function Popup({ popup }) {
   return (
@@ -62,3 +62,4 @@ export default function PopupPortal() {
     portalTarget
   );
 }
+

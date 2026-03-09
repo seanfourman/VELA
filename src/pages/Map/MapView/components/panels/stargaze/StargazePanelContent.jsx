@@ -1,4 +1,4 @@
-import "./StargazePanel.css";
+﻿import "./styles/StargazePanel.css";
 
 const IMAGE_EXT_REGEX = /\.(png|jpe?g|webp|gif|avif)(\?|#|$)/i;
 
@@ -173,3 +173,4 @@ export default function StargazePanelContent({
     </div>
   );
 }
+

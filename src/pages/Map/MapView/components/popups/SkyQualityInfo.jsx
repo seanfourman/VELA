@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { fetchSkyQualityMetrics } from "@/utils/skyQuality";
-import "./SkyQualityInfo.css";
+import "./styles/SkyQualityInfo.css";
 
 function formatMaybeNumber(value, digits = 2) {
   if (value == null) return "N/A";
@@ -131,3 +131,4 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
     </div>
   );
 }
+

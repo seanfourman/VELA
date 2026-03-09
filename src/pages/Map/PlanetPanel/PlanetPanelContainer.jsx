@@ -1,8 +1,8 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+﻿import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import PlanetPanel from "./PlanetPanel";
 import PlanetPanelMobile from "./PlanetPanelMobile";
 import PlanetPanelToggle from "./PlanetPanelToggle";
-import "./planetPanel.css";
+import "./styles/planetPanel.css";
 
 const PlanetPanelContainer = forwardRef(
   (
@@ -292,3 +292,4 @@ const PlanetPanelContainer = forwardRef(
 PlanetPanelContainer.displayName = "PlanetPanelContainer";
 
 export default PlanetPanelContainer;
+

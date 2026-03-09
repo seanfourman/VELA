@@ -1,9 +1,9 @@
-import planetsIcon from "@/assets/icons/planets-icon.svg";
+﻿import planetsIcon from "@/assets/icons/planets-icon.svg";
 import stargazingIcon from "@/assets/icons/stargazing-icon.svg";
 import locationIcon from "@/assets/icons/location-icon.svg";
 import lightmapIcon from "@/assets/icons/lightmap-icon.svg";
 import cubeIcon from "@/assets/icons/cube-svgrepo-com.svg";
-import "./MapQuickActions.css";
+import "./styles/MapQuickActions.css";
 
 function QuickActionButton({
   icon,
@@ -146,3 +146,4 @@ export default function MapQuickActions({
     </div>
   );
 }
+

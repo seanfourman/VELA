@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import Chip from "@mui/material/Chip";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
@@ -13,7 +13,7 @@ import AdminLocationForm from "./AdminLocationForm";
 import AdminLocationList from "./AdminLocationList";
 import AdminEventForm from "./AdminEventForm";
 import AdminEventList from "./AdminEventList";
-import "@/pages/Settings/SettingsPage.css";
+import "@/pages/Settings/styles/SettingsPage.css";
 import { EMPTY_EVENT, EMPTY_LOCATION } from "./adminConstants";
 import {
   buildDraftFromEvent,
@@ -383,3 +383,4 @@ function AdminPage({
 }
 
 export default AdminPage;
+

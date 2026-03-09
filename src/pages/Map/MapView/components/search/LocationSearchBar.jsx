@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import markerIcon from "@/assets/icons/marker-icon.svg";
 import mapLocationIcon from "@/assets/icons/map-location-icon.svg";
 import partyHornIcon from "@/assets/icons/party-horn-svgrepo-com.svg";
 import eventIcon from "@/assets/icons/event-svgrepo-com.svg";
-import "./LocationSearchBar.css";
+import "./styles/LocationSearchBar.css";
 
 const parseCoordinates = (value) => {
   const trimmed = String(value || "").trim();
@@ -283,3 +283,4 @@ export default function LocationSearchBar({
     </div>
   );
 }
+

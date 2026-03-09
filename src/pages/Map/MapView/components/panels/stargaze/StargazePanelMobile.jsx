@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import StargazePanelContent from "./StargazePanelContent";
-import "./StargazePanelMobile.css";
+import "./styles/StargazePanelMobile.css";
 
 export default function StargazePanelMobile({
   spot,
@@ -72,3 +72,4 @@ export default function StargazePanelMobile({
     </div>
   );
 }
+

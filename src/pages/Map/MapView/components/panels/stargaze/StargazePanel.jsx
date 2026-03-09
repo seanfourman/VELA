@@ -1,5 +1,5 @@
-import StargazePanelContent from "./StargazePanelContent";
-import "./StargazePanel.css";
+﻿import StargazePanelContent from "./StargazePanelContent";
+import "./styles/StargazePanel.css";
 
 export default function StargazePanel({
   spot,
@@ -48,3 +48,4 @@ export default function StargazePanel({
     </aside>
   );
 }
+

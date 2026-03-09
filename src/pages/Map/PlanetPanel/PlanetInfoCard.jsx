@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
 import showPopup from "@/utils/popup";
 import arZoneIcon from "@/assets/icons/ar-zone-svgrepo-com.svg";
-import "./planetInfoCard.css";
+import "./styles/planetInfoCard.css";
 
 const formatDegrees = (value) => {
   if (value === undefined || value === null || Number.isNaN(value)) {
@@ -300,3 +300,4 @@ export default function PlanetInfoCard({
     </div>
   );
 }
+

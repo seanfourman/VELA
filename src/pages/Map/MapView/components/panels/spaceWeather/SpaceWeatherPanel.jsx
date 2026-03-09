@@ -1,5 +1,5 @@
-import SpaceWeatherPanelContent from "./SpaceWeatherPanelContent";
-import "./SpaceWeatherPanel.css";
+﻿import SpaceWeatherPanelContent from "./SpaceWeatherPanelContent";
+import "./styles/SpaceWeatherPanel.css";
 
 export default function SpaceWeatherPanel({
   isOpen,
@@ -44,3 +44,4 @@ export default function SpaceWeatherPanel({
     </aside>
   );
 }
+

@@ -1,4 +1,4 @@
-import {
+﻿import {
   cloneElement,
   useCallback,
   useEffect,
@@ -11,7 +11,7 @@ import PlanetCard from "./PlanetCard";
 import PlanetArOverlay from "./PlanetArOverlay";
 import showPopup from "@/utils/popup";
 import arZoneIcon from "@/assets/icons/ar-zone-svgrepo-com.svg";
-import "./planetPanelMobile.css";
+import "./styles/planetPanelMobile.css";
 
 const formatDegrees = (value) => {
   if (value === undefined || value === null || Number.isNaN(value)) {
@@ -447,3 +447,4 @@ export default function PlanetPanelMobile({
     </div>
   );
 }
+

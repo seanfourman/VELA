@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 import userIcon from "@/assets/icons/user-icon.svg";
-import "./ProfileMenu.css";
+import "./styles/ProfileMenu.css";
 
 function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -159,3 +159,4 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
 }
 
 export default ProfileMenu;
+

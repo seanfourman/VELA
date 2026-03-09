@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import showPopup from "@/utils/popup";
 import exitFullscreenIcon from "@/assets/icons/exit-full-screen-svgrepo-com.svg";
@@ -14,7 +14,7 @@ import {
   resolvePlanetBadge,
   shortestAngleDelta,
 } from "./planetArUtils";
-import "./planetArOverlay.css";
+import "./styles/planetArOverlay.css";
 
 export default function PlanetArOverlay({ planet, onClose }) {
   const videoRef = useRef(null);
@@ -452,3 +452,4 @@ export default function PlanetArOverlay({ planet, onClose }) {
     portalTarget,
   );
 }
+

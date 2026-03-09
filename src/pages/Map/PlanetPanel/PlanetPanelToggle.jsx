@@ -1,4 +1,4 @@
-import "./planetPanel.css";
+﻿import "./styles/planetPanel.css";
 
 export default function PlanetPanelToggle({
   active,
@@ -29,3 +29,4 @@ export default function PlanetPanelToggle({
     </button>
   );
 }
+

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import "./MapTypeSwitcher.css";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
+import "./styles/MapTypeSwitcher.css";
 
 const OPTION_META = (previewKey) => [
   {
@@ -103,3 +103,4 @@ export default function MapTypeSwitcher({
     </div>
   );
 }
+

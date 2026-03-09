@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+﻿import { useEffect } from "react";
 import SpaceWeatherPanelContent from "./SpaceWeatherPanelContent";
-import "./SpaceWeatherPanelMobile.css";
+import "./styles/SpaceWeatherPanelMobile.css";
 
 export default function SpaceWeatherPanelMobile({
   isOpen,
@@ -66,3 +66,4 @@ export default function SpaceWeatherPanelMobile({
     </div>
   );
 }
+

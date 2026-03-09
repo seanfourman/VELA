@@ -1,10 +1,10 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import SaturnGlobe from "@/components/planets/SaturnGlobe";
 import PageShell from "@/components/layout/PageShell";
 import showPopup from "@/utils/popup";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import SearchDistanceSelector from "@/pages/Map/MapView/components/controls/SearchDistanceSelector";
-import "./SettingsPage.css";
+import "./styles/SettingsPage.css";
 
 const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
 const MAP_TYPE_OPTIONS = [
@@ -258,3 +258,4 @@ function SettingsPage({
 }
 
 export default SettingsPage;
+

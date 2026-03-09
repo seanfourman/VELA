@@ -1,4 +1,4 @@
-import "./PageShell.css";
+﻿import "./styles/PageShell.css";
 import { navigateToMapHome } from "@/utils/navigation";
 
 export default function PageShell({
@@ -59,3 +59,4 @@ export default function PageShell({
     </div>
   );
 }
+

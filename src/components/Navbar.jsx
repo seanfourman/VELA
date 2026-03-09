@@ -1,4 +1,4 @@
-import "./Navbar.css";
+﻿import "./styles/Navbar.css";
 import velaLogo from "@/assets/vela.svg";
 import velaLogoBlack from "@/assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
@@ -85,3 +85,4 @@ function Navbar({
 }
 
 export default Navbar;
+

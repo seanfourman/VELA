@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+﻿import { useMemo, useState } from "react";
 import showPopup from "@/utils/popup";
 import PageShell from "@/components/layout/PageShell";
 import { getPasswordChecks, isStrongPassword } from "@/utils/passwordRules";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import JupiterGlobe from "@/components/planets/JupiterGlobe";
-import "./AuthPage.css";
+import "./styles/AuthPage.css";
 
 const AUTH_MODE_LOGIN = "login";
 const AUTH_MODE_REGISTER = "register";
@@ -291,3 +291,4 @@ function AuthPage({ auth, isLight, onNavigate }) {
 }
 
 export default AuthPage;
+

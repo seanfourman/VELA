@@ -1,4 +1,4 @@
-import { Suspense, useLayoutEffect, useMemo, useRef, useState } from "react";
+﻿import { Suspense, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { OrbitControls, useTexture } from "@react-three/drei";
 import {
@@ -9,7 +9,7 @@ import {
   Vector3,
 } from "three";
 import { resolvePlanetTexture, PLANET_TEXTURES } from "@/utils/planetUtils";
-import "./planetCard.css";
+import "./styles/planetCard.css";
 
 function PlanetGlobe({ textureUrl, name }) {
   const isSaturn = !!name && name.toLowerCase().includes("saturn");
@@ -152,3 +152,4 @@ export default function PlanetCard({ planet, cardRef, onHover, reducedMotion }) 
     </div>
   );
 }
+

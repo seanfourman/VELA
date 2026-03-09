@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import "./SearchDistanceSelector.css";
+﻿import { useState, useRef, useEffect } from "react";
+import "./styles/SearchDistanceSelector.css";
 
 export default function SearchDistanceSelector({ value, onChange, hidden = false }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -74,3 +74,4 @@ export default function SearchDistanceSelector({ value, onChange, hidden = false
     </div>
   );
 }
+

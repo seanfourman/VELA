@@ -1,4 +1,4 @@
-import {
+﻿import {
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -9,9 +9,9 @@ import {
 import PlanetCard from "./PlanetCard";
 import PlanetInfoCard from "./PlanetInfoCard";
 import PlanetArOverlay from "./PlanetArOverlay";
-import "./planetPanel.css";
-import "./planetCard.css";
-import "./planetInfoCard.css";
+import "./styles/planetPanel.css";
+import "./styles/planetCard.css";
+import "./styles/planetInfoCard.css";
 
 const HOVER_DISMISS_DELAY_MS = 1500;
 const AR_TOGGLE_DISMISS_GRACE_MS = 700;
@@ -330,3 +330,4 @@ export default function PlanetPanel({
     </>
   );
 }
+
