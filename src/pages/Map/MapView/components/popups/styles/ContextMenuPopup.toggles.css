@@ -121,28 +121,28 @@
 }
 
 .rsvp-toggle.active {
-  background: rgba(249, 115, 22, 0.56);
-  border-color: rgba(249, 115, 22, 0.92);
+  background: var(--event-party-active-bg);
+  border-color: var(--event-party-color);
   color: #ffffff;
   box-shadow:
-    0 0 0 1px rgba(249, 115, 22, 0.4),
-    0 10px 24px rgba(249, 115, 22, 0.26);
+    0 0 0 1px var(--event-party-active-outline),
+    0 10px 24px var(--event-party-active-shadow);
 }
 
 .rsvp-toggle.active:hover {
-  background: rgba(249, 115, 22, 0.66);
+  background: var(--event-party-active-bg-hover);
 }
 
 .rsvp-toggle.special.active {
-  background: rgba(239, 68, 68, 0.56);
-  border-color: rgba(239, 68, 68, 0.92);
+  background: var(--event-special-active-bg);
+  border-color: var(--event-special-color);
   box-shadow:
-    0 0 0 1px rgba(239, 68, 68, 0.4),
-    0 10px 24px rgba(239, 68, 68, 0.26);
+    0 0 0 1px var(--event-special-active-outline),
+    0 10px 24px var(--event-special-active-shadow);
 }
 
 .rsvp-toggle.special.active:hover {
-  background: rgba(239, 68, 68, 0.66);
+  background: var(--event-special-active-bg-hover);
 }
 
 .share-toggle.share-flash {
@@ -193,19 +193,19 @@
 }
 
 .rsvp-toggle-label.active {
-  color: #ffedd5;
-  border-color: rgba(249, 115, 22, 0.62);
+  color: var(--event-party-text);
+  border-color: var(--event-party-label-border);
   box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(249, 115, 22, 0.35);
+    0 0 0 1px var(--event-party-label-ring);
 }
 
 .rsvp-toggle-label.special.active {
-  color: #fee2e2;
-  border-color: rgba(239, 68, 68, 0.62);
+  color: var(--event-special-text);
+  border-color: var(--event-special-label-border);
   box-shadow:
     0 6px 18px rgba(0, 0, 0, 0.35),
-    0 0 0 1px rgba(239, 68, 68, 0.35);
+    0 0 0 1px var(--event-special-label-ring);
 }
 
 .target-toggle-wrapper:hover .target-toggle-label,

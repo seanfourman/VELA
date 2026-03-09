@@ -88,13 +88,19 @@
   --accent-muted: #6b7280;
 
   /* Event Colors */
-  --event-party-color: #ff8a1f;
-  --event-party-color-bright: #ffb067;
-  --event-party-glow: rgba(255, 138, 31, 0.62);
-  --event-party-ring: rgba(255, 138, 31, 0.38);
-  --event-party-soft: rgba(255, 138, 31, 0.18);
-  --event-party-border: rgba(255, 138, 31, 0.52);
-  --event-party-text: #ffe7d1;
+  --event-party-color: #ff375f;
+  --event-party-color-bright: #ff8aa2;
+  --event-party-glow: rgba(255, 55, 95, 0.62);
+  --event-party-ring: rgba(255, 55, 95, 0.38);
+  --event-party-soft: rgba(255, 55, 95, 0.18);
+  --event-party-border: rgba(255, 55, 95, 0.52);
+  --event-party-text: #ffe1e8;
+  --event-party-active-bg: rgba(255, 55, 95, 0.56);
+  --event-party-active-bg-hover: rgba(255, 55, 95, 0.66);
+  --event-party-active-outline: rgba(255, 55, 95, 0.4);
+  --event-party-active-shadow: rgba(255, 55, 95, 0.26);
+  --event-party-label-border: rgba(255, 55, 95, 0.62);
+  --event-party-label-ring: rgba(255, 55, 95, 0.35);
 
   --event-special-color: #00d4ff;
   --event-special-color-bright: #7ae8ff;
@@ -103,6 +109,12 @@
   --event-special-soft: rgba(0, 212, 255, 0.18);
   --event-special-border: rgba(0, 212, 255, 0.52);
   --event-special-text: #def9ff;
+  --event-special-active-bg: rgba(0, 212, 255, 0.56);
+  --event-special-active-bg-hover: rgba(0, 212, 255, 0.66);
+  --event-special-active-outline: rgba(0, 212, 255, 0.4);
+  --event-special-active-shadow: rgba(0, 212, 255, 0.26);
+  --event-special-label-border: rgba(0, 212, 255, 0.62);
+  --event-special-label-ring: rgba(0, 212, 255, 0.35);
 
   /* Spacing */
   --radius-sm: 8px;
@@ -223,11 +235,23 @@
   --accent-muted: #9ca3af;
 
   /* Event Colors - Light */
-  --event-party-soft: rgba(255, 138, 31, 0.22);
-  --event-party-border: rgba(194, 65, 12, 0.38);
-  --event-party-text: #9a3412;
+  --event-party-soft: rgba(255, 55, 95, 0.22);
+  --event-party-border: rgba(190, 24, 93, 0.38);
+  --event-party-text: #9f1239;
+  --event-party-active-bg: rgba(255, 55, 95, 0.5);
+  --event-party-active-bg-hover: rgba(255, 55, 95, 0.6);
+  --event-party-active-outline: rgba(190, 24, 93, 0.34);
+  --event-party-active-shadow: rgba(190, 24, 93, 0.24);
+  --event-party-label-border: rgba(190, 24, 93, 0.5);
+  --event-party-label-ring: rgba(190, 24, 93, 0.3);
 
   --event-special-soft: rgba(0, 212, 255, 0.2);
   --event-special-border: rgba(8, 145, 178, 0.42);
   --event-special-text: #0c4a6e;
+  --event-special-active-bg: rgba(0, 212, 255, 0.5);
+  --event-special-active-bg-hover: rgba(0, 212, 255, 0.6);
+  --event-special-active-outline: rgba(8, 145, 178, 0.34);
+  --event-special-active-shadow: rgba(8, 145, 178, 0.24);
+  --event-special-label-border: rgba(8, 145, 178, 0.5);
+  --event-special-label-ring: rgba(8, 145, 178, 0.3);
 }
