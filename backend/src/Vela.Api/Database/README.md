@@ -13,6 +13,7 @@ The backend does **not** create tables or stored procedures at runtime.
 6. `SP/Favorite SPs.sql`
 7. `SP/Recommendation SPs.sql`
 8. `SP/StarParty SPs.sql`
+9. Optional sample data: `Seed/InitialContent.sql`
 
 Run them against the database referenced by `ConnectionStrings:myProjDB`
 in `backend/src/Vela.Api/appsettings.json`.
