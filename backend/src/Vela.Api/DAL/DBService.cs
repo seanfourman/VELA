@@ -7,19 +7,11 @@ public abstract class DBService
 {
     protected SqlConnection Connect()
     {
-        var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-        var connectionString =
-            configuration.GetConnectionString("myProjDB")
-            ?? configuration.GetConnectionString("DefaultConnection");
-
-        if (string.IsNullOrWhiteSpace(connectionString))
-        {
-            throw new InvalidOperationException(
-                "Missing connection string. Configure ConnectionStrings:myProjDB (or DefaultConnection) in appsettings.json."
-            );
-        }
-
-        var con = new SqlConnection(connectionString);
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .Build();
+        string cStr = configuration.GetConnectionString("myProjDB") ?? string.Empty;
+        var con = new SqlConnection(cStr);
         con.Open();
         return con;
     }
@@ -27,7 +19,7 @@ public abstract class DBService
     protected SqlCommand CreateCommand(
         string spName,
         SqlConnection con,
-        Dictionary<string, object>? parameters
+        Dictionary<string, object> parameters
     )
     {
         var cmd = new SqlCommand(spName, con);

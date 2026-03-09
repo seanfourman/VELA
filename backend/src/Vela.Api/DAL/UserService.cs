@@ -88,8 +88,8 @@ public class UserService : DBService
             };
 
             var cmd = CreateCommand("SP_InsertUser", con, parameters);
-            var affected = cmd.ExecuteNonQuery();
-            return affected > 0 ? id : Guid.Empty;
+            cmd.ExecuteNonQuery();
+            return id;
         }
         catch
         {
@@ -107,7 +107,7 @@ public class UserService : DBService
         try
         {
             con = Connect();
-            var cmd = CreateCommand("SP_AnyAdminExists", con, null);
+            var cmd = CreateCommand("SP_AnyAdminExists", con, new Dictionary<string, object>());
             using var reader = cmd.ExecuteReader();
             if (!reader.Read())
             {

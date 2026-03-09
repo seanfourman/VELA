@@ -50,7 +50,11 @@ public class RecommendationService : DBService
         try
         {
             con = Connect();
-            var cmd = CreateCommand("SP_GetAllRecommendations", con, null);
+            var cmd = CreateCommand(
+                "SP_GetAllRecommendations",
+                con,
+                new Dictionary<string, object>()
+            );
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())

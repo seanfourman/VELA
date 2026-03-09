@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Vela.Api.BL;
 using Vela.Api.DTOs;
 using Vela.Api.Validators;
-using UserModel = Vela.Api.BL.User;
 
 namespace Vela.Api.Controllers
 {
@@ -32,7 +31,7 @@ namespace Vela.Api.Controllers
                     return BadRequest(new { errors = validationErrors });
                 }
 
-                var user = new UserModel
+                var user = new Vela.Api.BL.User
                 {
                     Email = request.Email.Trim().ToLowerInvariant(),
                     Name = string.IsNullOrWhiteSpace(request.Name)
@@ -69,7 +68,10 @@ namespace Vela.Api.Controllers
                     return BadRequest("Email and password are required.");
                 }
 
-                UserModel? loggedInUser = UserModel.Login(request.Email, request.Password);
+                Vela.Api.BL.User? loggedInUser = Vela.Api.BL.User.Login(
+                    request.Email,
+                    request.Password
+                );
 
                 if (loggedInUser == null)
                 {
@@ -96,7 +98,7 @@ namespace Vela.Api.Controllers
                     return Unauthorized();
                 }
 
-                UserModel? user = UserModel.GetById(userId);
+                Vela.Api.BL.User? user = Vela.Api.BL.User.GetById(userId);
                 if (user == null)
                 {
                     return Unauthorized();
@@ -110,7 +112,7 @@ namespace Vela.Api.Controllers
             }
         }
 
-        private AuthResponseDto BuildAuthResponse(UserModel user)
+        private AuthResponseDto BuildAuthResponse(Vela.Api.BL.User user)
         {
             var tokenResult = JwtManager.CreateToken(user, _configuration);
             return new AuthResponseDto
@@ -121,7 +123,7 @@ namespace Vela.Api.Controllers
             };
         }
 
-        private static AuthUserDto MapToAuthUserDto(UserModel user)
+        private static AuthUserDto MapToAuthUserDto(Vela.Api.BL.User user)
         {
             return new AuthUserDto
             {
