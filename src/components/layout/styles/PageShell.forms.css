@@ -499,7 +499,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   gap: 8px;
-  align-items: end;
+  align-items: start;
 }
 
 .admin-time-picker__wheel-column {
@@ -577,12 +577,16 @@
 }
 
 .admin-time-picker__wheel-separator {
-  align-self: center;
-  justify-self: center;
+  align-self: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  margin-top: 24px;
   font-size: 1rem;
   font-weight: 600;
   color: var(--surface-text-subtle);
-  margin-bottom: 56px;
+  line-height: 1;
 }
 
 .admin-time-picker__actions {
