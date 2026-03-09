@@ -5,12 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "api:dev": "dotnet run --project backend/src/Vela.Api",
     "build": "vite build",
+    "api:build": "dotnet build backend/src/Vela.Api/Vela.Api.csproj",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@maplibre/maplibre-gl-leaflet": "^0.1.3",
+    "@mui/material": "^7.3.9",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.4.2",
     "leaflet": "^1.9.4",
@@ -19,6 +24,7 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-leaflet": "^5.0.0",
+    "react-router-dom": "^7.13.1",
     "three": "^0.181.2"
   },
   "devDependencies": {

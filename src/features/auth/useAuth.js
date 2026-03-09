@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  fetchSessionUser,
   loginUser,
-  mapUserToAuthUser,
   persistAuthSession,
   readAuthState,
   registerUser,
@@ -9,69 +9,80 @@ import {
 
 export function useAuth() {
   const [authState, setAuthState] = useState(() => readAuthState());
-  const users = authState.users;
   const session = authState.session;
-
-  const updateUsers = useCallback((users) => {
-    setAuthState((prev) => ({ ...prev, users }));
-  }, []);
+  const user = session?.user || null;
+  const token = session?.token || "";
+  const isAuthenticated = Boolean(token && user);
 
   const updateSession = useCallback((nextSession) => {
-    setAuthState((prev) => ({ ...prev, session: nextSession }));
+    setAuthState({ session: nextSession || null });
   }, []);
-
-  const activeUser = useMemo(() => {
-    if (!session?.userId) return null;
-    return users.find((entry) => entry.id === session.userId) || null;
-  }, [session, users]);
-
-  const isAuthenticated = Boolean(activeUser);
-  const user = mapUserToAuthUser(activeUser);
 
   const signOut = useCallback(() => {
     persistAuthSession(null);
     updateSession(null);
   }, [updateSession]);
 
-  const login = useCallback(
-    async ({ email, password } = {}) => {
-      const authUser = await loginUser({
-        users,
-        email,
-        password,
-        updateUsers,
-      });
-      const nextSession = { userId: authUser.id };
+  const commitSession = useCallback(
+    (nextSession) => {
       persistAuthSession(nextSession);
       updateSession(nextSession);
-      return mapUserToAuthUser(authUser);
+      return nextSession?.user || null;
     },
-    [users, updateSession, updateUsers]
+    [updateSession],
+  );
+
+  const login = useCallback(
+    async ({ email, password } = {}) => {
+      const nextSession = await loginUser({ email, password });
+      return commitSession(nextSession);
+    },
+    [commitSession],
   );
 
   const register = useCallback(
     async ({ name, email, password } = {}) => {
-      const authUser = await registerUser({
-        users,
-        name,
-        email,
-        password,
-        updateUsers,
-      });
-      const nextSession = { userId: authUser.id };
-      persistAuthSession(nextSession);
-      updateSession(nextSession);
-      return mapUserToAuthUser(authUser);
+      const nextSession = await registerUser({ name, email, password });
+      return commitSession(nextSession);
     },
-    [users, updateSession, updateUsers]
+    [commitSession],
   );
 
-  return {
-    session,
-    user,
-    isAuthenticated,
-    signOut,
-    login,
-    register,
-  };
+  useEffect(() => {
+    if (!session?.token) return;
+    if (session?.user) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const resolvedUser = await fetchSessionUser(session.token);
+        if (cancelled || !resolvedUser) return;
+        const nextSession = {
+          ...session,
+          user: resolvedUser,
+        };
+        commitSession(nextSession);
+      } catch {
+        if (cancelled) return;
+        signOut();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [commitSession, session, signOut]);
+
+  return useMemo(
+    () => ({
+      session,
+      token,
+      user,
+      isAuthenticated,
+      signOut,
+      login,
+      register,
+    }),
+    [isAuthenticated, login, register, session, signOut, token, user],
+  );
 }

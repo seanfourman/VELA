@@ -1,52 +1,65 @@
 # VELA
 
-VELA is a stargazing companion built with React, Vite, and Leaflet. It helps you find dark skies, explore curated stargazing locations, and see visible planets for any spot on the map.
+VELA is a React + ASP.NET Core stargazing app with:
+- React Router Data API routing (`createBrowserRouter`, `RouterProvider`, `Outlet`)
+- SQL-backed Web API (SQL Server via ADO.NET)
+- JWT authentication/authorization
+- 3-layer architecture (Controllers -> BL -> DAL)
 
-## Features
+## Stack
 
-- Interactive map with dark, light, and satellite base layers (MapTiler).
-- Light pollution overlay and sky quality lookups from World_Atlas_2015.tif.
-- Dark spot discovery via a proxied API.
-- Curated stargazing locations with details and galleries.
-- Favorites, pinned spots, targets, and quick actions.
-- Visible planets panel powered by VisiblePlanets.
-- Space weather panel powered by NASA DONKI (geomagnetic storms and CME impact runs).
-- Profile, settings, and admin tools with local auth.
+- Frontend: React, Vite, Leaflet, React Router, MUI
+- Backend: ASP.NET Core Web API, ADO.NET (System.Data.SqlClient), SQL Server, JWT Bearer auth, BCrypt
 
-## Getting started
+## Project structure
 
-1. Install dependencies:
+- Frontend: `src/`
+- Backend API: `backend/src/Vela.Api/`
+- Solution: `VelaServer.sln`
+
+## Run locally
+
+1. Install frontend dependencies:
    - `npm install`
-2. Create a local env file:
+2. Create env file:
    - `copy .env.example .env`
-3. Set `VITE_MAPTILER_KEY` in `.env`.
-4. Run the dev server:
+3. Start backend API:
+   - `dotnet run --project backend/src/Vela.Api`
+4. Start frontend dev server:
    - `npm run dev`
 
-## Environment variables
+Frontend default API base is:
+- `VITE_API_BASE=http://localhost:5152/api`
 
-Required:
-- `VITE_MAPTILER_KEY` (MapTiler tiles)
+## Default admin (seeded)
 
-Optional:
-- `VITE_NASA_API_KEY` (NASA API key for DONKI/space weather, falls back to `DEMO_KEY`)
+Configured in `backend/src/Vela.Api/appsettings.json`:
+- Email: `admin@vela.local`
+- Password: `Admin123!`
 
-## Data and services
+Change these values before final submission/demo.
 
-- Light map and sky quality endpoints are served by the Vite dev/preview server
-  (see `vite.config.js`). For static hosting, move those endpoints to a server.
-- The light pollution overlay uses `data/World_Atlas_2015.tif` (or a copy in
-  `public/`). The repo includes this file, but it is large.
-- Dark spot search is served locally at `/api/darkspots` in `vite.config.js`.
-- Visible planets are requested through the local endpoint
-  `/api/visible-planets`.
-- Curated locations are read/written via `/api/recommendations`, backed by
-  `data/stargazing_locations.json`.
-- User preferences and favorites are stored in localStorage.
+## API endpoints
+
+- Auth:
+  - `POST /api/users/register`
+  - `POST /api/users/login`
+  - `GET /api/users/me` (JWT)
+- Favorites (JWT):
+  - `GET /api/favorites`
+  - `POST /api/favorites`
+  - `DELETE /api/favorites/{spotId}`
+- Recommendations:
+  - `GET /api/recommendations` (public)
+  - `POST /api/recommendations` (admin JWT)
+  - `DELETE /api/recommendations/{id}` (admin JWT)
 
 ## Scripts
 
-- `npm run dev` - start the Vite dev server
-- `npm run build` - create a production build
-- `npm run preview` - preview the production build
-- `npm run lint` - run ESLint
+- `npm run dev` - frontend dev server
+- `npm run build` - frontend production build
+- `npm run preview` - preview frontend build
+- `npm run lint` - frontend lint
+
+Backend build:
+- `dotnet build backend/src/Vela.Api/Vela.Api.csproj`

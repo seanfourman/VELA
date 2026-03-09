@@ -1,4 +1,5 @@
-const FAVORITES_STORAGE_KEY = "vela:local:favorites";
+import { readStoredToken } from "@/features/auth/authStorage";
+import { buildFavoritesUrl } from "./apiEndpoints";
 
 const parseCoord = (value) => {
   const parsed = Number(value);
@@ -10,72 +11,88 @@ const buildSpotId = (lat, lon) => {
   return `${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`;
 };
 
-const normalizeFavoriteItem = (item) => {
-  if (!item || typeof item !== "object") return null;
-  const lat = parseCoord(item.lat ?? item.latitude);
-  const lon = parseCoord(item.lon ?? item.lng ?? item.longitude);
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+const getAuthToken = () => {
+  const token = readStoredToken();
+  return typeof token === "string" ? token.trim() : "";
+};
+
+const getResponseError = async (response) => {
+  const message = (await response.text().catch(() => "")).trim();
+  return message || `Favorites API error: ${response.status}`;
+};
+
+const authHeaders = () => {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error("Sign in to save favorites.");
+  }
+
   return {
-    lat,
-    lon,
-    spotId: item.spotId ?? buildSpotId(lat, lon),
-    createdAt:
-      typeof item.createdAt === "string" && item.createdAt
-        ? item.createdAt
-        : new Date().toISOString(),
+    Accept: "application/json",
+    Authorization: `Bearer ${token}`,
   };
 };
 
-const readFavorites = () => {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed.map(normalizeFavoriteItem).filter(Boolean);
-  } catch {
-    return [];
-  }
-};
-
-const writeFavorites = (items) => {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(items));
-  } catch {
-    // Ignore storage errors.
-  }
-};
-
 export async function saveFavoriteSpot({ lat, lon }) {
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-  const spotId = buildSpotId(lat, lon);
-  if (!spotId) return;
+  const parsedLat = parseCoord(lat);
+  const parsedLon = parseCoord(lon);
+  if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLon)) return;
 
-  const current = readFavorites();
-  const exists = current.some((item) => item.spotId === spotId);
-  if (exists) return;
-
-  current.push({
-    lat: Number(lat),
-    lon: Number(lon),
-    spotId,
-    createdAt: new Date().toISOString(),
+  const response = await fetch(buildFavoritesUrl(), {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      spotId: buildSpotId(parsedLat, parsedLon),
+      lat: parsedLat,
+      lon: parsedLon,
+    }),
   });
-  writeFavorites(current);
+
+  if (!response.ok) {
+    throw new Error(await getResponseError(response));
+  }
 }
 
 export async function deleteFavoriteSpot({ lat, lon, spotId }) {
+  const parsedLat = parseCoord(lat);
+  const parsedLon = parseCoord(lon);
   const resolvedSpotId =
-    (typeof spotId === "string" && spotId.trim()) || buildSpotId(lat, lon);
+    (typeof spotId === "string" && spotId.trim()) ||
+    buildSpotId(parsedLat, parsedLon);
   if (!resolvedSpotId) return;
 
-  const current = readFavorites();
-  const next = current.filter((item) => item.spotId !== resolvedSpotId);
-  writeFavorites(next);
+  const response = await fetch(buildFavoritesUrl(resolvedSpotId), {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+
+  if (response.status === 404) return;
+  if (!response.ok) {
+    throw new Error(await getResponseError(response));
+  }
 }
 
 export async function fetchFavoriteSpots() {
-  return readFavorites();
+  const token = getAuthToken();
+  if (!token) return [];
+
+  const response = await fetch(buildFavoritesUrl(), {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (response.status === 401) {
+    return [];
+  }
+  if (!response.ok) {
+    throw new Error(await getResponseError(response));
+  }
+
+  const data = await response.json().catch(() => []);
+  return Array.isArray(data) ? data : [];
 }

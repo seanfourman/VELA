@@ -29,3 +29,12 @@ dist-ssr
 docs
 data
 lightmap-tiles
+
+# .NET backend artifacts
+backend/**/bin/
+backend/**/obj/
+backend/**/*.db
+backend/**/*.db-shm
+backend/**/*.db-wal
+backend/**/appsettings.json
+backend/**/appsettings.Development.json

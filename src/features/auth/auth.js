@@ -1,200 +1,148 @@
-import { getPasswordValidationError } from "@/utils/passwordRules";
-import { createPasswordSalt, hashPassword } from "./authCrypto";
-import {
-  persistStoredSession,
-  persistStoredUsers,
-  readStoredSession,
-  readStoredUsers,
-} from "./authStorage";
+import { buildAuthUrl } from "@/utils/apiEndpoints";
+import { persistStoredSession, readStoredSession } from "./authStorage";
+
+const SESSION_EXPIRY_SKEW_MS = 60 * 1000;
 
 const normalizeEmail = (value) =>
   String(value || "")
     .trim()
     .toLowerCase();
 
-const createUserId = () => {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
+const normalizeRoleList = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map(String);
+  if (typeof value === "string") {
+    return value
+      .split(/[,\s]+/)
+      .map((entry) => entry.trim())
+      .filter(Boolean);
   }
-  return `local-${Date.now()}-${Math.round(Math.random() * 1000)}`;
+  return [];
 };
 
 const normalizeUser = (value) => {
   if (!value || typeof value !== "object") return null;
-  const id =
-    typeof value.id === "string" && value.id.trim() ? value.id.trim() : null;
+  const id = String(value.id ?? value.sub ?? "").trim();
   const email = normalizeEmail(value.email);
-  const passwordHash =
-    typeof value.passwordHash === "string" ? value.passwordHash : "";
-  const passwordSalt =
-    typeof value.passwordSalt === "string" ? value.passwordSalt : "";
-  const legacyPassword =
-    typeof value.password === "string" ? value.password : "";
-  const name = typeof value.name === "string" ? value.name.trim() : "";
+  if (!id || !email) return null;
 
-  if (!id || !email || (!passwordHash && !legacyPassword)) return null;
+  const name =
+    String(
+      value.name ?? value.preferred_username ?? value.given_name ?? email.split("@")[0]
+    ).trim() || "Explorer";
+  const rawRoles = normalizeRoleList(value.roles || value.role || value.groups);
+  const hasAdminRole = rawRoles.some((role) =>
+    ["admin", "administrator"].includes(String(role).toLowerCase())
+  );
+  const isAdmin = Boolean(value.is_admin === true || value.isAdmin === true || hasAdminRole);
 
   return {
+    sub: id,
     id,
     email,
-    passwordHash,
-    passwordSalt,
-    legacyPassword,
     name,
-    createdAt:
-      typeof value.createdAt === "string" && value.createdAt
-        ? value.createdAt
-        : new Date().toISOString(),
-    is_admin: value.is_admin !== false,
-    roles: Array.isArray(value.roles) ? value.roles : ["admin"],
-    groups: Array.isArray(value.groups) ? value.groups : ["admin"],
-  };
-};
-
-const serializeUser = (user) => {
-  const normalized = normalizeUser(user);
-  if (!normalized) return null;
-  return {
-    id: normalized.id,
-    email: normalized.email,
-    name: normalized.name,
-    createdAt: normalized.createdAt,
-    is_admin: normalized.is_admin,
-    roles: normalized.roles,
-    groups: normalized.groups,
-    passwordHash: normalized.passwordHash,
-    passwordSalt: normalized.passwordSalt,
+    preferred_username: name,
+    is_admin: isAdmin,
+    role: isAdmin ? "admin" : "user",
+    roles: isAdmin ? ["admin"] : ["user"],
+    groups: isAdmin ? ["admin"] : ["user"],
+    auth_source: "server",
   };
 };
 
 const normalizeSession = (value) => {
   if (!value || typeof value !== "object") return null;
-  const userId =
-    typeof value.userId === "string" && value.userId.trim()
-      ? value.userId.trim()
+  const token = String(value.token || "").trim();
+  if (!token) return null;
+  const expiresAtUtc =
+    typeof value.expiresAtUtc === "string" && value.expiresAtUtc.trim()
+      ? value.expiresAtUtc
       : "";
-  return userId ? { userId } : null;
+  const user = normalizeUser(value.user);
+  return {
+    token,
+    expiresAtUtc,
+    user,
+  };
 };
 
-const readUsers = () => readStoredUsers(normalizeUser);
-const persistUsers = (users) => persistStoredUsers(users, serializeUser);
-const readSession = () => readStoredSession(normalizeSession);
+const isExpired = (session) => {
+  const expiresAt = Date.parse(String(session?.expiresAtUtc || ""));
+  if (!Number.isFinite(expiresAt)) return false;
+  return Date.now() >= expiresAt - SESSION_EXPIRY_SKEW_MS;
+};
+
+const parseApiError = async (response, fallbackMessage) => {
+  const text = (await response.text().catch(() => "")).trim();
+  if (text) return text;
+  return `${fallbackMessage} (${response.status})`;
+};
+
+const requestAuth = async ({ endpoint, payload }) => {
+  const response = await fetch(buildAuthUrl(endpoint), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, "Authentication failed"));
+  }
+
+  const data = await response.json().catch(() => null);
+  const session = normalizeSession(data);
+  if (!session || !session.user) {
+    throw new Error("Authentication response is missing session data.");
+  }
+
+  return session;
+};
 
 export const readAuthState = () => {
-  const users = readUsers();
-  const session = readSession();
-  if (session && !users.some((entry) => entry.id === session.userId)) {
+  const session = readStoredSession(normalizeSession);
+  if (!session || isExpired(session)) {
     persistAuthSession(null);
-    return { users, session: null };
+    return { session: null };
   }
-  return { users, session };
+  return { session };
 };
 
 export const persistAuthSession = (session) => {
   persistStoredSession(session, normalizeSession);
 };
 
-export const mapUserToAuthUser = (user) => {
-  if (!user) return null;
-  const fallbackName = user.email.split("@")[0] || "Explorer";
-  return {
-    sub: user.id,
-    email: user.email,
-    name: user.name || fallbackName,
-    preferred_username: user.name || fallbackName,
-    is_admin: user.is_admin !== false,
-    roles: user.roles || ["admin"],
-    groups: user.groups || ["admin"],
-    auth_source: "local",
-  };
-};
+export const mapUserToAuthUser = (user) => normalizeUser(user);
 
-export async function loginUser({ users, email, password, updateUsers }) {
-  const normalizedEmail = normalizeEmail(email);
-  const normalizedPassword = typeof password === "string" ? password : "";
-  if (!normalizedEmail || !normalizedPassword) {
-    throw new Error("Email and password are required.");
-  }
-
-  const existingUser = users.find((entry) => entry.email === normalizedEmail);
-  if (!existingUser) {
-    throw new Error("Invalid email or password.");
-  }
-
-  let passwordMatches = false;
-  let resolvedUser = existingUser;
-  if (existingUser.passwordHash && existingUser.passwordSalt) {
-    const hashedInput = await hashPassword(
-      normalizedPassword,
-      existingUser.passwordSalt,
-    );
-    passwordMatches = hashedInput === existingUser.passwordHash;
-  } else if (existingUser.legacyPassword) {
-    passwordMatches = existingUser.legacyPassword === normalizedPassword;
-    if (passwordMatches) {
-      const migratedSalt = createPasswordSalt();
-      const migratedHash = await hashPassword(normalizedPassword, migratedSalt);
-      const migratedUsers = users.map((entry) =>
-        entry.id === existingUser.id
-          ? {
-              ...entry,
-              passwordHash: migratedHash,
-              passwordSalt: migratedSalt,
-              legacyPassword: "",
-            }
-          : entry,
-      );
-      persistUsers(migratedUsers);
-      updateUsers(migratedUsers);
-      resolvedUser =
-        migratedUsers.find((entry) => entry.id === existingUser.id) ||
-        existingUser;
-    }
-  }
-
-  if (!passwordMatches) {
-    throw new Error("Invalid email or password.");
-  }
-
-  return resolvedUser;
+export async function loginUser({ email, password }) {
+  return requestAuth({
+    endpoint: "login",
+    payload: { email: normalizeEmail(email), password: String(password || "") },
+  });
 }
 
-export async function registerUser({ users, name, email, password, updateUsers }) {
-  const normalizedName = typeof name === "string" ? name.trim() : "";
-  const normalizedEmail = normalizeEmail(email);
-  const normalizedPassword = typeof password === "string" ? password : "";
+export async function registerUser({ name, email, password }) {
+  return requestAuth({
+    endpoint: "register",
+    payload: {
+      name: String(name || "").trim(),
+      email: normalizeEmail(email),
+      password: String(password || ""),
+    },
+  });
+}
 
-  if (!normalizedEmail || !normalizedPassword) {
-    throw new Error("Email and password are required.");
-  }
-
-  const passwordError = getPasswordValidationError(normalizedPassword);
-  if (passwordError) throw new Error(passwordError);
-
-  if (users.some((entry) => entry.email === normalizedEmail)) {
-    throw new Error("An account with that email already exists.");
-  }
-
-  const passwordSalt = createPasswordSalt();
-  const passwordHash = await hashPassword(normalizedPassword, passwordSalt);
-  const nextUser = normalizeUser({
-    id: createUserId(),
-    email: normalizedEmail,
-    passwordHash,
-    passwordSalt,
-    name: normalizedName,
-    createdAt: new Date().toISOString(),
-    is_admin: true,
-    roles: ["admin"],
-    groups: ["admin"],
+export async function fetchSessionUser(token) {
+  const response = await fetch(buildAuthUrl("me"), {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
   });
 
-  if (!nextUser) {
-    throw new Error("Unable to create local account.");
+  if (!response.ok) {
+    throw new Error(await parseApiError(response, "Could not validate session"));
   }
 
-  const nextUsers = [...users, nextUser];
-  persistUsers(nextUsers);
-  updateUsers(nextUsers);
-  return nextUser;
+  const data = await response.json().catch(() => null);
+  return normalizeUser(data);
 }

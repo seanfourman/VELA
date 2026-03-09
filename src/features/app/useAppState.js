@@ -20,14 +20,11 @@ import {
   isAdminUser,
   loadProfileSettings,
   loadSettings,
-  normalizePath,
   normalizeProfile,
   normalizeSettings,
   normalizeStargazeLocation,
   normalizeStargazePayload,
 } from "@/utils/appState";
-
-const ZOOM_OUT_ROUTES = new Set(["/auth", "/profile", "/settings", "/admin"]);
 
 const safeSetJson = (key, value) => {
   try {
@@ -40,7 +37,6 @@ const safeSetJson = (key, value) => {
 const useAppState = () => {
   const auth = useAuth();
   const mapViewRef = useRef(null);
-  const transitionTimeoutRef = useRef(null);
   const [location, setLocation] = useState(null);
   const [locationStatus, setLocationStatus] = useState(() =>
     navigator.geolocation ? "searching" : "off",
@@ -55,9 +51,6 @@ const useAppState = () => {
   const [stargazeLocations, setStargazeLocations] = useState([]);
   const [starPartyEvents, setStarPartyEvents] = useState(() =>
     readEventsFromStorage(),
-  );
-  const [route, setRoute] = useState(() =>
-    normalizePath(window.location.pathname),
   );
 
   useEffect(() => {
@@ -108,14 +101,6 @@ const useAppState = () => {
   }, []);
 
   useEffect(() => {
-    const handlePopState = () => {
-      setRoute(normalizePath(window.location.pathname));
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  useEffect(() => {
     if (!navigator.geolocation) {
       return;
     }
@@ -150,45 +135,6 @@ const useAppState = () => {
       );
     }
   }, []);
-
-  useEffect(() => {
-    return () => {
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const navigate = useCallback(
-    (path) => {
-      const nextPath = normalizePath(path);
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-        transitionTimeoutRef.current = null;
-      }
-      if (nextPath === route) return;
-
-      const shouldZoomOut =
-        normalizePath(route) === "/" && ZOOM_OUT_ROUTES.has(nextPath);
-
-      if (shouldZoomOut) {
-        if (mapViewRef.current?.zoomOutToMin) {
-          mapViewRef.current.zoomOutToMin();
-        }
-
-        transitionTimeoutRef.current = setTimeout(() => {
-          window.history.pushState({}, document.title, nextPath);
-          setRoute(nextPath);
-          transitionTimeoutRef.current = null;
-        }, 700);
-        return;
-      }
-
-      window.history.pushState({}, document.title, nextPath);
-      setRoute(nextPath);
-    },
-    [route],
-  );
 
   const handleSaveProfile = useCallback((nextProfile) => {
     const normalized = normalizeProfile(nextProfile);
@@ -285,7 +231,6 @@ const useAppState = () => {
     setStarPartyEvents((prev) => toggleRsvp({ events: prev, eventId, user }).events);
   }, []);
 
-  const currentRoute = normalizePath(route);
   const isAdmin = isAdminUser(auth?.user);
   const isLight = mapType === "light";
   const mapIsAuthenticated = Boolean(auth?.isAuthenticated);
@@ -301,11 +246,9 @@ const useAppState = () => {
     profileSettings,
     stargazeLocations,
     starPartyEvents,
-    currentRoute,
     isAdmin,
     isLight,
     mapIsAuthenticated,
-    navigate,
     handleSaveProfile,
     handleResetProfile,
     handleUpdateSettings,

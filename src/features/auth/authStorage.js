@@ -1,5 +1,4 @@
-const AUTH_USERS_KEY = "vela:local:auth:users";
-const AUTH_SESSION_KEY = "vela:local:auth:session";
+const AUTH_SESSION_KEY = "vela:auth:session";
 
 const readJsonFromStorage = (key, fallbackValue) => {
   if (typeof window === "undefined") return fallbackValue;
@@ -24,19 +23,6 @@ const writeJsonToStorage = (key, value) => {
   }
 };
 
-export const readStoredUsers = (normalizeUser) => {
-  const parsed = readJsonFromStorage(AUTH_USERS_KEY, []);
-  if (!Array.isArray(parsed)) return [];
-  return parsed.map(normalizeUser).filter(Boolean);
-};
-
-export const persistStoredUsers = (users, serializeUser) => {
-  const payload = Array.isArray(users)
-    ? users.map(serializeUser).filter(Boolean)
-    : [];
-  writeJsonToStorage(AUTH_USERS_KEY, payload);
-};
-
 export const readStoredSession = (normalizeSession) =>
   normalizeSession(readJsonFromStorage(AUTH_SESSION_KEY, null));
 
@@ -46,4 +32,11 @@ export const persistStoredSession = (session, normalizeSession) => {
     return;
   }
   writeJsonToStorage(AUTH_SESSION_KEY, normalizeSession(session));
+};
+
+export const readStoredToken = () => {
+  const session = readJsonFromStorage(AUTH_SESSION_KEY, null);
+  if (!session || typeof session !== "object") return "";
+  const token = typeof session.token === "string" ? session.token.trim() : "";
+  return token;
 };

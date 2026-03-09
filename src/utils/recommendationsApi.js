@@ -1,4 +1,5 @@
 import { buildRecommendationsUrl } from "./apiEndpoints";
+import { readStoredToken } from "@/features/auth/authStorage";
 
 const clean = (value) => (typeof value === "string" ? value.trim() : "");
 const MAX_URLS_PER_FIELD = 20;
@@ -69,6 +70,14 @@ const parseLocations = (data) => {
   return [];
 };
 
+const getAuthHeaders = () => {
+  const token = String(readStoredToken() || "").trim();
+  if (!token) {
+    throw new Error("Admin sign-in is required for this action.");
+  }
+  return { Authorization: `Bearer ${token}` };
+};
+
 const buildPayload = (location) => {
   if (!location || typeof location !== "object") return null;
 
@@ -103,7 +112,10 @@ export async function saveRecommendation({ location }) {
 
   const response = await fetch(buildRecommendationsUrl(), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(payload),
   });
 
@@ -130,7 +142,10 @@ export async function deleteRecommendation({ spotId }) {
     `${buildRecommendationsUrl()}/${encodeURIComponent(spotId)}`,
     {
       method: "DELETE",
-      headers: { Accept: "application/json" },
+      headers: {
+        ...getAuthHeaders(),
+        Accept: "application/json",
+      },
     }
   );
 

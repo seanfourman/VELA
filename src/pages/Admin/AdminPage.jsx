@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import Chip from "@mui/material/Chip";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
 import showPopup from "@/utils/popup";
@@ -87,6 +88,14 @@ function AdminPage({
     "--switch-index": activeViewIndex,
     "--switch-count": 2,
   };
+  const summaryChipSx = useMemo(
+    () => ({
+      color: isLight ? "#10223f" : "#f5f8ff",
+      borderColor: isLight ? "rgba(16, 34, 63, 0.32)" : "rgba(245, 248, 255, 0.34)",
+      bgcolor: "transparent",
+    }),
+    [isLight],
+  );
 
   const handleLocationFieldChange = (key) => (event) => {
     const value = event.target.value;
@@ -303,10 +312,30 @@ function AdminPage({
           </div>
 
           <div className="admin-summary-row">
-            <span className="profile-pill">Spots {locationList.length}</span>
-            <span className="profile-pill">Events {eventList.length}</span>
-            <span className="profile-pill">Published {publishedEventsCount}</span>
-            <span className="profile-pill">RSVPs {totalRsvps}</span>
+            <Chip
+              size="small"
+              label={`Spots ${locationList.length}`}
+              variant="outlined"
+              sx={summaryChipSx}
+            />
+            <Chip
+              size="small"
+              label={`Events ${eventList.length}`}
+              variant="outlined"
+              sx={summaryChipSx}
+            />
+            <Chip
+              size="small"
+              label={`Published ${publishedEventsCount}`}
+              variant="outlined"
+              sx={summaryChipSx}
+            />
+            <Chip
+              size="small"
+              label={`RSVPs ${totalRsvps}`}
+              variant="outlined"
+              sx={summaryChipSx}
+            />
           </div>
 
           {activeView === "locations" ? (
