@@ -281,9 +281,9 @@
 }
 
 .party-event-marker .marker-dot.party-event-dot {
-  --marker-color: #f97316;
-  --marker-glow: rgba(249, 115, 22, 0.62);
-  --marker-ring: rgba(249, 115, 22, 0.38);
+  --marker-color: var(--event-party-color);
+  --marker-glow: var(--event-party-glow);
+  --marker-ring: var(--event-party-ring);
   box-shadow: 0 0 16px var(--marker-glow);
   border-color: rgba(255, 255, 255, 0.95);
   display: flex;
@@ -297,7 +297,7 @@
   width: 14px;
   height: 14px;
   display: block;
-  filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(249, 115, 22, 0.8));
+  filter: brightness(0) invert(1) drop-shadow(0 0 5px var(--event-party-glow));
   pointer-events: none;
 }
 
@@ -317,33 +317,33 @@
 }
 
 .party-event-marker.rsvp-confetti-pop .marker-pin::before {
-  background: #f97316;
+  background: var(--event-party-color);
   box-shadow:
-    -20px -9px 0 0 #facc15,
-    -12px -18px 0 0 #38bdf8,
+    -20px -9px 0 0 var(--event-party-color-bright),
+    -12px -18px 0 0 var(--event-special-color),
     0 -23px 0 0 #22c55e,
-    13px -17px 0 0 #f43f5e,
+    13px -17px 0 0 var(--event-party-color),
     22px -7px 0 0 #fb7185,
     -18px 9px 0 0 #a855f7,
-    -6px 18px 0 0 #f59e0b,
+    -6px 18px 0 0 var(--event-special-color-bright),
     8px 19px 0 0 #2dd4bf,
     19px 8px 0 0 #ec4899;
   animation: party-rsvp-confetti-burst 0.7s ease-out forwards;
 }
 
 .party-event-marker.rsvp-confetti-pop .marker-pin::after {
-  background: #fbbf24;
+  background: var(--event-party-color-bright);
   box-shadow:
     -15px -15px 0 0 #60a5fa,
     -4px -22px 0 0 #fb7185,
     7px -20px 0 0 #34d399,
-    18px -12px 0 0 #f97316,
+    18px -12px 0 0 var(--event-party-color),
     23px 0 0 0 #facc15,
     16px 13px 0 0 #f472b6,
-    4px 22px 0 0 #22d3ee,
+    4px 22px 0 0 var(--event-special-color),
     -8px 20px 0 0 #a3e635,
     -19px 11px 0 0 #c084fc,
-    -23px 1px 0 0 #fb923c;
+    -23px 1px 0 0 var(--event-party-color-bright);
   animation: party-rsvp-confetti-burst 0.76s ease-out forwards;
   animation-delay: 0.04s;
 }
@@ -368,33 +368,33 @@
 }
 
 .special-event-marker.rsvp-confetti-pop .marker-pin::before {
-  background: #ef4444;
+  background: var(--event-special-color);
   box-shadow:
-    -20px -9px 0 0 #fca5a5,
-    -12px -18px 0 0 #f87171,
-    0 -23px 0 0 #fb7185,
-    13px -17px 0 0 #ef4444,
-    22px -7px 0 0 #dc2626,
-    -18px 9px 0 0 #f97316,
-    -6px 18px 0 0 #fb7185,
-    8px 19px 0 0 #f43f5e,
-    19px 8px 0 0 #f59e0b;
+    -20px -9px 0 0 var(--event-special-color-bright),
+    -12px -18px 0 0 #67e8f9,
+    0 -23px 0 0 #22d3ee,
+    13px -17px 0 0 var(--event-special-color),
+    22px -7px 0 0 #0ea5e9,
+    -18px 9px 0 0 var(--event-party-color),
+    -6px 18px 0 0 #38bdf8,
+    8px 19px 0 0 #06b6d4,
+    19px 8px 0 0 var(--event-party-color-bright);
   animation: party-rsvp-confetti-burst 0.7s ease-out forwards;
 }
 
 .special-event-marker.rsvp-confetti-pop .marker-pin::after {
-  background: #fca5a5;
+  background: var(--event-special-color-bright);
   box-shadow:
-    -15px -15px 0 0 #fecaca,
-    -4px -22px 0 0 #f87171,
-    7px -20px 0 0 #fb7185,
-    18px -12px 0 0 #ef4444,
-    23px 0 0 0 #fca5a5,
-    16px 13px 0 0 #f43f5e,
-    4px 22px 0 0 #dc2626,
-    -8px 20px 0 0 #f97316,
-    -19px 11px 0 0 #fda4af,
-    -23px 1px 0 0 #f59e0b;
+    -15px -15px 0 0 #bae6fd,
+    -4px -22px 0 0 #67e8f9,
+    7px -20px 0 0 #22d3ee,
+    18px -12px 0 0 var(--event-special-color),
+    23px 0 0 0 var(--event-special-color-bright),
+    16px 13px 0 0 #0891b2,
+    4px 22px 0 0 #0ea5e9,
+    -8px 20px 0 0 var(--event-party-color),
+    -19px 11px 0 0 #38bdf8,
+    -23px 1px 0 0 var(--event-party-color-bright);
   animation: party-rsvp-confetti-burst 0.76s ease-out forwards;
   animation-delay: 0.04s;
 }
@@ -404,9 +404,9 @@
 }
 
 .special-event-marker .marker-dot.special-event-dot {
-  --marker-color: #ef4444;
-  --marker-glow: rgba(239, 68, 68, 0.62);
-  --marker-ring: rgba(239, 68, 68, 0.38);
+  --marker-color: var(--event-special-color);
+  --marker-glow: var(--event-special-glow);
+  --marker-ring: var(--event-special-ring);
   box-shadow: 0 0 16px var(--marker-glow);
   border-color: rgba(255, 255, 255, 0.95);
   display: flex;
@@ -420,7 +420,7 @@
   width: 14px;
   height: 14px;
   display: block;
-  filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(239, 68, 68, 0.8));
+  filter: brightness(0) invert(1) drop-shadow(0 0 5px var(--event-special-glow));
   pointer-events: none;
 }
 

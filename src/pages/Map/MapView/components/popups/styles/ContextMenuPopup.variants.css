@@ -21,11 +21,11 @@
 }
 
 .star-party-popup__title-block .popup-coords-label {
-  color: #fdba74;
+  color: var(--event-party-color-bright);
 }
 
 .star-party-popup.is-special-event .star-party-popup__title-block .popup-coords-label {
-  color: #fca5a5;
+  color: var(--event-special-color-bright);
 }
 
 .star-party-popup__title-block .star-party-popup__title {
@@ -75,29 +75,29 @@
   align-items: center;
   padding: 3px 8px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(251, 146, 60, 0.5);
-  background: rgba(251, 146, 60, 0.14);
+  border: 1px solid var(--event-party-border);
+  background: var(--event-party-soft);
   font-size: 0.74rem;
   font-weight: 600;
-  color: #fed7aa;
+  color: var(--event-party-text);
 }
 
 .map-container.light .star-party-popup__chip {
-  border-color: rgba(194, 65, 12, 0.34);
-  background: rgba(251, 146, 60, 0.2);
-  color: #9a3412;
+  border-color: var(--event-party-border);
+  background: var(--event-party-soft);
+  color: var(--event-party-text);
 }
 
 .star-party-popup.is-special-event .star-party-popup__chip {
-  border-color: rgba(239, 68, 68, 0.5);
-  background: rgba(239, 68, 68, 0.14);
-  color: #fee2e2;
+  border-color: var(--event-special-border);
+  background: var(--event-special-soft);
+  color: var(--event-special-text);
 }
 
 .map-container.light .star-party-popup.is-special-event .star-party-popup__chip {
-  border-color: rgba(185, 28, 28, 0.36);
-  background: rgba(248, 113, 113, 0.18);
-  color: #991b1b;
+  border-color: var(--event-special-border);
+  background: var(--event-special-soft);
+  color: var(--event-special-text);
 }
 
 .star-party-popup__chip.warning {
