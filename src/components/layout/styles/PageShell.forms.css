@@ -495,44 +495,94 @@
   pointer-events: auto;
 }
 
-.admin-time-picker__list {
+.admin-time-picker__wheel {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
-  max-height: 216px;
-  overflow-y: auto;
-  padding-right: 2px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: end;
 }
 
-.admin-time-picker__option {
+.admin-time-picker__wheel-column {
+  position: relative;
+  display: grid;
+  gap: 6px;
+}
+
+.admin-time-picker__wheel-label {
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--surface-text-subtle);
+}
+
+.admin-time-picker__wheel-window {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: calc(20px + ((170px - 34px) / 2));
+  height: 34px;
+  border: 1px solid rgba(56, 189, 248, 0.58);
+  border-radius: var(--radius-sm);
+  background: rgba(56, 189, 248, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.22);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.admin-time-picker__wheel-list {
+  height: 170px;
+  overflow-y: auto;
+  padding: 68px 0;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.admin-time-picker__wheel-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.admin-time-picker__wheel-item {
   display: inline-flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
-  height: 30px;
+  height: 34px;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border: 0;
   background: transparent;
-  color: var(--surface-text);
-  font-size: 0.8rem;
+  color: var(--surface-text-muted);
+  font-size: 0.95rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
   cursor: pointer;
+  scroll-snap-align: center;
   transition:
-    background 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease;
+    color 0.15s ease,
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
-.admin-time-picker__option:hover {
-  background: var(--glass-bg-hover);
+.admin-time-picker__wheel-item:hover {
+  color: var(--surface-text);
 }
 
-.admin-time-picker__option.selected {
-  background: rgba(56, 189, 248, 0.22);
-  border-color: rgba(56, 189, 248, 0.68);
-  color: #dbeafe;
+.admin-time-picker__wheel-item.selected {
+  color: var(--surface-text);
   font-weight: 600;
+  opacity: 1;
+  transform: scale(1.03);
+}
+
+.admin-time-picker__wheel-separator {
+  align-self: center;
+  justify-self: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--surface-text-subtle);
+  margin-bottom: 56px;
 }
 
 .admin-time-picker__actions {
