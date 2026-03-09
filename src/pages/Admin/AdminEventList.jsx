@@ -1,7 +1,7 @@
 import { formatDateTime } from "@/utils/dateTime";
 
 const typeLabel = (value) =>
-  value === "special_event" ? "Special event" : "Star party";
+  value === "special_event" ? "Special Event" : "Star Party";
 const statusLabel = (value) => {
   if (value === "published") return "Published";
   if (value === "archived") return "Archived";
@@ -63,7 +63,9 @@ export default function AdminEventList({
                   {event.lat.toFixed(4)}, {event.lng.toFixed(4)}
                 </div>
                 <div className="admin-location-chip-row">
-                  <span className="admin-meta-chip admin-meta-chip--type">
+                  <span
+                    className={`admin-meta-chip admin-meta-chip--type admin-meta-chip--type-${event.eventType}`}
+                  >
                     {typeLabel(event.eventType)}
                   </span>
                   <span

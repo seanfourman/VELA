@@ -27,8 +27,8 @@ export const EMPTY_EVENT = {
 };
 
 export const EVENT_TYPE_OPTIONS = [
-  { value: "party", label: "Star party" },
-  { value: "special_event", label: "Special event" },
+  { value: "party", label: "Star Party" },
+  { value: "special_event", label: "Special Event" },
 ];
 
 export const EVENT_STATUS_OPTIONS = [

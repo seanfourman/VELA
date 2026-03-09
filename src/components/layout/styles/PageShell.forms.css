@@ -723,8 +723,16 @@
 
 .admin-meta-chip--type {
   color: var(--surface-text);
-  border-color: rgba(56, 189, 248, 0.36);
-  background: rgba(56, 189, 248, 0.16);
+}
+
+.admin-meta-chip--type-party {
+  border-color: rgba(249, 115, 22, 0.52);
+  background: rgba(249, 115, 22, 0.2);
+}
+
+.admin-meta-chip--type-special_event {
+  border-color: rgba(239, 68, 68, 0.52);
+  background: rgba(239, 68, 68, 0.2);
 }
 
 .admin-meta-chip--status {
