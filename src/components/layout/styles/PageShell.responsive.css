@@ -120,9 +120,10 @@
   }
 
   .admin-location-actions {
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
   }
 }
 

@@ -2,6 +2,11 @@ import { formatDateTime } from "@/utils/dateTime";
 
 const typeLabel = (value) =>
   value === "special_event" ? "Special event" : "Star party";
+const statusLabel = (value) => {
+  if (value === "published") return "Published";
+  if (value === "archived") return "Archived";
+  return "Draft";
+};
 
 export default function AdminEventList({
   events,
@@ -39,27 +44,43 @@ export default function AdminEventList({
             }`}
           >
             <div className="admin-location-card-header">
-              <div>
-                <div className="admin-location-title">{event.title}</div>
-                <div className="admin-location-meta">
+              <div className="admin-location-content admin-event-content">
+                <div className="admin-location-title-row">
+                  <div className="admin-location-title">{event.title}</div>
+                  {isEditing ? (
+                    <span className="admin-meta-chip admin-meta-chip--status admin-meta-chip--status-draft">
+                      Editing
+                    </span>
+                  ) : null}
+                </div>
+                <div className="admin-location-meta admin-location-meta--datetime">
                   {formatDateTime(event.startsAt, { includeYear: true })}
                   {event.endsAt
                     ? ` - ${formatDateTime(event.endsAt, { includeYear: true })}`
                     : ""}
                 </div>
-                <div className="admin-location-meta">
+                <div className="admin-location-meta admin-location-meta--coords">
                   {event.lat.toFixed(4)}, {event.lng.toFixed(4)}
                 </div>
-                <div className="admin-location-meta">
-                  {typeLabel(event.eventType)} | Status: {event.status} | RSVP:{" "}
-                  {rsvpCount}
-                  {" | "}Checklist: {hostChecklistCount}
+                <div className="admin-location-chip-row">
+                  <span className="admin-meta-chip admin-meta-chip--type">
+                    {typeLabel(event.eventType)}
+                  </span>
+                  <span
+                    className={`admin-meta-chip admin-meta-chip--status admin-meta-chip--status-${event.status}`}
+                  >
+                    {statusLabel(event.status)}
+                  </span>
+                  <span className="admin-meta-chip">RSVP {rsvpCount}</span>
+                  <span className="admin-meta-chip">
+                    Checklist {hostChecklistCount}
+                  </span>
                 </div>
               </div>
               <div className="admin-location-actions">
                 <button
                   type="button"
-                  className="glass-btn profile-action-btn"
+                  className="glass-btn profile-action-btn admin-card-btn admin-card-btn--primary"
                   onClick={() => onEditEvent?.(event)}
                   disabled={isEditing}
                 >
@@ -68,7 +89,7 @@ export default function AdminEventList({
                 {onSetStatus ? (
                   <button
                     type="button"
-                    className="glass-btn profile-action-btn"
+                    className="glass-btn profile-action-btn admin-card-btn admin-card-btn--soft"
                     onClick={() => onSetStatus?.(event.id, statusActionNext)}
                     disabled={isArchived}
                   >
@@ -77,7 +98,7 @@ export default function AdminEventList({
                 ) : null}
                 <button
                   type="button"
-                  className="glass-btn profile-action-btn"
+                  className="glass-btn profile-action-btn admin-card-btn admin-card-btn--danger"
                   onClick={() => onDeleteEvent?.(event)}
                 >
                   Remove
@@ -89,7 +110,7 @@ export default function AdminEventList({
               <p className="admin-location-description">{event.description}</p>
             ) : null}
             {event.meetupDetails ? (
-              <p className="admin-location-meta">
+              <p className="admin-card-note">
                 Meetup: {event.meetupDetails}
               </p>
             ) : null}
