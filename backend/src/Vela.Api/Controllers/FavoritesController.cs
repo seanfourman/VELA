@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Vela.Api.BL;
+using Vela.Api.Configuration;
 using Vela.Api.DTOs;
 using Vela.Api.Validators;
 
@@ -14,83 +15,66 @@ namespace Vela.Api.Controllers
         [HttpGet]
         public IActionResult GetFavorites()
         {
-            try
+            var userId = ReadUserId();
+            if (!userId.HasValue)
             {
-                var userId = ReadUserId();
-                if (!userId.HasValue)
-                {
-                    return Unauthorized();
-                }
+                return Unauthorized();
+            }
 
-                var favorites = FavoriteSpot.GetByUserId(userId.Value);
-                return Ok(favorites);
-            }
-            catch
-            {
-                return StatusCode(500, "An error occurred while retrieving favorites.");
-            }
+            var favorites = FavoriteSpot.GetByUserId(userId.Value);
+            return Ok(favorites);
         }
 
         [HttpPost]
         public IActionResult SaveFavorite([FromBody] CreateFavoriteRequestDto request)
         {
-            try
+            if (request is null)
             {
-                var userId = ReadUserId();
-                if (!userId.HasValue)
-                {
-                    return Unauthorized();
-                }
-
-                List<string> validationErrors = RequestValidator.ValidateFavoriteRequest(request);
-                if (validationErrors.Any())
-                {
-                    return BadRequest(new { errors = validationErrors });
-                }
-
-                var saved = FavoriteSpot.Save(userId.Value, request);
-                return Ok(saved);
+                return BadRequest("Request body is required.");
             }
-            catch
+
+            var userId = ReadUserId();
+            if (!userId.HasValue)
             {
-                return StatusCode(500, "An error occurred while saving favorite.");
+                return Unauthorized();
             }
+
+            List<string> validationErrors = RequestValidator.ValidateFavoriteRequest(request);
+            if (validationErrors.Any())
+            {
+                return BadRequest(new { errors = validationErrors });
+            }
+
+            var saved = FavoriteSpot.Save(userId.Value, request);
+            return Ok(saved);
         }
 
         [HttpDelete("{spotId}")]
         public IActionResult DeleteFavorite(string spotId)
         {
-            try
+            var userId = ReadUserId();
+            if (!userId.HasValue)
             {
-                var userId = ReadUserId();
-                if (!userId.HasValue)
-                {
-                    return Unauthorized();
-                }
-
-                if (string.IsNullOrWhiteSpace(spotId))
-                {
-                    return BadRequest("spotId is required.");
-                }
-
-                var deleted = FavoriteSpot.Delete(userId.Value, spotId);
-                if (!deleted)
-                {
-                    return NotFound();
-                }
-
-                return NoContent();
+                return Unauthorized();
             }
-            catch
+
+            if (string.IsNullOrWhiteSpace(spotId))
             {
-                return StatusCode(500, "An error occurred while deleting favorite.");
+                return BadRequest("spotId is required.");
             }
+
+            var deleted = FavoriteSpot.Delete(userId.Value, spotId);
+            if (!deleted)
+            {
+                return NotFound();
+            }
+
+            return NoContent();
         }
 
         private Guid? ReadUserId()
         {
-            var rawUserId = User.FindFirst("sub")?.Value;
-            return Guid.TryParse(rawUserId, out var userId) ? userId : null;
+            return User.ReadUserId();
         }
     }
 }

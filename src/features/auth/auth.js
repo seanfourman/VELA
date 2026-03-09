@@ -1,40 +1,23 @@
 import { buildAuthUrl } from "@/utils/apiEndpoints";
 import { persistStoredSession, readStoredSession } from "./authStorage";
 
-const SESSION_EXPIRY_SKEW_MS = 60 * 1000;
-
 const normalizeEmail = (value) =>
   String(value || "")
     .trim()
     .toLowerCase();
 
-const normalizeRoleList = (value) => {
-  if (!value) return [];
-  if (Array.isArray(value)) return value.map(String);
-  if (typeof value === "string") {
-    return value
-      .split(/[,\s]+/)
-      .map((entry) => entry.trim())
-      .filter(Boolean);
-  }
-  return [];
-};
-
 const normalizeUser = (value) => {
   if (!value || typeof value !== "object") return null;
-  const id = String(value.id ?? value.sub ?? "").trim();
+  const id = String(value.id ?? "").trim();
   const email = normalizeEmail(value.email);
   if (!id || !email) return null;
 
   const name =
-    String(
-      value.name ?? value.preferred_username ?? value.given_name ?? email.split("@")[0]
-    ).trim() || "Explorer";
-  const rawRoles = normalizeRoleList(value.roles || value.role || value.groups);
-  const hasAdminRole = rawRoles.some((role) =>
-    ["admin", "administrator"].includes(String(role).toLowerCase())
-  );
-  const isAdmin = Boolean(value.is_admin === true || value.isAdmin === true || hasAdminRole);
+    String(value.name ?? value.preferred_username ?? email.split("@")[0]).trim() ||
+    "Explorer";
+  const role = String(value.role || "").trim().toLowerCase();
+  const isAdmin = Boolean(value.isAdmin === true || value.is_admin === true || role === "admin");
+  const normalizedRole = isAdmin ? "admin" : "user";
 
   return {
     sub: id,
@@ -43,9 +26,9 @@ const normalizeUser = (value) => {
     name,
     preferred_username: name,
     is_admin: isAdmin,
-    role: isAdmin ? "admin" : "user",
-    roles: isAdmin ? ["admin"] : ["user"],
-    groups: isAdmin ? ["admin"] : ["user"],
+    role: normalizedRole,
+    roles: [normalizedRole],
+    groups: [normalizedRole],
     auth_source: "server",
   };
 };
@@ -66,13 +49,50 @@ const normalizeSession = (value) => {
   };
 };
 
-const isExpired = (session) => {
-  const expiresAt = Date.parse(String(session?.expiresAtUtc || ""));
-  if (!Number.isFinite(expiresAt)) return false;
-  return Date.now() >= expiresAt - SESSION_EXPIRY_SKEW_MS;
+const extractErrorMessage = (value) => {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || "";
+  }
+  if (!value || typeof value !== "object") return "";
+
+  if (Array.isArray(value.errors)) {
+    const joined = value.errors
+      .map((entry) => String(entry || "").trim())
+      .filter(Boolean)
+      .join(" ");
+    if (joined) return joined;
+  }
+
+  if (value.errors && typeof value.errors === "object") {
+    const messages = Object.values(value.errors)
+      .flatMap((entry) => (Array.isArray(entry) ? entry : [entry]))
+      .map((entry) => String(entry || "").trim())
+      .filter(Boolean);
+    if (messages.length) return messages.join(" ");
+  }
+
+  if (typeof value.detail === "string" && value.detail.trim()) {
+    return value.detail.trim();
+  }
+  if (typeof value.message === "string" && value.message.trim()) {
+    return value.message.trim();
+  }
+  if (typeof value.title === "string" && value.title.trim()) {
+    return value.title.trim();
+  }
+
+  return "";
 };
 
 const parseApiError = async (response, fallbackMessage) => {
+  const contentType = String(response.headers.get("content-type") || "");
+  if (contentType.includes("application/json")) {
+    const payload = await response.json().catch(() => null);
+    const jsonMessage = extractErrorMessage(payload);
+    if (jsonMessage) return jsonMessage;
+  }
+
   const text = (await response.text().catch(() => "")).trim();
   if (text) return text;
   return `${fallbackMessage} (${response.status})`;
@@ -100,11 +120,7 @@ const requestAuth = async ({ endpoint, payload }) => {
 
 export const readAuthState = () => {
   const session = readStoredSession(normalizeSession);
-  if (!session || isExpired(session)) {
-    persistAuthSession(null);
-    return { session: null };
-  }
-  return { session };
+  return { session: session || null };
 };
 
 export const persistAuthSession = (session) => {

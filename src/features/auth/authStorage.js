@@ -30,28 +30,47 @@ const isSessionExpired = (session) => {
   return Date.now() >= expiresAt - SESSION_EXPIRY_SKEW_MS;
 };
 
-export const readStoredSession = (normalizeSession) =>
-  normalizeSession(readJsonFromStorage(AUTH_SESSION_KEY, null));
+const clearSession = () => {
+  writeJsonToStorage(AUTH_SESSION_KEY, null);
+};
+
+export const readStoredSession = (normalizeSession) => {
+  const normalize =
+    typeof normalizeSession === "function" ? normalizeSession : (value) => value;
+  const session = normalize(readJsonFromStorage(AUTH_SESSION_KEY, null));
+  if (!session || typeof session !== "object") return null;
+
+  if (isSessionExpired(session)) {
+    clearSession();
+    return null;
+  }
+  return session;
+};
 
 export const persistStoredSession = (session, normalizeSession) => {
+  const normalize =
+    typeof normalizeSession === "function" ? normalizeSession : (value) => value;
   if (!session) {
-    writeJsonToStorage(AUTH_SESSION_KEY, null);
+    clearSession();
     return;
   }
-  writeJsonToStorage(AUTH_SESSION_KEY, normalizeSession(session));
+
+  const normalized = normalize(session);
+  if (!normalized) {
+    clearSession();
+    return;
+  }
+
+  writeJsonToStorage(AUTH_SESSION_KEY, normalized);
 };
 
 export const readStoredToken = () => {
-  const session = readJsonFromStorage(AUTH_SESSION_KEY, null);
-  if (!session || typeof session !== "object") return "";
-  if (isSessionExpired(session)) {
-    writeJsonToStorage(AUTH_SESSION_KEY, null);
-    return "";
-  }
+  const session = readStoredSession();
+  if (!session) return "";
   const token = typeof session.token === "string" ? session.token.trim() : "";
   return token;
 };
 
 export const clearStoredSession = () => {
-  writeJsonToStorage(AUTH_SESSION_KEY, null);
+  clearSession();
 };

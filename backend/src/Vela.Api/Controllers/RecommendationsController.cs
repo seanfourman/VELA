@@ -14,63 +14,45 @@ namespace Vela.Api.Controllers
         [HttpGet]
         public IActionResult GetRecommendations()
         {
-            try
-            {
-                var recommendations = Recommendation.GetAll();
-                return Ok(recommendations);
-            }
-            catch
-            {
-                return StatusCode(500, "An error occurred while retrieving recommendations.");
-            }
+            var recommendations = Recommendation.GetAll();
+            return Ok(recommendations);
         }
 
         [Authorize(Roles = "admin")]
         [HttpPost]
         public IActionResult SaveRecommendation([FromBody] UpsertRecommendationRequestDto request)
         {
-            try
+            if (request is null)
             {
-                List<string> validationErrors = RequestValidator.ValidateRecommendationRequest(
-                    request
-                );
-                if (validationErrors.Any())
-                {
-                    return BadRequest(new { errors = validationErrors });
-                }
+                return BadRequest("Request body is required.");
+            }
 
-                var saved = Recommendation.Save(request);
-                return Ok(saved);
-            }
-            catch
+            List<string> validationErrors = RequestValidator.ValidateRecommendationRequest(request);
+            if (validationErrors.Any())
             {
-                return StatusCode(500, "An error occurred while saving recommendation.");
+                return BadRequest(new { errors = validationErrors });
             }
+
+            var saved = Recommendation.Save(request);
+            return Ok(saved);
         }
 
         [Authorize(Roles = "admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteRecommendation(string id)
         {
-            try
+            if (string.IsNullOrWhiteSpace(id))
             {
-                if (string.IsNullOrWhiteSpace(id))
-                {
-                    return BadRequest("id is required.");
-                }
-
-                var deleted = Recommendation.Delete(id.Trim());
-                if (!deleted)
-                {
-                    return NotFound();
-                }
-
-                return NoContent();
+                return BadRequest("id is required.");
             }
-            catch
+
+            var deleted = Recommendation.Delete(id.Trim());
+            if (!deleted)
             {
-                return StatusCode(500, "An error occurred while deleting recommendation.");
+                return NotFound();
             }
+
+            return NoContent();
         }
     }
 }
