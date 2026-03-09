@@ -12,6 +12,8 @@ export const formatDateTime = (
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
+    hourCycle: "h23",
   };
 
   if (includeYear) {

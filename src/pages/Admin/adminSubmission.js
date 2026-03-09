@@ -52,7 +52,7 @@ export const validateEventDraft = (eventData) => {
   }
 
   if (!eventData.startsAt) {
-    return validationError("Event start time is required", 2400);
+    return validationError("Event start date and time are required", 2400);
   }
 
   if (!Number.isFinite(eventData.lat) || eventData.lat < -90 || eventData.lat > 90) {

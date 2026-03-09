@@ -1,5 +1,44 @@
 import { EVENT_STATUS_OPTIONS, EVENT_TYPE_OPTIONS } from "./adminConstants";
 import AdminDatePicker from "./AdminDatePicker";
+import AdminTimePicker from "./AdminTimePicker";
+
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const DATE_TIME_PATTERN = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/;
+
+const pad2 = (value) => String(value).padStart(2, "0");
+
+const splitDateTimeValue = (value) => {
+  const raw = String(value || "").trim();
+  if (!raw) return { date: "", time: "" };
+
+  if (DATE_ONLY_PATTERN.test(raw)) {
+    return { date: raw, time: "" };
+  }
+
+  const dateTimeMatch = raw.match(DATE_TIME_PATTERN);
+  if (dateTimeMatch) {
+    return { date: dateTimeMatch[1], time: dateTimeMatch[2] };
+  }
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return { date: "", time: "" };
+  const year = parsed.getFullYear();
+  const month = pad2(parsed.getMonth() + 1);
+  const day = pad2(parsed.getDate());
+  const hours = pad2(parsed.getHours());
+  const minutes = pad2(parsed.getMinutes());
+  return {
+    date: `${year}-${month}-${day}`,
+    time: `${hours}:${minutes}`,
+  };
+};
+
+const mergeDateAndTime = (dateValue, timeValue) => {
+  const date = String(dateValue || "").trim();
+  const time = String(timeValue || "").trim();
+  if (!date) return "";
+  return time ? `${date}T${time}` : date;
+};
 
 export default function AdminEventForm({
   draft,
@@ -28,6 +67,8 @@ export default function AdminEventForm({
     "--switch-index": statusIndex,
     "--switch-count": EVENT_STATUS_OPTIONS.length,
   };
+  const startsAt = splitDateTimeValue(draft.startsAt);
+  const endsAt = splitDateTimeValue(draft.endsAt);
   const emitFieldValue = (key, value) =>
     onFieldChange(key)({
       target: { value },
@@ -120,14 +161,27 @@ export default function AdminEventForm({
 
       <div className="admin-event-grid">
         <label className="profile-field admin-grid-span-2">
-          <span className="profile-label">Starts at</span>
+          <span className="profile-label">Start date</span>
           <AdminDatePicker
-            value={draft.startsAt}
-            onChange={(next) => emitFieldValue("startsAt", next)}
+            value={startsAt.date}
+            onChange={(nextDate) =>
+              emitFieldValue("startsAt", mergeDateAndTime(nextDate, startsAt.time))
+            }
           />
         </label>
 
         <label className="profile-field admin-grid-span-2">
+          <span className="profile-label">Start time</span>
+          <AdminTimePicker
+            value={startsAt.time}
+            disabled={!startsAt.date}
+            onChange={(nextTime) =>
+              emitFieldValue("startsAt", mergeDateAndTime(startsAt.date, nextTime))
+            }
+          />
+        </label>
+
+        <label className="profile-field admin-grid-span-3">
           <span className="profile-label">Latitude</span>
           <input
             className="profile-input"
@@ -141,7 +195,7 @@ export default function AdminEventForm({
           />
         </label>
 
-        <label className="profile-field admin-grid-span-2">
+        <label className="profile-field admin-grid-span-3">
           <span className="profile-label">Longitude</span>
           <input
             className="profile-input"
@@ -159,11 +213,24 @@ export default function AdminEventForm({
       <details className="admin-advanced-block">
         <summary>Advanced details</summary>
         <div className="admin-advanced-content">
-          <label className="profile-field">
-            <span className="profile-label">Ends at</span>
+          <label className="profile-field admin-grid-span-2">
+            <span className="profile-label">End date</span>
             <AdminDatePicker
-              value={draft.endsAt}
-              onChange={(next) => emitFieldValue("endsAt", next)}
+              value={endsAt.date}
+              onChange={(nextDate) =>
+                emitFieldValue("endsAt", mergeDateAndTime(nextDate, endsAt.time))
+              }
+            />
+          </label>
+
+          <label className="profile-field admin-grid-span-2">
+            <span className="profile-label">End time</span>
+            <AdminTimePicker
+              value={endsAt.time}
+              disabled={!endsAt.date}
+              onChange={(nextTime) =>
+                emitFieldValue("endsAt", mergeDateAndTime(endsAt.date, nextTime))
+              }
             />
           </label>
 

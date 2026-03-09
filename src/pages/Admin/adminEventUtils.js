@@ -2,15 +2,18 @@ const cleanText = (value) => (typeof value === "string" ? value.trim() : "");
 
 const pad2 = (value) => String(value).padStart(2, "0");
 
-const toIsoDateTime = (value) => {
+const toIsoDateTime = (value, { requireTime = false } = {}) => {
   const raw = cleanText(value);
   if (!raw) return "";
 
   if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+    if (requireTime) return "";
     const [year, month, day] = raw.split("-").map(Number);
     const parsed = new Date(year, month - 1, day, 12, 0, 0, 0);
     return Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString();
   }
+
+  if (requireTime && !/T\d{2}:\d{2}/.test(raw)) return "";
 
   const parsed = new Date(raw);
   if (Number.isNaN(parsed.getTime())) return "";
@@ -26,6 +29,19 @@ const toLocalDateInput = (value) => {
   const month = pad2(parsed.getMonth() + 1);
   const day = pad2(parsed.getDate());
   return `${year}-${month}-${day}`;
+};
+
+const toLocalDateTimeInput = (value) => {
+  const raw = cleanText(value);
+  if (!raw) return "";
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return "";
+  const year = parsed.getFullYear();
+  const month = pad2(parsed.getMonth() + 1);
+  const day = pad2(parsed.getDate());
+  const hours = pad2(parsed.getHours());
+  const minutes = pad2(parsed.getMinutes());
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
 const parseChecklist = (value) =>
@@ -50,7 +66,7 @@ const buildEventId = ({ title, startsAt }) => {
 
 const buildEventFromDraft = (draft) => {
   const title = cleanText(draft?.title);
-  const startsAt = toIsoDateTime(draft?.startsAt);
+  const startsAt = toIsoDateTime(draft?.startsAt, { requireTime: true });
   const endsAt = toIsoDateTime(draft?.endsAt);
   const eventType = cleanText(draft?.eventType) || "party";
   const status = cleanText(draft?.status) || "draft";
@@ -79,8 +95,8 @@ const buildDraftFromEvent = (event) => {
     title: cleanText(event.title),
     eventType: cleanText(event.eventType || event.type || "party"),
     status: cleanText(event.status || "draft"),
-    startsAt: toLocalDateInput(event.startsAt),
-    endsAt: toLocalDateInput(event.endsAt),
+    startsAt: toLocalDateTimeInput(event.startsAt) || toLocalDateInput(event.startsAt),
+    endsAt: toLocalDateTimeInput(event.endsAt) || toLocalDateInput(event.endsAt),
     lat: Number.isFinite(event.lat) ? String(event.lat) : "",
     lng: Number.isFinite(event.lng) ? String(event.lng) : "",
     meetupDetails: cleanText(event.meetupDetails),

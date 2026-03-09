@@ -109,6 +109,11 @@
     max-width: none;
   }
 
+  .admin-time-picker__menu {
+    width: 100%;
+    max-width: none;
+  }
+
   .admin-location-card-header {
     flex-direction: column;
     align-items: flex-start;
