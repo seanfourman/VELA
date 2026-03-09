@@ -161,17 +161,16 @@ export default function DarkSpotPopupContent({
           if (!directionsUrl) return null;
           return (
             <button
-              className="popup-btn"
+              className="popup-btn popup-btn--directions"
               onClick={() => {
                 window.open(directionsUrl, "_blank");
               }}
             >
-              Get Directions
+              <span className="popup-btn__label">Get Directions</span>
               {origin ? (
-                <>
-                  <br />
-                  (from {origin.label.toLowerCase()})
-                </>
+                <span className="popup-btn__origin">
+                  from {origin.label.toLowerCase()}
+                </span>
               ) : null}
             </button>
           );

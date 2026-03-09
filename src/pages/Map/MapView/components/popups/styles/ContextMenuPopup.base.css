@@ -109,6 +109,33 @@
     color 0.2s ease;
 }
 
+.popup-btn--directions {
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.popup-btn__label {
+  display: inline-block;
+  line-height: 1.1;
+}
+
+.popup-btn__origin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-hover);
+  color: var(--surface-text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
 .popup-btn.danger {
   border-color: rgba(252, 165, 165, 0.35);
   color: #fca5a5;
