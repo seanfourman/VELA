@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import showPopup from "@/utils/popup";
+﻿import { useCallback, useEffect, useState } from "react";
+import showNotification from "@/utils/notifications";
 import { fetchRecommendations } from "@/utils/recommendationsApi";
 import {
   normalizeStargazeLocation,
@@ -20,7 +20,7 @@ export const useStargazeLocations = () => {
         setStargazeLocations(normalized);
       } catch (error) {
         if (cancelled) return;
-        showPopup(
+        showNotification(
           error instanceof Error
             ? error.message
             : "Could not load recommended spots right now",
@@ -57,3 +57,5 @@ export const useStargazeLocations = () => {
     handleDeleteStargazeLocation,
   };
 };
+
+

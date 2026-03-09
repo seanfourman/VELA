@@ -1,7 +1,7 @@
 ﻿import { useMemo } from "react";
 import SaturnGlobe from "@/components/planets/SaturnGlobe";
 import PageShell from "@/components/layout/PageShell";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import SearchDistanceSelector from "@/pages/Map/MapView/components/controls/SearchDistanceSelector";
 import "./styles/SettingsPage.css";
@@ -76,7 +76,7 @@ function SettingsPage({
 
   const handleReset = () => {
     onResetSettings?.();
-    showPopup("Settings reset to defaults", "info", { duration: 2200 });
+    showNotification("Settings reset to defaults", "info", { duration: 2200 });
   };
 
   const hero = showMoon ? (
@@ -258,4 +258,6 @@ function SettingsPage({
 }
 
 export default SettingsPage;
+
+
 

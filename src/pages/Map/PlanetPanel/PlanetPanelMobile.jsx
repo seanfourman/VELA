@@ -9,7 +9,7 @@
 } from "react";
 import PlanetCard from "./PlanetCard";
 import PlanetArOverlay from "./PlanetArOverlay";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import arZoneIcon from "@/assets/icons/ar-zone-svgrepo-com.svg";
 import "./styles/planetPanelMobile.css";
 
@@ -270,11 +270,11 @@ export default function PlanetPanelMobile({
         throw new Error("Clipboard unavailable");
       }
 
-      showPopup(`${currentPlanet?.name || "Planet"} info copied`, "success", {
+      showNotification(`${currentPlanet?.name || "Planet"} info copied`, "success", {
         duration: 2000,
       });
     } catch {
-      showPopup("Could not copy planet info", "warning", {
+      showNotification("Could not copy planet info", "warning", {
         duration: 2200,
       });
     } finally {
@@ -447,4 +447,6 @@ export default function PlanetPanelMobile({
     </div>
   );
 }
+
+
 

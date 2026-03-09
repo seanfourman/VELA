@@ -1,4 +1,4 @@
-import {
+﻿import {
   forwardRef,
   useCallback,
   useEffect,
@@ -40,7 +40,7 @@ import {
 import MarkerLayers from "./MapView/components/layers/MarkerLayers";
 import useMapViewState from "./MapView/hooks/useMapViewState";
 import useSpaceWeather from "@/features/spaceWeather/useSpaceWeather";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import { getRsvpUserId } from "@/features/starParty/starPartyStorage";
 
 const MapView = forwardRef(function MapView(
@@ -140,7 +140,7 @@ const MapView = forwardRef(function MapView(
     (event) => {
       if (!event?.id) return;
       if (!isAuthenticated || !activeUserRsvpId) {
-        showPopup("Sign in to RSVP to events", "failure", { duration: 2400 });
+        showNotification("Sign in to RSVP to events", "failure", { duration: 2400 });
         return;
       }
       const currentRsvps = Array.isArray(event.rsvps) ? event.rsvps : [];
@@ -148,7 +148,7 @@ const MapView = forwardRef(function MapView(
         (entry) => entry.userId === activeUserRsvpId,
       );
       onToggleStarPartyRsvp?.({ eventId: event.id, user: authUser });
-      showPopup(isAlreadyJoined ? "RSVP removed" : "RSVP confirmed", "success", {
+      showNotification(isAlreadyJoined ? "RSVP removed" : "RSVP confirmed", "success", {
         duration: 1800,
       });
     },
@@ -344,3 +344,5 @@ const MapView = forwardRef(function MapView(
 MapView.displayName = "MapView";
 
 export default MapView;
+
+

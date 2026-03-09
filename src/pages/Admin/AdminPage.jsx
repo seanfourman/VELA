@@ -2,7 +2,7 @@
 import Chip from "@mui/material/Chip";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import {
   deleteRecommendation,
   saveRecommendation,
@@ -114,14 +114,14 @@ function AdminPage({
     const nextDraft = buildDraftFromLocation(location);
     if (!nextDraft) return;
     setLocationDraft(nextDraft);
-    showPopup("Editing selected location", "info", { duration: 1800 });
+    showNotification("Editing selected location", "info", { duration: 1800 });
   };
 
   const handleEditEvent = (event) => {
     const nextDraft = buildDraftFromEvent(event);
     if (!nextDraft) return;
     setEventDraft(nextDraft);
-    showPopup("Editing selected event", "info", { duration: 1800 });
+    showNotification("Editing selected event", "info", { duration: 1800 });
   };
 
   const handleDeleteLocation = async (location) => {
@@ -136,9 +136,9 @@ function AdminPage({
       if (editingLocationId && editingLocationId === String(locationId).trim()) {
         resetLocationForm();
       }
-      showPopup("Location removed", "info", { duration: 2200 });
+      showNotification("Location removed", "info", { duration: 2200 });
     } catch (error) {
-      showPopup(
+      showNotification(
         error instanceof Error
           ? error.message
           : "Could not delete this location right now",
@@ -155,7 +155,7 @@ function AdminPage({
     if (editingEventId && editingEventId === eventId) {
       resetEventForm();
     }
-    showPopup("Event removed", "info", { duration: 2200 });
+    showNotification("Event removed", "info", { duration: 2200 });
   };
 
   const handleSubmitLocation = async (event) => {
@@ -164,7 +164,7 @@ function AdminPage({
 
     const validation = validateLocationDraft(location);
     if (validation) {
-      showPopup(validation.message, "failure", { duration: validation.duration });
+      showNotification(validation.message, "failure", { duration: validation.duration });
       return;
     }
 
@@ -182,14 +182,14 @@ function AdminPage({
         location: apiLocation,
       });
       onSaveStargazeLocation?.(apiLocation);
-      showPopup(
+      showNotification(
         isEditingLocation ? "Location updated" : "Location added",
         "success",
         { duration: 2400 }
       );
       resetLocationForm();
     } catch (error) {
-      showPopup(
+      showNotification(
         error instanceof Error
           ? error.message
           : "Could not save this location right now",
@@ -205,7 +205,7 @@ function AdminPage({
 
     const validation = validateEventDraft(eventData);
     if (validation) {
-      showPopup(validation.message, "failure", { duration: validation.duration });
+      showNotification(validation.message, "failure", { duration: validation.duration });
       return;
     }
 
@@ -219,12 +219,12 @@ function AdminPage({
 
     try {
       await Promise.resolve(onSaveStarPartyEvent?.(payload));
-      showPopup(isEditingEvent ? "Event updated" : "Event created", "success", {
+      showNotification(isEditingEvent ? "Event updated" : "Event created", "success", {
         duration: 2400,
       });
       resetEventForm();
     } catch (error) {
-      showPopup(
+      showNotification(
         error instanceof Error
           ? error.message
           : "Could not save this event right now",
@@ -240,7 +240,7 @@ function AdminPage({
     if (editingEventId && editingEventId === String(eventId).trim()) {
       setEventDraft((current) => ({ ...current, status }));
     }
-    showPopup(`Event status set to ${status}`, "info", { duration: 1800 });
+    showNotification(`Event status set to ${status}`, "info", { duration: 1800 });
   };
 
   const hero = showPlanet ? (
@@ -383,4 +383,6 @@ function AdminPage({
 }
 
 export default AdminPage;
+
+
 

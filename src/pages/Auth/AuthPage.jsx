@@ -1,5 +1,5 @@
 ﻿import { useMemo, useState } from "react";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import PageShell from "@/components/layout/PageShell";
 import { getPasswordChecks, isStrongPassword } from "@/utils/passwordRules";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
@@ -68,15 +68,15 @@ function AuthPage({ auth, isLight, onNavigate }) {
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!isValidEmail(trimmedEmail)) {
-      showPopup("Enter a valid email address", "failure", { duration: 2800 });
+      showNotification("Enter a valid email address", "failure", { duration: 2800 });
       return;
     }
     if (!password) {
-      showPopup("Enter your password", "failure", { duration: 2600 });
+      showNotification("Enter your password", "failure", { duration: 2600 });
       return;
     }
     if (isRegisterMode && !isStrongPassword(password)) {
-      showPopup(
+      showNotification(
         "Use a stronger password: 8+ chars with upper, lower, number, and symbol",
         "failure",
         { duration: 3600 },
@@ -84,7 +84,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
       return;
     }
     if (isRegisterMode && password !== confirmPassword) {
-      showPopup("Passwords do not match", "failure", { duration: 2800 });
+      showNotification("Passwords do not match", "failure", { duration: 2800 });
       return;
     }
 
@@ -96,17 +96,17 @@ function AuthPage({ auth, isLight, onNavigate }) {
           email: trimmedEmail,
           password,
         });
-        showPopup("Account created. You are now logged in", "success", {
+        showNotification("Account created. You are now logged in", "success", {
           duration: 2600,
         });
       } else {
         await auth?.login?.({ email: trimmedEmail, password });
-        showPopup("Welcome back!", "success", { duration: 2200 });
+        showNotification("Welcome back!", "success", { duration: 2200 });
       }
       resetPasswords();
       onNavigate?.("/");
     } catch (error) {
-      showPopup(
+      showNotification(
         error instanceof Error ? error.message : "Authentication failed",
         "failure",
         { duration: 3600 },
@@ -291,4 +291,6 @@ function AuthPage({ auth, isLight, onNavigate }) {
 }
 
 export default AuthPage;
+
+
 

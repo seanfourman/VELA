@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import showPopup from "@/utils/popup";
+﻿import { useCallback } from "react";
+import showNotification from "@/utils/notifications";
 
 const useMapDirections = ({
   directionsProvider = "google",
@@ -54,7 +54,7 @@ const useMapDirections = ({
       const lng = Number(coords?.lng);
       const url = buildShareUrl({ lat, lng });
       if (!url) {
-        showPopup("No coordinates available to share", "warning", {
+        showNotification("No coordinates available to share", "warning", {
           duration: 2200,
         });
         return;
@@ -64,7 +64,7 @@ const useMapDirections = ({
       window.setTimeout(() => {
         const opened = window.open(url, "_blank");
         if (!opened) {
-          showPopup(
+          showNotification(
             "Pop-up blocked. Allow pop-ups to open Google Maps",
             "warning",
             { duration: 2600 },
@@ -76,7 +76,7 @@ const useMapDirections = ({
         } catch {
           // Ignore if the browser prevents access to the new window handle.
         }
-        showPopup(`Opened ${resolvedLabel} in Google Maps`, "info", {
+        showNotification(`Opened ${resolvedLabel} in Google Maps`, "info", {
           duration: 2000,
         });
       }, 1500);
@@ -134,3 +134,5 @@ const useMapDirections = ({
 };
 
 export default useMapDirections;
+
+

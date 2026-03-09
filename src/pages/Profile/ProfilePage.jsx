@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import EarthGlobe from "@/components/planets/EarthGlobe";
 import PageShell from "@/components/layout/PageShell";
 import userIcon from "@/assets/icons/user-icon.svg";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 
 const EMPTY_PROFILE = {
@@ -75,7 +75,7 @@ function ProfilePage({
     };
 
     onSave(nextProfile);
-    showPopup("Profile updated", "success", { duration: 2200 });
+    showNotification("Profile updated", "success", { duration: 2200 });
   };
 
   const handleReset = () => {
@@ -83,7 +83,7 @@ function ProfilePage({
       onReset();
     }
     setDraft({ ...EMPTY_PROFILE });
-    showPopup("Profile reset to defaults", "info", { duration: 2200 });
+    showNotification("Profile reset to defaults", "info", { duration: 2200 });
   };
 
   const hero = showEarth ? (
@@ -211,3 +211,5 @@ function ProfilePage({
 }
 
 export default ProfilePage;
+
+

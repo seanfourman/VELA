@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
-import PopupPortal from "@/components/PopupPortal";
+import ToastNotifications from "@/components/ToastNotifications";
 import useAppState from "@/features/app/useAppState";
 import { normalizePath } from "@/utils/appState";
 import { AppLayoutContext } from "./AppLayoutContext";
@@ -77,10 +77,12 @@ function AppLayout() {
           currentRoute={currentRoute}
         />
         <Outlet />
-        <PopupPortal />
+        <ToastNotifications />
       </div>
     </AppLayoutContext.Provider>
   );
 }
 
 export default AppLayout;
+
+

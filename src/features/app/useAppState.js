@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+﻿import { useEffect, useRef } from "react";
 import { useAuth } from "@/features/auth/useAuth";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import { isAdminUser } from "@/utils/appState";
 import { useLocationTracking } from "./hooks/useLocationTracking";
@@ -39,7 +39,7 @@ const useAppState = () => {
 
   useEffect(() => {
     if (!isProbablyHardwareAccelerated()) {
-      showPopup(
+      showNotification(
         "Hardware acceleration appears to be disabled. Performance and visuals may be affected",
         "failure",
         { duration: 6000 },
@@ -79,3 +79,5 @@ const useAppState = () => {
 };
 
 export default useAppState;
+
+

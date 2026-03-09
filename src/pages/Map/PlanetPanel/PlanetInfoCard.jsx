@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import arZoneIcon from "@/assets/icons/ar-zone-svgrepo-com.svg";
 import "./styles/planetInfoCard.css";
 
@@ -177,11 +177,11 @@ export default function PlanetInfoCard({
         throw new Error("Clipboard unavailable");
       }
 
-      showPopup(`${planet?.name || "Planet"} info copied`, "success", {
+      showNotification(`${planet?.name || "Planet"} info copied`, "success", {
         duration: 2000,
       });
     } catch {
-      showPopup("Could not copy planet info", "warning", {
+      showNotification("Could not copy planet info", "warning", {
         duration: 2200,
       });
     }
@@ -300,4 +300,6 @@ export default function PlanetInfoCard({
     </div>
   );
 }
+
+
 

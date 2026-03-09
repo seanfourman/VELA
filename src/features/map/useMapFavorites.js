@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import showPopup from "@/utils/popup";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import showNotification from "@/utils/notifications";
 import { FAVORITE_EXIT_MS } from "@/pages/Map/MapView/core/mapConfig";
 import {
   loadFavoriteSpots,
@@ -36,7 +36,7 @@ const useMapFavorites = ({
         setFavoriteSpots(items);
       } catch (error) {
         if (cancelled) return;
-        showPopup(
+        showNotification(
           error instanceof Error
             ? error.message
             : "Could not load favorites right now",
@@ -77,7 +77,7 @@ const useMapFavorites = ({
       try {
         await saveFavorite(lat, lng);
       } catch (error) {
-        showPopup(
+        showNotification(
           error instanceof Error
             ? error.message
             : "Could not save favorite right now",
@@ -93,7 +93,7 @@ const useMapFavorites = ({
       try {
         await removeFavorite({ lat, lng, spotId });
       } catch (error) {
-        showPopup(
+        showNotification(
           error instanceof Error
             ? error.message
             : "Could not remove favorite right now",
@@ -266,3 +266,5 @@ const useMapFavorites = ({
 };
 
 export default useMapFavorites;
+
+

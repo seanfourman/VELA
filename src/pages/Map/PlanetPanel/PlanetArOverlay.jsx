@@ -1,6 +1,6 @@
 ﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import showPopup from "@/utils/popup";
+import showNotification from "@/utils/notifications";
 import exitFullscreenIcon from "@/assets/icons/exit-full-screen-svgrepo-com.svg";
 import {
   clamp,
@@ -202,7 +202,7 @@ export default function PlanetArOverlay({ planet, onClose }) {
       setMotionAccess("denied");
       setSensorStatus("error");
       setSensorError("Motion permission was denied");
-      showPopup("Motion permission is needed for AR direction", "warning", {
+      showNotification("Motion permission is needed for AR direction", "warning", {
         duration: 2600,
       });
     } catch {
@@ -452,4 +452,6 @@ export default function PlanetArOverlay({ planet, onClose }) {
     portalTarget,
   );
 }
+
+
 
