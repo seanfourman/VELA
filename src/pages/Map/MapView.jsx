@@ -41,7 +41,7 @@ import MarkerLayers from "./MapView/components/layers/MarkerLayers";
 import useMapViewState from "./MapView/hooks/useMapViewState";
 import useSpaceWeather from "@/features/spaceWeather/useSpaceWeather";
 import showNotification from "@/utils/notifications";
-import { getRsvpUserId } from "@/features/starParty/starPartyStorage";
+import { getRsvpUserId } from "@/features/starParty/starPartyUtils";
 
 const MapView = forwardRef(function MapView(
   {
@@ -137,7 +137,7 @@ const MapView = forwardRef(function MapView(
   }, []);
 
   const handleToggleEventRsvp = useCallback(
-    (event) => {
+    async (event) => {
       if (!event?.id) return;
       if (!isAuthenticated || !activeUserRsvpId) {
         showNotification("Sign in to RSVP to events", "failure", { duration: 2400 });
@@ -147,12 +147,22 @@ const MapView = forwardRef(function MapView(
       const isAlreadyJoined = currentRsvps.some(
         (entry) => entry.userId === activeUserRsvpId,
       );
-      onToggleStarPartyRsvp?.({ eventId: event.id, user: authUser });
-      showNotification(isAlreadyJoined ? "RSVP removed" : "RSVP confirmed", "success", {
-        duration: 1800,
-      });
+      try {
+        const result = await onToggleStarPartyRsvp?.({ eventId: event.id });
+        const joinedNow =
+          typeof result?.joined === "boolean" ? result.joined : !isAlreadyJoined;
+        showNotification(joinedNow ? "RSVP confirmed" : "RSVP removed", "success", {
+          duration: 1800,
+        });
+      } catch (error) {
+        showNotification(
+          error instanceof Error ? error.message : "Could not update RSVP right now",
+          "failure",
+          { duration: 2600 },
+        );
+      }
     },
-    [activeUserRsvpId, authUser, isAuthenticated, onToggleStarPartyRsvp],
+    [activeUserRsvpId, isAuthenticated, onToggleStarPartyRsvp],
   );
 
   useImperativeHandle(
@@ -344,5 +354,6 @@ const MapView = forwardRef(function MapView(
 MapView.displayName = "MapView";
 
 export default MapView;
+
 
 

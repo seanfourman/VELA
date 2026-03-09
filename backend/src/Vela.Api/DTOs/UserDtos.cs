@@ -39,6 +39,15 @@ public class AuthUserDto
 
     [JsonPropertyName("is_admin")]
     public bool IsAdmin { get; set; }
+
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; } = string.Empty;
+
+    [JsonPropertyName("avatarUrl")]
+    public string AvatarUrl { get; set; } = string.Empty;
+
+    [JsonPropertyName("bio")]
+    public string Bio { get; set; } = string.Empty;
 }
 
 public class AuthResponseDto
@@ -51,4 +60,28 @@ public class AuthResponseDto
 
     [JsonPropertyName("user")]
     public AuthUserDto User { get; set; } = new();
+}
+
+public class UserProfileDto
+{
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; } = string.Empty;
+
+    [JsonPropertyName("avatarUrl")]
+    public string AvatarUrl { get; set; } = string.Empty;
+
+    [JsonPropertyName("bio")]
+    public string Bio { get; set; } = string.Empty;
+}
+
+public class UpdateUserProfileRequestDto
+{
+    [JsonPropertyName("displayName")]
+    public string? DisplayName { get; set; }
+
+    [JsonPropertyName("avatarUrl")]
+    public string? AvatarUrl { get; set; }
+
+    [JsonPropertyName("bio")]
+    public string? Bio { get; set; }
 }

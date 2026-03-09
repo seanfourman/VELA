@@ -97,6 +97,55 @@ namespace Vela.Api.Controllers
             return Ok(MapToAuthUserDto(user));
         }
 
+        [Authorize]
+        [HttpGet("profile")]
+        public IActionResult GetProfile()
+        {
+            var userId = User.ReadUserId();
+            if (!userId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var profile = Vela.Api.BL.User.GetProfile(userId.Value);
+            if (profile == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(profile);
+        }
+
+        [Authorize]
+        [HttpPut("profile")]
+        public IActionResult UpdateProfile([FromBody] UpdateUserProfileRequestDto request)
+        {
+            if (request is null)
+            {
+                return BadRequest("Request body is required.");
+            }
+
+            List<string> validationErrors = RequestValidator.ValidateUserProfileRequest(request);
+            if (validationErrors.Any())
+            {
+                return BadRequest(new { errors = validationErrors });
+            }
+
+            var userId = User.ReadUserId();
+            if (!userId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var updated = Vela.Api.BL.User.UpdateProfile(userId.Value, request);
+            if (updated == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updated);
+        }
+
         private AuthResponseDto BuildAuthResponse(Vela.Api.BL.User user)
         {
             var tokenResult = JwtManager.CreateToken(user, _configuration);
@@ -116,7 +165,10 @@ namespace Vela.Api.Controllers
                 Email = user.Email,
                 Name = user.Name,
                 Role = user.Role,
-                IsAdmin = user.IsAdmin
+                IsAdmin = user.IsAdmin,
+                DisplayName = user.DisplayName,
+                AvatarUrl = user.AvatarUrl,
+                Bio = user.Bio
             };
         }
     }

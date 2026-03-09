@@ -1,4 +1,3 @@
-export const PROFILE_STORAGE_KEY = "vela:profile:settings";
 export const SETTINGS_STORAGE_KEY = "vela:settings";
 export const DEFAULT_MAP_TYPE = "satellite";
 const SEARCH_DISTANCE_OPTIONS = [10, 25, 50, 75, 100];
@@ -177,18 +176,6 @@ export const normalizeStargazePayload = (payload) => {
     ? payload.locations
     : [];
   return locations.map(normalizeStargazeLocation).filter(Boolean);
-};
-
-export const loadProfileSettings = () => {
-  if (typeof window === "undefined") return { ...DEFAULT_PROFILE };
-  try {
-    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_PROFILE };
-    const parsed = JSON.parse(raw);
-    return { ...DEFAULT_PROFILE, ...normalizeProfile(parsed) };
-  } catch {
-    return { ...DEFAULT_PROFILE };
-  }
 };
 
 export const loadSettings = () => {

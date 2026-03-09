@@ -1,4 +1,5 @@
 using Vela.Api.DAL;
+using Vela.Api.DTOs;
 
 namespace Vela.Api.BL;
 
@@ -10,6 +11,9 @@ public class User
     public string HashedPassword { get; set; } = string.Empty;
     public bool IsAdmin { get; set; }
     public string Role { get; set; } = "user";
+    public string DisplayName { get; set; } = string.Empty;
+    public string AvatarUrl { get; set; } = string.Empty;
+    public string Bio { get; set; } = string.Empty;
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
     public string Register(string plainTextPassword)
@@ -29,6 +33,7 @@ public class User
 
         Email = normalizedEmail;
         Name = string.IsNullOrWhiteSpace(Name) ? normalizedEmail.Split('@')[0] : Name.Trim();
+        DisplayName = string.IsNullOrWhiteSpace(DisplayName) ? Name : DisplayName.Trim();
         HashedPassword = BCrypt.Net.BCrypt.HashPassword(plainTextPassword);
         IsAdmin = false;
         Role = "user";
@@ -56,5 +61,17 @@ public class User
     {
         UserService userService = new();
         return userService.GetUserById(id);
+    }
+
+    public static UserProfileDto? GetProfile(Guid id)
+    {
+        UserService userService = new();
+        return userService.GetUserProfile(id);
+    }
+
+    public static UserProfileDto? UpdateProfile(Guid id, UpdateUserProfileRequestDto request)
+    {
+        UserService userService = new();
+        return userService.UpdateUserProfile(id, request);
     }
 }

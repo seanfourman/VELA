@@ -1,10 +1,17 @@
 using System.Data.SqlClient;
 using Vela.Api.BL;
+using Vela.Api.DTOs;
 
 namespace Vela.Api.DAL;
 
 public class UserService : DBService
 {
+    private static string ReadSafeString(SqlDataReader reader, string columnName)
+    {
+        var value = reader[columnName];
+        return value == DBNull.Value ? string.Empty : value.ToString() ?? string.Empty;
+    }
+
     private static User MapReaderToUser(SqlDataReader reader)
     {
         return new User
@@ -15,6 +22,9 @@ public class UserService : DBService
             HashedPassword = reader["HashedPassword"].ToString() ?? string.Empty,
             IsAdmin = Convert.ToBoolean(reader["IsAdmin"]),
             Role = reader["Role"].ToString() ?? "user",
+            DisplayName = ReadSafeString(reader, "DisplayName"),
+            AvatarUrl = ReadSafeString(reader, "AvatarUrl"),
+            Bio = ReadSafeString(reader, "Bio"),
             CreatedAtUtc = Convert.ToDateTime(reader["CreatedAtUtc"])
         };
     }
@@ -84,6 +94,9 @@ public class UserService : DBService
                 { "@HashedPassword", user.HashedPassword },
                 { "@IsAdmin", user.IsAdmin },
                 { "@Role", role },
+                { "@DisplayName", string.IsNullOrWhiteSpace(user.DisplayName) ? user.Name.Trim() : user.DisplayName.Trim() },
+                { "@AvatarUrl", string.IsNullOrWhiteSpace(user.AvatarUrl) ? DBNull.Value : user.AvatarUrl.Trim() },
+                { "@Bio", string.IsNullOrWhiteSpace(user.Bio) ? DBNull.Value : user.Bio.Trim() },
                 { "@CreatedAtUtc", user.CreatedAtUtc == default ? DateTime.UtcNow : user.CreatedAtUtc }
             };
 
@@ -116,6 +129,72 @@ public class UserService : DBService
 
             var count = Convert.ToInt32(reader["TotalAdmins"]);
             return count > 0;
+        }
+        finally
+        {
+            con?.Close();
+        }
+    }
+
+    public UserProfileDto? GetUserProfile(Guid userId)
+    {
+        SqlConnection? con = null;
+        try
+        {
+            con = Connect();
+            var cmd = CreateCommand(
+                "SP_GetUserProfile",
+                con,
+                new Dictionary<string, object> { { "@Id", userId } }
+            );
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+            {
+                return null;
+            }
+
+            return new UserProfileDto
+            {
+                DisplayName = ReadSafeString(reader, "DisplayName"),
+                AvatarUrl = ReadSafeString(reader, "AvatarUrl"),
+                Bio = ReadSafeString(reader, "Bio")
+            };
+        }
+        finally
+        {
+            con?.Close();
+        }
+    }
+
+    public UserProfileDto? UpdateUserProfile(Guid userId, UpdateUserProfileRequestDto request)
+    {
+        SqlConnection? con = null;
+        try
+        {
+            con = Connect();
+            var cmd = CreateCommand(
+                "SP_UpdateUserProfile",
+                con,
+                new Dictionary<string, object>
+                {
+                    { "@Id", userId },
+                    { "@DisplayName", string.IsNullOrWhiteSpace(request.DisplayName) ? DBNull.Value : request.DisplayName.Trim() },
+                    { "@AvatarUrl", string.IsNullOrWhiteSpace(request.AvatarUrl) ? DBNull.Value : request.AvatarUrl.Trim() },
+                    { "@Bio", string.IsNullOrWhiteSpace(request.Bio) ? DBNull.Value : request.Bio.Trim() }
+                }
+            );
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+            {
+                return null;
+            }
+
+            return new UserProfileDto
+            {
+                DisplayName = ReadSafeString(reader, "DisplayName"),
+                AvatarUrl = ReadSafeString(reader, "AvatarUrl"),
+                Bio = ReadSafeString(reader, "Bio")
+            };
         }
         finally
         {

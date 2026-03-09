@@ -20,7 +20,7 @@ const useAppState = () => {
     handleResetProfile,
     handleUpdateSettings,
     handleResetSettings,
-  } = useUserPreferences();
+  } = useUserPreferences({ auth });
   const { location, locationStatus } = useLocationTracking({
     highAccuracyLocation: settings.highAccuracyLocation,
   });

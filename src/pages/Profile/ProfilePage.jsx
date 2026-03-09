@@ -5,12 +5,6 @@ import userIcon from "@/assets/icons/user-icon.svg";
 import showNotification from "@/utils/notifications";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 
-const EMPTY_PROFILE = {
-  displayName: "",
-  avatarUrl: "",
-  bio: "",
-};
-
 const normalizeProfile = (value) => {
   const safe = value && typeof value === "object" ? value : {};
   return {
@@ -31,6 +25,7 @@ function ProfilePage({
   onNavigate,
 }) {
   const [draft, setDraft] = useState(() => normalizeProfile(profile));
+  const [isSaving, setIsSaving] = useState(false);
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const user = auth?.user || {};
   const userEmail = user?.email;
@@ -64,9 +59,9 @@ function ProfilePage({
     setDraft((current) => ({ ...current, [key]: value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!onSave) return;
+    if (!onSave || isSaving) return;
 
     const nextProfile = {
       displayName: draftNormalized.displayName.trim(),
@@ -74,16 +69,38 @@ function ProfilePage({
       bio: draftNormalized.bio.trim(),
     };
 
-    onSave(nextProfile);
-    showNotification("Profile updated", "success", { duration: 2200 });
+    setIsSaving(true);
+    try {
+      await Promise.resolve(onSave(nextProfile));
+      showNotification("Profile updated", "success", { duration: 2200 });
+    } catch (error) {
+      showNotification(
+        error instanceof Error ? error.message : "Could not update profile",
+        "failure",
+        { duration: 2800 },
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleReset = () => {
-    if (onReset) {
-      onReset();
+  const handleReset = async () => {
+    if (!onReset || isSaving) return;
+
+    setIsSaving(true);
+    try {
+      const nextProfile = await Promise.resolve(onReset());
+      setDraft(normalizeProfile(nextProfile));
+      showNotification("Profile reset to defaults", "info", { duration: 2200 });
+    } catch (error) {
+      showNotification(
+        error instanceof Error ? error.message : "Could not reset profile",
+        "failure",
+        { duration: 2800 },
+      );
+    } finally {
+      setIsSaving(false);
     }
-    setDraft({ ...EMPTY_PROFILE });
-    showNotification("Profile reset to defaults", "info", { duration: 2200 });
   };
 
   const hero = showEarth ? (
@@ -191,16 +208,16 @@ function ProfilePage({
               type="button"
               className="glass-btn profile-action-btn profile-secondary"
               onClick={handleReset}
-              disabled={!hasChanges}
+              disabled={!hasChanges || isSaving}
             >
               Reset
             </button>
             <button
               type="submit"
               className="glass-btn profile-action-btn profile-primary"
-              disabled={!hasChanges}
+              disabled={!hasChanges || isSaving}
             >
-              Save changes
+              {isSaving ? "Saving..." : "Save changes"}
             </button>
           </div>
           <p className="profile-account-id">{user?.sub || "Not available"}</p>

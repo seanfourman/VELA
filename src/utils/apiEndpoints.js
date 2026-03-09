@@ -19,6 +19,7 @@ const LOCAL_ENDPOINTS = {
   skyQuality: "/api/skyquality",
   lightMapTiles: "/api/lightmap/{z}/{x}/{y}.png",
   recommendations: "/api/recommendations",
+  starPartyEvents: "/api/star-party-events",
 };
 
 const joinResourceUrl = (base, resource) =>
@@ -86,6 +87,20 @@ export const buildRecommendationsUrl = () =>
         RECOMMENDATIONS_API_BASE,
         LOCAL_ENDPOINTS.recommendations
       ).replace(/\/recommendations$/, "")}/recommendations`;
+
+export const buildStarPartyEventsUrl = (eventId = "") => {
+  const base = API_BASE
+    ? joinResourceUrl(API_BASE, "star-party-events")
+    : LOCAL_ENDPOINTS.starPartyEvents;
+  const normalizedId = String(eventId || "").trim();
+  return normalizedId ? `${base}/${encodeURIComponent(normalizedId)}` : base;
+};
+
+export const buildStarPartyEventStatusUrl = (eventId) =>
+  `${buildStarPartyEventsUrl(eventId)}/status`;
+
+export const buildStarPartyEventToggleRsvpUrl = (eventId) =>
+  `${buildStarPartyEventsUrl(eventId)}/rsvp/toggle`;
 
 export const getLightmapTileUrlTemplate = () =>
   LIGHTMAP_API_BASE

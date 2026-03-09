@@ -1,6 +1,4 @@
-const STAR_PARTY_STORAGE_KEY = "vela:star-party:events";
-
-const EVENT_TYPES = new Set(["party", "special_event"]);
+﻿const EVENT_TYPES = new Set(["party", "special_event"]);
 const EVENT_STATUSES = new Set(["published", "draft", "cancelled"]);
 
 const cleanText = (value) => (typeof value === "string" ? value.trim() : "");
@@ -11,6 +9,11 @@ const parseNumber = (value) => {
 };
 
 const toIsoDateTime = (value) => {
+  if (!value) return "";
+  if (value instanceof Date && Number.isFinite(value.getTime())) {
+    return value.toISOString();
+  }
+
   const raw = cleanText(value);
   if (!raw) return "";
   const parsed = new Date(raw);
@@ -60,16 +63,6 @@ const getRsvpUserId = (user) => {
   return "";
 };
 
-const normalizeRsvpUser = (user) => {
-  const userId = getRsvpUserId(user);
-  if (!userId) return null;
-  return {
-    userId,
-    name: cleanText(user?.name || user?.preferred_username) || "Explorer",
-    email: cleanText(user?.email),
-  };
-};
-
 const normalizeRsvps = (value) => {
   if (!Array.isArray(value)) return [];
   const list = [];
@@ -89,21 +82,6 @@ const normalizeRsvps = (value) => {
   return list;
 };
 
-const createEventId = () => {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return `event-${crypto.randomUUID()}`;
-  }
-  return `event-${Date.now()}-${Math.round(Math.random() * 100000)}`;
-};
-
-const sortByStartTime = (events) =>
-  [...events].sort((a, b) => {
-    const aStart = new Date(a.startsAt || a.createdAt || 0).getTime();
-    const bStart = new Date(b.startsAt || b.createdAt || 0).getTime();
-    if (aStart !== bStart) return aStart - bStart;
-    return String(a.title).localeCompare(String(b.title));
-  });
-
 const normalizeHost = (value) => {
   if (!value || typeof value !== "object") return null;
   const id = cleanText(value.id).toLowerCase();
@@ -117,6 +95,13 @@ const normalizeHost = (value) => {
   };
 };
 
+const createEventId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return `event-${crypto.randomUUID()}`;
+  }
+  return `event-${Date.now()}-${Math.round(Math.random() * 100000)}`;
+};
+
 const normalizeEvent = (value) => {
   if (!value || typeof value !== "object") return null;
 
@@ -127,7 +112,7 @@ const normalizeEvent = (value) => {
       value.lon ??
       value.longitude ??
       value.coordinates?.lng ??
-      value.coordinates?.lon
+      value.coordinates?.lon,
   );
 
   if (!title) return null;
@@ -160,111 +145,44 @@ const normalizeEvent = (value) => {
   };
 };
 
+const sortByStartTime = (events) =>
+  [...events].sort((a, b) => {
+    const aStart = new Date(a.startsAt || a.createdAt || 0).getTime();
+    const bStart = new Date(b.startsAt || b.createdAt || 0).getTime();
+    if (aStart !== bStart) return aStart - bStart;
+    return String(a.title).localeCompare(String(b.title));
+  });
+
 const normalizeEventList = (value) => {
   if (!Array.isArray(value)) return [];
   return sortByStartTime(value.map(normalizeEvent).filter(Boolean));
 };
 
-const readEventsFromStorage = () => {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STAR_PARTY_STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return normalizeEventList(parsed);
-  } catch {
-    return [];
-  }
-};
+const upsertEventInList = (events, nextEvent) => {
+  const normalized = normalizeEvent(nextEvent);
+  if (!normalized) return normalizeEventList(events);
 
-const writeEventsToStorage = (events) => {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(
-      STAR_PARTY_STORAGE_KEY,
-      JSON.stringify(normalizeEventList(events))
-    );
-  } catch {
-    return;
-  }
-};
-
-const saveEvent = ({ events, draft, host }) => {
-  const normalized = normalizeEvent({
-    ...draft,
-    host,
-    updatedAt: new Date().toISOString(),
-  });
-  if (!normalized) return { events: normalizeEventList(events), savedEvent: null };
-
-  const next = Array.isArray(events) ? [...events] : [];
-  const existingIndex = next.findIndex((event) => event.id === normalized.id);
-  if (existingIndex >= 0) {
-    normalized.createdAt = next[existingIndex]?.createdAt || normalized.createdAt;
-    normalized.rsvps = next[existingIndex]?.rsvps || normalized.rsvps;
-    next.splice(existingIndex, 1, normalized);
+  const list = Array.isArray(events) ? [...events] : [];
+  const index = list.findIndex((event) => event.id === normalized.id);
+  if (index >= 0) {
+    list.splice(index, 1, normalized);
   } else {
-    next.push(normalized);
+    list.push(normalized);
   }
-  const sorted = sortByStartTime(next);
-  return { events: sorted, savedEvent: normalized };
+  return normalizeEventList(list);
 };
 
-const deleteEventById = ({ events, eventId }) =>
-  normalizeEventList((events || []).filter((event) => event.id !== eventId));
-
-const toggleRsvp = ({ events, eventId, user }) => {
-  const rsvpUser = normalizeRsvpUser(user);
-  if (!rsvpUser) {
-    return { events: normalizeEventList(events), updatedEvent: null, joined: false };
-  }
-
-  const nextEvents = (events || []).map((event) => {
-    if (event.id !== eventId) return event;
-    const rsvps = Array.isArray(event.rsvps) ? [...event.rsvps] : [];
-    const existingIndex = rsvps.findIndex(
-      (entry) => entry.userId === rsvpUser.userId
-    );
-
-    if (existingIndex >= 0) {
-      rsvps.splice(existingIndex, 1);
-      return {
-        ...event,
-        rsvps,
-        updatedAt: new Date().toISOString(),
-      };
-    }
-
-    rsvps.push({
-      userId: rsvpUser.userId,
-      name: rsvpUser.name,
-      email: rsvpUser.email,
-      joinedAt: new Date().toISOString(),
-    });
-    return {
-      ...event,
-      rsvps,
-      updatedAt: new Date().toISOString(),
-    };
-  });
-
-  const updatedEvents = normalizeEventList(nextEvents);
-  const updatedEvent = updatedEvents.find((event) => event.id === eventId) || null;
-  const joined = Boolean(
-    updatedEvent?.rsvps?.some((entry) => entry.userId === rsvpUser.userId)
-  );
-  return { events: updatedEvents, updatedEvent, joined };
+const removeEventFromList = (events, eventId) => {
+  const normalizedId = cleanText(eventId);
+  if (!normalizedId) return normalizeEventList(events);
+  return normalizeEventList((events || []).filter((event) => event.id !== normalizedId));
 };
 
 export {
-  STAR_PARTY_STORAGE_KEY,
-  readEventsFromStorage,
-  writeEventsToStorage,
-  normalizeEvent,
-  normalizeEventList,
-  saveEvent,
-  deleteEventById,
-  toggleRsvp,
   getRsvpUserId,
   normalizeChecklist,
+  normalizeEvent,
+  normalizeEventList,
+  upsertEventInList,
+  removeEventFromList,
 };

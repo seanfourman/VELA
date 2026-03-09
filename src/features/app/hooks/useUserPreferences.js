@@ -3,13 +3,12 @@ import {
   DEFAULT_MAP_TYPE,
   DEFAULT_PROFILE,
   DEFAULT_SETTINGS,
-  PROFILE_STORAGE_KEY,
   SETTINGS_STORAGE_KEY,
-  loadProfileSettings,
   loadSettings,
   normalizeProfile,
   normalizeSettings,
 } from "@/utils/appState";
+import { fetchUserProfile, saveUserProfile } from "@/utils/profileApi";
 
 const safeSetJson = (key, value) => {
   if (typeof window === "undefined") return;
@@ -29,12 +28,12 @@ const readMapType = () => {
   }
 };
 
-export const useUserPreferences = () => {
+export const useUserPreferences = ({ auth }) => {
+  const isAuthenticated = Boolean(auth?.isAuthenticated);
+  const userId = String(auth?.user?.id || auth?.user?.sub || "").trim();
   const [mapType, setMapType] = useState(() => readMapType());
   const [settings, setSettings] = useState(() => loadSettings());
-  const [profileSettings, setProfileSettings] = useState(() =>
-    loadProfileSettings(),
-  );
+  const [profileSettings, setProfileSettings] = useState(() => ({ ...DEFAULT_PROFILE }));
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -58,21 +57,51 @@ export const useUserPreferences = () => {
     };
   }, [settings.accessibilityMode]);
 
-  const handleSaveProfile = useCallback((nextProfile) => {
-    const normalized = normalizeProfile(nextProfile);
-    setProfileSettings(normalized);
-    safeSetJson(PROFILE_STORAGE_KEY, normalized);
-  }, []);
+  useEffect(() => {
+    if (!isAuthenticated || !userId) return;
 
-  const handleResetProfile = useCallback(() => {
-    setProfileSettings({ ...DEFAULT_PROFILE });
-    if (typeof window === "undefined") return;
-    try {
-      localStorage.removeItem(PROFILE_STORAGE_KEY);
-    } catch {
-      return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const profile = await fetchUserProfile();
+        if (cancelled) return;
+        setProfileSettings({ ...DEFAULT_PROFILE, ...normalizeProfile(profile) });
+      } catch {
+        if (cancelled) return;
+        setProfileSettings({ ...DEFAULT_PROFILE });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, userId]);
+
+  const handleSaveProfile = useCallback(async (nextProfile) => {
+    const normalized = normalizeProfile(nextProfile);
+    if (!isAuthenticated || !userId) {
+      setProfileSettings(normalized);
+      return normalized;
     }
-  }, []);
+
+    const saved = await saveUserProfile(normalized);
+    const resolved = { ...DEFAULT_PROFILE, ...normalizeProfile(saved) };
+    setProfileSettings(resolved);
+    return resolved;
+  }, [isAuthenticated, userId]);
+
+  const handleResetProfile = useCallback(async () => {
+    const cleared = { ...DEFAULT_PROFILE };
+    if (!isAuthenticated || !userId) {
+      setProfileSettings(cleared);
+      return cleared;
+    }
+
+    const saved = await saveUserProfile(cleared);
+    const resolved = { ...DEFAULT_PROFILE, ...normalizeProfile(saved) };
+    setProfileSettings(resolved);
+    return resolved;
+  }, [isAuthenticated, userId]);
 
   const handleUpdateSettings = useCallback((patch) => {
     setSettings((prev) => normalizeSettings({ ...prev, ...patch }));
@@ -94,7 +123,7 @@ export const useUserPreferences = () => {
     mapType,
     setMapType,
     settings,
-    profileSettings,
+    profileSettings: isAuthenticated ? profileSettings : DEFAULT_PROFILE,
     handleSaveProfile,
     handleResetProfile,
     handleUpdateSettings,

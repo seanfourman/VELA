@@ -8,12 +8,19 @@ The backend does **not** create tables or stored procedures at runtime.
 1. `Tables/Users.sql`
 2. `Tables/Favorites.sql`
 3. `Tables/Recommendations.sql`
-4. `SP/User SPs.sql`
-5. `SP/Favorite SPs.sql`
-6. `SP/Recommendation SPs.sql`
+4. `Tables/StarPartyEvents.sql`
+5. `SP/User SPs.sql`
+6. `SP/Favorite SPs.sql`
+7. `SP/Recommendation SPs.sql`
+8. `SP/StarParty SPs.sql`
 
 Run them against the database referenced by `ConnectionStrings:myProjDB`
 in `backend/src/Vela.Api/appsettings.json`.
+
+If your `Users` table already exists from an older version, rerun:
+- `Tables/Users.sql`
+- `SP/User SPs.sql`
+to add profile columns and profile procedures.
 
 ## Notes
 

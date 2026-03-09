@@ -148,14 +148,24 @@ function AdminPage({
     }
   };
 
-  const handleDeleteEvent = (event) => {
+  const handleDeleteEvent = async (event) => {
     const eventId = String(event?.id || "").trim();
     if (!eventId) return;
-    onDeleteStarPartyEvent?.(eventId);
-    if (editingEventId && editingEventId === eventId) {
-      resetEventForm();
+    try {
+      await Promise.resolve(onDeleteStarPartyEvent?.(eventId));
+      if (editingEventId && editingEventId === eventId) {
+        resetEventForm();
+      }
+      showNotification("Event removed", "info", { duration: 2200 });
+    } catch (error) {
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Could not delete this event right now",
+        "failure",
+        { duration: 3200 },
+      );
     }
-    showNotification("Event removed", "info", { duration: 2200 });
   };
 
   const handleSubmitLocation = async (event) => {
@@ -234,13 +244,23 @@ function AdminPage({
     }
   };
 
-  const handleSetEventStatus = (eventId, status) => {
+  const handleSetEventStatus = async (eventId, status) => {
     if (!eventId || !status) return;
-    onSetStarPartyEventStatus?.({ eventId, status });
-    if (editingEventId && editingEventId === String(eventId).trim()) {
-      setEventDraft((current) => ({ ...current, status }));
+    try {
+      await Promise.resolve(onSetStarPartyEventStatus?.({ eventId, status }));
+      if (editingEventId && editingEventId === String(eventId).trim()) {
+        setEventDraft((current) => ({ ...current, status }));
+      }
+      showNotification(`Event status set to ${status}`, "info", { duration: 1800 });
+    } catch (error) {
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Could not change event status right now",
+        "failure",
+        { duration: 3200 },
+      );
     }
-    showNotification(`Event status set to ${status}`, "info", { duration: 1800 });
   };
 
   const hero = showPlanet ? (
