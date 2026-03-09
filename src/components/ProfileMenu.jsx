@@ -119,8 +119,8 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
               href="/admin"
               className="profile-admin-shortcut"
               onClick={(event) => handleMenuNavigate(event, "/admin")}
-              title="Admin Panel"
               aria-label="Admin Panel"
+              data-tooltip="Admin Panel"
             >
               <img
                 src={adminIcon}

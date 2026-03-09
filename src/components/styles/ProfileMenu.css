@@ -123,6 +123,39 @@
   transform: translateY(1px);
 }
 
+.profile-admin-shortcut::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 50%;
+  transform: translateX(50%) translateY(-4px);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(10, 12, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  color: var(--surface-text);
+  font-size: 0.75rem;
+  z-index: 5;
+}
+
+.profile-admin-shortcut:hover::after,
+.profile-admin-shortcut:focus-visible::after {
+  opacity: 1;
+  transform: translateX(50%) translateY(0);
+}
+
+.profile-dropdown.light .profile-admin-shortcut::after {
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
 .profile-admin-shortcut-icon {
   width: 18px;
   height: 18px;
