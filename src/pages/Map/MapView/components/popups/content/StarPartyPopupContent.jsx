@@ -131,62 +131,63 @@ export default function StarPartyPopupContent({
           </div>
         </div>
       ) : null}
-
-      <div className="star-party-popup__stats">
-        <span className="star-party-popup__chip">RSVP {rsvpCount}</span>
-      </div>
-
-      <div className="popup-coords star-party-popup__title-block">
-        <span className="popup-coords-label star-party-popup__type">
-          {eventTypeLabel}
-        </span>
-        <span className="star-party-popup__title">
-          {event.title}
-        </span>
-        <div className="star-party-popup__time">
-          {formatDateTime(event.startsAt)}
-          {event.endsAt ? ` - ${formatDateTime(event.endsAt)}` : ""}
+      <div className="context-menu-popup__scroll">
+        <div className="star-party-popup__stats">
+          <span className="star-party-popup__chip">RSVP {rsvpCount}</span>
         </div>
-      </div>
 
-      <div className="popup-coords star-party-popup__meetup">
-        <span className="popup-coords-label">Meetup pin</span>
-        <span
-          className="popup-coords-value star-party-popup__coords-value popup-coords-value--copyable"
-          role="button"
-          tabIndex={0}
-          aria-label={`Copy coordinates ${coordinatesLabel}`}
-          onClick={handleCopyCoords}
-          onKeyDown={handleCopyCoordsKeyDown}
-        >
-          {coordinatesLabel}
-        </span>
-      </div>
-
-      <SkyQualityInfo lat={event.lat} lng={event.lng} variant="compact" />
-
-      {event.description ? (
-        <p className="star-party-popup__description">{event.description}</p>
-      ) : null}
-
-      {Array.isArray(event.hostChecklist) && event.hostChecklist.length > 0 ? (
-        <div className="star-party-popup__checklist">
-          <div className="star-party-popup__checklist-title">Host checklist</div>
-          <ul>
-            {event.hostChecklist.slice(0, 3).map((item) => (
-              <li key={item}>{item}</li>
-            ))}
-          </ul>
+        <div className="popup-coords star-party-popup__title-block">
+          <span className="popup-coords-label star-party-popup__type">
+            {eventTypeLabel}
+          </span>
+          <span className="star-party-popup__title">
+            {event.title}
+          </span>
+          <div className="star-party-popup__time">
+            {formatDateTime(event.startsAt)}
+            {event.endsAt ? ` - ${formatDateTime(event.endsAt)}` : ""}
+          </div>
         </div>
-      ) : null}
 
-      {onGetDirections ? (
-        <div className="popup-actions">
-          <button className="popup-btn" onClick={onGetDirections}>
-            Get Directions
-          </button>
+        <div className="popup-coords star-party-popup__meetup">
+          <span className="popup-coords-label">Meetup pin</span>
+          <span
+            className="popup-coords-value star-party-popup__coords-value popup-coords-value--copyable"
+            role="button"
+            tabIndex={0}
+            aria-label={`Copy coordinates ${coordinatesLabel}`}
+            onClick={handleCopyCoords}
+            onKeyDown={handleCopyCoordsKeyDown}
+          >
+            {coordinatesLabel}
+          </span>
         </div>
-      ) : null}
+
+        <SkyQualityInfo lat={event.lat} lng={event.lng} variant="compact" />
+
+        {event.description ? (
+          <p className="star-party-popup__description">{event.description}</p>
+        ) : null}
+
+        {Array.isArray(event.hostChecklist) && event.hostChecklist.length > 0 ? (
+          <div className="star-party-popup__checklist">
+            <div className="star-party-popup__checklist-title">Host checklist</div>
+            <ul>
+              {event.hostChecklist.slice(0, 3).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {onGetDirections ? (
+          <div className="popup-actions">
+            <button className="popup-btn" onClick={onGetDirections}>
+              Get Directions
+            </button>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

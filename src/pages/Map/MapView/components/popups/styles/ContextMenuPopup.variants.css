@@ -1,16 +1,16 @@
 .darkspot-popup {
-  gap: 10px;
+  --context-menu-gap: 10px;
   max-width: 260px;
   position: relative;
 }
 
 .stargaze-popup {
-  gap: 10px;
+  --context-menu-gap: 10px;
   max-width: 240px;
 }
 
 .star-party-popup {
-  gap: 8px;
+  --context-menu-gap: 8px;
   max-width: 280px;
   position: relative;
 }

@@ -1,6 +1,7 @@
 .sky-quality-info {
   position: relative;
   width: 100%;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -174,8 +175,9 @@
   gap: 6px;
   padding: 8px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--glass-border-subtle);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg-hover);
+  overflow: hidden;
 }
 
 .sky-quality-info.compact .sky-quality-meta {
@@ -184,13 +186,14 @@
 }
 
 .meta-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   font-size: 0.8125rem;
   color: var(--surface-text);
   font-variant-numeric: tabular-nums;
+  min-width: 0;
 }
 
 .sky-quality-info.compact .meta-row {
@@ -205,6 +208,8 @@
   white-space: nowrap;
   color: var(--surface-text);
   font-weight: 400;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .meta-row-value > span {
@@ -225,8 +230,12 @@
 }
 
 .meta-row > span:first-child {
+  min-width: 0;
   color: var(--surface-text-subtle);
   font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sky-quality-info.compact .meta-row span:first-child {

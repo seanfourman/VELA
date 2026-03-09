@@ -1,5 +1,16 @@
 @media (max-width: 768px) {
+  .context-menu-popup {
+    --context-menu-max-height: clamp(280px, calc(100svh - 380px), 420px);
+    --context-menu-max-height: clamp(280px, calc(100dvh - 380px), 420px);
+  }
+
   .target-toggle-label {
     display: none;
+  }
+}
+
+@media (min-width: 1440px) and (min-height: 1200px) {
+  .context-menu-popup {
+    --context-menu-max-height: clamp(420px, calc(100dvh - 520px), 780px);
   }
 }

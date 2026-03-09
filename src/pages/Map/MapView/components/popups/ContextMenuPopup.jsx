@@ -174,47 +174,48 @@ export default function ContextMenuPopup({
           </div>
         </div>
       ) : null}
-      <div className="popup-coords">
-        <span key={resolvedCoordsLabel} className="popup-coords-label">
-          {resolvedCoordsLabel}
-        </span>
-        <span
-          className="popup-coords-value popup-coords-value--copyable"
-          role="button"
-          tabIndex={0}
-          aria-label={`Copy coordinates ${coordinatesLabel}`}
-          onClick={handleCopyCoords}
-          onKeyDown={handleCopyCoordsKeyDown}
-        >
-          {coordinatesLabel}
-        </span>
-      </div>
+      <div className="context-menu-popup__scroll">
+        <div className="popup-coords">
+          <span key={resolvedCoordsLabel} className="popup-coords-label">
+            {resolvedCoordsLabel}
+          </span>
+          <span
+            className="popup-coords-value popup-coords-value--copyable"
+            role="button"
+            tabIndex={0}
+            aria-label={`Copy coordinates ${coordinatesLabel}`}
+            onClick={handleCopyCoords}
+            onKeyDown={handleCopyCoordsKeyDown}
+          >
+            {coordinatesLabel}
+          </span>
+        </div>
 
-      <SkyQualityInfo lat={coords.lat} lng={coords.lng} variant="compact" />
+        <SkyQualityInfo lat={coords.lat} lng={coords.lng} variant="compact" />
 
-      <div className="popup-actions">
-        {onGetDirections && (
-          <button className="popup-btn" onClick={onGetDirections}>
-            Get Directions
-          </button>
-        )}
-        {onOpenSpaceWeather && (
-          <button className="popup-btn" onClick={onOpenSpaceWeather}>
-            Get Space Weather
-          </button>
-        )}
-        {onExtraAction && (
-          <button className="popup-btn" onClick={onExtraAction}>
-            {resolvedExtraLabel}
-          </button>
-        )}
-        {onRemovePin && (
-          <button className="popup-btn" onClick={onRemovePin}>
-            {resolvedRemoveLabel}
-          </button>
-        )}
+        <div className="popup-actions">
+          {onGetDirections && (
+            <button className="popup-btn" onClick={onGetDirections}>
+              Get Directions
+            </button>
+          )}
+          {onOpenSpaceWeather && (
+            <button className="popup-btn" onClick={onOpenSpaceWeather}>
+              Get Space Weather
+            </button>
+          )}
+          {onExtraAction && (
+            <button className="popup-btn" onClick={onExtraAction}>
+              {resolvedExtraLabel}
+            </button>
+          )}
+          {onRemovePin && (
+            <button className="popup-btn" onClick={onRemovePin}>
+              {resolvedRemoveLabel}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-

@@ -20,29 +20,31 @@ export default function LocationPopupContent({ location, onOpenSpaceWeather }) {
 
   return (
     <div className="context-menu-popup">
-      <div className="popup-coords">
-        <span className="popup-coords-label">Your location</span>
-        <span
-          className="popup-coords-value popup-coords-value--copyable"
-          role="button"
-          tabIndex={0}
-          aria-label={`Copy coordinates ${coordinatesLabel}`}
-          onClick={handleCopyCoords}
-          onKeyDown={handleCopyCoordsKeyDown}
-        >
-          {coordinatesLabel}
-        </span>
-      </div>
-
-      <SkyQualityInfo lat={location.lat} lng={location.lng} variant="compact" />
-
-      {onOpenSpaceWeather ? (
-        <div className="popup-actions">
-          <button className="popup-btn" onClick={onOpenSpaceWeather}>
-            Get Space Weather
-          </button>
+      <div className="context-menu-popup__scroll">
+        <div className="popup-coords">
+          <span className="popup-coords-label">Your location</span>
+          <span
+            className="popup-coords-value popup-coords-value--copyable"
+            role="button"
+            tabIndex={0}
+            aria-label={`Copy coordinates ${coordinatesLabel}`}
+            onClick={handleCopyCoords}
+            onKeyDown={handleCopyCoordsKeyDown}
+          >
+            {coordinatesLabel}
+          </span>
         </div>
-      ) : null}
+
+        <SkyQualityInfo lat={location.lat} lng={location.lng} variant="compact" />
+
+        {onOpenSpaceWeather ? (
+          <div className="popup-actions">
+            <button className="popup-btn" onClick={onOpenSpaceWeather}>
+              Get Space Weather
+            </button>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

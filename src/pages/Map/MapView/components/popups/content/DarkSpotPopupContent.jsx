@@ -122,83 +122,85 @@ export default function DarkSpotPopupContent({
           </div>
         ) : null}
       </div>
-      <div className="popup-coords">
-        <span className="popup-coords-label">Stargazing location</span>
-        <span
-          className="popup-coords-value popup-coords-value--copyable"
-          role="button"
-          tabIndex={0}
-          aria-label={`Copy coordinates ${coordinatesLabel}`}
-          onClick={handleCopyCoords}
-          onKeyDown={handleCopyCoordsKeyDown}
-        >
-          {coordinatesLabel}
-        </span>
-      </div>
-
-      <SkyQualityInfo lat={spot.lat} lng={spot.lon} variant="compact" />
-
-      <div className="darkspot-stats">
-        <div className="darkspot-stat">
-          <span className="darkspot-stat-label">
-            Level
-            <span
-              className="stat-help"
-              tabIndex={0}
-              aria-label="Darkness rating: lower numbers are darker skies (1-5)"
-              data-tooltip="Darkness rating: lower numbers are darker skies (1-5)"
-            >
-              ?
-            </span>
-          </span>
-          <span className="darkspot-stat-value">{spot.level ?? "--"}</span>
-        </div>
-        <div className="darkspot-stat">
-          <span className="darkspot-stat-label">
-            Light value
-            <span
-              className="stat-help"
-              tabIndex={0}
-              aria-label={"Modeled brightness at the site (ucd/m\u00B2)"}
-              data-tooltip={"Modeled brightness at the site (ucd/m\u00B2)"}
-            >
-              ?
-            </span>
-          </span>
-          <span className="darkspot-stat-value">
-            {spot.light_value != null ? spot.light_value.toFixed(2) : "--"}
+      <div className="context-menu-popup__scroll">
+        <div className="popup-coords">
+          <span className="popup-coords-label">Stargazing location</span>
+          <span
+            className="popup-coords-value popup-coords-value--copyable"
+            role="button"
+            tabIndex={0}
+            aria-label={`Copy coordinates ${coordinatesLabel}`}
+            onClick={handleCopyCoords}
+            onKeyDown={handleCopyCoordsKeyDown}
+          >
+            {coordinatesLabel}
           </span>
         </div>
-      </div>
-      <div className="popup-actions">
-        {(() => {
-          const origin = getDirectionsOrigin?.();
-          const directionsUrl = buildDirectionsUrl?.(origin, {
-            lat: spot.lat,
-            lng: spot.lon,
-          });
-          if (!directionsUrl) return null;
-          return (
-            <button
-              className="popup-btn popup-btn--directions"
-              onClick={() => {
-                window.open(directionsUrl, "_blank");
-              }}
-            >
-              <span className="popup-btn__label">Get Directions</span>
-              {origin ? (
-                <span className="popup-btn__origin">
-                  from {origin.label.toLowerCase()}
-                </span>
-              ) : null}
+
+        <SkyQualityInfo lat={spot.lat} lng={spot.lon} variant="compact" />
+
+        <div className="darkspot-stats">
+          <div className="darkspot-stat">
+            <span className="darkspot-stat-label">
+              Level
+              <span
+                className="stat-help"
+                tabIndex={0}
+                aria-label="Darkness rating: lower numbers are darker skies (1-5)"
+                data-tooltip="Darkness rating: lower numbers are darker skies (1-5)"
+              >
+                ?
+              </span>
+            </span>
+            <span className="darkspot-stat-value">{spot.level ?? "--"}</span>
+          </div>
+          <div className="darkspot-stat">
+            <span className="darkspot-stat-label">
+              Light value
+              <span
+                className="stat-help"
+                tabIndex={0}
+                aria-label={"Modeled brightness at the site (ucd/m\u00B2)"}
+                data-tooltip={"Modeled brightness at the site (ucd/m\u00B2)"}
+              >
+                ?
+              </span>
+            </span>
+            <span className="darkspot-stat-value">
+              {spot.light_value != null ? spot.light_value.toFixed(2) : "--"}
+            </span>
+          </div>
+        </div>
+        <div className="popup-actions">
+          {(() => {
+            const origin = getDirectionsOrigin?.();
+            const directionsUrl = buildDirectionsUrl?.(origin, {
+              lat: spot.lat,
+              lng: spot.lon,
+            });
+            if (!directionsUrl) return null;
+            return (
+              <button
+                className="popup-btn popup-btn--directions"
+                onClick={() => {
+                  window.open(directionsUrl, "_blank");
+                }}
+              >
+                <span className="popup-btn__label">Get Directions</span>
+                {origin ? (
+                  <span className="popup-btn__origin">
+                    from {origin.label.toLowerCase()}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })()}
+          {onOpenSpaceWeather ? (
+            <button className="popup-btn" onClick={onOpenSpaceWeather}>
+              Get Space Weather
             </button>
-          );
-        })()}
-        {onOpenSpaceWeather ? (
-          <button className="popup-btn" onClick={onOpenSpaceWeather}>
-            Get Space Weather
-          </button>
-        ) : null}
+          ) : null}
+        </div>
       </div>
     </div>
   );
