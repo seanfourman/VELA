@@ -80,6 +80,10 @@
   margin-bottom: 8px;
 }
 
+.profile-dropdown.has-admin-shortcut .profile-meta {
+  padding-right: 46px;
+}
+
 .profile-name {
   color: var(--surface-text);
   font-weight: 600;
@@ -89,6 +93,47 @@
 .profile-email {
   color: var(--surface-text-muted);
   font-size: 0.85rem;
+}
+
+.profile-admin-shortcut {
+  position: absolute;
+  top: 14px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border-strong);
+  background: var(--glass-bg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+.profile-admin-shortcut:hover {
+  background: var(--glass-bg-hover);
+  border-color: #ffffff;
+}
+
+.profile-admin-shortcut:active {
+  transform: translateY(1px);
+}
+
+.profile-admin-shortcut-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  filter: invert(1);
+  opacity: 0.9;
+}
+
+.profile-dropdown.light .profile-admin-shortcut-icon {
+  filter: none;
+  opacity: 0.75;
 }
 
 .profile-actions {
@@ -130,15 +175,6 @@
 
 .profile-action.logout:hover {
   background: rgba(220, 38, 38, 0.12);
-}
-
-.profile-action.admin {
-  color: #3a6feb;
-  font-weight: 600;
-}
-
-.profile-action.admin:hover {
-  background: rgba(68, 125, 239, 0.12);
 }
 
 .profile-dropdown.open {

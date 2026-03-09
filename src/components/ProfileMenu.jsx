@@ -1,5 +1,6 @@
 ﻿import { useCallback, useEffect, useRef, useState } from "react";
 import userIcon from "@/assets/icons/user-icon.svg";
+import adminIcon from "@/assets/icons/admin-with-cogwheels-svgrepo-com.svg";
 import "./styles/ProfileMenu.css";
 
 function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
@@ -109,10 +110,27 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
       {menuVisible && (
         <div
           className={`profile-dropdown ${isLight ? "light" : ""} ${
-            menuOpen ? "open" : "closing"
-          }`}
+            isAdmin ? "has-admin-shortcut" : ""
+          } ${menuOpen ? "open" : "closing"}`}
           ref={menuRef}
         >
+          {isAdmin ? (
+            <a
+              href="/admin"
+              className="profile-admin-shortcut"
+              onClick={(event) => handleMenuNavigate(event, "/admin")}
+              title="Admin Panel"
+              aria-label="Admin Panel"
+            >
+              <img
+                src={adminIcon}
+                alt=""
+                aria-hidden="true"
+                className="profile-admin-shortcut-icon"
+              />
+            </a>
+          ) : null}
+
           <div className="profile-meta">
             <div className="profile-name">{displayName || "Signed In"}</div>
             {userEmail ? (
@@ -135,15 +153,6 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
             >
               Settings
             </a>
-            {isAdmin ? (
-              <a
-                href="/admin"
-                className="profile-action admin"
-                onClick={(event) => handleMenuNavigate(event, "/admin")}
-              >
-                Admin
-              </a>
-            ) : null}
             <button
               type="button"
               className="profile-action logout"
