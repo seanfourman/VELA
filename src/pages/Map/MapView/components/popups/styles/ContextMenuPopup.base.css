@@ -21,6 +21,12 @@
   scrollbar-color: rgba(255, 255, 255, 0.6) transparent;
 }
 
+@supports selector(:has(*)) {
+  .context-menu-popup__scroll:has(.metric-help:hover, .metric-help:focus-visible, .stat-help:hover, .stat-help:focus-visible) {
+    overflow: visible;
+  }
+}
+
 .context-menu-popup__scroll > * {
   flex: 0 0 auto;
   min-width: 0;
