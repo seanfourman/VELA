@@ -2,6 +2,10 @@
 import favoriteIcon from "@/assets/icons/favorite-icon.svg";
 import targetIcon from "@/assets/icons/target-icon.svg";
 import shareIcon from "@/assets/icons/share-icon.svg";
+import {
+  copyCoordinates,
+  formatCoordinatesLabel,
+} from "./content/copyCoordinates";
 import "./styles/ContextMenuPopup.css";
 
 export default function ContextMenuPopup({
@@ -56,6 +60,20 @@ export default function ContextMenuPopup({
     coordsLabel || (isFavorite ? "Favorited spot" : "Pinned location");
   const resolvedRemoveLabel = removeLabel || "Remove Pin";
   const resolvedExtraLabel = extraActionLabel || "View details";
+  const coordinatesLabel = formatCoordinatesLabel({
+    lat: coords.lat,
+    lng: coords.lng,
+  });
+  const handleCopyCoords = (event) => {
+    event.stopPropagation();
+    void copyCoordinates({ lat: coords.lat, lng: coords.lng });
+  };
+  const handleCopyCoordsKeyDown = (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    void copyCoordinates({ lat: coords.lat, lng: coords.lng });
+  };
 
   return (
     <div
@@ -160,8 +178,15 @@ export default function ContextMenuPopup({
         <span key={resolvedCoordsLabel} className="popup-coords-label">
           {resolvedCoordsLabel}
         </span>
-        <span className="popup-coords-value">
-          {coords.lat.toFixed(4)}, {coords.lng.toFixed(4)}
+        <span
+          className="popup-coords-value popup-coords-value--copyable"
+          role="button"
+          tabIndex={0}
+          aria-label={`Copy coordinates ${coordinatesLabel}`}
+          onClick={handleCopyCoords}
+          onKeyDown={handleCopyCoordsKeyDown}
+        >
+          {coordinatesLabel}
         </span>
       </div>
 

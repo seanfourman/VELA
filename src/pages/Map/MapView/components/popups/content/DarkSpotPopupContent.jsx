@@ -2,6 +2,7 @@ import SkyQualityInfo from "../SkyQualityInfo";
 import targetIcon from "@/assets/icons/target-icon.svg";
 import favoriteIcon from "@/assets/icons/favorite-icon.svg";
 import shareIcon from "@/assets/icons/share-icon.svg";
+import { copyCoordinates, formatCoordinatesLabel } from "./copyCoordinates";
 
 export default function DarkSpotPopupContent({
   spot,
@@ -30,6 +31,17 @@ export default function DarkSpotPopupContent({
   const canShare = true;
   const toggleCount = 1 + Number(canFavorite) + Number(canShare);
   const toggleLayout = toggleCount > 1 ? "dual" : "single";
+  const coordinatesLabel = formatCoordinatesLabel({ lat: spot.lat, lng: spot.lon });
+  const handleCopyCoords = (event) => {
+    event.stopPropagation();
+    void copyCoordinates({ lat: spot.lat, lng: spot.lon });
+  };
+  const handleCopyCoordsKeyDown = (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    event.stopPropagation();
+    void copyCoordinates({ lat: spot.lat, lng: spot.lon });
+  };
 
   return (
     <div className="context-menu-popup darkspot-popup">
@@ -112,8 +124,15 @@ export default function DarkSpotPopupContent({
       </div>
       <div className="popup-coords">
         <span className="popup-coords-label">Stargazing location</span>
-        <span className="popup-coords-value">
-          {spot.lat.toFixed(4)}, {spot.lon.toFixed(4)}
+        <span
+          className="popup-coords-value popup-coords-value--copyable"
+          role="button"
+          tabIndex={0}
+          aria-label={`Copy coordinates ${coordinatesLabel}`}
+          onClick={handleCopyCoords}
+          onKeyDown={handleCopyCoordsKeyDown}
+        >
+          {coordinatesLabel}
         </span>
       </div>
 

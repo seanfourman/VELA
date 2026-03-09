@@ -34,6 +34,25 @@
   font-variant-numeric: tabular-nums;
 }
 
+.popup-coords-value--copyable {
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  padding: 1px 6px;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.popup-coords-value--copyable:hover {
+  background: var(--glass-bg-hover);
+}
+
+.popup-coords-value--copyable:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.65);
+  outline-offset: 2px;
+  background: var(--glass-bg-hover);
+}
+
 @keyframes popup-label-swap {
   from {
     opacity: 0;

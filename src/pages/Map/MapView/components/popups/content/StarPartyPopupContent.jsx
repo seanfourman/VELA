@@ -2,6 +2,7 @@ import SkyQualityInfo from "../SkyQualityInfo";
 import shareIcon from "@/assets/icons/share-icon.svg";
 import invitationHeartIcon from "@/assets/icons/invitation-heart-love-svgrepo-com.svg";
 import { formatDateTime } from "@/utils/dateTime";
+import { copyCoordinates, formatCoordinatesLabel } from "./copyCoordinates";
 
 export default function StarPartyPopupContent({
   event,
@@ -44,6 +45,17 @@ export default function StarPartyPopupContent({
     : isJoined
       ? "Joined"
       : "RSVP";
+  const coordinatesLabel = formatCoordinatesLabel({ lat: event.lat, lng: event.lng });
+  const handleCopyCoords = (popupEvent) => {
+    popupEvent.stopPropagation();
+    void copyCoordinates({ lat: event.lat, lng: event.lng });
+  };
+  const handleCopyCoordsKeyDown = (popupEvent) => {
+    if (popupEvent.key !== "Enter" && popupEvent.key !== " ") return;
+    popupEvent.preventDefault();
+    popupEvent.stopPropagation();
+    void copyCoordinates({ lat: event.lat, lng: event.lng });
+  };
 
   return (
     <div
@@ -128,7 +140,7 @@ export default function StarPartyPopupContent({
         <span className="popup-coords-label star-party-popup__type">
           {eventTypeLabel}
         </span>
-        <span className="popup-coords-value star-party-popup__title">
+        <span className="star-party-popup__title">
           {event.title}
         </span>
         <div className="star-party-popup__time">
@@ -139,8 +151,15 @@ export default function StarPartyPopupContent({
 
       <div className="popup-coords star-party-popup__meetup">
         <span className="popup-coords-label">Meetup pin</span>
-        <span className="popup-coords-value star-party-popup__coords-value">
-          {event.lat.toFixed(4)}, {event.lng.toFixed(4)}
+        <span
+          className="popup-coords-value star-party-popup__coords-value popup-coords-value--copyable"
+          role="button"
+          tabIndex={0}
+          aria-label={`Copy coordinates ${coordinatesLabel}`}
+          onClick={handleCopyCoords}
+          onKeyDown={handleCopyCoordsKeyDown}
+        >
+          {coordinatesLabel}
         </span>
       </div>
 
