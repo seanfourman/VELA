@@ -7,7 +7,7 @@ export default function AdminLocationList({
   return (
     <div className="admin-location-list">
       {locations.length === 0 ? (
-        <div className="profile-readonly">No curated locations yet.</div>
+        <div className="profile-readonly">No curated locations yet</div>
       ) : (
         locations.map((location) => {
           const locationId = String(location.id || "").trim();

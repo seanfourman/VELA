@@ -11,7 +11,7 @@ export default function AdminEventList({
   activeEventId = null,
 }) {
   if (!Array.isArray(events) || events.length === 0) {
-    return <div className="profile-readonly">No events created yet.</div>;
+    return <div className="profile-readonly">No events created yet</div>;
   }
 
   return (
@@ -19,7 +19,9 @@ export default function AdminEventList({
       {events.map((event) => {
         const eventId = String(event.id || "").trim();
         const isEditing =
-          Boolean(activeEventId) && Boolean(eventId) && activeEventId === eventId;
+          Boolean(activeEventId) &&
+          Boolean(eventId) &&
+          activeEventId === eventId;
         const rsvpCount = Array.isArray(event.rsvps) ? event.rsvps.length : 0;
         const isPublished = event.status === "published";
         const isCancelled = event.status === "cancelled";
@@ -87,7 +89,9 @@ export default function AdminEventList({
               <p className="admin-location-description">{event.description}</p>
             ) : null}
             {event.meetupDetails ? (
-              <p className="admin-location-meta">Meetup: {event.meetupDetails}</p>
+              <p className="admin-location-meta">
+                Meetup: {event.meetupDetails}
+              </p>
             ) : null}
           </article>
         );
