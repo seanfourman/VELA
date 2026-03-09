@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Vela.Api.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -57,7 +56,5 @@ app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-new DatabaseSetupService().Initialize(configuration, app.Environment);
 
 app.Run();

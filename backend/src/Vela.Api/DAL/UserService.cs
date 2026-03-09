@@ -25,13 +25,8 @@ public class UserService : DBService
         try
         {
             con = Connect();
-            var sql = @"
-SELECT TOP 1 Id, Email, Name, HashedPassword, IsAdmin, Role, CreatedAtUtc
-FROM Users
-WHERE Email = @Email;";
-
             var parameters = new Dictionary<string, object> { { "@Email", email.Trim().ToLowerInvariant() } };
-            var cmd = CreateTextCommand(sql, con, parameters);
+            var cmd = CreateCommand("SP_GetUserByEmail", con, parameters);
 
             using var reader = cmd.ExecuteReader();
             if (reader.Read())
@@ -53,13 +48,8 @@ WHERE Email = @Email;";
         try
         {
             con = Connect();
-            var sql = @"
-SELECT TOP 1 Id, Email, Name, HashedPassword, IsAdmin, Role, CreatedAtUtc
-FROM Users
-WHERE Id = @Id;";
-
             var parameters = new Dictionary<string, object> { { "@Id", id } };
-            var cmd = CreateTextCommand(sql, con, parameters);
+            var cmd = CreateCommand("SP_GetUserById", con, parameters);
 
             using var reader = cmd.ExecuteReader();
             if (reader.Read())
@@ -86,10 +76,6 @@ WHERE Id = @Id;";
                 ? (user.IsAdmin ? "admin" : "user")
                 : user.Role.Trim().ToLowerInvariant();
 
-            var sql = @"
-INSERT INTO Users (Id, Email, Name, HashedPassword, IsAdmin, Role, CreatedAtUtc)
-VALUES (@Id, @Email, @Name, @HashedPassword, @IsAdmin, @Role, @CreatedAtUtc);";
-
             var parameters = new Dictionary<string, object>
             {
                 { "@Id", id },
@@ -101,7 +87,7 @@ VALUES (@Id, @Email, @Name, @HashedPassword, @IsAdmin, @Role, @CreatedAtUtc);";
                 { "@CreatedAtUtc", user.CreatedAtUtc == default ? DateTime.UtcNow : user.CreatedAtUtc }
             };
 
-            var cmd = CreateTextCommand(sql, con, parameters);
+            var cmd = CreateCommand("SP_InsertUser", con, parameters);
             var affected = cmd.ExecuteNonQuery();
             return affected > 0 ? id : Guid.Empty;
         }
@@ -121,9 +107,14 @@ VALUES (@Id, @Email, @Name, @HashedPassword, @IsAdmin, @Role, @CreatedAtUtc);";
         try
         {
             con = Connect();
-            var sql = "SELECT COUNT(1) FROM Users WHERE IsAdmin = 1;";
-            var cmd = CreateTextCommand(sql, con, null);
-            var count = Convert.ToInt32(cmd.ExecuteScalar());
+            var cmd = CreateCommand("SP_AnyAdminExists", con, null);
+            using var reader = cmd.ExecuteReader();
+            if (!reader.Read())
+            {
+                return false;
+            }
+
+            var count = Convert.ToInt32(reader["TotalAdmins"]);
             return count > 0;
         }
         finally

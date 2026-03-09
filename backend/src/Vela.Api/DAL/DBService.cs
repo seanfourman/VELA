@@ -43,24 +43,4 @@ public abstract class DBService
 
         return cmd;
     }
-
-    protected SqlCommand CreateTextCommand(
-        string sql,
-        SqlConnection con,
-        Dictionary<string, object>? parameters
-    )
-    {
-        var cmd = new SqlCommand(sql, con);
-        cmd.CommandType = CommandType.Text;
-
-        if (parameters != null)
-        {
-            foreach (var param in parameters)
-            {
-                cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);
-            }
-        }
-
-        return cmd;
-    }
 }

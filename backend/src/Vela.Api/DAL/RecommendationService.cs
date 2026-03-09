@@ -1,3 +1,4 @@
+using System.Data;
 using System.Data.SqlClient;
 using System.Text.Json;
 using Vela.Api.BL;
@@ -49,12 +50,7 @@ public class RecommendationService : DBService
         try
         {
             con = Connect();
-            var sql = @"
-SELECT Id, Name, Country, Region, [Type], Description, BestTime, Lat, Lon, PhotoUrlsJson, SourceUrlsJson
-FROM Recommendations
-ORDER BY Name;";
-
-            var cmd = CreateTextCommand(sql, con, null);
+            var cmd = CreateCommand("SP_GetAllRecommendations", con, null);
             using var reader = cmd.ExecuteReader();
 
             while (reader.Read())
@@ -85,65 +81,8 @@ ORDER BY Name;";
                 )
                 : request.Id.Trim();
 
-            var selectSql = "SELECT COUNT(1) FROM Recommendations WHERE Id = @Id;";
-            var selectCmd = CreateTextCommand(
-                selectSql,
-                con,
-                new Dictionary<string, object> { { "@Id", id } }
-            );
-            var exists = Convert.ToInt32(selectCmd.ExecuteScalar()) > 0;
-
-            if (exists)
-            {
-                var updateSql = @"
-UPDATE Recommendations
-SET Name = @Name,
-    Country = @Country,
-    Region = @Region,
-    [Type] = @Type,
-    Description = @Description,
-    BestTime = @BestTime,
-    Lat = @Lat,
-    Lon = @Lon,
-    PhotoUrlsJson = @PhotoUrlsJson,
-    SourceUrlsJson = @SourceUrlsJson,
-    UpdatedAtUtc = @UpdatedAtUtc
-WHERE Id = @Id;";
-
-                var updateCmd = CreateTextCommand(updateSql, con, BuildUpsertParameters(id, request));
-                updateCmd.ExecuteNonQuery();
-            }
-            else
-            {
-                var insertSql = @"
-INSERT INTO Recommendations
-(
-    Id, Name, Country, Region, [Type], Description, BestTime, Lat, Lon,
-    PhotoUrlsJson, SourceUrlsJson, CreatedAtUtc, UpdatedAtUtc
-)
-VALUES
-(
-    @Id, @Name, @Country, @Region, @Type, @Description, @BestTime, @Lat, @Lon,
-    @PhotoUrlsJson, @SourceUrlsJson, @CreatedAtUtc, @UpdatedAtUtc
-);";
-
-                var insertParams = BuildUpsertParameters(id, request);
-                insertParams.Add("@CreatedAtUtc", DateTime.UtcNow);
-                var insertCmd = CreateTextCommand(insertSql, con, insertParams);
-                insertCmd.ExecuteNonQuery();
-            }
-
-            var getSql = @"
-SELECT TOP 1 Id, Name, Country, Region, [Type], Description, BestTime, Lat, Lon, PhotoUrlsJson, SourceUrlsJson
-FROM Recommendations
-WHERE Id = @Id;";
-
-            var getCmd = CreateTextCommand(
-                getSql,
-                con,
-                new Dictionary<string, object> { { "@Id", id } }
-            );
-            using var reader = getCmd.ExecuteReader();
+            var cmd = CreateCommand("SP_UpsertRecommendation", con, BuildUpsertParameters(id, request));
+            using var reader = cmd.ExecuteReader();
             return reader.Read()
                 ? MapReaderToRecommendation(reader)
                 : new RecommendationDto
@@ -176,83 +115,19 @@ WHERE Id = @Id;";
         try
         {
             con = Connect();
-            var sql = "DELETE FROM Recommendations WHERE Id = @Id;";
-            var cmd = CreateTextCommand(
-                sql,
+            var cmd = CreateCommand(
+                "SP_DeleteRecommendation",
                 con,
                 new Dictionary<string, object> { { "@Id", id.Trim() } }
             );
-            return cmd.ExecuteNonQuery() > 0;
-        }
-        finally
-        {
-            con?.Close();
-        }
-    }
-
-    public void SeedRecommendationsFromFileIfEmpty(string? filePath)
-    {
-        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
-        {
-            return;
-        }
-
-        SqlConnection? con = null;
-        try
-        {
-            con = Connect();
-            var countCmd = CreateTextCommand("SELECT COUNT(1) FROM Recommendations;", con, null);
-            var hasRows = Convert.ToInt32(countCmd.ExecuteScalar()) > 0;
-            if (hasRows)
+            var affectedRowsParam = new SqlParameter("@AffectedRows", SqlDbType.Int)
             {
-                return;
-            }
+                Direction = ParameterDirection.Output
+            };
+            cmd.Parameters.Add(affectedRowsParam);
 
-            var rawJson = File.ReadAllText(filePath);
-            using var doc = JsonDocument.Parse(rawJson);
-            if (
-                !doc.RootElement.TryGetProperty("locations", out var locationsNode)
-                || locationsNode.ValueKind != JsonValueKind.Array
-            )
-            {
-                return;
-            }
-
-            foreach (var locationNode in locationsNode.EnumerateArray())
-            {
-                var request = ParseSeedLocation(locationNode);
-                if (request == null)
-                {
-                    continue;
-                }
-
-                var id = Recommendation.BuildLocationId(
-                    request.Name,
-                    request.Coordinates.Lat,
-                    request.Coordinates.Lon
-                );
-
-                var insertSql = @"
-INSERT INTO Recommendations
-(
-    Id, Name, Country, Region, [Type], Description, BestTime, Lat, Lon,
-    PhotoUrlsJson, SourceUrlsJson, CreatedAtUtc, UpdatedAtUtc
-)
-VALUES
-(
-    @Id, @Name, @Country, @Region, @Type, @Description, @BestTime, @Lat, @Lon,
-    @PhotoUrlsJson, @SourceUrlsJson, @CreatedAtUtc, @UpdatedAtUtc
-);";
-
-                var parameters = BuildUpsertParameters(id, request);
-                parameters.Add("@CreatedAtUtc", DateTime.UtcNow);
-                var cmd = CreateTextCommand(insertSql, con, parameters);
-                cmd.ExecuteNonQuery();
-            }
-        }
-        catch
-        {
-            // Seeding should never break API boot.
+            cmd.ExecuteNonQuery();
+            return Convert.ToInt32(affectedRowsParam.Value) > 0;
         }
         finally
         {
@@ -280,91 +155,6 @@ VALUES
             { "@SourceUrlsJson", SerializeUrlList(request.SourceUrls) },
             { "@UpdatedAtUtc", DateTime.UtcNow }
         };
-    }
-
-    private static UpsertRecommendationRequestDto? ParseSeedLocation(JsonElement locationNode)
-    {
-        var name = ReadString(locationNode, "name");
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return null;
-        }
-
-        if (
-            !locationNode.TryGetProperty("coordinates", out var coordinatesNode)
-            || coordinatesNode.ValueKind != JsonValueKind.Object
-        )
-        {
-            return null;
-        }
-
-        var lat = ReadDouble(coordinatesNode, "lat");
-        var lon = ReadDouble(coordinatesNode, "lon");
-        if (!double.IsFinite(lat) || !double.IsFinite(lon))
-        {
-            return null;
-        }
-
-        return new UpsertRecommendationRequestDto
-        {
-            Name = name,
-            Country = ReadString(locationNode, "country"),
-            Region = ReadString(locationNode, "region"),
-            Type = ReadString(locationNode, "type"),
-            Description = ReadString(locationNode, "description"),
-            BestTime = ReadString(locationNode, "best_time"),
-            Coordinates = new CoordinatesDto { Lat = lat, Lon = lon },
-            PhotoUrls = ReadStringArray(locationNode, "photo_urls"),
-            SourceUrls = ReadStringArray(locationNode, "source_urls")
-        };
-    }
-
-    private static string? ReadString(JsonElement node, string propertyName)
-    {
-        if (!node.TryGetProperty(propertyName, out var value) || value.ValueKind != JsonValueKind.String)
-        {
-            return null;
-        }
-
-        var text = value.GetString()?.Trim();
-        return string.IsNullOrWhiteSpace(text) ? null : text;
-    }
-
-    private static double ReadDouble(JsonElement node, string propertyName)
-    {
-        if (!node.TryGetProperty(propertyName, out var value))
-        {
-            return double.NaN;
-        }
-
-        if (value.ValueKind == JsonValueKind.Number && value.TryGetDouble(out var asNumber))
-        {
-            return asNumber;
-        }
-
-        if (value.ValueKind == JsonValueKind.String && double.TryParse(value.GetString(), out asNumber))
-        {
-            return asNumber;
-        }
-
-        return double.NaN;
-    }
-
-    private static List<string> ReadStringArray(JsonElement node, string propertyName)
-    {
-        if (!node.TryGetProperty(propertyName, out var value) || value.ValueKind != JsonValueKind.Array)
-        {
-            return [];
-        }
-
-        return value
-            .EnumerateArray()
-            .Where(item => item.ValueKind == JsonValueKind.String)
-            .Select(item => item.GetString()?.Trim() ?? string.Empty)
-            .Where(item => !string.IsNullOrWhiteSpace(item))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .Take(20)
-            .ToList();
     }
 
     private static string SerializeUrlList(IEnumerable<string>? urls)

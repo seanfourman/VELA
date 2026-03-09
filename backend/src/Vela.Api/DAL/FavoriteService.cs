@@ -24,14 +24,8 @@ public class FavoriteService : DBService
         try
         {
             con = Connect();
-            var sql = @"
-SELECT SpotId, Lat, Lon, CreatedAtUtc
-FROM Favorites
-WHERE UserId = @UserId
-ORDER BY CreatedAtUtc DESC;";
-
             var parameters = new Dictionary<string, object> { { "@UserId", userId } };
-            var cmd = CreateTextCommand(sql, con, parameters);
+            var cmd = CreateCommand("SP_GetFavoritesByUserId", con, parameters);
 
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
@@ -54,18 +48,13 @@ ORDER BY CreatedAtUtc DESC;";
         {
             con = Connect();
 
-            var getSql = @"
-SELECT TOP 1 SpotId, Lat, Lon, CreatedAtUtc
-FROM Favorites
-WHERE UserId = @UserId AND SpotId = @SpotId;";
-
             var getParams = new Dictionary<string, object>
             {
                 { "@UserId", userId },
                 { "@SpotId", spotId.Trim() }
             };
 
-            var getCmd = CreateTextCommand(getSql, con, getParams);
+            var getCmd = CreateCommand("SP_GetFavoriteByUserAndSpot", con, getParams);
             using (var reader = getCmd.ExecuteReader())
             {
                 if (reader.Read())
@@ -75,10 +64,6 @@ WHERE UserId = @UserId AND SpotId = @SpotId;";
             }
 
             var createdAt = DateTime.UtcNow;
-            var insertSql = @"
-INSERT INTO Favorites (Id, UserId, SpotId, Lat, Lon, CreatedAtUtc)
-VALUES (@Id, @UserId, @SpotId, @Lat, @Lon, @CreatedAtUtc);";
-
             var insertParams = new Dictionary<string, object>
             {
                 { "@Id", Guid.NewGuid() },
@@ -89,7 +74,7 @@ VALUES (@Id, @UserId, @SpotId, @Lat, @Lon, @CreatedAtUtc);";
                 { "@CreatedAtUtc", createdAt }
             };
 
-            var insertCmd = CreateTextCommand(insertSql, con, insertParams);
+            var insertCmd = CreateCommand("SP_InsertFavorite", con, insertParams);
             insertCmd.ExecuteNonQuery();
 
             return new FavoriteSpotDto
@@ -112,18 +97,23 @@ VALUES (@Id, @UserId, @SpotId, @Lat, @Lon, @CreatedAtUtc);";
         try
         {
             con = Connect();
-            var sql = @"
-DELETE FROM Favorites
-WHERE UserId = @UserId AND SpotId = @SpotId;";
-
-            var parameters = new Dictionary<string, object>
+            var cmd = CreateCommand(
+                "SP_DeleteFavorite",
+                con,
+                new Dictionary<string, object>
+                {
+                    { "@UserId", userId },
+                    { "@SpotId", spotId.Trim() }
+                }
+            );
+            var affectedRowsParam = new SqlParameter("@AffectedRows", System.Data.SqlDbType.Int)
             {
-                { "@UserId", userId },
-                { "@SpotId", spotId.Trim() }
+                Direction = System.Data.ParameterDirection.Output
             };
+            cmd.Parameters.Add(affectedRowsParam);
 
-            var cmd = CreateTextCommand(sql, con, parameters);
-            return cmd.ExecuteNonQuery() > 0;
+            cmd.ExecuteNonQuery();
+            return Convert.ToInt32(affectedRowsParam.Value) > 0;
         }
         finally
         {
