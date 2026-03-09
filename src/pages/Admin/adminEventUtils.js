@@ -63,7 +63,7 @@ const buildEventFromDraft = (draft) => {
     eventType,
     status,
     startsAt,
-    endsAt,
+    endsAt: endsAt || null,
     lat,
     lng,
     meetupDetails: cleanText(draft?.meetupDetails),

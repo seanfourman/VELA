@@ -111,14 +111,20 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
           <div className="sky-quality-meta">
             <div className="meta-row">
               <span>Brightness</span>
-              <span>
-                {formatMaybeNumber(metrics.Brightness_mcd_m2, 1)} mcd/m^2
+              <span className="meta-row-value">
+                <span>{formatMaybeNumber(metrics.Brightness_mcd_m2, 1)}</span>
+                <span className="sky-quality-unit">
+                  mcd/m<sup>2</sup>
+                </span>
               </span>
             </div>
             <div className="meta-row">
               <span>Artificial</span>
-              <span>
-                {formatMaybeNumber(metrics.Artif_bright_uccd_m2, 0)} ucd/m^2
+              <span className="meta-row-value">
+                <span>{formatMaybeNumber(metrics.Artif_bright_uccd_m2, 0)}</span>
+                <span className="sky-quality-unit">
+                  &micro;cd/m<sup>2</sup>
+                </span>
               </span>
             </div>
             <div className="meta-row">

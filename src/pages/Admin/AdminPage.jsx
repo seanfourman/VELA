@@ -32,6 +32,12 @@ import {
   validateLocationDraft,
 } from "./adminSubmission";
 
+const compareAlphabetical = (left, right) =>
+  String(left || "").trim().localeCompare(String(right || "").trim(), undefined, {
+    sensitivity: "base",
+    numeric: true,
+  });
+
 function AdminPage({
   auth,
   isAdmin,
@@ -59,17 +65,14 @@ function AdminPage({
   const locationList = useMemo(() => {
     if (!Array.isArray(stargazeLocations)) return [];
     return [...stargazeLocations].sort((a, b) =>
-      String(a?.name || "").localeCompare(String(b?.name || ""),
-    ));
+      compareAlphabetical(a?.name, b?.name),
+    );
   }, [stargazeLocations]);
   const eventList = useMemo(() => {
     if (!Array.isArray(starPartyEvents)) return [];
-    return [...starPartyEvents].sort((a, b) => {
-      const aTime = new Date(a.startsAt || 0).getTime();
-      const bTime = new Date(b.startsAt || 0).getTime();
-      if (aTime !== bTime) return aTime - bTime;
-      return String(a.title || "").localeCompare(String(b.title || ""));
-    });
+    return [...starPartyEvents].sort((a, b) =>
+      compareAlphabetical(a?.title, b?.title),
+    );
   }, [starPartyEvents]);
   const publishedEventsCount = useMemo(
     () => eventList.filter((event) => event.status === "published").length,

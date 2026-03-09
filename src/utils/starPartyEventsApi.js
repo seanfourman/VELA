@@ -6,8 +6,72 @@ import {
 } from "./apiEndpoints";
 
 const parseError = async (response, fallback = "Star party API error") => {
+  const contentType = String(response.headers.get("content-type") || "");
+  if (contentType.includes("application/json")) {
+    const payload = await response.json().catch(() => null);
+    const message = extractErrorMessage(payload);
+    if (message) return message;
+  }
+
   const text = (await response.text().catch(() => "")).trim();
   return text || `${fallback}: ${response.status}`;
+};
+
+const extractErrorMessage = (value) => {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed || "";
+  }
+
+  if (!value || typeof value !== "object") return "";
+
+  if (Array.isArray(value.errors)) {
+    const joined = value.errors
+      .map((entry) => String(entry || "").trim())
+      .filter(Boolean)
+      .join(" ");
+    if (joined) return joined;
+  }
+
+  if (value.errors && typeof value.errors === "object") {
+    const messages = Object.values(value.errors)
+      .flatMap((entry) => (Array.isArray(entry) ? entry : [entry]))
+      .map((entry) => String(entry || "").trim())
+      .filter(Boolean);
+    if (messages.length) {
+      const hasEndsAtParseError = messages.some((message) =>
+        message.toLowerCase().includes("$.endsat")
+      );
+      const filtered = hasEndsAtParseError
+        ? messages.filter(
+            (message) =>
+              !message.toLowerCase().includes("the request field is required")
+          )
+        : messages;
+
+      if (
+        filtered.some((message) =>
+          message.toLowerCase().includes("could not be converted")
+        )
+      ) {
+        return "End date is invalid. Leave it empty or choose a valid date.";
+      }
+
+      if (filtered.length) return filtered.join(" ");
+    }
+  }
+
+  if (typeof value.detail === "string" && value.detail.trim()) {
+    return value.detail.trim();
+  }
+  if (typeof value.message === "string" && value.message.trim()) {
+    return value.message.trim();
+  }
+  if (typeof value.title === "string" && value.title.trim()) {
+    return value.title.trim();
+  }
+
+  return "";
 };
 
 const getAuthHeaders = () => {
