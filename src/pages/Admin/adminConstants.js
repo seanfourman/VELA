@@ -34,7 +34,7 @@ export const EVENT_TYPE_OPTIONS = [
 export const EVENT_STATUS_OPTIONS = [
   { value: "draft", label: "Draft" },
   { value: "published", label: "Published" },
-  { value: "cancelled", label: "Cancelled" },
+  { value: "archived", label: "Archived" },
 ];
 
 export const INPUT_FIELDS = [

@@ -24,7 +24,7 @@ export default function AdminEventList({
           activeEventId === eventId;
         const rsvpCount = Array.isArray(event.rsvps) ? event.rsvps.length : 0;
         const isPublished = event.status === "published";
-        const isCancelled = event.status === "cancelled";
+        const isArchived = event.status === "archived";
         const hostChecklistCount = Array.isArray(event.hostChecklist)
           ? event.hostChecklist.length
           : 0;
@@ -70,7 +70,7 @@ export default function AdminEventList({
                     type="button"
                     className="glass-btn profile-action-btn"
                     onClick={() => onSetStatus?.(event.id, statusActionNext)}
-                    disabled={isCancelled}
+                    disabled={isArchived}
                   >
                     {statusActionLabel}
                   </button>

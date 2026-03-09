@@ -1,5 +1,5 @@
 ﻿const EVENT_TYPES = new Set(["party", "special_event"]);
-const EVENT_STATUSES = new Set(["published", "draft", "cancelled"]);
+const EVENT_STATUSES = new Set(["published", "draft", "archived"]);
 
 const cleanText = (value) => (typeof value === "string" ? value.trim() : "");
 

@@ -11,7 +11,7 @@ public static class RequestValidator
     );
 
     private static readonly HashSet<string> AllowedEventStatuses = new(
-        ["draft", "published", "cancelled"],
+        ["draft", "published", "archived"],
         StringComparer.OrdinalIgnoreCase
     );
 
@@ -114,7 +114,7 @@ public static class RequestValidator
         var status = (request.Status ?? string.Empty).Trim();
         if (!string.IsNullOrWhiteSpace(status) && !AllowedEventStatuses.Contains(status))
         {
-            errors.Add("status must be one of: draft, published, cancelled.");
+            errors.Add("status must be one of: draft, published, archived.");
         }
 
         return errors;
@@ -135,7 +135,7 @@ public static class RequestValidator
 
         if (!AllowedEventStatuses.Contains(status))
         {
-            errors.Add("status must be one of: draft, published, cancelled.");
+            errors.Add("status must be one of: draft, published, archived.");
         }
 
         return errors;

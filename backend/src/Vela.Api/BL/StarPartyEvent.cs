@@ -11,7 +11,7 @@ public class StarPartyEvent
     );
 
     private static readonly HashSet<string> AllowedStatuses = new(
-        ["draft", "published", "cancelled"],
+        ["draft", "published", "archived"],
         StringComparer.OrdinalIgnoreCase
     );
 
