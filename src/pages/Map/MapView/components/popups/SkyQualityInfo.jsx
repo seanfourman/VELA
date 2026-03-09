@@ -96,8 +96,8 @@ export default function SkyQualityInfo({ lat, lng, variant = "compact" }) {
                 <span
                   className="metric-help"
                   tabIndex={0}
-                  aria-label="Sky Quality Meter reading (mag/arcsec^2)"
-                  data-tooltip="Sky Quality Meter reading (mag/arcsec^2)"
+                  aria-label={"Sky Quality Meter reading (mag/arcsec\u00B2)"}
+                  data-tooltip={"Sky Quality Meter reading (mag/arcsec\u00B2)"}
                 >
                   ?
                 </span>

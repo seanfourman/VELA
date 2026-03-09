@@ -159,8 +159,8 @@ export default function DarkSpotPopupContent({
             <span
               className="stat-help"
               tabIndex={0}
-              aria-label="Modeled brightness at the site (ucd/m^2)"
-              data-tooltip="Modeled brightness at the site (ucd/m^2)"
+              aria-label={"Modeled brightness at the site (ucd/m\u00B2)"}
+              data-tooltip={"Modeled brightness at the site (ucd/m\u00B2)"}
             >
               ?
             </span>
