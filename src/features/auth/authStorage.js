@@ -1,4 +1,5 @@
 const AUTH_SESSION_KEY = "vela:auth:session";
+const SESSION_EXPIRY_SKEW_MS = 60 * 1000;
 
 const readJsonFromStorage = (key, fallbackValue) => {
   if (typeof window === "undefined") return fallbackValue;
@@ -23,6 +24,12 @@ const writeJsonToStorage = (key, value) => {
   }
 };
 
+const isSessionExpired = (session) => {
+  const expiresAt = Date.parse(String(session?.expiresAtUtc || ""));
+  if (!Number.isFinite(expiresAt)) return false;
+  return Date.now() >= expiresAt - SESSION_EXPIRY_SKEW_MS;
+};
+
 export const readStoredSession = (normalizeSession) =>
   normalizeSession(readJsonFromStorage(AUTH_SESSION_KEY, null));
 
@@ -37,6 +44,14 @@ export const persistStoredSession = (session, normalizeSession) => {
 export const readStoredToken = () => {
   const session = readJsonFromStorage(AUTH_SESSION_KEY, null);
   if (!session || typeof session !== "object") return "";
+  if (isSessionExpired(session)) {
+    writeJsonToStorage(AUTH_SESSION_KEY, null);
+    return "";
+  }
   const token = typeof session.token === "string" ? session.token.trim() : "";
   return token;
+};
+
+export const clearStoredSession = () => {
+  writeJsonToStorage(AUTH_SESSION_KEY, null);
 };

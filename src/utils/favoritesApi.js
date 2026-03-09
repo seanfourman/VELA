@@ -1,4 +1,4 @@
-import { readStoredToken } from "@/features/auth/authStorage";
+import { clearStoredSession, readStoredToken } from "@/features/auth/authStorage";
 import { buildFavoritesUrl } from "./apiEndpoints";
 
 const parseCoord = (value) => {
@@ -87,6 +87,7 @@ export async function fetchFavoriteSpots() {
   });
 
   if (response.status === 401) {
+    clearStoredSession();
     return [];
   }
   if (!response.ok) {
