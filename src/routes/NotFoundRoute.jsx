@@ -1,5 +1,6 @@
 import PageShell from "@/components/layout/PageShell";
 import { useAppLayoutContext } from "@/layouts/AppLayoutContext";
+import brokenWebLinkIcon from "@/assets/icons/broken-web-link-svgrepo-com.svg";
 
 function NotFoundRoute() {
   const { isLight, navigate } = useAppLayoutContext();
@@ -11,20 +12,17 @@ function NotFoundRoute() {
       isLight={isLight}
       onNavigate={navigate}
     >
-      <section className="profile-card glass-panel glass-panel-elevated">
-        <h2 className="profile-section-title">404</h2>
+      <section className="profile-card glass-panel glass-panel-elevated not-found-card">
+        <img
+          src={brokenWebLinkIcon}
+          alt=""
+          aria-hidden="true"
+          className="not-found-card__icon"
+        />
+        <h2 className="profile-section-title not-found-card__code">404</h2>
         <p className="profile-section-copy">
-          Check the URL or go back to the map.
+          Check the URL and try again
         </p>
-        <div className="profile-actions">
-          <button
-            type="button"
-            className="glass-btn profile-action-btn profile-primary"
-            onClick={() => navigate("/")}
-          >
-            Open map
-          </button>
-        </div>
       </section>
     </PageShell>
   );
