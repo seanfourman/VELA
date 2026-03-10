@@ -52,24 +52,6 @@ export function getFavoriteOnlySpots({
   });
 }
 
-export function getFavoriteStargazeSpots({
-  visibleStargazeLocations,
-  favoriteSpotKeys,
-  getSpotKey,
-}) {
-  if (
-    !Array.isArray(visibleStargazeLocations) ||
-    visibleStargazeLocations.length === 0
-  ) {
-    return [];
-  }
-  if (favoriteSpotKeys.size === 0) return [];
-
-  return visibleStargazeLocations.filter((spot) =>
-    favoriteSpotKeys.has(getSpotKey(spot.lat, spot.lng))
-  );
-}
-
 export function getPinnedTargetState({ placedMarker, selectedDarkSpot, getSpotKey }) {
   return Boolean(
     placedMarker?.isFavorite &&

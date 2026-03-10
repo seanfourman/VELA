@@ -272,6 +272,15 @@
   height: 20px;
 }
 
+.favorite-marker:not(.removing):not(.favorite-transition) .marker-dot.favorite-dot {
+  animation: none;
+}
+
+.favorite-marker:not(.removing):not(.favorite-transition) .marker-dot.favorite-dot::after {
+  animation: none;
+  opacity: 0;
+}
+
 .favorite-marker .favorite-heart {
   width: 12px;
   height: 12px;

@@ -1,5 +1,9 @@
 import { Marker, Popup } from "react-leaflet";
-import { favoriteSpotIcon, pinIcon } from "@/pages/Map/MapView/core/markerIcons";
+import {
+  favoriteSpotIcon,
+  favoriteSpotIconTransition,
+  pinIcon,
+} from "@/pages/Map/MapView/core/markerIcons";
 import { PinnedPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 export default function PlacedMarker({
@@ -13,6 +17,7 @@ export default function PlacedMarker({
   onToggleTarget,
   onShareLocation,
   onOpenSpaceWeather,
+  isFavoriteEntering,
   centerOnCoords,
 }) {
   if (!placedMarker) return null;
@@ -21,7 +26,13 @@ export default function PlacedMarker({
     <Marker
       key={`placed-${placedMarker.id}`}
       position={[placedMarker.lat, placedMarker.lng]}
-      icon={placedMarker.isFavorite ? favoriteSpotIcon : pinIcon}
+      icon={
+        placedMarker.isFavorite
+          ? isFavoriteEntering
+            ? favoriteSpotIconTransition
+            : favoriteSpotIcon
+          : pinIcon
+      }
       ref={(marker) => {
         placedMarkerRef.current = marker || null;
       }}

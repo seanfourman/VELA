@@ -2,7 +2,6 @@ import LocationMarker from "./markers/LocationMarker";
 import ExitingMarker from "./markers/ExitingMarker";
 import PlacedMarker from "./markers/PlacedMarker";
 import StargazeMarkers from "./markers/StargazeMarkers";
-import FavoriteStargazeMarkers from "./markers/FavoriteStargazeMarkers";
 import DarkSpotMarkers from "./markers/DarkSpotMarkers";
 import FavoriteOnlyMarkers from "./markers/FavoriteOnlyMarkers";
 import StarPartyMarkers from "./markers/StarPartyMarkers";
@@ -54,6 +53,16 @@ export default function MarkerLayers({
             state.placedMarker?.isFavorite ? "Favorite spot" : "Pinned location",
           )
         }
+        isFavoriteEntering={
+          state.placedMarker
+            ? derived.enteringFavoriteKeySet.has(
+                handlers.getSpotKey(
+                  state.placedMarker.lat,
+                  state.placedMarker.lng,
+                ),
+              )
+            : false
+        }
         centerOnCoords={handlers.centerOnCoords}
       />
       <StargazeMarkers
@@ -61,6 +70,7 @@ export default function MarkerLayers({
         isAuthenticated={isAuthenticated}
         isMobileView={ui.isMobileView}
         favoriteSpotKeys={derived.favoriteSpotKeys}
+        enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
         selectedDarkSpot={state.selectedDarkSpot}
         stargazeMarkerRefs={stargazeMarkerRefs}
         mapRef={mapRef}
@@ -75,15 +85,11 @@ export default function MarkerLayers({
         getSpotKey={handlers.getSpotKey}
         onOpenSpaceWeatherAt={onOpenSpaceWeatherAt}
       />
-      <FavoriteStargazeMarkers
-        spots={derived.favoriteStargazeSpots}
-        exitingFavoriteKeySet={derived.exitingFavoriteKeySet}
-        getSpotKey={handlers.getSpotKey}
-      />
       <DarkSpotMarkers
         darkSpots={state.darkSpots}
         selectedDarkSpot={state.selectedDarkSpot}
         favoriteSpotKeys={derived.favoriteSpotKeys}
+        enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
         isAuthenticated={isAuthenticated}
         centerOnCoords={handlers.centerOnCoords}
         handleToggleDarkSpotFavorite={handlers.handleToggleDarkSpotFavorite}
@@ -97,6 +103,7 @@ export default function MarkerLayers({
       />
       <FavoriteOnlyMarkers
         favoriteOnlySpots={derived.favoriteOnlySpots}
+        enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
         exitingFavoriteKeySet={derived.exitingFavoriteKeySet}
         selectedDarkSpot={state.selectedDarkSpot}
         isAuthenticated={isAuthenticated}

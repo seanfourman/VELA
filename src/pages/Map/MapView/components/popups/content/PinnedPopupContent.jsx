@@ -13,17 +13,20 @@ export default function PinnedPopupContent({
 }) {
   if (!placedMarker) return null;
 
+  const isFavoritedPin = Boolean(placedMarker.isFavorite);
+
   return (
     <ContextMenuPopup
       coords={placedMarker}
       onGetDirections={onGetDirections}
-      onRemovePin={onRemovePin}
+      onRemovePin={isFavoritedPin ? onToggleFavorite : onRemovePin}
       isAuthenticated={Boolean(isAuthenticated)}
-      isFavorite={Boolean(placedMarker.isFavorite)}
+      isFavorite={isFavoritedPin}
       onToggleFavorite={onToggleFavorite}
-      coordsLabel={placedMarker.isFavorite ? "Favorited spot" : "Pinned location"}
+      coordsLabel={isFavoritedPin ? "Favorited spot" : "Pinned location"}
+      removeLabel={isFavoritedPin ? "Remove Favorite" : "Remove Pin"}
       isTarget={Boolean(isPinnedTarget)}
-      onToggleTarget={placedMarker.isFavorite ? onToggleTarget : null}
+      onToggleTarget={isFavoritedPin ? onToggleTarget : null}
       onShareLocation={onShareLocation}
       onOpenSpaceWeather={onOpenSpaceWeather}
     />

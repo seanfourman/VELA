@@ -1,5 +1,9 @@
 import { Marker, Popup } from "react-leaflet";
-import { stargazeIcon } from "@/pages/Map/MapView/core/markerIcons";
+import {
+  favoriteSpotIcon,
+  favoriteSpotIconTransition,
+  stargazeIcon,
+} from "@/pages/Map/MapView/core/markerIcons";
 import { StargazePopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 export default function StargazeMarkers({
@@ -7,6 +11,7 @@ export default function StargazeMarkers({
   isAuthenticated,
   isMobileView,
   favoriteSpotKeys,
+  enteringFavoriteKeySet,
   selectedDarkSpot,
   stargazeMarkerRefs,
   mapRef,
@@ -26,6 +31,7 @@ export default function StargazeMarkers({
   return spots.map((spot) => {
     const spotKey = getSpotKey(spot.lat, spot.lng);
     const isFavoriteSpot = favoriteSpotKeys.has(spotKey);
+    const isFavoriteEntering = enteringFavoriteKeySet.has(spotKey);
     const isTarget =
       selectedDarkSpot &&
       Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
@@ -42,7 +48,13 @@ export default function StargazeMarkers({
       <Marker
         key={`stargaze-${spot.id}`}
         position={[spot.lat, spot.lng]}
-        icon={stargazeIcon}
+        icon={
+          isFavoriteSpot
+            ? isFavoriteEntering
+              ? favoriteSpotIconTransition
+              : favoriteSpotIcon
+            : stargazeIcon
+        }
         ref={(marker) => {
           if (marker) {
             stargazeMarkerRefs.current.set(spot.id, marker);

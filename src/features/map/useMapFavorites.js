@@ -18,6 +18,8 @@ const upsertFavoriteSpot = (collection, nextSpot) => {
   );
 };
 
+const FAVORITE_ENTRY_MS = 360;
+
 const useMapFavorites = ({
   getSpotKey,
   placedMarker,
@@ -26,7 +28,9 @@ const useMapFavorites = ({
   setSelectedDarkSpot,
 }) => {
   const [favoriteSpots, setFavoriteSpots] = useState([]);
+  const [enteringFavoriteKeys, setEnteringFavoriteKeys] = useState([]);
   const [exitingFavoriteKeys, setExitingFavoriteKeys] = useState([]);
+  const favoriteEntryTimeoutsRef = useRef(new Map());
   const favoriteRemovalTimeoutsRef = useRef(new Map());
 
   const favoriteSpotKeys = useMemo(
@@ -36,6 +40,10 @@ const useMapFavorites = ({
   const exitingFavoriteKeySet = useMemo(
     () => new Set(exitingFavoriteKeys),
     [exitingFavoriteKeys],
+  );
+  const enteringFavoriteKeySet = useMemo(
+    () => new Set(enteringFavoriteKeys),
+    [enteringFavoriteKeys],
   );
 
   useEffect(() => {
@@ -63,8 +71,13 @@ const useMapFavorites = ({
   }, [getSpotKey]);
 
   useEffect(() => {
+    const entryTimeouts = favoriteEntryTimeoutsRef.current;
     const removalTimeouts = favoriteRemovalTimeoutsRef.current;
     return () => {
+      entryTimeouts.forEach((timeoutId) => {
+        clearTimeout(timeoutId);
+      });
+      entryTimeouts.clear();
       removalTimeouts.forEach((timeoutId) => {
         clearTimeout(timeoutId);
       });
@@ -101,6 +114,30 @@ const useMapFavorites = ({
       "failure",
     );
   }, []);
+
+  const clearFavoriteEntry = useCallback((spotKey) => {
+    if (!spotKey) return;
+    const entryTimeouts = favoriteEntryTimeoutsRef.current;
+    const timeoutId = entryTimeouts.get(spotKey);
+    if (timeoutId) {
+      clearTimeout(timeoutId);
+      entryTimeouts.delete(spotKey);
+    }
+    setEnteringFavoriteKeys((prev) => prev.filter((key) => key !== spotKey));
+  }, []);
+
+  const triggerFavoriteEntry = useCallback((spotKey) => {
+    if (!spotKey) return;
+    clearFavoriteEntry(spotKey);
+    setEnteringFavoriteKeys((prev) =>
+      prev.includes(spotKey) ? prev : [...prev, spotKey],
+    );
+    const timeoutId = setTimeout(() => {
+      favoriteEntryTimeoutsRef.current.delete(spotKey);
+      setEnteringFavoriteKeys((prev) => prev.filter((key) => key !== spotKey));
+    }, FAVORITE_ENTRY_MS);
+    favoriteEntryTimeoutsRef.current.set(spotKey, timeoutId);
+  }, [clearFavoriteEntry]);
 
   const persistFavoriteSpot = useCallback(
     async (lat, lng) => {
@@ -186,6 +223,7 @@ const useMapFavorites = ({
           ? selectedDarkSpot
           : null;
 
+      clearFavoriteEntry(spotKey);
       removeFavoriteLocally(spotKey);
 
       try {
@@ -201,6 +239,7 @@ const useMapFavorites = ({
     },
     [
       favoriteSpots,
+      clearFavoriteEntry,
       getSpotKey,
       persistRemoveFavoriteSpot,
       removeFavoriteLocally,
@@ -223,23 +262,27 @@ const useMapFavorites = ({
 
       const optimisticSpot = buildFavoriteSpot(spot.lat, spot.lon);
       setFavoriteSpots((prev) => upsertFavoriteSpot(prev, optimisticSpot));
+      triggerFavoriteEntry(key);
 
       try {
         const saved = await persistFavoriteSpot(spot.lat, spot.lon);
         commitSavedFavorite(saved ?? optimisticSpot);
       } catch (error) {
+        clearFavoriteEntry(key);
         setFavoriteSpots((prev) => prev.filter((item) => item.key !== key));
         reportFavoriteError(error, "Could not save favorite right now");
       }
     },
     [
       buildFavoriteSpot,
+      clearFavoriteEntry,
       commitSavedFavorite,
       favoriteSpotKeys,
       getSpotKey,
       handleRemoveFavoriteSpot,
       persistFavoriteSpot,
       reportFavoriteError,
+      triggerFavoriteEntry,
     ],
   );
 
@@ -275,23 +318,27 @@ const useMapFavorites = ({
 
       const optimisticSpot = buildFavoriteSpot(spot.lat, spot.lng);
       setFavoriteSpots((prev) => upsertFavoriteSpot(prev, optimisticSpot));
+      triggerFavoriteEntry(key);
 
       try {
         const saved = await persistFavoriteSpot(spot.lat, spot.lng);
         commitSavedFavorite(saved ?? optimisticSpot);
       } catch (error) {
+        clearFavoriteEntry(key);
         setFavoriteSpots((prev) => prev.filter((item) => item.key !== key));
         reportFavoriteError(error, "Could not save favorite right now");
       }
     },
     [
       buildFavoriteSpot,
+      clearFavoriteEntry,
       commitSavedFavorite,
       favoriteSpotKeys,
       getSpotKey,
       handleRemoveFavoriteSpotAnimated,
       persistFavoriteSpot,
       reportFavoriteError,
+      triggerFavoriteEntry,
     ],
   );
 
@@ -314,6 +361,7 @@ const useMapFavorites = ({
 
     const optimisticSpot = buildFavoriteSpot(lat, lng);
     setFavoriteSpots((prev) => upsertFavoriteSpot(prev, optimisticSpot));
+    triggerFavoriteEntry(key);
     setPlacedMarkerFavoriteState(key, true);
     setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
 
@@ -321,6 +369,7 @@ const useMapFavorites = ({
       const saved = await persistFavoriteSpot(lat, lng);
       commitSavedFavorite(saved ?? optimisticSpot);
     } catch (error) {
+      clearFavoriteEntry(key);
       setFavoriteSpots((prev) => prev.filter((item) => item.key !== key));
       setPlacedMarkerFavoriteState(key, false);
       restoreSelectedTarget(
@@ -334,6 +383,7 @@ const useMapFavorites = ({
     }
   }, [
     buildFavoriteSpot,
+    clearFavoriteEntry,
     commitSavedFavorite,
     favoriteSpotKeys,
     favoriteSpots,
@@ -347,12 +397,14 @@ const useMapFavorites = ({
     selectedDarkSpot,
     setPlacedMarkerFavoriteState,
     setSelectedDarkSpot,
+    triggerFavoriteEntry,
   ]);
 
   return {
     favoriteSpots,
     setFavoriteSpots,
     favoriteSpotKeys,
+    enteringFavoriteKeySet,
     exitingFavoriteKeys,
     setExitingFavoriteKeys,
     exitingFavoriteKeySet,

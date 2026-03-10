@@ -4,13 +4,11 @@ import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import { preloadAllPlanetTextures } from "@/utils/planetUtils";
 import {
   getFavoriteOnlySpots,
-  getFavoriteStargazeSpots,
   getPinnedTargetState,
   getQuickActionTitles,
   getSearchPlaceholder,
 } from "../core/mapDerivedState";
 import useMapDirections from "./useMapDirections";
-import useMapFavoriteTransition from "./useMapFavoriteTransition";
 import useMapFavorites from "@/features/map/useMapFavorites";
 import useMapInteractions from "./useMapInteractions";
 import useMapStargaze from "./useMapStargaze";
@@ -106,9 +104,6 @@ const useMapViewState = ({
     setLatestGridShot,
     getSpotKey,
   });
-
-  useMapFavoriteTransition({ placedMarker, placedMarkerRef });
-
   const handleToggleLightOverlay = useCallback(() => {
     onToggleLightOverlay?.(!lightOverlayEnabled);
   }, [lightOverlayEnabled, onToggleLightOverlay]);
@@ -155,16 +150,6 @@ const useMapViewState = ({
     ]
   );
 
-  const favoriteStargazeSpots = useMemo(
-    () =>
-      getFavoriteStargazeSpots({
-        visibleStargazeLocations: stargaze.visibleStargazeLocations,
-        favoriteSpotKeys: favorites.favoriteSpotKeys,
-        getSpotKey,
-      }),
-    [favorites.favoriteSpotKeys, getSpotKey, stargaze.visibleStargazeLocations]
-  );
-
   const isPinnedTarget = getPinnedTargetState({
     placedMarker,
     selectedDarkSpot,
@@ -202,6 +187,7 @@ const useMapViewState = ({
       visibleStargazeLocations: stargaze.visibleStargazeLocations,
       activeStargazeSpot: stargaze.activeStargazeSpot,
       favoriteSpotKeys: favorites.favoriteSpotKeys,
+      enteringFavoriteKeySet: favorites.enteringFavoriteKeySet,
       exitingFavoriteKeySet: favorites.exitingFavoriteKeySet,
       reducedMotion,
       hasAnyLocation,
@@ -209,7 +195,6 @@ const useMapViewState = ({
       quickDarkSpotsTitle,
       searchPlaceholder,
       favoriteOnlySpots,
-      favoriteStargazeSpots,
       isPinnedTarget,
     },
     planets: {

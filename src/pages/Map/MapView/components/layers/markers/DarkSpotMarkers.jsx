@@ -1,11 +1,16 @@
 import { Marker, Popup } from "react-leaflet";
-import { darkSpotIcon, favoriteSpotIcon } from "@/pages/Map/MapView/core/markerIcons";
+import {
+  darkSpotIcon,
+  favoriteSpotIcon,
+  favoriteSpotIconTransition,
+} from "@/pages/Map/MapView/core/markerIcons";
 import { DarkSpotPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 export default function DarkSpotMarkers({
   darkSpots,
   selectedDarkSpot,
   favoriteSpotKeys,
+  enteringFavoriteKeySet,
   isAuthenticated,
   centerOnCoords,
   handleToggleDarkSpotFavorite,
@@ -20,7 +25,9 @@ export default function DarkSpotMarkers({
   if (!Array.isArray(darkSpots)) return null;
 
   return darkSpots.map((spot, index) => {
-    const isFavoriteSpot = favoriteSpotKeys.has(getSpotKey(spot.lat, spot.lon));
+    const spotKey = getSpotKey(spot.lat, spot.lon);
+    const isFavoriteSpot = favoriteSpotKeys.has(spotKey);
+    const isFavoriteEntering = enteringFavoriteKeySet.has(spotKey);
     const isSelected =
       selectedDarkSpot &&
       Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
@@ -30,7 +37,13 @@ export default function DarkSpotMarkers({
       <Marker
         key={`darkspot-${index}`}
         position={[spot.lat, spot.lon]}
-        icon={isFavoriteSpot ? favoriteSpotIcon : darkSpotIcon}
+        icon={
+          isFavoriteSpot
+            ? isFavoriteEntering
+              ? favoriteSpotIconTransition
+              : favoriteSpotIcon
+            : darkSpotIcon
+        }
         eventHandlers={{
           popupopen: () => centerOnCoords(spot.lat, spot.lon),
         }}

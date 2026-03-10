@@ -1,9 +1,14 @@
 import { Marker, Popup } from "react-leaflet";
-import { favoritePinIconRemoving, favoriteSpotIcon } from "@/pages/Map/MapView/core/markerIcons";
+import {
+  favoritePinIconRemoving,
+  favoriteSpotIcon,
+  favoriteSpotIconTransition,
+} from "@/pages/Map/MapView/core/markerIcons";
 import { FavoritePopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
 
 export default function FavoriteOnlyMarkers({
   favoriteOnlySpots,
+  enteringFavoriteKeySet,
   exitingFavoriteKeySet,
   selectedDarkSpot,
   isAuthenticated,
@@ -19,6 +24,7 @@ export default function FavoriteOnlyMarkers({
 
   return favoriteOnlySpots.map((spot) => {
     const directionsOrigin = getDirectionsOrigin();
+    const isEntering = enteringFavoriteKeySet.has(spot.key);
     const isExiting = exitingFavoriteKeySet.has(spot.key);
     const isSelected =
       selectedDarkSpot &&
@@ -48,7 +54,13 @@ export default function FavoriteOnlyMarkers({
       <Marker
         key={`favorite-${spot.key}`}
         position={[spot.lat, spot.lng]}
-        icon={isExiting ? favoritePinIconRemoving : favoriteSpotIcon}
+        icon={
+          isExiting
+            ? favoritePinIconRemoving
+            : isEntering
+              ? favoriteSpotIconTransition
+              : favoriteSpotIcon
+        }
         eventHandlers={{
           popupopen: () => centerOnCoords(spot.lat, spot.lng),
         }}
