@@ -31,8 +31,6 @@ function ProfilePage({
   const userName =
     user?.name || user?.preferred_username || user?.given_name || "Explorer";
   const showEarth = useMemo(() => isProbablyHardwareAccelerated(), []);
-  const isDayMap = Boolean(isLight);
-  const earthVariant = isDayMap ? "day" : "night";
 
   useEffect(() => {
     setDraft(normalizeProfile(profile));
@@ -104,8 +102,8 @@ function ProfilePage({
 
   const hero = showEarth ? (
     <EarthGlobe
-      variant={earthVariant}
-      showClouds={isDayMap}
+      variant="day"
+      showClouds
       className="profile-page__earth-canvas"
     />
   ) : null;
