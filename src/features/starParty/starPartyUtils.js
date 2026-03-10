@@ -180,8 +180,6 @@ const removeEventFromList = (events, eventId) => {
 
 export {
   getRsvpUserId,
-  normalizeChecklist,
-  normalizeEvent,
   normalizeEventList,
   upsertEventInList,
   removeEventFromList,

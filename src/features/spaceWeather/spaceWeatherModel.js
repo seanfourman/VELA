@@ -74,7 +74,7 @@ export const classifyKpIndex = (value) => {
   return { ...match };
 };
 
-export const getRequiredKpForLatitude = (latitude) => {
+const getRequiredKpForLatitude = (latitude) => {
   if (!isFiniteNumber(latitude)) return null;
   const absoluteLatitude = Math.min(90, Math.abs(latitude));
   const band = AURORA_BANDS.find((entry) => absoluteLatitude >= entry.minLat);

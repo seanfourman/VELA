@@ -25,9 +25,3 @@ export function isStrongPassword(password) {
   const value = normalizePassword(password);
   return RULES.every(([, test]) => test(value));
 }
-
-export function getPasswordValidationError(password) {
-  const value = normalizePassword(password);
-  const failedRule = RULES.find(([, test]) => !test(value));
-  return failedRule ? failedRule[2] : "";
-}

@@ -57,7 +57,7 @@ export const buildVisiblePlanetsUrl = (lat, lng) =>
     lon: lng,
   });
 
-export const buildMapTilerResourceUrl = (resourcePath = "") =>
+const buildMapTilerResourceUrl = (resourcePath = "") =>
   resourcePath
     ? joinResourceUrl(MAPTILER_PROXY_BASE, resourcePath)
     : MAPTILER_PROXY_BASE;

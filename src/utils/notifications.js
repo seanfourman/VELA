@@ -10,11 +10,7 @@ export function registerNotificationDispatcher(dispatcher) {
   };
 }
 
-export function showNotification(
-  message,
-  type = "info",
-  { duration = 2500 } = {},
-) {
+const showNotification = (message, type = "info", { duration = 2500 } = {}) => {
   if (!message || typeof notificationDispatcher !== "function") return;
 
   notificationDispatcher({
@@ -22,6 +18,6 @@ export function showNotification(
     type,
     duration,
   });
-}
+};
 
 export default showNotification;

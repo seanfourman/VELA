@@ -127,8 +127,6 @@ export const persistAuthSession = (session) => {
   persistStoredSession(session, normalizeSession);
 };
 
-export const mapUserToAuthUser = (user) => normalizeUser(user);
-
 export async function loginUser({ email, password }) {
   return requestAuth({
     endpoint: "login",

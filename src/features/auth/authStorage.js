@@ -70,7 +70,3 @@ export const readStoredToken = () => {
   const token = typeof session.token === "string" ? session.token.trim() : "";
   return token;
 };
-
-export const clearStoredSession = () => {
-  clearSession();
-};

@@ -1,78 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import showNotification from "@/utils/notifications";
-import { copyTextToClipboard } from "@/utils/clipboard";
 import arZoneIcon from "@/assets/icons/ar-zone-svgrepo-com.svg";
+import {
+  buildPlanetCopyPayload,
+  copyPlanetDetailsToClipboard,
+  formatDegrees,
+  formatDeclination,
+  formatMagnitude,
+  formatRightAscension,
+} from "./planetInfoUtils";
 import "./styles/planetInfoCard.css";
-
-const formatDegrees = (value) => {
-  if (value === undefined || value === null || Number.isNaN(value)) {
-    return "-";
-  }
-  return `${value.toFixed(1)}\u00b0`;
-};
-
-const formatMagnitude = (value) => {
-  if (value === undefined || value === null || Number.isNaN(value)) {
-    return "-";
-  }
-  return value.toFixed(1);
-};
-
-const formatRightAscension = (ra) => {
-  if (!ra) return "-";
-  const hours = Number.isFinite(ra.hours)
-    ? ra.hours.toString().padStart(2, "0")
-    : "00";
-  const minutes = Number.isFinite(ra.minutes)
-    ? ra.minutes.toString().padStart(2, "0")
-    : "00";
-  return `${hours}h ${minutes}m`;
-};
-
-const formatDeclination = (dec) => {
-  if (!dec) return "-";
-  const sign = dec.negative ? "-" : "+";
-  const degrees = Number.isFinite(dec.degrees) ? Math.abs(dec.degrees) : 0;
-  const arcminutes = Number.isFinite(dec.arcminutes)
-    ? Math.abs(dec.arcminutes)
-    : 0;
-  return `${sign}${degrees}\u00b0 ${arcminutes}'`;
-};
-
-const normalizeAzimuth = (value) => {
-  if (!Number.isFinite(value)) return null;
-  return ((value % 360) + 360) % 360;
-};
-
-const formatDirection = (value) => {
-  const normalized = normalizeAzimuth(Number(value));
-  if (normalized === null) return "Unknown";
-  const labels = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
-  const index = Math.round(normalized / 45) % labels.length;
-  return labels[index];
-};
-
-
-const buildCopyPayload = (planet) => {
-  const azimuth = formatDegrees(planet?.azimuth);
-  const direction = formatDirection(planet?.azimuth);
-  const magnitude = formatMagnitude(planet?.magnitude);
-  const rightAscension = formatRightAscension(planet?.rightAscension);
-  const declination = formatDeclination(planet?.declination);
-  const horizonStatus =
-    planet?.aboveHorizon === false ? "Below horizon right now" : "Above the horizon";
-
-  return [
-    `Name: ${planet?.name || "Planet"}`,
-    `Constellation: ${planet?.constellation || "Constellation unknown"}`,
-    `Visibility: ${planet?.nakedEyeObject ? "Naked eye" : "Needs optics"}`,
-    `Altitude: ${formatDegrees(planet?.altitude)}`,
-    `Azimuth: ${azimuth} (${direction})`,
-    `Magnitude: ${magnitude}`,
-    `RA / Dec: ${rightAscension} / ${declination}`,
-    `Status: ${horizonStatus}`,
-  ].join("\n");
-};
 
 const EXIT_ANIMATION_MS = 180;
 const DESKTOP_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
@@ -96,7 +32,7 @@ export default function PlanetInfoCard({
   const [isExiting, setIsExiting] = useState(false);
   const [desktopPointer, setDesktopPointer] = useState(() => hasDesktopPointer());
   const planet = renderedCard?.planet ?? null;
-  const copyPayload = useMemo(() => buildCopyPayload(planet), [planet]);
+  const copyPayload = useMemo(() => buildPlanetCopyPayload(planet), [planet]);
   const arDisabled = desktopPointer;
 
   useEffect(() => {
@@ -105,19 +41,24 @@ export default function PlanetInfoCard({
         clearTimeout(exitTimeoutRef.current);
         exitTimeoutRef.current = null;
       }
-      setRenderedCard(hoveredCard);
-      setIsExiting(false);
-      return;
+      const animationFrameId = window.requestAnimationFrame(() => {
+        setRenderedCard(hoveredCard);
+        setIsExiting(false);
+      });
+      return () => window.cancelAnimationFrame(animationFrameId);
     }
 
     if (!renderedCard) return;
 
-    setIsExiting(true);
+    const animationFrameId = window.requestAnimationFrame(() => {
+      setIsExiting(true);
+    });
     exitTimeoutRef.current = setTimeout(() => {
       setRenderedCard(null);
       setIsExiting(false);
       exitTimeoutRef.current = null;
     }, EXIT_ANIMATION_MS);
+    return () => window.cancelAnimationFrame(animationFrameId);
   }, [hoveredCard, renderedCard]);
 
   useEffect(() => {
@@ -139,8 +80,6 @@ export default function PlanetInfoCard({
       setDesktopPointer(event.matches);
     };
 
-    setDesktopPointer(mediaQuery.matches);
-
     if (typeof mediaQuery.addEventListener === "function") {
       mediaQuery.addEventListener("change", handleChange);
       return () => mediaQuery.removeEventListener("change", handleChange);
@@ -152,21 +91,7 @@ export default function PlanetInfoCard({
 
   const handleCopy = async () => {
     if (!renderedCard || !copyPayload) return;
-
-    try {
-      const copied = await copyTextToClipboard(copyPayload);
-      if (!copied) {
-        throw new Error("Clipboard unavailable");
-      }
-
-      showNotification(`${planet?.name || "Planet"} info copied`, "success", {
-        duration: 2000,
-      });
-    } catch {
-      showNotification("Could not copy planet info", "warning", {
-        duration: 2200,
-      });
-    }
+    await copyPlanetDetailsToClipboard(planet);
   };
 
   const handleArOpen = (event) => {
