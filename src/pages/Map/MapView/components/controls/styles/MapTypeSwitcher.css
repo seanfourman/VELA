@@ -277,30 +277,35 @@ body.map-ui-shifted-space-weather .map-type-switcher {
 
   .map-type-options {
     top: auto;
-    bottom: calc(100% + 10px);
+    bottom: 2px;
     left: 50%;
     right: auto;
     gap: 6px;
     padding: 3px;
     max-width: none;
-    max-height: 0;
     visibility: hidden;
-    transform: translate(-50%, 14px) scale(0.95);
+    transform: translate(-50%, 0) scaleY(0.18);
+    transform-origin: center bottom;
     opacity: 0;
     pointer-events: none;
     justify-content: flex-start;
     align-items: center;
     flex-direction: column;
-    transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.22s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0.25s;
   }
 
   .map-type-switcher.expanded .map-type-options {
-    max-height: 220px;
     visibility: visible;
-    transform: translate(-50%, 0) scale(1);
+    transform: translate(-50%, -54px) scaleY(1);
     opacity: 1;
     pointer-events: auto;
+    transition:
+      opacity 0.2s ease,
+      transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+      visibility 0s linear 0s;
   }
 
   .map-type-tooltip-label {
