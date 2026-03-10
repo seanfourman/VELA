@@ -173,6 +173,8 @@ export default function AdminTimePicker({
   };
 
   const settleColumn = (element, values, onSelect) => {
+    if (!element || !values.length) return;
+
     const rawIndex = Math.round(element.scrollTop / ITEM_HEIGHT);
     const normalizedLoopIndex = clampLoopIndex(rawIndex, values.length);
     if (normalizedLoopIndex !== rawIndex) {
@@ -288,18 +290,24 @@ export default function AdminTimePicker({
   }, [menuOpen, hourValues, minuteValues]);
 
   const handleHourScroll = (event) => {
+    const element = event.currentTarget;
+    if (!element) return;
+
     clearTimeout(hourTimerRef.current);
     hourTimerRef.current = setTimeout(() => {
-      settleColumn(event.currentTarget, hourValues, (nextHour) => {
+      settleColumn(element, hourValues, (nextHour) => {
         updateTime(nextHour, selectedMinuteRef.current);
       });
     }, 70);
   };
 
   const handleMinuteScroll = (event) => {
+    const element = event.currentTarget;
+    if (!element) return;
+
     clearTimeout(minuteTimerRef.current);
     minuteTimerRef.current = setTimeout(() => {
-      settleColumn(event.currentTarget, minuteValues, (nextMinute) => {
+      settleColumn(element, minuteValues, (nextMinute) => {
         updateTime(selectedHourRef.current, nextMinute);
       });
     }, 70);
