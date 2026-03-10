@@ -3,11 +3,12 @@ export default function AdminLocationList({
   onDeleteLocation,
   onEditLocation,
   activeLocationId = null,
+  emptyMessage = "No curated locations yet",
 }) {
   return (
     <div className="admin-location-list">
       {locations.length === 0 ? (
-        <div className="profile-readonly">No curated locations yet</div>
+        <div className="profile-readonly">{emptyMessage}</div>
       ) : (
         locations.map((location) => {
           const locationId = String(location.id || "").trim();

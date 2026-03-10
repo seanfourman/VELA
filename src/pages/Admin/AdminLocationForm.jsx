@@ -128,7 +128,9 @@ export default function AdminLocationForm({
         </button>
         <button
           type="submit"
-          className="glass-btn profile-action-btn profile-primary"
+          className={`glass-btn profile-action-btn profile-primary admin-submit-btn${
+            isEditing ? "" : " admin-submit-btn--create"
+          }`}
         >
           {submitLabel}
         </button>

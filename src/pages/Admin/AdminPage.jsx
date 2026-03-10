@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Chip from "@mui/material/Chip";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
@@ -38,6 +38,82 @@ const compareAlphabetical = (left, right) =>
     numeric: true,
   });
 
+const ADMIN_PAGE_SIZE = 8;
+
+const normalizeSearchValue = (value) => String(value || "").trim().toLowerCase();
+
+const buildSearchBlob = (values) =>
+  values
+    .flatMap((value) => {
+      if (Array.isArray(value)) return value;
+      return [value];
+    })
+    .map((value) => String(value || "").trim().toLowerCase())
+    .filter(Boolean)
+    .join(" ");
+
+const matchesLocationSearch = (location, query) => {
+  if (!query) return true;
+
+  const blob = buildSearchBlob([
+    location?.name,
+    location?.id,
+    location?.region,
+    location?.country,
+    location?.type,
+    location?.bestTime,
+    location?.description,
+    location?.lat,
+    location?.lng,
+  ]);
+
+  return blob.includes(query);
+};
+
+const matchesEventSearch = (event, query) => {
+  if (!query) return true;
+
+  const blob = buildSearchBlob([
+    event?.title,
+    event?.id,
+    event?.eventType,
+    event?.status,
+    event?.description,
+    event?.meetupDetails,
+    event?.lat,
+    event?.lng,
+    event?.host?.name,
+    event?.host?.email,
+    event?.hostChecklist,
+  ]);
+
+  return blob.includes(query);
+};
+
+const paginateItems = (items, page, pageSize) => {
+  const startIndex = (page - 1) * pageSize;
+  return items.slice(startIndex, startIndex + pageSize);
+};
+
+const PaginationChevron = ({ direction }) => (
+  <svg
+    viewBox="0 0 20 20"
+    width="18"
+    height="18"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      d={direction === "left" ? "M12.5 4.5L7 10l5.5 5.5" : "M7.5 4.5L13 10l-5.5 5.5"}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 function AdminPage({
   auth,
   isAdmin,
@@ -57,6 +133,10 @@ function AdminPage({
   const [locationDraft, setLocationDraft] = useState(EMPTY_LOCATION);
   const [eventDraft, setEventDraft] = useState(EMPTY_EVENT);
   const [activeView, setActiveView] = useState("locations");
+  const [locationSearch, setLocationSearch] = useState("");
+  const [eventSearch, setEventSearch] = useState("");
+  const [locationPage, setLocationPage] = useState(1);
+  const [eventPage, setEventPage] = useState(1);
   const editingLocationId = String(locationDraft.id || "").trim();
   const editingEventId = String(eventDraft.id || "").trim();
   const isEditingLocation = Boolean(editingLocationId);
@@ -74,6 +154,43 @@ function AdminPage({
       compareAlphabetical(a?.title, b?.title),
     );
   }, [starPartyEvents]);
+  const normalizedLocationSearch = useMemo(
+    () => normalizeSearchValue(locationSearch),
+    [locationSearch],
+  );
+  const normalizedEventSearch = useMemo(
+    () => normalizeSearchValue(eventSearch),
+    [eventSearch],
+  );
+  const filteredLocationList = useMemo(
+    () =>
+      locationList.filter((location) =>
+        matchesLocationSearch(location, normalizedLocationSearch),
+      ),
+    [locationList, normalizedLocationSearch],
+  );
+  const filteredEventList = useMemo(
+    () => eventList.filter((event) => matchesEventSearch(event, normalizedEventSearch)),
+    [eventList, normalizedEventSearch],
+  );
+  const locationTotalPages = Math.max(
+    1,
+    Math.ceil(filteredLocationList.length / ADMIN_PAGE_SIZE),
+  );
+  const eventTotalPages = Math.max(
+    1,
+    Math.ceil(filteredEventList.length / ADMIN_PAGE_SIZE),
+  );
+  const safeLocationPage = Math.min(locationPage, locationTotalPages);
+  const safeEventPage = Math.min(eventPage, eventTotalPages);
+  const paginatedLocations = useMemo(
+    () => paginateItems(filteredLocationList, safeLocationPage, ADMIN_PAGE_SIZE),
+    [filteredLocationList, safeLocationPage],
+  );
+  const paginatedEvents = useMemo(
+    () => paginateItems(filteredEventList, safeEventPage, ADMIN_PAGE_SIZE),
+    [filteredEventList, safeEventPage],
+  );
   const publishedEventsCount = useMemo(
     () => eventList.filter((event) => event.status === "published").length,
     [eventList],
@@ -87,6 +204,42 @@ function AdminPage({
     [eventList],
   );
   const activeViewIndex = activeView === "events" ? 1 : 0;
+  const activeSearchValue = activeView === "events" ? eventSearch : locationSearch;
+  const activeFilteredCount =
+    activeView === "events" ? filteredEventList.length : filteredLocationList.length;
+  const activeTotalCount = activeView === "events" ? eventList.length : locationList.length;
+  const activePage = activeView === "events" ? safeEventPage : safeLocationPage;
+  const activeTotalPages = activeView === "events" ? eventTotalPages : locationTotalPages;
+  const activeSearchLabel =
+    activeView === "events" ? "Search events" : "Search locations";
+  const activeSearchPlaceholder =
+    activeView === "events"
+      ? "Search by title, status, host, notes, or checklist"
+      : "Search by name, country, region, type, or description";
+  const activeFormTitle =
+    activeView === "events"
+      ? isEditingEvent
+        ? "Edit event"
+        : "Create event"
+      : isEditingLocation
+        ? "Edit location"
+        : "Add location";
+  const activeFormCopy =
+    activeView === "events"
+      ? "Create and update star party events."
+      : "Create and update curated stargazing spots.";
+  const activeCollectionTitle =
+    activeView === "events" ? "Existing events" : "Existing locations";
+  const activeCollectionCopy =
+    activeView === "events"
+      ? "Search, review, and manage created events."
+      : "Search, review, and manage curated map spots.";
+  const visibleStart =
+    activeFilteredCount === 0 ? 0 : (activePage - 1) * ADMIN_PAGE_SIZE + 1;
+  const visibleEnd =
+    activeFilteredCount === 0
+      ? 0
+      : Math.min(activePage * ADMIN_PAGE_SIZE, activeFilteredCount);
   const viewSwitcherStyle = {
     "--switch-index": activeViewIndex,
     "--switch-count": 2,
@@ -108,6 +261,47 @@ function AdminPage({
   const handleEventFieldChange = (key) => (event) => {
     const value = event.target.value;
     setEventDraft((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleSearchChange = (event) => {
+    const value = event.target.value;
+    if (activeView === "events") {
+      setEventSearch(value);
+      setEventPage(1);
+      return;
+    }
+    setLocationSearch(value);
+    setLocationPage(1);
+  };
+
+  const handleSearchReset = () => {
+    if (activeView === "events") {
+      setEventSearch("");
+      setEventPage(1);
+      return;
+    }
+    setLocationSearch("");
+    setLocationPage(1);
+  };
+
+  const handlePreviousPage = () => {
+    if (activeView === "events") {
+      setEventPage((current) => Math.max(Math.min(current, eventTotalPages) - 1, 1));
+      return;
+    }
+    setLocationPage((current) => Math.max(Math.min(current, locationTotalPages) - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    if (activeView === "events") {
+      setEventPage((current) =>
+        Math.min(Math.min(current, eventTotalPages) + 1, eventTotalPages),
+      );
+      return;
+    }
+    setLocationPage((current) =>
+      Math.min(Math.min(current, locationTotalPages) + 1, locationTotalPages),
+    );
   };
 
   const resetLocationForm = () => setLocationDraft(EMPTY_LOCATION);
@@ -198,7 +392,7 @@ function AdminPage({
       showNotification(
         isEditingLocation ? "Location updated" : "Location added",
         "success",
-        { duration: 2400 }
+        { duration: 2400 },
       );
       resetLocationForm();
     } catch (error) {
@@ -363,40 +557,206 @@ function AdminPage({
 
           {activeView === "locations" ? (
             <>
-              <AdminLocationForm
-                draft={locationDraft}
-                onFieldChange={handleLocationFieldChange}
-                onReset={resetLocationForm}
-                onCancelEdit={resetLocationForm}
-                onSubmit={handleSubmitLocation}
-                isEditing={isEditingLocation}
-              />
+              <div className="admin-panel-section">
+                <div className="admin-panel-section__header">
+                  <div>
+                    <h3 className="admin-panel-section__title">{activeFormTitle}</h3>
+                    <p className="admin-panel-section__copy">{activeFormCopy}</p>
+                  </div>
+                </div>
 
-              <AdminLocationList
-                locations={locationList}
-                onDeleteLocation={handleDeleteLocation}
-                onEditLocation={handleEditLocation}
-                activeLocationId={editingLocationId || null}
-              />
+                <AdminLocationForm
+                  draft={locationDraft}
+                  onFieldChange={handleLocationFieldChange}
+                  onReset={resetLocationForm}
+                  onCancelEdit={resetLocationForm}
+                  onSubmit={handleSubmitLocation}
+                  isEditing={isEditingLocation}
+                />
+              </div>
+
+              <div className="admin-section-separator" aria-hidden="true" />
+
+              <div className="admin-panel-section admin-panel-section--collection">
+                <div className="admin-panel-section__header">
+                  <div>
+                    <h3 className="admin-panel-section__title">
+                      {activeCollectionTitle}
+                    </h3>
+                    <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
+                  </div>
+                </div>
+
+                <div className="admin-collection-tools">
+                  <label className="profile-field admin-search-field">
+                    <span className="profile-label">{activeSearchLabel}</span>
+                    <input
+                      className="profile-input"
+                      type="search"
+                      value={activeSearchValue}
+                      onChange={handleSearchChange}
+                      placeholder={activeSearchPlaceholder}
+                    />
+                  </label>
+                  <div className="admin-collection-meta">
+                    <div className="admin-results-copy">
+                      Showing {visibleStart}-{visibleEnd} of {activeFilteredCount}
+                      {activeFilteredCount !== activeTotalCount
+                        ? ` matching ${activeTotalCount} total`
+                        : ""}
+                    </div>
+                    {activeSearchValue ? (
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-toolbar-btn"
+                        onClick={handleSearchReset}
+                      >
+                        Clear search
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <AdminLocationList
+                  locations={paginatedLocations}
+                  onDeleteLocation={handleDeleteLocation}
+                  onEditLocation={handleEditLocation}
+                  activeLocationId={editingLocationId || null}
+                  emptyMessage={
+                    normalizedLocationSearch
+                      ? "No curated locations match this search"
+                      : "No curated locations yet"
+                  }
+                />
+
+                {activeTotalPages > 1 ? (
+                  <div className="admin-pagination">
+                    <button
+                      type="button"
+                      className="glass-btn profile-action-btn admin-pagination-btn"
+                      onClick={handlePreviousPage}
+                      disabled={activePage <= 1}
+                      aria-label="Previous page"
+                    >
+                      <PaginationChevron direction="left" />
+                    </button>
+                    <div className="admin-pagination-status">
+                      Page {activePage} of {activeTotalPages}
+                    </div>
+                    <button
+                      type="button"
+                      className="glass-btn profile-action-btn admin-pagination-btn"
+                      onClick={handleNextPage}
+                      disabled={activePage >= activeTotalPages}
+                      aria-label="Next page"
+                    >
+                      <PaginationChevron direction="right" />
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </>
           ) : (
             <>
-              <AdminEventForm
-                draft={eventDraft}
-                onFieldChange={handleEventFieldChange}
-                onSubmit={handleSubmitEvent}
-                onReset={resetEventForm}
-                onCancelEdit={resetEventForm}
-                isEditing={isEditingEvent}
-              />
+              <div className="admin-panel-section">
+                <div className="admin-panel-section__header">
+                  <div>
+                    <h3 className="admin-panel-section__title">{activeFormTitle}</h3>
+                    <p className="admin-panel-section__copy">{activeFormCopy}</p>
+                  </div>
+                </div>
 
-              <AdminEventList
-                events={eventList}
-                onEditEvent={handleEditEvent}
-                onDeleteEvent={handleDeleteEvent}
-                onSetStatus={handleSetEventStatus}
-                activeEventId={editingEventId || null}
-              />
+                <AdminEventForm
+                  draft={eventDraft}
+                  onFieldChange={handleEventFieldChange}
+                  onSubmit={handleSubmitEvent}
+                  onReset={resetEventForm}
+                  onCancelEdit={resetEventForm}
+                  isEditing={isEditingEvent}
+                />
+              </div>
+
+              <div className="admin-section-separator" aria-hidden="true" />
+
+              <div className="admin-panel-section admin-panel-section--collection">
+                <div className="admin-panel-section__header">
+                  <div>
+                    <h3 className="admin-panel-section__title">
+                      {activeCollectionTitle}
+                    </h3>
+                    <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
+                  </div>
+                </div>
+
+                <div className="admin-collection-tools">
+                  <label className="profile-field admin-search-field">
+                    <span className="profile-label">{activeSearchLabel}</span>
+                    <input
+                      className="profile-input"
+                      type="search"
+                      value={activeSearchValue}
+                      onChange={handleSearchChange}
+                      placeholder={activeSearchPlaceholder}
+                    />
+                  </label>
+                  <div className="admin-collection-meta">
+                    <div className="admin-results-copy">
+                      Showing {visibleStart}-{visibleEnd} of {activeFilteredCount}
+                      {activeFilteredCount !== activeTotalCount
+                        ? ` matching ${activeTotalCount} total`
+                        : ""}
+                    </div>
+                    {activeSearchValue ? (
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-toolbar-btn"
+                        onClick={handleSearchReset}
+                      >
+                        Clear search
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                <AdminEventList
+                  events={paginatedEvents}
+                  onEditEvent={handleEditEvent}
+                  onDeleteEvent={handleDeleteEvent}
+                  onSetStatus={handleSetEventStatus}
+                  activeEventId={editingEventId || null}
+                  emptyMessage={
+                    normalizedEventSearch
+                      ? "No events match this search"
+                      : "No events created yet"
+                  }
+                />
+
+                {activeTotalPages > 1 ? (
+                  <div className="admin-pagination">
+                    <button
+                      type="button"
+                      className="glass-btn profile-action-btn admin-pagination-btn"
+                      onClick={handlePreviousPage}
+                      disabled={activePage <= 1}
+                      aria-label="Previous page"
+                    >
+                      <PaginationChevron direction="left" />
+                    </button>
+                    <div className="admin-pagination-status">
+                      Page {activePage} of {activeTotalPages}
+                    </div>
+                    <button
+                      type="button"
+                      className="glass-btn profile-action-btn admin-pagination-btn"
+                      onClick={handleNextPage}
+                      disabled={activePage >= activeTotalPages}
+                      aria-label="Next page"
+                    >
+                      <PaginationChevron direction="right" />
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             </>
           )}
         </section>
@@ -406,6 +766,3 @@ function AdminPage({
 }
 
 export default AdminPage;
-
-
-

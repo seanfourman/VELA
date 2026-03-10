@@ -14,9 +14,10 @@ export default function AdminEventList({
   onDeleteEvent,
   onSetStatus,
   activeEventId = null,
+  emptyMessage = "No events created yet",
 }) {
   if (!Array.isArray(events) || events.length === 0) {
-    return <div className="profile-readonly">No events created yet</div>;
+    return <div className="profile-readonly">{emptyMessage}</div>;
   }
 
   return (

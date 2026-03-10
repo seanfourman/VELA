@@ -93,6 +93,11 @@
     align-items: flex-start;
   }
 
+  .admin-panel-section__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .admin-view-switcher,
   .admin-form-switcher {
     width: 100%;
@@ -136,5 +141,35 @@
 
   .profile-page__earth {
     transform: translate(-50%, -50%);
+  }
+}
+@media (max-width: 768px) {
+  .admin-collection-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-search-field {
+    max-width: none;
+    width: 100%;
+  }
+
+  .admin-collection-meta {
+    width: 100%;
+    justify-items: stretch;
+  }
+
+  .admin-results-copy {
+    text-align: left;
+  }
+
+  .admin-pagination {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .admin-pagination-status {
+    min-width: 0;
+    text-align: left;
   }
 }
