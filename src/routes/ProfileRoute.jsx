@@ -8,7 +8,6 @@ function ProfileRoute() {
     profileSettings,
     isAdmin,
     isLight,
-    mapType,
     navigate,
     handleSaveProfile,
     handleResetProfile,
@@ -25,7 +24,6 @@ function ProfileRoute() {
       profile={profileSettings}
       isAdmin={isAdmin}
       isLight={isLight}
-      mapType={mapType}
       onSave={handleSaveProfile}
       onReset={handleResetProfile}
       onNavigate={navigate}

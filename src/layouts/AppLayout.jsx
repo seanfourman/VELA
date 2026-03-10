@@ -16,6 +16,8 @@ function AppLayout() {
   const transitionTimeoutRef = useRef(null);
 
   const currentRoute = normalizePath(location.pathname);
+  const isMapRoute = currentRoute === "/";
+  const routeIsLight = isMapRoute && appState.isLight;
 
   useEffect(() => {
     return () => {
@@ -56,12 +58,13 @@ function AppLayout() {
   const value = useMemo(
     () => ({
       ...appState,
+      isLight: routeIsLight,
       currentRoute,
       navigate,
       isThreeDModeActive,
       setIsThreeDModeActive,
     }),
-    [appState, currentRoute, isThreeDModeActive, navigate],
+    [appState, routeIsLight, currentRoute, isThreeDModeActive, navigate],
   );
 
   return (
@@ -69,7 +72,7 @@ function AppLayout() {
       <div className="app">
         <Navbar
           mapType={appState.mapType}
-          forceLight={currentRoute === "/" && isThreeDModeActive}
+          forceLight={isMapRoute && isThreeDModeActive}
           auth={appState.auth}
           profile={appState.profileSettings}
           isAdmin={appState.isAdmin}

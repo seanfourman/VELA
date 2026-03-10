@@ -12,13 +12,13 @@ function Navbar({
   onNavigate,
   currentRoute,
 }) {
-  const isLight = forceLight || mapType === "light";
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const currentPath =
     typeof currentRoute === "string"
       ? currentRoute
       : window.location.pathname;
   const isHome = currentPath === "/";
+  const isLight = isHome && (forceLight || mapType === "light");
   const isAuthScreen = currentPath === "/auth";
   const logoSrc = !isHome ? velaLogo : isLight ? velaLogoBlack : velaLogo;
 

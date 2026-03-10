@@ -19,7 +19,6 @@ function ProfilePage({
   profile,
   isLight,
   isAdmin,
-  mapType,
   onSave,
   onReset,
   onNavigate,
@@ -32,7 +31,7 @@ function ProfilePage({
   const userName =
     user?.name || user?.preferred_username || user?.given_name || "Explorer";
   const showEarth = useMemo(() => isProbablyHardwareAccelerated(), []);
-  const isDayMap = mapType === "light" || mapType === "satellite" || isLight;
+  const isDayMap = Boolean(isLight);
   const earthVariant = isDayMap ? "day" : "night";
 
   useEffect(() => {
