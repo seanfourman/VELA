@@ -1,4 +1,5 @@
-﻿import "./styles/StargazePanel.css";
+import { buildExternalMapSearchUrl } from "@/utils/mapLinks";
+import "./styles/StargazePanel.css";
 
 const IMAGE_EXT_REGEX = /\.(png|jpe?g|webp|gif|avif)(\?|#|$)/i;
 
@@ -28,17 +29,6 @@ const getLinkHost = (value) => {
   } catch {
     return raw.replace(/^https?:\/\//, "").split("/")[0] || "source";
   }
-};
-
-const getMapLink = (lat, lng, provider) => {
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  if (provider === "waze") {
-    const params = new URLSearchParams();
-    params.set("ll", `${lat},${lng}`);
-    params.set("navigate", "yes");
-    return `https://www.waze.com/ul?${params.toString()}`;
-  }
-  return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
 };
 
 const renderLinkList = (title, links, labelPrefix) => {
@@ -97,7 +87,11 @@ export default function StargazePanelContent({
     { label: "Coordinates", value: coordsLabel },
   ].filter((fact) => fact.value);
 
-  const mapUrl = getMapLink(spot.lat, spot.lng, directionsProvider);
+  const mapUrl = buildExternalMapSearchUrl({
+    lat: spot.lat,
+    lng: spot.lng,
+    provider: directionsProvider,
+  });
   const mapLabel =
     directionsProvider === "waze" ? "Open in Waze" : "Open in Google Maps";
 
@@ -173,4 +167,3 @@ export default function StargazePanelContent({
     </div>
   );
 }
-

@@ -1,5 +1,9 @@
-﻿import { useCallback } from "react";
+import { useCallback } from "react";
 import showNotification from "@/utils/notifications";
+import {
+  buildExternalMapDirectionsUrl,
+  buildExternalMapSearchUrl,
+} from "@/utils/mapLinks";
 
 const useMapDirections = ({
   directionsProvider = "google",
@@ -8,45 +12,24 @@ const useMapDirections = ({
   contextMenu,
 }) => {
   const buildDirectionsUrl = useCallback(
-    (origin, destination) => {
-      const destLat = Number(destination?.lat);
-      const destLng = Number(destination?.lng);
-      if (!Number.isFinite(destLat) || !Number.isFinite(destLng)) return null;
-
-      if (directionsProvider === "waze") {
-        const params = new URLSearchParams();
-        params.set("ll", `${destLat},${destLng}`);
-        params.set("navigate", "yes");
-        if (
-          origin &&
-          Number.isFinite(origin.lat) &&
-          Number.isFinite(origin.lng)
-        ) {
-          params.set("from", `${origin.lat},${origin.lng}`);
-        }
-        return `https://www.waze.com/ul?${params.toString()}`;
-      }
-
-      if (
-        origin &&
-        Number.isFinite(origin.lat) &&
-        Number.isFinite(origin.lng)
-      ) {
-        return `https://www.google.com/maps/dir/${origin.lat},${origin.lng}/${destLat},${destLng}`;
-      }
-
-      return `https://www.google.com/maps/dir/?api=1&destination=${destLat},${destLng}`;
-    },
+    (origin, destination) =>
+      buildExternalMapDirectionsUrl({
+        provider: directionsProvider,
+        origin,
+        destination,
+      }),
     [directionsProvider],
   );
 
-  const buildShareUrl = useCallback((coords) => {
-    const lat = Number(coords?.lat);
-    const lng = Number(coords?.lng);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-    const query = encodeURIComponent(`${lat},${lng}`);
-    return `https://www.google.com/maps/search/?api=1&query=${query}`;
-  }, []);
+  const buildShareUrl = useCallback(
+    (coords) =>
+      buildExternalMapSearchUrl({
+        lat: coords?.lat,
+        lng: coords?.lng,
+        provider: "google",
+      }),
+    [],
+  );
 
   const handleShareLocation = useCallback(
     (coords, label = "Location") => {
@@ -134,5 +117,3 @@ const useMapDirections = ({
 };
 
 export default useMapDirections;
-
-

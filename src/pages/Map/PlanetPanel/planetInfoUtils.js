@@ -1,5 +1,4 @@
-import showNotification from "@/utils/notifications";
-import { copyTextToClipboard } from "@/utils/clipboard";
+import { copyTextWithFeedback } from "@/utils/clipboard";
 
 export const formatDegrees = (value) => {
   if (value === undefined || value === null || Number.isNaN(value)) {
@@ -41,7 +40,7 @@ const normalizeAzimuth = (value) => {
   return ((value % 360) + 360) % 360;
 };
 
-export const formatDirection = (value) => {
+const formatDirection = (value) => {
   const normalized = normalizeAzimuth(Number(value));
   if (normalized === null) return "Unknown";
   const labels = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
@@ -72,22 +71,13 @@ export const buildPlanetCopyPayload = (planet) => {
 
 export const copyPlanetDetailsToClipboard = async (planet) => {
   const copyPayload = buildPlanetCopyPayload(planet);
-  if (!copyPayload) return false;
-
-  try {
-    const copied = await copyTextToClipboard(copyPayload);
-    if (!copied) {
-      throw new Error("Clipboard unavailable");
-    }
-
-    showNotification(`${planet?.name || "Planet"} info copied`, "success", {
-      duration: 2000,
-    });
-    return true;
-  } catch {
-    showNotification("Could not copy planet info", "warning", {
-      duration: 2200,
-    });
-    return false;
-  }
+  return copyTextWithFeedback({
+    value: copyPayload,
+    successMessage: `${planet?.name || "Planet"} info copied`,
+    failureMessage: "Could not copy planet info",
+    successType: "success",
+    failureType: "warning",
+    successDuration: 2000,
+    failureDuration: 2200,
+  });
 };

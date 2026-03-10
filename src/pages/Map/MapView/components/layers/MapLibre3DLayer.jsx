@@ -13,6 +13,20 @@ const PITCH_SENSITIVITY = 0.22;
 const TOUCH_PITCH_THRESHOLD = 8;
 const RTL_TEXT_PLUGIN_URL =
   "https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.js";
+const STYLE_URL_CACHE_BUSTER = "proxy-v2";
+const RTL_PLUGIN_STATE_KEY = "__velaMapLibreRtlPluginState__";
+
+const getRtlPluginState = () => {
+  if (typeof globalThis === "undefined") {
+    return { requested: false };
+  }
+
+  if (!globalThis[RTL_PLUGIN_STATE_KEY]) {
+    globalThis[RTL_PLUGIN_STATE_KEY] = { requested: false };
+  }
+
+  return globalThis[RTL_PLUGIN_STATE_KEY];
+};
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const getTouchDistance = (touches) => {
@@ -26,21 +40,49 @@ const getTouchMidY = (touches) => {
   return (touches[0].clientY + touches[1].clientY) / 2;
 };
 
+const isDuplicateRtlPluginError = (error) =>
+  String(error?.message || error || "").includes(
+    "setRTLTextPlugin cannot be called multiple times",
+  );
+
 const ensureRtlTextPlugin = () => {
+  const pluginState = getRtlPluginState();
   const status = maplibregl.getRTLTextPluginStatus?.();
-  if (status === "loaded" || status === "loading") return;
+  if (status === "loaded" || status === "loading") {
+    pluginState.requested = true;
+    return;
+  }
+
+  if (pluginState.requested) return;
 
   if (typeof maplibregl.setRTLTextPlugin !== "function") return;
 
-  maplibregl.setRTLTextPlugin(
-    RTL_TEXT_PLUGIN_URL,
-    (error) => {
-      if (error) {
+  pluginState.requested = true;
+
+  try {
+    const maybePromise = maplibregl.setRTLTextPlugin(
+      RTL_TEXT_PLUGIN_URL,
+      (error) => {
+        if (error && !isDuplicateRtlPluginError(error)) {
+          pluginState.requested = false;
+          console.warn("Failed to load RTL text plugin for 3D map labels", error);
+        }
+      },
+      true,
+    );
+
+    if (typeof maybePromise?.catch === "function") {
+      maybePromise.catch((error) => {
+        if (isDuplicateRtlPluginError(error)) return;
+        pluginState.requested = false;
         console.warn("Failed to load RTL text plugin for 3D map labels", error);
-      }
-    },
-    true,
-  );
+      });
+    }
+  } catch (error) {
+    if (isDuplicateRtlPluginError(error)) return;
+    pluginState.requested = false;
+    console.warn("Failed to load RTL text plugin for 3D map labels", error);
+  }
 };
 
 const attachAngleControls = (map, glMap) => {
@@ -241,7 +283,8 @@ const attachAngleControls = (map, glMap) => {
   };
 };
 
-const getStyleUrl = () => buildMapTilerStyleUrl("streets-v2");
+const getStyleUrl = () =>
+  `${buildMapTilerStyleUrl("streets-v2")}?_vela=${STYLE_URL_CACHE_BUSTER}`;
 
 export default function MapLibre3DLayer() {
   const map = useMap();

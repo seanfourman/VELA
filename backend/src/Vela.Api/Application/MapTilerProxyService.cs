@@ -43,6 +43,9 @@ public sealed class MapTilerProxyService : IMapTilerProxyService
         var contentType =
             response.Content.Headers.ContentType?.ToString() ?? "application/octet-stream";
         var contentEncoding = response.Content.Headers.ContentEncoding.FirstOrDefault();
+        var cacheControl = response.Headers.CacheControl?.ToString();
+        var etag = response.Headers.ETag?.ToString();
+        var lastModified = response.Content.Headers.LastModified;
 
         if (ShouldRewriteJson(normalizedPath, contentType))
         {
@@ -51,15 +54,18 @@ public sealed class MapTilerProxyService : IMapTilerProxyService
             bytes = Encoding.UTF8.GetBytes(rewritten);
             contentType = "application/json; charset=utf-8";
             contentEncoding = null;
+            cacheControl = "no-cache";
+            etag = null;
+            lastModified = null;
         }
 
         return new MapTilerProxyResponse
         {
             Content = bytes,
             ContentType = contentType,
-            CacheControl = response.Headers.CacheControl?.ToString(),
-            ETag = response.Headers.ETag?.ToString(),
-            LastModified = response.Content.Headers.LastModified,
+            CacheControl = cacheControl,
+            ETag = etag,
+            LastModified = lastModified,
             ContentEncoding = contentEncoding,
         };
     }
@@ -79,6 +85,11 @@ public sealed class MapTilerProxyService : IMapTilerProxyService
         foreach (var entry in query)
         {
             if (string.Equals(entry.Key, "key", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (entry.Key.StartsWith("_", StringComparison.Ordinal))
             {
                 continue;
             }
@@ -244,7 +255,8 @@ public sealed class MapTilerProxyService : IMapTilerProxyService
             );
         }
 
-        var proxyUrl = $"{proxyBaseUrl}/{uri.AbsolutePath.TrimStart('/')}";
+        var proxyPath = uri.GetComponents(UriComponents.Path, UriFormat.Unescaped);
+        var proxyUrl = $"{proxyBaseUrl}/{proxyPath.TrimStart('/')}";
         if (queryValues.Count > 0)
         {
             proxyUrl = $"{proxyUrl}?{string.Join('&', queryValues)}";

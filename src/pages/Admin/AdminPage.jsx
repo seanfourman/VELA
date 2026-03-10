@@ -9,6 +9,7 @@ import {
 } from "@/utils/recommendationsApi";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import AdminAccessNotice from "./AdminAccessNotice";
+import AdminCollectionSection from "./AdminCollectionSection";
 import AdminLocationForm from "./AdminLocationForm";
 import AdminLocationList from "./AdminLocationList";
 import AdminEventForm from "./AdminEventForm";
@@ -112,25 +113,6 @@ const paginateItems = (items, page, pageSize) => {
   const startIndex = (page - 1) * pageSize;
   return items.slice(startIndex, startIndex + pageSize);
 };
-
-const PaginationChevron = ({ direction }) => (
-  <svg
-    viewBox="0 0 20 20"
-    width="18"
-    height="18"
-    aria-hidden="true"
-    focusable="false"
-  >
-    <path
-      d={direction === "left" ? "M12.5 4.5L7 10l5.5 5.5" : "M7.5 4.5L13 10l-5.5 5.5"}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 function AdminPage({
   auth,
@@ -843,28 +825,20 @@ function AdminPage({
 
               <div className="admin-section-separator" aria-hidden="true" />
 
-              <div className="admin-panel-section admin-panel-section--collection">
-                <div className="admin-panel-section__header">
-                  <div className="admin-panel-section__intro">
-                    <h3 className="admin-panel-section__title">
-                      {activeCollectionTitle}
-                    </h3>
-                    <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
-                  </div>
-                  <div className="admin-collection-tools">
-                    <label className="profile-field admin-search-field">
-                      <input
-                        className="profile-input"
-                        type="search"
-                        aria-label={activeSearchLabel}
-                        value={activeSearchValue}
-                        onChange={handleSearchChange}
-                        placeholder={activeSearchPlaceholder}
-                      />
-                    </label>
-                  </div>
-                </div>
-
+              <AdminCollectionSection
+                title={activeCollectionTitle}
+                copy={activeCollectionCopy}
+                searchLabel={activeSearchLabel}
+                searchValue={activeSearchValue}
+                onSearchChange={handleSearchChange}
+                searchPlaceholder={activeSearchPlaceholder}
+                paginationRef={locationPaginationRef}
+                resultSummary={activeResultSummary}
+                page={activePage}
+                totalPages={activeTotalPages}
+                onPreviousPage={handlePreviousPage}
+                onNextPage={handleNextPage}
+              >
                 <AdminLocationList
                   locations={paginatedLocations}
                   onDeleteLocation={handleRequestDeleteLocation}
@@ -876,33 +850,7 @@ function AdminPage({
                       : "No curated locations yet"
                   }
                 />
-
-                <div className="admin-pagination" ref={locationPaginationRef}>
-                  <div className="admin-pagination-status">{activeResultSummary}</div>
-                  {activeTotalPages > 1 ? (
-                    <>
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-pagination-btn"
-                        onClick={handlePreviousPage}
-                        disabled={activePage <= 1}
-                        aria-label="Previous page"
-                      >
-                        <PaginationChevron direction="left" />
-                      </button>
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-pagination-btn"
-                        onClick={handleNextPage}
-                        disabled={activePage >= activeTotalPages}
-                        aria-label="Next page"
-                      >
-                        <PaginationChevron direction="right" />
-                      </button>
-                    </>
-                  ) : null}
-                </div>
-              </div>
+              </AdminCollectionSection>
             </>
           ) : activeView === "events" ? (
             <>
@@ -926,28 +874,20 @@ function AdminPage({
 
               <div className="admin-section-separator" aria-hidden="true" />
 
-              <div className="admin-panel-section admin-panel-section--collection">
-                <div className="admin-panel-section__header">
-                  <div className="admin-panel-section__intro">
-                    <h3 className="admin-panel-section__title">
-                      {activeCollectionTitle}
-                    </h3>
-                    <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
-                  </div>
-                  <div className="admin-collection-tools">
-                    <label className="profile-field admin-search-field">
-                      <input
-                        className="profile-input"
-                        type="search"
-                        aria-label={activeSearchLabel}
-                        value={activeSearchValue}
-                        onChange={handleSearchChange}
-                        placeholder={activeSearchPlaceholder}
-                      />
-                    </label>
-                  </div>
-                </div>
-
+              <AdminCollectionSection
+                title={activeCollectionTitle}
+                copy={activeCollectionCopy}
+                searchLabel={activeSearchLabel}
+                searchValue={activeSearchValue}
+                onSearchChange={handleSearchChange}
+                searchPlaceholder={activeSearchPlaceholder}
+                paginationRef={eventPaginationRef}
+                resultSummary={activeResultSummary}
+                page={activePage}
+                totalPages={activeTotalPages}
+                onPreviousPage={handlePreviousPage}
+                onNextPage={handleNextPage}
+              >
                 <AdminEventList
                   events={paginatedEvents}
                   onEditEvent={handleEditEvent}
@@ -960,58 +900,24 @@ function AdminPage({
                       : "No events created yet"
                   }
                 />
-
-                <div className="admin-pagination" ref={eventPaginationRef}>
-                  <div className="admin-pagination-status">{activeResultSummary}</div>
-                  {activeTotalPages > 1 ? (
-                    <>
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-pagination-btn"
-                        onClick={handlePreviousPage}
-                        disabled={activePage <= 1}
-                        aria-label="Previous page"
-                      >
-                        <PaginationChevron direction="left" />
-                      </button>
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-pagination-btn"
-                        onClick={handleNextPage}
-                        disabled={activePage >= activeTotalPages}
-                        aria-label="Next page"
-                      >
-                        <PaginationChevron direction="right" />
-                      </button>
-                    </>
-                  ) : null}
-                </div>
-              </div>
+              </AdminCollectionSection>
             </>
           ) : (
             <>
-              <div className="admin-panel-section admin-panel-section--collection">
-                <div className="admin-panel-section__header">
-                  <div className="admin-panel-section__intro">
-                    <h3 className="admin-panel-section__title">
-                      {activeCollectionTitle}
-                    </h3>
-                    <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
-                  </div>
-                  <div className="admin-collection-tools">
-                    <label className="profile-field admin-search-field">
-                      <input
-                        className="profile-input"
-                        type="search"
-                        aria-label={activeSearchLabel}
-                        value={activeSearchValue}
-                        onChange={handleSearchChange}
-                        placeholder={activeSearchPlaceholder}
-                      />
-                    </label>
-                  </div>
-                </div>
-
+              <AdminCollectionSection
+                title={activeCollectionTitle}
+                copy={activeCollectionCopy}
+                searchLabel={activeSearchLabel}
+                searchValue={activeSearchValue}
+                onSearchChange={handleSearchChange}
+                searchPlaceholder={activeSearchPlaceholder}
+                paginationRef={userPaginationRef}
+                resultSummary={activeResultSummary}
+                page={activePage}
+                totalPages={activeTotalPages}
+                onPreviousPage={handlePreviousPage}
+                onNextPage={handleNextPage}
+              >
                 {usersLoadError ? (
                   <div className="admin-inline-feedback">
                     <div className="profile-readonly admin-inline-feedback__message">
@@ -1035,33 +941,7 @@ function AdminPage({
                     }
                   />
                 )}
-
-                <div className="admin-pagination" ref={userPaginationRef}>
-                  <div className="admin-pagination-status">{activeResultSummary}</div>
-                  {activeTotalPages > 1 ? (
-                    <>
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-pagination-btn"
-                        onClick={handlePreviousPage}
-                        disabled={activePage <= 1}
-                        aria-label="Previous page"
-                      >
-                        <PaginationChevron direction="left" />
-                      </button>
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-pagination-btn"
-                        onClick={handleNextPage}
-                        disabled={activePage >= activeTotalPages}
-                        aria-label="Next page"
-                      >
-                        <PaginationChevron direction="right" />
-                      </button>
-                    </>
-                  ) : null}
-                </div>
-              </div>
+              </AdminCollectionSection>
             </>
           )}
         </section>

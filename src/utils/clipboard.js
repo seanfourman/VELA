@@ -1,3 +1,5 @@
+import showNotification from "@/utils/notifications";
+
 const legacyCopyText = (value) => {
   if (typeof document === "undefined") return false;
 
@@ -32,4 +34,42 @@ export async function copyTextToClipboard(value) {
   } catch {
     return false;
   }
+}
+
+export async function copyTextWithFeedback({
+  value,
+  missingMessage = "",
+  successMessage = "Copied",
+  failureMessage = "Could not copy",
+  successType = "info",
+  failureType = "warning",
+  successDuration = 1800,
+  failureDuration = 2200,
+}) {
+  const normalizedValue =
+    typeof value === "string"
+      ? value
+      : value === undefined || value === null
+        ? ""
+        : String(value);
+
+  if (!normalizedValue) {
+    if (missingMessage) {
+      showNotification(missingMessage, failureType, { duration: failureDuration });
+    }
+    return false;
+  }
+
+  const copied = await copyTextToClipboard(normalizedValue);
+  if (copied) {
+    if (successMessage) {
+      showNotification(successMessage, successType, { duration: successDuration });
+    }
+    return true;
+  }
+
+  if (failureMessage) {
+    showNotification(failureMessage, failureType, { duration: failureDuration });
+  }
+  return false;
 }
