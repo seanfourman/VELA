@@ -1,5 +1,6 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import showNotification from "@/utils/notifications";
+import { copyTextToClipboard } from "@/utils/clipboard";
 import arZoneIcon from "@/assets/icons/ar-zone-svgrepo-com.svg";
 import "./styles/planetInfoCard.css";
 
@@ -51,24 +52,6 @@ const formatDirection = (value) => {
   return labels[index];
 };
 
-const legacyCopyText = (text) => {
-  if (typeof document === "undefined") return false;
-  const textarea = document.createElement("textarea");
-  textarea.value = text;
-  textarea.setAttribute("readonly", "");
-  textarea.style.position = "fixed";
-  textarea.style.left = "-9999px";
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  try {
-    return document.execCommand("copy");
-  } catch {
-    return false;
-  } finally {
-    document.body.removeChild(textarea);
-  }
-};
 
 const buildCopyPayload = (planet) => {
   const azimuth = formatDegrees(planet?.azimuth);
@@ -171,9 +154,8 @@ export default function PlanetInfoCard({
     if (!renderedCard || !copyPayload) return;
 
     try {
-      if (navigator?.clipboard?.writeText) {
-        await navigator.clipboard.writeText(copyPayload);
-      } else if (!legacyCopyText(copyPayload)) {
+      const copied = await copyTextToClipboard(copyPayload);
+      if (!copied) {
         throw new Error("Clipboard unavailable");
       }
 
@@ -300,6 +282,9 @@ export default function PlanetInfoCard({
     </div>
   );
 }
+
+
+
 
 
 

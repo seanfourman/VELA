@@ -13,9 +13,11 @@ This audit is based on the local course material in `docs/_extracted`, mainly:
 ### Frontend
 - The app is built with functional components and hooks across the main flows.
 - Routing is centralized in `src/router.jsx` with route-level composition under `src/layouts/AppLayout.jsx`.
-- Network calls are wrapped in dedicated modules and hooks instead of being scattered through presentational components.
-- Internal navigation now uses router links in the main shell components.
-- Portal root DOM setup now happens in a hook effect instead of during render.
+- Internal navigation uses router-driven navigation only.
+- Network calls are wrapped in dedicated modules and now point at the backend-owned API surface instead of the older mixed fallback setup.
+- Notifications are managed by a React provider-backed store instead of a window event bus.
+- Portal root DOM setup happens in a hook effect instead of during render.
+- Clipboard fallback logic is centralized in one helper instead of being duplicated across multiple components.
 
 ### Backend
 - Controllers now depend on injected services instead of static BL classes.
@@ -26,77 +28,43 @@ This audit is based on the local course material in `docs/_extracted`, mainly:
 - The old static BL path and `DBService` path were removed.
 
 ## Remaining gaps by area
-### 1. Notifications are implemented as a window event bus, not a React state/context pattern
+### 1. Favorite mutation logic is still duplicated across the map flows
 Priority: medium
 
 Current state:
-- `src/utils/notifications.js`
-- `src/components/ToastNotifications.jsx`
+- `src/features/map/useMapFavorites.js`
 
-Why it is still off:
-- The hooks material leans toward React-managed state, effects, context, and reducers.
-- The current notification system works, but it bypasses React state flow by dispatching and listening to browser events on `window`.
-
-What to change later:
-1. Replace the global event bus with a `NotificationProvider`.
-2. Expose `useNotifications()` for enqueue and dismiss actions.
-3. Keep the toast renderer inside provider state instead of listening to DOM events.
-
-### 2. Navigation helper still contains a full-page fallback
-Priority: medium
-
-Current state:
-- `src/utils/navigation.js`
-
-Why it is still off:
-- The router lectures emphasize SPA navigation through router hooks and router components.
-- `window.location.assign()` is only used as a fallback, but it is still outside the taught SPA path.
+Why it still matters:
+- The biggest correctness bugs in the map flow came from separate favorite paths drifting apart.
+- The add flow is more consolidated now, but the hook still contains multiple specialized toggle/remove branches that should be tightened further.
 
 What to change later:
-1. Keep all in-app navigation on `useNavigate`, `Link`, or `NavLink`.
-2. Remove the full reload fallback if there are no non-router call sites that need it.
+1. Collapse the remaining favorite toggle/remove branches into one shared mutation helper.
+2. Keep marker animation state and persistence flow in one path.
+3. Reduce the number of marker-specific favorite edge cases.
 
-### 3. Clipboard fallbacks use direct DOM textareas in event handlers
+### 2. Frontend chunking is improved, but the map stack is still the heaviest part of the app
 Priority: low
 
 Current state:
-- `src/pages/Map/PlanetPanel/PlanetInfoCard.jsx`
-- `src/pages/Map/PlanetPanel/PlanetPanelMobile.jsx`
-- `src/pages/Map/MapView/components/popups/content/copyCoordinates.js`
+- `vite.config.js`
 
-Why it is only a minor gap:
-- This is not a render-time side effect anymore.
-- It is still imperative DOM code and can be centralized for cleaner React style.
+Why it is only a follow-up item:
+- Vendor chunking is improved.
+- The build still warns because the map/MapLibre stack remains large.
 
 What to change later:
-1. Create one shared clipboard helper.
-2. Prefer `navigator.clipboard.writeText()` first.
-3. Keep the textarea fallback in one place only.
-
-### 4. The refactored backend still has no automated tests around the new service and repository seams
-Priority: medium
-
-Current state:
-- There is no backend test project covering the new DI and repository boundaries.
-
-Why it matters:
-- The repository-pattern material is mainly about separation and swapability.
-- Without tests, the structural improvement is real, but still not defended.
-
-What to change later:
-1. Add a backend test project.
-2. Unit-test `UserService`, `FavoriteService`, `RecommendationService`, and `StarPartyEventService` with mocked repositories.
-3. Add controller tests for auth, favorites, recommendations, and star-party event flows.
+1. Consider isolating more of the map-only vendor code.
+2. Split optional 3D/map features further only if startup size becomes a real problem.
+3. Revisit the build warning only if performance becomes a real issue.
 
 ## Areas that do not currently need change
 - Hook usage for auth/session state in `src/features/auth/useAuth.js` is aligned with the hooks material.
 - Central route definition in `src/router.jsx` is aligned with the router material.
 - Frontend API wrappers and auth persistence are acceptable for the fetch and JWT units.
 - Local storage usage is fine for this SPA and not a mismatch by itself.
-- The backend architecture is now aligned with the DI and repository material at the structural level.
+- The backend architecture is aligned with the DI and repository material at the structural level.
 
 ## Recommended order from here
-1. Replace the notification event bus with a React provider.
-2. Add backend tests around the new service and repository seams.
-3. Remove the full-page navigation fallback if it is no longer needed.
-4. Centralize clipboard fallback logic.
+1. Finish collapsing the remaining duplicate favorite mutation branches.
+2. Revisit bundle size only if the map route becomes a measurable performance problem.

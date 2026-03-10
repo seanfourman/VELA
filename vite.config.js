@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -24,6 +25,12 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
+          if (id.includes("@mui") || id.includes("@emotion")) {
+            return "mui-vendor";
+          }
+          if (id.includes("maplibre-gl") || id.includes("@maplibre")) {
+            return "maplibre-vendor";
+          }
           if (id.includes("@react-three/drei")) {
             return "drei-vendor";
           }
@@ -38,6 +45,9 @@ export default defineConfig({
           }
           if (id.includes("leaflet") || id.includes("react-leaflet")) {
             return "leaflet-vendor";
+          }
+          if (id.includes("react-router")) {
+            return "router-vendor";
           }
           if (id.includes("react")) {
             return "react-vendor";

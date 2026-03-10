@@ -1,28 +1,7 @@
 import showNotification from "@/utils/notifications";
+import { copyTextToClipboard } from "@/utils/clipboard";
 
 const formatCoordinates = (lat, lng) => `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-
-const legacyCopyText = (value) => {
-  if (typeof document === "undefined") return false;
-  const textarea = document.createElement("textarea");
-  textarea.value = value;
-  textarea.setAttribute("readonly", "true");
-  textarea.style.position = "fixed";
-  textarea.style.opacity = "0";
-  textarea.style.left = "-9999px";
-  document.body.appendChild(textarea);
-  textarea.select();
-
-  let copied = false;
-  try {
-    copied = document.execCommand("copy");
-  } catch {
-    copied = false;
-  }
-
-  document.body.removeChild(textarea);
-  return copied;
-};
 
 export async function copyCoordinates({ lat, lng }) {
   const latNumber = Number(lat);
@@ -37,9 +16,8 @@ export async function copyCoordinates({ lat, lng }) {
   const value = formatCoordinates(latNumber, lngNumber);
 
   try {
-    if (navigator?.clipboard?.writeText) {
-      await navigator.clipboard.writeText(value);
-    } else if (!legacyCopyText(value)) {
+    const copied = await copyTextToClipboard(value);
+    if (!copied) {
       throw new Error("Clipboard API unavailable.");
     }
 

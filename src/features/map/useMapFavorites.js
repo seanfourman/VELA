@@ -211,6 +211,43 @@ const useMapFavorites = ({
     });
   }, []);
 
+  const addFavoriteSpot = useCallback(
+    async ({
+      lat,
+      lng,
+      onOptimisticAdd,
+      onRollback,
+      errorMessage = "Could not save favorite right now",
+    }) => {
+      const optimisticSpot = buildFavoriteSpot(lat, lng);
+      const { key } = optimisticSpot;
+
+      setFavoriteSpots((prev) => upsertFavoriteSpot(prev, optimisticSpot));
+      triggerFavoriteEntry(key);
+      onOptimisticAdd?.(optimisticSpot);
+
+      try {
+        const saved = await persistFavoriteSpot(lat, lng);
+        commitSavedFavorite(saved ?? optimisticSpot);
+        return saved ?? optimisticSpot;
+      } catch (error) {
+        clearFavoriteEntry(key);
+        setFavoriteSpots((prev) => prev.filter((item) => item.key !== key));
+        onRollback?.(optimisticSpot);
+        reportFavoriteError(error, errorMessage);
+        return null;
+      }
+    },
+    [
+      buildFavoriteSpot,
+      clearFavoriteEntry,
+      commitSavedFavorite,
+      persistFavoriteSpot,
+      reportFavoriteError,
+      triggerFavoriteEntry,
+    ],
+  );
+
   const handleRemoveFavoriteSpot = useCallback(
     async (spotKey) => {
       if (!spotKey) return;
@@ -260,29 +297,13 @@ const useMapFavorites = ({
         return;
       }
 
-      const optimisticSpot = buildFavoriteSpot(spot.lat, spot.lon);
-      setFavoriteSpots((prev) => upsertFavoriteSpot(prev, optimisticSpot));
-      triggerFavoriteEntry(key);
-
-      try {
-        const saved = await persistFavoriteSpot(spot.lat, spot.lon);
-        commitSavedFavorite(saved ?? optimisticSpot);
-      } catch (error) {
-        clearFavoriteEntry(key);
-        setFavoriteSpots((prev) => prev.filter((item) => item.key !== key));
-        reportFavoriteError(error, "Could not save favorite right now");
-      }
+      await addFavoriteSpot({ lat: spot.lat, lng: spot.lon });
     },
     [
-      buildFavoriteSpot,
-      clearFavoriteEntry,
-      commitSavedFavorite,
+      addFavoriteSpot,
       favoriteSpotKeys,
       getSpotKey,
       handleRemoveFavoriteSpot,
-      persistFavoriteSpot,
-      reportFavoriteError,
-      triggerFavoriteEntry,
     ],
   );
 
@@ -316,29 +337,13 @@ const useMapFavorites = ({
         return;
       }
 
-      const optimisticSpot = buildFavoriteSpot(spot.lat, spot.lng);
-      setFavoriteSpots((prev) => upsertFavoriteSpot(prev, optimisticSpot));
-      triggerFavoriteEntry(key);
-
-      try {
-        const saved = await persistFavoriteSpot(spot.lat, spot.lng);
-        commitSavedFavorite(saved ?? optimisticSpot);
-      } catch (error) {
-        clearFavoriteEntry(key);
-        setFavoriteSpots((prev) => prev.filter((item) => item.key !== key));
-        reportFavoriteError(error, "Could not save favorite right now");
-      }
+      await addFavoriteSpot({ lat: spot.lat, lng: spot.lng });
     },
     [
-      buildFavoriteSpot,
-      clearFavoriteEntry,
-      commitSavedFavorite,
+      addFavoriteSpot,
       favoriteSpotKeys,
       getSpotKey,
       handleRemoveFavoriteSpotAnimated,
-      persistFavoriteSpot,
-      reportFavoriteError,
-      triggerFavoriteEntry,
     ],
   );
 
@@ -359,45 +364,36 @@ const useMapFavorites = ({
       return;
     }
 
-    const optimisticSpot = buildFavoriteSpot(lat, lng);
-    setFavoriteSpots((prev) => upsertFavoriteSpot(prev, optimisticSpot));
-    triggerFavoriteEntry(key);
-    setPlacedMarkerFavoriteState(key, true);
-    setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
-
-    try {
-      const saved = await persistFavoriteSpot(lat, lng);
-      commitSavedFavorite(saved ?? optimisticSpot);
-    } catch (error) {
-      clearFavoriteEntry(key);
-      setFavoriteSpots((prev) => prev.filter((item) => item.key !== key));
-      setPlacedMarkerFavoriteState(key, false);
-      restoreSelectedTarget(
-        key,
-        selectionMatchesPinned ? previousSelection : null,
-      );
-      if (existing) {
-        restoreFavoriteLocally(existing, previousSelection);
-      }
-      reportFavoriteError(error, "Could not save favorite right now");
-    }
+    await addFavoriteSpot({
+      lat,
+      lng,
+      onOptimisticAdd: (optimisticSpot) => {
+        setPlacedMarkerFavoriteState(optimisticSpot.key, true);
+        setSelectedDarkSpot({ lat, lng, label: "Favorite spot" });
+      },
+      onRollback: (optimisticSpot) => {
+        setPlacedMarkerFavoriteState(optimisticSpot.key, false);
+        restoreSelectedTarget(
+          optimisticSpot.key,
+          selectionMatchesPinned ? previousSelection : null,
+        );
+        if (existing) {
+          restoreFavoriteLocally(existing, previousSelection);
+        }
+      },
+    });
   }, [
-    buildFavoriteSpot,
-    clearFavoriteEntry,
-    commitSavedFavorite,
+    addFavoriteSpot,
     favoriteSpotKeys,
     favoriteSpots,
     getSpotKey,
     handleRemoveFavoriteSpot,
-    persistFavoriteSpot,
     placedMarker,
-    reportFavoriteError,
     restoreFavoriteLocally,
     restoreSelectedTarget,
     selectedDarkSpot,
     setPlacedMarkerFavoriteState,
     setSelectedDarkSpot,
-    triggerFavoriteEntry,
   ]);
 
   return {

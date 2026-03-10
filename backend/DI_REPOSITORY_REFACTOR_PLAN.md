@@ -84,6 +84,3 @@ A feature slice is considered complete when:
 - no `new SomeDalService()` calls remain in the slice
 
 The backend now meets that definition structurally.
-
-## Immediate next implementation step
-Add backend tests for the new service and repository seams so the architectural refactor is protected by automated verification.

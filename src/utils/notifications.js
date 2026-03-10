@@ -1,13 +1,27 @@
-﻿export const NOTIFICATION_EVENT = "app:notification";
+let notificationDispatcher = null;
+
+export function registerNotificationDispatcher(dispatcher) {
+  notificationDispatcher = dispatcher;
+
+  return () => {
+    if (notificationDispatcher === dispatcher) {
+      notificationDispatcher = null;
+    }
+  };
+}
 
 export function showNotification(
   message,
   type = "info",
   { duration = 2500 } = {},
 ) {
-  if (!message) return;
-  const detail = { message, type, duration };
-  window.dispatchEvent(new CustomEvent(NOTIFICATION_EVENT, { detail }));
+  if (!message || typeof notificationDispatcher !== "function") return;
+
+  notificationDispatcher({
+    message,
+    type,
+    duration,
+  });
 }
 
 export default showNotification;
