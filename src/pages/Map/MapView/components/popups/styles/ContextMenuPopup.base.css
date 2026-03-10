@@ -199,6 +199,10 @@
   line-height: 1.1;
 }
 
+.popup-btn__label--swap {
+  animation: popup-label-swap 0.22s ease;
+}
+
 .popup-btn__origin {
   display: inline-flex;
   align-items: center;

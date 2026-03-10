@@ -211,7 +211,12 @@ export default function ContextMenuPopup({
           )}
           {onRemovePin && (
             <button className="popup-btn" onClick={onRemovePin}>
-              {resolvedRemoveLabel}
+              <span
+                key={resolvedRemoveLabel}
+                className="popup-btn__label popup-btn__label--swap"
+              >
+                {resolvedRemoveLabel}
+              </span>
             </button>
           )}
         </div>
