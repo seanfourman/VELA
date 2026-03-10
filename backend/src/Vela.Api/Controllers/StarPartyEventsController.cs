@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vela.Api.BL;
+using Vela.Api.Application;
 using Vela.Api.Configuration;
 using Vela.Api.DTOs;
+using Vela.Api.Models;
 using Vela.Api.Validators;
 
 namespace Vela.Api.Controllers
@@ -11,11 +12,23 @@ namespace Vela.Api.Controllers
     [Route("api/star-party-events")]
     public class StarPartyEventsController : ControllerBase
     {
+        private readonly IStarPartyEventService _starPartyEventService;
+        private readonly IUserService _userService;
+
+        public StarPartyEventsController(
+            IStarPartyEventService starPartyEventService,
+            IUserService userService
+        )
+        {
+            _starPartyEventService = starPartyEventService;
+            _userService = userService;
+        }
+
         [AllowAnonymous]
         [HttpGet]
         public IActionResult GetEvents()
         {
-            var events = StarPartyEvent.GetAll();
+            var events = _starPartyEventService.GetAll();
             return Ok(events);
         }
 
@@ -40,7 +53,7 @@ namespace Vela.Api.Controllers
                 return Unauthorized();
             }
 
-            var saved = StarPartyEvent.Save(request, hostUser);
+            var saved = _starPartyEventService.Save(request, hostUser);
             return Ok(saved);
         }
 
@@ -69,7 +82,7 @@ namespace Vela.Api.Controllers
                 return BadRequest(new { errors = validationErrors });
             }
 
-            var updated = StarPartyEvent.SetStatus(id.Trim(), request.Status);
+            var updated = _starPartyEventService.SetStatus(id.Trim(), request.Status);
             if (updated == null)
             {
                 return NotFound();
@@ -87,7 +100,7 @@ namespace Vela.Api.Controllers
                 return BadRequest("id is required.");
             }
 
-            var deleted = StarPartyEvent.Delete(id.Trim());
+            var deleted = _starPartyEventService.Delete(id.Trim());
             if (!deleted)
             {
                 return NotFound();
@@ -111,7 +124,7 @@ namespace Vela.Api.Controllers
                 return Unauthorized();
             }
 
-            var result = StarPartyEvent.ToggleRsvp(id.Trim(), currentUser);
+            var result = _starPartyEventService.ToggleRsvp(id.Trim(), currentUser);
             if (result.Event == null)
             {
                 return NotFound();
@@ -122,12 +135,12 @@ namespace Vela.Api.Controllers
                 {
                     Event = result.Event,
                     Joined = result.Joined,
-                    RsvpCount = result.Event.Rsvps.Count
+                    RsvpCount = result.Event.Rsvps.Count,
                 }
             );
         }
 
-        private Vela.Api.BL.User? ReadCurrentUser()
+        private User? ReadCurrentUser()
         {
             var userId = User.ReadUserId();
             if (!userId.HasValue)
@@ -135,7 +148,7 @@ namespace Vela.Api.Controllers
                 return null;
             }
 
-            return Vela.Api.BL.User.GetById(userId.Value);
+            return _userService.GetById(userId.Value);
         }
     }
 }

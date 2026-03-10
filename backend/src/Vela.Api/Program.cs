@@ -3,6 +3,7 @@ using Vela.Api.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApiPresentation();
+builder.Services.AddApplicationServices();
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddConfiguredCors(builder.Configuration);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

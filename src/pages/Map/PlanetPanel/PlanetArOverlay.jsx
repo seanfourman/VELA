@@ -1,5 +1,6 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import usePortalTarget from "@/hooks/usePortalTarget";
 import showNotification from "@/utils/notifications";
 import exitFullscreenIcon from "@/assets/icons/exit-full-screen-svgrepo-com.svg";
 import {
@@ -43,17 +44,7 @@ export default function PlanetArOverlay({ planet, onClose }) {
         : "granted"
       : "denied",
   );
-
-  const portalTarget = useMemo(() => {
-    if (typeof document === "undefined") return null;
-    let target = document.getElementById("planet-ar-overlay-root");
-    if (!target) {
-      target = document.createElement("div");
-      target.id = "planet-ar-overlay-root";
-      document.body.appendChild(target);
-    }
-    return target;
-  }, []);
+  const portalTarget = usePortalTarget("planet-ar-overlay-root");
 
   const targetAzimuth = normalizeAzimuth(Number(planet?.azimuth));
   const targetAltitude = Number.isFinite(Number(planet?.altitude))
@@ -452,6 +443,3 @@ export default function PlanetArOverlay({ planet, onClose }) {
     portalTarget,
   );
 }
-
-
-

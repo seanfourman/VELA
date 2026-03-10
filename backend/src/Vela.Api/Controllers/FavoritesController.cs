@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vela.Api.BL;
+using Vela.Api.Application;
 using Vela.Api.Configuration;
 using Vela.Api.DTOs;
 using Vela.Api.Validators;
@@ -12,6 +12,13 @@ namespace Vela.Api.Controllers
     [Route("api/[controller]")]
     public class FavoritesController : ControllerBase
     {
+        private readonly IFavoriteService _favoriteService;
+
+        public FavoritesController(IFavoriteService favoriteService)
+        {
+            _favoriteService = favoriteService;
+        }
+
         [HttpGet]
         public IActionResult GetFavorites()
         {
@@ -21,7 +28,7 @@ namespace Vela.Api.Controllers
                 return Unauthorized();
             }
 
-            var favorites = FavoriteSpot.GetByUserId(userId.Value);
+            var favorites = _favoriteService.GetByUserId(userId.Value);
             return Ok(favorites);
         }
 
@@ -45,7 +52,7 @@ namespace Vela.Api.Controllers
                 return BadRequest(new { errors = validationErrors });
             }
 
-            var saved = FavoriteSpot.Save(userId.Value, request);
+            var saved = _favoriteService.Save(userId.Value, request);
             return Ok(saved);
         }
 
@@ -63,7 +70,7 @@ namespace Vela.Api.Controllers
                 return BadRequest("spotId is required.");
             }
 
-            var deleted = FavoriteSpot.Delete(userId.Value, spotId);
+            var deleted = _favoriteService.Delete(userId.Value, spotId);
             if (!deleted)
             {
                 return NotFound();

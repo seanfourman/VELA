@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vela.Api.BL;
+using Vela.Api.Application;
 using Vela.Api.DTOs;
 using Vela.Api.Validators;
 
@@ -10,11 +10,18 @@ namespace Vela.Api.Controllers
     [Route("api/[controller]")]
     public class RecommendationsController : ControllerBase
     {
+        private readonly IRecommendationService _recommendationService;
+
+        public RecommendationsController(IRecommendationService recommendationService)
+        {
+            _recommendationService = recommendationService;
+        }
+
         [AllowAnonymous]
         [HttpGet]
         public IActionResult GetRecommendations()
         {
-            var recommendations = Recommendation.GetAll();
+            var recommendations = _recommendationService.GetAll();
             return Ok(recommendations);
         }
 
@@ -33,7 +40,7 @@ namespace Vela.Api.Controllers
                 return BadRequest(new { errors = validationErrors });
             }
 
-            var saved = Recommendation.Save(request);
+            var saved = _recommendationService.Save(request);
             return Ok(saved);
         }
 
@@ -46,7 +53,7 @@ namespace Vela.Api.Controllers
                 return BadRequest("id is required.");
             }
 
-            var deleted = Recommendation.Delete(id.Trim());
+            var deleted = _recommendationService.Delete(id.Trim());
             if (!deleted)
             {
                 return NotFound();

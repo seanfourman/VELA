@@ -2,6 +2,8 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Vela.Api.Application;
+using Vela.Api.DAL;
 
 namespace Vela.Api.Configuration;
 
@@ -17,6 +19,24 @@ public static class ServiceCollectionExtensions
         });
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        return services;
+    }
+
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    {
+        services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
+
+        services.AddScoped<IFavoriteRepository, SqlFavoriteRepository>();
+        services.AddScoped<IUserRepository, SqlUserRepository>();
+        services.AddScoped<IRecommendationRepository, SqlRecommendationRepository>();
+        services.AddScoped<IStarPartyEventRepository, SqlStarPartyEventRepository>();
+
+        services.AddScoped<IFavoriteService, FavoriteService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IRecommendationService, RecommendationService>();
+        services.AddScoped<IStarPartyEventService, StarPartyEventService>();
+        services.AddScoped<ITokenService, JwtTokenService>();
+
         return services;
     }
 
@@ -51,7 +71,7 @@ public static class ServiceCollectionExtensions
                     ValidIssuer = issuer,
                     ValidAudience = audience,
                     IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
-                    ClockSkew = TimeSpan.FromMinutes(1)
+                    ClockSkew = TimeSpan.FromMinutes(1),
                 };
             });
         services.AddAuthorization();

@@ -1,9 +1,10 @@
 using Vela.Api.DAL;
 using Vela.Api.DTOs;
+using Vela.Api.Models;
 
-namespace Vela.Api.BL;
+namespace Vela.Api.Application;
 
-public class StarPartyEvent
+public sealed class StarPartyEventService : IStarPartyEventService
 {
     private static readonly HashSet<string> AllowedEventTypes = new(
         ["party", "special_event"],
@@ -15,15 +16,20 @@ public class StarPartyEvent
         StringComparer.OrdinalIgnoreCase
     );
 
-    public static List<StarPartyEventDto> GetAll()
+    private readonly IStarPartyEventRepository _starPartyEventRepository;
+
+    public StarPartyEventService(IStarPartyEventRepository starPartyEventRepository)
     {
-        StarPartyEventService eventService = new();
-        return eventService.GetAllEvents();
+        _starPartyEventRepository = starPartyEventRepository;
     }
 
-    public static StarPartyEventDto Save(UpsertStarPartyEventRequestDto request, User hostUser)
+    public List<StarPartyEventDto> GetAll()
     {
-        StarPartyEventService eventService = new();
+        return _starPartyEventRepository.GetAllEvents();
+    }
+
+    public StarPartyEventDto Save(UpsertStarPartyEventRequestDto request, User hostUser)
+    {
         var normalizedStartsAt = request.StartsAt.ToUniversalTime();
         var normalizedEndsAt = request.EndsAt?.ToUniversalTime();
         var normalizedTitle = request.Title.Trim();
@@ -43,28 +49,25 @@ public class StarPartyEvent
             Lng = request.Lng,
             MeetupDetails = NormalizeNullableText(request.MeetupDetails),
             Description = NormalizeNullableText(request.Description),
-            HostChecklist = NormalizeChecklist(request.HostChecklist)
+            HostChecklist = NormalizeChecklist(request.HostChecklist),
         };
 
-        return eventService.UpsertEvent(payload, hostUser);
+        return _starPartyEventRepository.UpsertEvent(payload, hostUser);
     }
 
-    public static StarPartyEventDto? SetStatus(string id, string status)
+    public StarPartyEventDto? SetStatus(string id, string status)
     {
-        StarPartyEventService eventService = new();
-        return eventService.SetStatus(id.Trim(), NormalizeStatus(status));
+        return _starPartyEventRepository.SetStatus(id.Trim(), NormalizeStatus(status));
     }
 
-    public static bool Delete(string id)
+    public bool Delete(string id)
     {
-        StarPartyEventService eventService = new();
-        return eventService.DeleteEvent(id.Trim());
+        return _starPartyEventRepository.DeleteEvent(id.Trim());
     }
 
-    public static (StarPartyEventDto? Event, bool Joined) ToggleRsvp(string id, User user)
+    public (StarPartyEventDto? Event, bool Joined) ToggleRsvp(string id, User user)
     {
-        StarPartyEventService eventService = new();
-        return eventService.ToggleRsvp(id.Trim(), user);
+        return _starPartyEventRepository.ToggleRsvp(id.Trim(), user);
     }
 
     private static string NormalizeEventType(string? value)
@@ -95,7 +98,7 @@ public class StarPartyEvent
             .ToList();
     }
 
-    public static string BuildEventId(string title, DateTime startsAtUtc)
+    private static string BuildEventId(string title, DateTime startsAtUtc)
     {
         var titleSlug = Slugify(title);
         var dateSlug = startsAtUtc.ToString("yyyyMMdd");

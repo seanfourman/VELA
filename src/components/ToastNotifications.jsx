@@ -1,5 +1,6 @@
-﻿import { createPortal } from "react-dom";
-import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import { useEffect, useState } from "react";
+import usePortalTarget from "@/hooks/usePortalTarget";
 import { NOTIFICATION_EVENT } from "@/utils/notifications";
 import "./styles/ToastNotifications.css";
 
@@ -17,16 +18,7 @@ function ToastMessage({ notification }) {
 
 export default function ToastNotifications() {
   const [notifications, setNotifications] = useState([]);
-
-  const portalTarget = useMemo(() => {
-    let element = document.getElementById("notification-root");
-    if (!element) {
-      element = document.createElement("div");
-      element.id = "notification-root";
-      document.body.appendChild(element);
-    }
-    return element;
-  }, []);
+  const portalTarget = usePortalTarget("notification-root");
 
   useEffect(() => {
     const handler = (event) => {

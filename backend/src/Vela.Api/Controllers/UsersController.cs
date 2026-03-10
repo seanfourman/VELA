@@ -1,8 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Vela.Api.BL;
+using Vela.Api.Application;
 using Vela.Api.Configuration;
 using Vela.Api.DTOs;
+using Vela.Api.Models;
 using Vela.Api.Validators;
 
 namespace Vela.Api.Controllers
@@ -11,11 +12,13 @@ namespace Vela.Api.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly IUserService _userService;
+        private readonly ITokenService _tokenService;
 
-        public UsersController(IConfiguration configuration)
+        public UsersController(IUserService userService, ITokenService tokenService)
         {
-            _configuration = configuration;
+            _userService = userService;
+            _tokenService = tokenService;
         }
 
         [AllowAnonymous]
@@ -33,21 +36,14 @@ namespace Vela.Api.Controllers
                 return BadRequest(new { errors = validationErrors });
             }
 
-            var user = new Vela.Api.BL.User
-            {
-                Email = request.Email.Trim().ToLowerInvariant(),
-                Name = string.IsNullOrWhiteSpace(request.Name)
-                    ? request.Email.Split('@')[0]
-                    : request.Name.Trim()
-            };
+            var result = _userService.Register(request);
 
-            var result = user.Register(request.Password);
-
-            return result switch
+            return result.Status switch
             {
-                "SUCCESS" => Ok(BuildAuthResponse(user)),
-                "USER_EXISTS" => Conflict("An account with that email already exists."),
-                _ => StatusCode(500, "Registration failed due to an unknown error.")
+                RegisterUserStatus.Success when result.User != null => Ok(BuildAuthResponse(result.User)),
+                RegisterUserStatus.UserExists => Conflict("An account with that email already exists."),
+                RegisterUserStatus.InvalidEmail => BadRequest("A valid email is required."),
+                _ => StatusCode(500, "Registration failed due to an unknown error."),
             };
         }
 
@@ -68,8 +64,7 @@ namespace Vela.Api.Controllers
                 return BadRequest("Email and password are required.");
             }
 
-            Vela.Api.BL.User? loggedInUser = Vela.Api.BL.User.Login(request.Email, request.Password);
-
+            var loggedInUser = _userService.Login(request.Email, request.Password);
             if (loggedInUser == null)
             {
                 return Unauthorized("Invalid email or password.");
@@ -88,7 +83,7 @@ namespace Vela.Api.Controllers
                 return Unauthorized();
             }
 
-            Vela.Api.BL.User? user = Vela.Api.BL.User.GetById(userId.Value);
+            var user = _userService.GetById(userId.Value);
             if (user == null)
             {
                 return Unauthorized();
@@ -107,7 +102,7 @@ namespace Vela.Api.Controllers
                 return Unauthorized();
             }
 
-            var profile = Vela.Api.BL.User.GetProfile(userId.Value);
+            var profile = _userService.GetProfile(userId.Value);
             if (profile == null)
             {
                 return NotFound();
@@ -137,7 +132,7 @@ namespace Vela.Api.Controllers
                 return Unauthorized();
             }
 
-            var updated = Vela.Api.BL.User.UpdateProfile(userId.Value, request);
+            var updated = _userService.UpdateProfile(userId.Value, request);
             if (updated == null)
             {
                 return NotFound();
@@ -146,18 +141,18 @@ namespace Vela.Api.Controllers
             return Ok(updated);
         }
 
-        private AuthResponseDto BuildAuthResponse(Vela.Api.BL.User user)
+        private AuthResponseDto BuildAuthResponse(User user)
         {
-            var tokenResult = JwtManager.CreateToken(user, _configuration);
+            var tokenResult = _tokenService.CreateToken(user);
             return new AuthResponseDto
             {
                 Token = tokenResult.Token,
                 ExpiresAtUtc = tokenResult.ExpiresAtUtc,
-                User = MapToAuthUserDto(user)
+                User = MapToAuthUserDto(user),
             };
         }
 
-        private static AuthUserDto MapToAuthUserDto(Vela.Api.BL.User user)
+        private static AuthUserDto MapToAuthUserDto(User user)
         {
             return new AuthUserDto
             {
@@ -168,7 +163,7 @@ namespace Vela.Api.Controllers
                 IsAdmin = user.IsAdmin,
                 DisplayName = user.DisplayName,
                 AvatarUrl = user.AvatarUrl,
-                Bio = user.Bio
+                Bio = user.Bio,
             };
         }
     }
