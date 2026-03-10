@@ -21,7 +21,7 @@ in `backend/src/Vela.Api/appsettings.json`.
 If your `Users` table already exists from an older version, rerun:
 - `Tables/Users.sql`
 - `SP/User SPs.sql`
-to add profile columns and profile procedures.
+to add profile columns, profile procedures, and admin user-management procedures.
 
 ## Notes
 

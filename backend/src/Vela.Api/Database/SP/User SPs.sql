@@ -81,6 +81,48 @@ BEGIN
 END;
 GO
 
+CREATE OR ALTER PROCEDURE SP_GetAdminUsers
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        Id,
+        Email,
+        Name,
+        DisplayName,
+        AvatarUrl,
+        Bio,
+        IsAdmin,
+        Role,
+        CreatedAtUtc
+    FROM Users
+    ORDER BY CreatedAtUtc DESC, Email ASC;
+END;
+GO
+
+CREATE OR ALTER PROCEDURE SP_UpdateUserAccess
+    @Id UNIQUEIDENTIFIER,
+    @IsAdmin BIT,
+    @Role NVARCHAR(20)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    UPDATE Users
+    SET IsAdmin = @IsAdmin,
+        Role = @Role
+    WHERE Id = @Id;
+
+    IF @@ROWCOUNT = 0
+    BEGIN
+        RETURN;
+    END
+
+    EXEC SP_GetUserById @Id = @Id;
+END;
+GO
+
 CREATE OR ALTER PROCEDURE SP_AnyAdminExists
 AS
 BEGIN

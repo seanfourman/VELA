@@ -930,8 +930,38 @@
   text-align: right;
 }
 
+.admin-collection-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .admin-toolbar-btn {
   min-width: 122px;
+}
+
+.admin-user-management-note {
+  margin: 0;
+}
+
+.admin-inline-feedback {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-inline-feedback__message {
+  margin: 0;
+}
+
+.admin-user-email {
+  font-size: 0.88rem;
+  color: var(--surface-text-muted);
+  word-break: break-word;
+}
+
+.admin-user-card .admin-card-btn {
+  min-width: 136px;
 }
 
 .admin-submit-btn {

@@ -7,6 +7,11 @@ namespace Vela.Api.Application;
 public sealed class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private static readonly HashSet<string> AllowedRoles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "user",
+        "admin",
+    };
 
     public UserService(IUserRepository userRepository)
     {
@@ -85,5 +90,79 @@ public sealed class UserService : IUserService
     public UserProfileDto? UpdateProfile(Guid id, UpdateUserProfileRequestDto request)
     {
         return _userRepository.UpdateUserProfile(id, request);
+    }
+
+    public List<AdminManagedUserDto> GetManagedUsers()
+    {
+        return _userRepository.GetManagedUsers();
+    }
+
+    public UpdateUserAccessResult UpdateUserAccess(
+        Guid actorUserId,
+        Guid targetUserId,
+        UpdateUserAccessRequestDto request
+    )
+    {
+        if (actorUserId == targetUserId)
+        {
+            return new UpdateUserAccessResult
+            {
+                Status = UpdateUserAccessStatus.CannotModifyOwnAccess,
+            };
+        }
+
+        var user = _userRepository.GetUserById(targetUserId);
+        if (user == null)
+        {
+            return new UpdateUserAccessResult { Status = UpdateUserAccessStatus.UserNotFound };
+        }
+
+        var requestedRole = string.IsNullOrWhiteSpace(request.Role)
+            ? (request.IsAdmin ? "admin" : "user")
+            : request.Role.Trim().ToLowerInvariant();
+
+        if (!AllowedRoles.Contains(requestedRole))
+        {
+            return new UpdateUserAccessResult { Status = UpdateUserAccessStatus.InvalidRole };
+        }
+
+        var nextIsAdmin = request.IsAdmin || string.Equals(requestedRole, "admin");
+        var nextRole = nextIsAdmin ? "admin" : "user";
+
+        if (user.IsAdmin && !nextIsAdmin && _userRepository.GetAdminCount() <= 1)
+        {
+            return new UpdateUserAccessResult
+            {
+                Status = UpdateUserAccessStatus.CannotRemoveLastAdmin,
+            };
+        }
+
+        var updatedUser = _userRepository.UpdateUserAccess(targetUserId, nextIsAdmin, nextRole);
+        if (updatedUser == null)
+        {
+            return new UpdateUserAccessResult { Status = UpdateUserAccessStatus.UserNotFound };
+        }
+
+        return new UpdateUserAccessResult
+        {
+            Status = UpdateUserAccessStatus.Success,
+            User = MapToManagedUser(updatedUser),
+        };
+    }
+
+    private static AdminManagedUserDto MapToManagedUser(User user)
+    {
+        return new AdminManagedUserDto
+        {
+            Id = user.Id.ToString(),
+            Email = user.Email,
+            Name = user.Name,
+            DisplayName = user.DisplayName,
+            AvatarUrl = user.AvatarUrl,
+            Bio = user.Bio,
+            Role = user.Role,
+            IsAdmin = user.IsAdmin,
+            CreatedAtUtc = user.CreatedAtUtc,
+        };
     }
 }

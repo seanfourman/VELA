@@ -10,4 +10,7 @@ public interface IUserRepository
     Guid InsertUser(User user);
     UserProfileDto? GetUserProfile(Guid userId);
     UserProfileDto? UpdateUserProfile(Guid userId, UpdateUserProfileRequestDto request);
+    List<AdminManagedUserDto> GetManagedUsers();
+    User? UpdateUserAccess(Guid userId, bool isAdmin, string role);
+    int GetAdminCount();
 }

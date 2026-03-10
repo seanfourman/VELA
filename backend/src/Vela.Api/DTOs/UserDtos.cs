@@ -85,3 +85,42 @@ public class UpdateUserProfileRequestDto
     [JsonPropertyName("bio")]
     public string? Bio { get; set; }
 }
+
+public class AdminManagedUserDto
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = string.Empty;
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("displayName")]
+    public string DisplayName { get; set; } = string.Empty;
+
+    [JsonPropertyName("avatarUrl")]
+    public string AvatarUrl { get; set; } = string.Empty;
+
+    [JsonPropertyName("bio")]
+    public string Bio { get; set; } = string.Empty;
+
+    [JsonPropertyName("role")]
+    public string Role { get; set; } = "user";
+
+    [JsonPropertyName("is_admin")]
+    public bool IsAdmin { get; set; }
+
+    [JsonPropertyName("createdAtUtc")]
+    public DateTime CreatedAtUtc { get; set; }
+}
+
+public class UpdateUserAccessRequestDto
+{
+    [JsonPropertyName("role")]
+    public string? Role { get; set; }
+
+    [JsonPropertyName("is_admin")]
+    public bool IsAdmin { get; set; }
+}

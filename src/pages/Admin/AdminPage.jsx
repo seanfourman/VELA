@@ -13,6 +13,7 @@ import AdminLocationForm from "./AdminLocationForm";
 import AdminLocationList from "./AdminLocationList";
 import AdminEventForm from "./AdminEventForm";
 import AdminEventList from "./AdminEventList";
+import AdminUserList from "./AdminUserList";
 import "@/pages/Settings/styles/SettingsPage.css";
 import { EMPTY_EVENT, EMPTY_LOCATION } from "./adminConstants";
 import {
@@ -31,6 +32,7 @@ import {
   validateEventDraft,
   validateLocationDraft,
 } from "./adminSubmission";
+import useAdminUsers from "./useAdminUsers";
 
 const compareAlphabetical = (left, right) =>
   String(left || "").trim().localeCompare(String(right || "").trim(), undefined, {
@@ -90,6 +92,22 @@ const matchesEventSearch = (event, query) => {
   return blob.includes(query);
 };
 
+const matchesUserSearch = (user, query) => {
+  if (!query) return true;
+
+  const blob = buildSearchBlob([
+    user?.name,
+    user?.displayName,
+    user?.email,
+    user?.role,
+    user?.isAdmin ? "admin" : "user",
+    user?.createdAtUtc,
+    user?.bio,
+  ]);
+
+  return blob.includes(query);
+};
+
 const paginateItems = (items, page, pageSize) => {
   const startIndex = (page - 1) * pageSize;
   return items.slice(startIndex, startIndex + pageSize);
@@ -135,12 +153,25 @@ function AdminPage({
   const [activeView, setActiveView] = useState("locations");
   const [locationSearch, setLocationSearch] = useState("");
   const [eventSearch, setEventSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
   const [locationPage, setLocationPage] = useState(1);
   const [eventPage, setEventPage] = useState(1);
+  const [userPage, setUserPage] = useState(1);
   const editingLocationId = String(locationDraft.id || "").trim();
   const editingEventId = String(eventDraft.id || "").trim();
   const isEditingLocation = Boolean(editingLocationId);
   const isEditingEvent = Boolean(editingEventId);
+  const currentUserId = String(auth?.user?.id || auth?.user?.sub || "").trim();
+  const {
+    users: managedUsers,
+    isLoading: areUsersLoading,
+    loadError: usersLoadError,
+    pendingUserId,
+    loadUsers: reloadUsers,
+    saveUserAccess,
+  } = useAdminUsers({
+    enabled: canUseAdminTools && hasAdminAccess,
+  });
   const showPlanet = useMemo(() => isProbablyHardwareAccelerated(), []);
   const locationList = useMemo(() => {
     if (!Array.isArray(stargazeLocations)) return [];
@@ -154,6 +185,15 @@ function AdminPage({
       compareAlphabetical(a?.title, b?.title),
     );
   }, [starPartyEvents]);
+  const userList = useMemo(() => {
+    if (!Array.isArray(managedUsers)) return [];
+    return [...managedUsers].sort((a, b) =>
+      compareAlphabetical(
+        a?.displayName || a?.name || a?.email,
+        b?.displayName || b?.name || b?.email,
+      ),
+    );
+  }, [managedUsers]);
   const normalizedLocationSearch = useMemo(
     () => normalizeSearchValue(locationSearch),
     [locationSearch],
@@ -161,6 +201,10 @@ function AdminPage({
   const normalizedEventSearch = useMemo(
     () => normalizeSearchValue(eventSearch),
     [eventSearch],
+  );
+  const normalizedUserSearch = useMemo(
+    () => normalizeSearchValue(userSearch),
+    [userSearch],
   );
   const filteredLocationList = useMemo(
     () =>
@@ -173,6 +217,10 @@ function AdminPage({
     () => eventList.filter((event) => matchesEventSearch(event, normalizedEventSearch)),
     [eventList, normalizedEventSearch],
   );
+  const filteredUserList = useMemo(
+    () => userList.filter((user) => matchesUserSearch(user, normalizedUserSearch)),
+    [normalizedUserSearch, userList],
+  );
   const locationTotalPages = Math.max(
     1,
     Math.ceil(filteredLocationList.length / ADMIN_PAGE_SIZE),
@@ -181,8 +229,10 @@ function AdminPage({
     1,
     Math.ceil(filteredEventList.length / ADMIN_PAGE_SIZE),
   );
+  const userTotalPages = Math.max(1, Math.ceil(filteredUserList.length / ADMIN_PAGE_SIZE));
   const safeLocationPage = Math.min(locationPage, locationTotalPages);
   const safeEventPage = Math.min(eventPage, eventTotalPages);
+  const safeUserPage = Math.min(userPage, userTotalPages);
   const paginatedLocations = useMemo(
     () => paginateItems(filteredLocationList, safeLocationPage, ADMIN_PAGE_SIZE),
     [filteredLocationList, safeLocationPage],
@@ -191,9 +241,17 @@ function AdminPage({
     () => paginateItems(filteredEventList, safeEventPage, ADMIN_PAGE_SIZE),
     [filteredEventList, safeEventPage],
   );
+  const paginatedUsers = useMemo(
+    () => paginateItems(filteredUserList, safeUserPage, ADMIN_PAGE_SIZE),
+    [filteredUserList, safeUserPage],
+  );
   const publishedEventsCount = useMemo(
     () => eventList.filter((event) => event.status === "published").length,
     [eventList],
+  );
+  const adminUsersCount = useMemo(
+    () => userList.filter((user) => user.isAdmin).length,
+    [userList],
   );
   const totalRsvps = useMemo(
     () =>
@@ -203,36 +261,76 @@ function AdminPage({
       ),
     [eventList],
   );
-  const activeViewIndex = activeView === "events" ? 1 : 0;
-  const activeSearchValue = activeView === "events" ? eventSearch : locationSearch;
+  const activeViewIndex = activeView === "events" ? 1 : activeView === "users" ? 2 : 0;
+  const activeSearchValue =
+    activeView === "events"
+      ? eventSearch
+      : activeView === "users"
+        ? userSearch
+        : locationSearch;
   const activeFilteredCount =
-    activeView === "events" ? filteredEventList.length : filteredLocationList.length;
-  const activeTotalCount = activeView === "events" ? eventList.length : locationList.length;
-  const activePage = activeView === "events" ? safeEventPage : safeLocationPage;
-  const activeTotalPages = activeView === "events" ? eventTotalPages : locationTotalPages;
+    activeView === "events"
+      ? filteredEventList.length
+      : activeView === "users"
+        ? filteredUserList.length
+        : filteredLocationList.length;
+  const activeTotalCount =
+    activeView === "events"
+      ? eventList.length
+      : activeView === "users"
+        ? userList.length
+        : locationList.length;
+  const activePage =
+    activeView === "events"
+      ? safeEventPage
+      : activeView === "users"
+        ? safeUserPage
+        : safeLocationPage;
+  const activeTotalPages =
+    activeView === "events"
+      ? eventTotalPages
+      : activeView === "users"
+        ? userTotalPages
+        : locationTotalPages;
   const activeSearchLabel =
-    activeView === "events" ? "Search events" : "Search locations";
+    activeView === "events"
+      ? "Search events"
+      : activeView === "users"
+        ? "Search users"
+        : "Search locations";
   const activeSearchPlaceholder =
     activeView === "events"
       ? "Search by title, status, host, notes, or checklist"
-      : "Search by name, country, region, type, or description";
+      : activeView === "users"
+        ? "Search by name, display name, email, or role"
+        : "Search by name, country, region, type, or description";
   const activeFormTitle =
     activeView === "events"
       ? isEditingEvent
         ? "Edit event"
         : "Create event"
+      : activeView === "users"
+        ? "User access"
       : isEditingLocation
         ? "Edit location"
         : "Add location";
   const activeFormCopy =
     activeView === "events"
       ? "Create and update star party events."
+      : activeView === "users"
+        ? "Grant or remove admin access for other accounts."
       : "Create and update curated stargazing spots.";
   const activeCollectionTitle =
-    activeView === "events" ? "Existing events" : "Existing locations";
+    activeView === "events"
+      ? "Existing events"
+      : activeView === "users"
+        ? "Existing users"
+        : "Existing locations";
   const activeCollectionCopy =
     activeView === "events"
       ? "Search, review, and manage created events."
+      : activeView === "users"
+        ? "Search, review, and manage user access."
       : "Search, review, and manage curated map spots.";
   const visibleStart =
     activeFilteredCount === 0 ? 0 : (activePage - 1) * ADMIN_PAGE_SIZE + 1;
@@ -242,7 +340,7 @@ function AdminPage({
       : Math.min(activePage * ADMIN_PAGE_SIZE, activeFilteredCount);
   const viewSwitcherStyle = {
     "--switch-index": activeViewIndex,
-    "--switch-count": 2,
+    "--switch-count": 3,
   };
   const summaryChipSx = useMemo(
     () => ({
@@ -270,6 +368,11 @@ function AdminPage({
       setEventPage(1);
       return;
     }
+    if (activeView === "users") {
+      setUserSearch(value);
+      setUserPage(1);
+      return;
+    }
     setLocationSearch(value);
     setLocationPage(1);
   };
@@ -278,6 +381,11 @@ function AdminPage({
     if (activeView === "events") {
       setEventSearch("");
       setEventPage(1);
+      return;
+    }
+    if (activeView === "users") {
+      setUserSearch("");
+      setUserPage(1);
       return;
     }
     setLocationSearch("");
@@ -289,6 +397,10 @@ function AdminPage({
       setEventPage((current) => Math.max(Math.min(current, eventTotalPages) - 1, 1));
       return;
     }
+    if (activeView === "users") {
+      setUserPage((current) => Math.max(Math.min(current, userTotalPages) - 1, 1));
+      return;
+    }
     setLocationPage((current) => Math.max(Math.min(current, locationTotalPages) - 1, 1));
   };
 
@@ -296,6 +408,12 @@ function AdminPage({
     if (activeView === "events") {
       setEventPage((current) =>
         Math.min(Math.min(current, eventTotalPages) + 1, eventTotalPages),
+      );
+      return;
+    }
+    if (activeView === "users") {
+      setUserPage((current) =>
+        Math.min(Math.min(current, userTotalPages) + 1, userTotalPages),
       );
       return;
     }
@@ -460,6 +578,50 @@ function AdminPage({
     }
   };
 
+  const handleReloadUsers = async () => {
+    try {
+      await reloadUsers();
+    } catch (error) {
+      showNotification(
+        error instanceof Error ? error.message : "Could not reload users right now",
+        "failure",
+        { duration: 3200 },
+      );
+    }
+  };
+
+  const handleToggleUserAdmin = async (user) => {
+    const userId = String(user?.id || "").trim();
+    if (!userId || userId === currentUserId) return;
+
+    const nextIsAdmin = !user?.isAdmin;
+    const targetLabel =
+      String(user?.displayName || user?.name || user?.email || "User").trim() || "User";
+
+    try {
+      await saveUserAccess({
+        userId,
+        isAdmin: nextIsAdmin,
+        role: nextIsAdmin ? "admin" : "user",
+      });
+      showNotification(
+        nextIsAdmin
+          ? `${targetLabel} now has admin access`
+          : `Admin access removed from ${targetLabel}`,
+        "success",
+        { duration: 2400 },
+      );
+    } catch (error) {
+      showNotification(
+        error instanceof Error
+          ? error.message
+          : "Could not update user access right now",
+        "failure",
+        { duration: 3200 },
+      );
+    }
+  };
+
   const hero = showPlanet ? (
     <MoonGlobe
       variant={isLight ? "day" : "night"}
@@ -496,7 +658,7 @@ function AdminPage({
             <div>
               <h2 className="profile-section-title">Admin tools</h2>
               <p className="profile-section-copy">
-                Manage curated map spots and admin-created star party events.
+                Manage curated map spots, events, and user access.
               </p>
             </div>
             <div
@@ -525,6 +687,16 @@ function AdminPage({
               >
                 Events
               </button>
+              <button
+                type="button"
+                className={`settings-switch${
+                  activeView === "users" ? " active" : ""
+                }`}
+                aria-pressed={activeView === "users"}
+                onClick={() => setActiveView("users")}
+              >
+                Users
+              </button>
             </div>
           </div>
 
@@ -550,6 +722,18 @@ function AdminPage({
             <Chip
               size="small"
               label={`RSVPs ${totalRsvps}`}
+              variant="outlined"
+              sx={summaryChipSx}
+            />
+            <Chip
+              size="small"
+              label={`Users ${userList.length}`}
+              variant="outlined"
+              sx={summaryChipSx}
+            />
+            <Chip
+              size="small"
+              label={`Admins ${adminUsersCount}`}
               variant="outlined"
               sx={summaryChipSx}
             />
@@ -656,7 +840,7 @@ function AdminPage({
                 ) : null}
               </div>
             </>
-          ) : (
+          ) : activeView === "events" ? (
             <>
               <div className="admin-panel-section">
                 <div className="admin-panel-section__header">
@@ -730,6 +914,130 @@ function AdminPage({
                       : "No events created yet"
                   }
                 />
+
+                {activeTotalPages > 1 ? (
+                  <div className="admin-pagination">
+                    <button
+                      type="button"
+                      className="glass-btn profile-action-btn admin-pagination-btn"
+                      onClick={handlePreviousPage}
+                      disabled={activePage <= 1}
+                      aria-label="Previous page"
+                    >
+                      <PaginationChevron direction="left" />
+                    </button>
+                    <div className="admin-pagination-status">
+                      Page {activePage} of {activeTotalPages}
+                    </div>
+                    <button
+                      type="button"
+                      className="glass-btn profile-action-btn admin-pagination-btn"
+                      onClick={handleNextPage}
+                      disabled={activePage >= activeTotalPages}
+                      aria-label="Next page"
+                    >
+                      <PaginationChevron direction="right" />
+                    </button>
+                  </div>
+                ) : null}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="admin-panel-section">
+                <div className="admin-panel-section__header">
+                  <div>
+                    <h3 className="admin-panel-section__title">{activeFormTitle}</h3>
+                    <p className="admin-panel-section__copy">{activeFormCopy}</p>
+                  </div>
+                </div>
+
+                <div className="profile-readonly admin-user-management-note">
+                  Change other accounts here. Access changes are stored immediately,
+                  but the affected user may need to sign out and back in before a new
+                  token reflects the updated role.
+                </div>
+                <div className="profile-readonly admin-user-management-note">
+                  Your current account is locked in this panel to avoid breaking the
+                  active admin session.
+                </div>
+              </div>
+
+              <div className="admin-section-separator" aria-hidden="true" />
+
+              <div className="admin-panel-section admin-panel-section--collection">
+                <div className="admin-panel-section__header">
+                  <div>
+                    <h3 className="admin-panel-section__title">
+                      {activeCollectionTitle}
+                    </h3>
+                    <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
+                  </div>
+                </div>
+
+                <div className="admin-collection-tools">
+                  <label className="profile-field admin-search-field">
+                    <span className="profile-label">{activeSearchLabel}</span>
+                    <input
+                      className="profile-input"
+                      type="search"
+                      value={activeSearchValue}
+                      onChange={handleSearchChange}
+                      placeholder={activeSearchPlaceholder}
+                    />
+                  </label>
+                  <div className="admin-collection-meta">
+                    <div className="admin-results-copy">
+                      Showing {visibleStart}-{visibleEnd} of {activeFilteredCount}
+                      {activeFilteredCount !== activeTotalCount
+                        ? ` matching ${activeTotalCount} total`
+                        : ""}
+                    </div>
+                    <div className="admin-collection-actions">
+                      {activeSearchValue ? (
+                        <button
+                          type="button"
+                          className="glass-btn profile-action-btn admin-toolbar-btn"
+                          onClick={handleSearchReset}
+                        >
+                          Clear search
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-toolbar-btn"
+                        onClick={handleReloadUsers}
+                        disabled={areUsersLoading}
+                      >
+                        {areUsersLoading ? "Refreshing..." : "Refresh"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {usersLoadError ? (
+                  <div className="admin-inline-feedback">
+                    <div className="profile-readonly admin-inline-feedback__message">
+                      {usersLoadError}
+                    </div>
+                  </div>
+                ) : null}
+
+                {areUsersLoading && !userList.length ? (
+                  <div className="profile-readonly">Loading users...</div>
+                ) : (
+                  <AdminUserList
+                    users={paginatedUsers}
+                    currentUserId={currentUserId || null}
+                    pendingUserId={pendingUserId || null}
+                    onToggleAdmin={handleToggleUserAdmin}
+                    emptyMessage={
+                      normalizedUserSearch
+                        ? "No users match this search"
+                        : "No users available yet"
+                    }
+                  />
+                )}
 
                 {activeTotalPages > 1 ? (
                   <div className="admin-pagination">

@@ -157,10 +157,79 @@ public sealed class SqlUserRepository : IUserRepository
         };
     }
 
+    public List<AdminManagedUserDto> GetManagedUsers()
+    {
+        using var connection = _connectionFactory.CreateOpenConnection();
+        using var command = SqlStoredProcedureCommandBuilder.Create(
+            "SP_GetAdminUsers",
+            connection,
+            new Dictionary<string, object>()
+        );
+        using var reader = command.ExecuteReader();
+        var users = new List<AdminManagedUserDto>();
+
+        while (reader.Read())
+        {
+            users.Add(MapReaderToManagedUser(reader));
+        }
+
+        return users;
+    }
+
+    public User? UpdateUserAccess(Guid userId, bool isAdmin, string role)
+    {
+        using var connection = _connectionFactory.CreateOpenConnection();
+        using var command = SqlStoredProcedureCommandBuilder.Create(
+            "SP_UpdateUserAccess",
+            connection,
+            new Dictionary<string, object>
+            {
+                { "@Id", userId },
+                { "@IsAdmin", isAdmin },
+                { "@Role", role.Trim().ToLowerInvariant() },
+            }
+        );
+        using var reader = command.ExecuteReader();
+        return reader.Read() ? MapReaderToUser(reader) : null;
+    }
+
+    public int GetAdminCount()
+    {
+        using var connection = _connectionFactory.CreateOpenConnection();
+        using var command = SqlStoredProcedureCommandBuilder.Create(
+            "SP_AnyAdminExists",
+            connection,
+            new Dictionary<string, object>()
+        );
+        var result = command.ExecuteScalar();
+        if (result == null || result == DBNull.Value)
+        {
+            return 0;
+        }
+
+        return Convert.ToInt32(result);
+    }
+
     private static string ReadSafeString(SqlDataReader reader, string columnName)
     {
         var value = reader[columnName];
         return value == DBNull.Value ? string.Empty : value.ToString() ?? string.Empty;
+    }
+
+    private static AdminManagedUserDto MapReaderToManagedUser(SqlDataReader reader)
+    {
+        return new AdminManagedUserDto
+        {
+            Id = reader["Id"].ToString() ?? string.Empty,
+            Email = reader["Email"].ToString() ?? string.Empty,
+            Name = reader["Name"].ToString() ?? string.Empty,
+            DisplayName = ReadSafeString(reader, "DisplayName"),
+            AvatarUrl = ReadSafeString(reader, "AvatarUrl"),
+            Bio = ReadSafeString(reader, "Bio"),
+            Role = reader["Role"].ToString() ?? "user",
+            IsAdmin = Convert.ToBoolean(reader["IsAdmin"]),
+            CreatedAtUtc = Convert.ToDateTime(reader["CreatedAtUtc"]),
+        };
     }
 
     private static User MapReaderToUser(SqlDataReader reader)

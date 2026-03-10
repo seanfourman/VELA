@@ -141,6 +141,41 @@ namespace Vela.Api.Controllers
             return Ok(updated);
         }
 
+        [Authorize(Roles = "admin")]
+        [HttpGet("admin/manage")]
+        public IActionResult GetManagedUsers()
+        {
+            return Ok(_userService.GetManagedUsers());
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpPatch("admin/manage/{id:guid}")]
+        public IActionResult UpdateUserAccess(Guid id, [FromBody] UpdateUserAccessRequestDto request)
+        {
+            if (request is null)
+            {
+                return BadRequest("Request body is required.");
+            }
+
+            var actorUserId = User.ReadUserId();
+            if (!actorUserId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            var result = _userService.UpdateUserAccess(actorUserId.Value, id, request);
+
+            return result.Status switch
+            {
+                UpdateUserAccessStatus.Success when result.User != null => Ok(result.User),
+                UpdateUserAccessStatus.UserNotFound => NotFound("User not found."),
+                UpdateUserAccessStatus.InvalidRole => BadRequest("Only 'user' and 'admin' roles are supported."),
+                UpdateUserAccessStatus.CannotRemoveLastAdmin => Conflict("At least one admin account must remain."),
+                UpdateUserAccessStatus.CannotModifyOwnAccess => BadRequest("Change another account from the admin panel, not your current one."),
+                _ => StatusCode(500, "Could not update user access."),
+            };
+        }
+
         private AuthResponseDto BuildAuthResponse(User user)
         {
             var tokenResult = _tokenService.CreateToken(user);

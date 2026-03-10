@@ -159,6 +159,10 @@
     justify-items: stretch;
   }
 
+  .admin-collection-actions {
+    justify-content: flex-start;
+  }
+
   .admin-results-copy {
     text-align: left;
   }

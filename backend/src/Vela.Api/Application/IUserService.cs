@@ -10,4 +10,10 @@ public interface IUserService
     User? GetById(Guid id);
     UserProfileDto? GetProfile(Guid id);
     UserProfileDto? UpdateProfile(Guid id, UpdateUserProfileRequestDto request);
+    List<AdminManagedUserDto> GetManagedUsers();
+    UpdateUserAccessResult UpdateUserAccess(
+        Guid actorUserId,
+        Guid targetUserId,
+        UpdateUserAccessRequestDto request
+    );
 }
