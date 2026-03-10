@@ -1,12 +1,6 @@
 import { parseUtcDate } from "@/features/spaceWeather/spaceWeatherModel";
+import { buildSpaceWeatherSnapshotUrl } from "@/utils/apiEndpoints";
 
-const NASA_API_KEY =
-  typeof import.meta.env.VITE_NASA_API_KEY === "string" &&
-  import.meta.env.VITE_NASA_API_KEY.trim()
-    ? import.meta.env.VITE_NASA_API_KEY.trim()
-    : "DEMO_KEY";
-
-const DONKI_BASE_URL = "https://api.nasa.gov/DONKI";
 const GST_LOOKBACK_DAYS = 30;
 const CME_LOOKBACK_DAYS = 21;
 const CACHE_TTL_MS = 10 * 60 * 1000;
@@ -39,25 +33,20 @@ const toTimestamp = (value) => parseUtcDate(value)?.getTime() ?? -1;
 
 const readErrorMessage = async (response) => {
   const payload = await response.json().catch(() => null);
+  if (typeof payload?.detail === "string") return payload.detail;
   if (typeof payload?.error?.message === "string") return payload.error.message;
   if (typeof payload?.message === "string") return payload.message;
-  return `NASA DONKI API request failed (${response.status})`;
+  return `Space weather request failed (${response.status})`;
 };
 
-const fetchDonki = async (path, params) => {
-  const url = new URL(`${DONKI_BASE_URL}/${path}`);
-  Object.entries({ ...params, api_key: NASA_API_KEY }).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") return;
-    url.searchParams.set(key, String(value));
-  });
-
-  const response = await fetch(url.toString(), {
+const fetchSnapshotPayload = async ({ force = false } = {}) => {
+  const response = await fetch(buildSpaceWeatherSnapshotUrl({ force }), {
     headers: { Accept: "application/json" },
   }).catch((error) => {
     const message =
       error instanceof Error && error.message
         ? error.message
-        : "Could not reach NASA DONKI service";
+        : "Could not reach the space weather service";
     throw new Error(message);
   });
 
@@ -65,8 +54,7 @@ const fetchDonki = async (path, params) => {
     throw new Error(await readErrorMessage(response));
   }
 
-  const data = await response.json().catch(() => []);
-  return toArray(data);
+  return response.json().catch(() => ({}));
 };
 
 const extractKpSamples = (gstEvents) =>
@@ -191,7 +179,11 @@ const normalizeEarthDirectedCmes = (rawCmes) => {
   );
 };
 
-const buildSnapshot = (gstRaw, cmeRaw, { gstStartDate, cmeStartDate, endDate }) => {
+const buildSnapshot = (
+  gstRaw,
+  cmeRaw,
+  { gstStartDate, cmeStartDate, endDate, fetchedAt, apiKeyMode }
+) => {
   const gstEvents = normalizeGstEvents(gstRaw);
   const kpSamples = extractKpSamples(gstRaw).sort(
     (a, b) => toTimestamp(b.observedTime) - toTimestamp(a.observedTime),
@@ -214,8 +206,11 @@ const buildSnapshot = (gstRaw, cmeRaw, { gstStartDate, cmeStartDate, endDate }) 
   );
 
   return {
-    fetchedAt: new Date().toISOString(),
-    apiKeyMode: NASA_API_KEY === "DEMO_KEY" ? "demo" : "custom",
+    fetchedAt:
+      typeof fetchedAt === "string" && fetchedAt.trim()
+        ? fetchedAt
+        : new Date().toISOString(),
+    apiKeyMode: apiKeyMode === "custom" ? "custom" : "demo",
     window: {
       gstStartDate,
       cmeStartDate,
@@ -241,25 +236,26 @@ export async function fetchSpaceWeatherSnapshot({ force = false } = {}) {
   if (cacheIsFresh) return cachedSnapshot;
   if (inflightRequest) return inflightRequest;
 
-  const endDate = formatDateParam(new Date());
-  const gstStartDate = formatDateParam(addUtcDays(new Date(), -GST_LOOKBACK_DAYS));
-  const cmeStartDate = formatDateParam(addUtcDays(new Date(), -CME_LOOKBACK_DAYS));
-
-  inflightRequest = Promise.all([
-    fetchDonki("GST", {
-      startDate: gstStartDate,
-      endDate,
-    }),
-    fetchDonki("CME", {
-      startDate: cmeStartDate,
-      endDate,
-    }),
-  ])
-    .then(([gstRaw, cmeRaw]) => {
+  inflightRequest = fetchSnapshotPayload({ force })
+    .then((payload) => {
+      const gstRaw = toArray(payload?.gstRaw);
+      const cmeRaw = toArray(payload?.cmeRaw);
+      const windowRange = payload?.window ?? {};
       const snapshot = buildSnapshot(gstRaw, cmeRaw, {
-        gstStartDate,
-        cmeStartDate,
-        endDate,
+        gstStartDate:
+          typeof windowRange?.gstStartDate === "string"
+            ? windowRange.gstStartDate
+            : formatDateParam(addUtcDays(new Date(), -GST_LOOKBACK_DAYS)),
+        cmeStartDate:
+          typeof windowRange?.cmeStartDate === "string"
+            ? windowRange.cmeStartDate
+            : formatDateParam(addUtcDays(new Date(), -CME_LOOKBACK_DAYS)),
+        endDate:
+          typeof windowRange?.endDate === "string"
+            ? windowRange.endDate
+            : formatDateParam(new Date()),
+        fetchedAt: payload?.fetchedAt,
+        apiKeyMode: payload?.apiKeyMode,
       });
       cachedSnapshot = snapshot;
       cachedAt = Date.now();

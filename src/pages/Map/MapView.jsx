@@ -26,7 +26,6 @@ import {
   LIGHT_TILE_URL,
   LONG_PRESS_MS,
   MAP_TILES,
-  MAPTILER_KEY,
   MAX_ZOOM,
   MIN_ZOOM,
 } from "./MapView/core/mapConfig";
@@ -207,7 +206,7 @@ const MapView = forwardRef(function MapView(
         maxZoom={MAX_ZOOM}
       >
         {isThreeDMode ? (
-          <MapLibre3DLayer apiKey={MAPTILER_KEY} />
+          <MapLibre3DLayer />
         ) : (
           <TileLayer
             key={mapType}
@@ -344,7 +343,6 @@ const MapView = forwardRef(function MapView(
       <MapTypeSwitcher
         mapType={mapType}
         onChange={setMapType}
-        previewKey={MAPTILER_KEY}
         latestGridShot={state.latestGridShot}
       />
     </div>

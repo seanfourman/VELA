@@ -65,7 +65,7 @@ function SpaceWeatherPanelContent({
         <div className="space-weather-panel__error">
           <div>{error}</div>
           <div className="space-weather-panel__error-hint">
-            If this keeps failing, check `VITE_NASA_API_KEY` in your `.env`.
+            If this keeps failing, check the backend NASA key configuration.
           </div>
         </div>
       ) : null}

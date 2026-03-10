@@ -1,6 +1,8 @@
-import { getLightmapTileUrlTemplate } from "@/utils/apiEndpoints";
+import {
+  buildMapTilerRasterTemplateUrl,
+  getLightmapTileUrlTemplate,
+} from "@/utils/apiEndpoints";
 
-const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY || "";
 const LOCATION_ZOOM = 16;
 const DEFAULT_CENTER = [20, 0];
 const DEFAULT_ZOOM = 2;
@@ -14,21 +16,20 @@ const LIGHT_TILE_URL = getLightmapTileUrlTemplate();
 
 const MAP_TILES = {
   dark: {
-    url: `https://api.maptiler.com/maps/streets-v2-dark/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+    url: buildMapTilerRasterTemplateUrl("streets-v2-dark", "png"),
     attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>',
   },
   light: {
-    url: `https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=${MAPTILER_KEY}`,
+    url: buildMapTilerRasterTemplateUrl("streets-v2", "png"),
     attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>',
   },
   satellite: {
-    url: `https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=${MAPTILER_KEY}`,
+    url: buildMapTilerRasterTemplateUrl("hybrid", "jpg"),
     attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>',
   },
 };
 
 export {
-  MAPTILER_KEY,
   LOCATION_ZOOM,
   DEFAULT_CENTER,
   DEFAULT_ZOOM,

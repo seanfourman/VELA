@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddMemoryCache();
         services.AddScoped<ISqlConnectionFactory, SqlConnectionFactory>();
 
         services.AddScoped<IFavoriteRepository, SqlFavoriteRepository>();
@@ -36,6 +37,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRecommendationService, RecommendationService>();
         services.AddScoped<IStarPartyEventService, StarPartyEventService>();
         services.AddScoped<ITokenService, JwtTokenService>();
+        services.AddSingleton<IWorldAtlasService, WorldAtlasService>();
+        services.AddHttpClient<ISpaceWeatherService, SpaceWeatherService>();
+        services.AddHttpClient<IMapTilerProxyService, MapTilerProxyService>();
+        services.AddHttpClient<IVisiblePlanetsService, VisiblePlanetsService>();
 
         return services;
     }

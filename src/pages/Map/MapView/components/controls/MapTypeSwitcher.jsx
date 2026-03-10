@@ -1,32 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { buildMapTilerRasterUrl } from "@/utils/apiEndpoints";
 import "./styles/MapTypeSwitcher.css";
 
-const OPTION_META = (previewKey) => [
+const OPTION_META = [
   {
     id: "light",
     label: "Light",
-    preview: `https://api.maptiler.com/maps/streets-v2/0/0/0.png?key=${previewKey}`,
+    preview: buildMapTilerRasterUrl("streets-v2", 0, 0, 0, "png"),
   },
   {
     id: "dark",
     label: "Dark",
-    preview: `https://api.maptiler.com/maps/streets-v2-dark/0/0/0.png?key=${previewKey}`,
+    preview: buildMapTilerRasterUrl("streets-v2-dark", 0, 0, 0, "png"),
   },
   {
     id: "satellite",
     label: "Satellite",
-    preview: `https://api.maptiler.com/maps/hybrid/0/0/0.jpg?key=${previewKey}`,
+    preview: buildMapTilerRasterUrl("hybrid", 0, 0, 0, "jpg"),
   },
 ];
 
 export default function MapTypeSwitcher({
   mapType,
   onChange,
-  previewKey,
   latestGridShot,
 }) {
   const [expanded, setExpanded] = useState(false);
-  const options = OPTION_META(previewKey);
+  const options = OPTION_META;
   const current = options.find((opt) => opt.id === mapType) || options[0];
   const previewSrc = latestGridShot || current.preview;
   const containerRef = useRef(null);

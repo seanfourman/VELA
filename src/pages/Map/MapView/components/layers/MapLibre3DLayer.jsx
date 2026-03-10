@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import maplibregl from "maplibre-gl";
 import { useMap } from "react-leaflet";
+import { buildMapTilerStyleUrl } from "@/utils/apiEndpoints";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "@maplibre/maplibre-gl-leaflet";
 
@@ -240,10 +241,9 @@ const attachAngleControls = (map, glMap) => {
   };
 };
 
-const getStyleUrl = (apiKey) =>
-  `https://api.maptiler.com/maps/streets-v2/style.json?key=${apiKey || ""}`;
+const getStyleUrl = () => buildMapTilerStyleUrl("streets-v2");
 
-export default function MapLibre3DLayer({ apiKey }) {
+export default function MapLibre3DLayer() {
   const map = useMap();
   const layerRef = useRef(null);
 
@@ -261,7 +261,7 @@ export default function MapLibre3DLayer({ apiKey }) {
 
     try {
       const layer = L.maplibreGL({
-        style: getStyleUrl(apiKey),
+        style: getStyleUrl(),
         pane: "tilePane",
         interactive: false,
         attributionControl: false,
@@ -335,7 +335,7 @@ export default function MapLibre3DLayer({ apiKey }) {
 
       map.options.inertia = previousInertia;
     };
-  }, [apiKey, map]);
+  }, [map]);
 
   return null;
 }
