@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Chip from "@mui/material/Chip";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
@@ -157,6 +157,10 @@ function AdminPage({
   const [locationPage, setLocationPage] = useState(1);
   const [eventPage, setEventPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
+  const locationPaginationRef = useRef(null);
+  const eventPaginationRef = useRef(null);
+  const userPaginationRef = useRef(null);
+  const pendingPaginationAnchorRef = useRef(null);
   const editingLocationId = String(locationDraft.id || "").trim();
   const editingEventId = String(eventDraft.id || "").trim();
   const isEditingLocation = Boolean(editingLocationId);
@@ -167,7 +171,6 @@ function AdminPage({
     isLoading: areUsersLoading,
     loadError: usersLoadError,
     pendingUserId,
-    loadUsers: reloadUsers,
     saveUserAccess,
   } = useAdminUsers({
     enabled: canUseAdminTools && hasAdminAccess,
@@ -274,12 +277,6 @@ function AdminPage({
       : activeView === "users"
         ? filteredUserList.length
         : filteredLocationList.length;
-  const activeTotalCount =
-    activeView === "events"
-      ? eventList.length
-      : activeView === "users"
-        ? userList.length
-        : locationList.length;
   const activePage =
     activeView === "events"
       ? safeEventPage
@@ -300,10 +297,10 @@ function AdminPage({
         : "Search locations";
   const activeSearchPlaceholder =
     activeView === "events"
-      ? "Search by title, status, host, notes, or checklist"
+      ? "Search events"
       : activeView === "users"
-        ? "Search by name, display name, email, or role"
-        : "Search by name, country, region, type, or description";
+        ? "Search users"
+        : "Search locations";
   const activeFormTitle =
     activeView === "events"
       ? isEditingEvent
@@ -338,6 +335,7 @@ function AdminPage({
     activeFilteredCount === 0
       ? 0
       : Math.min(activePage * ADMIN_PAGE_SIZE, activeFilteredCount);
+  const activeResultSummary = `${visibleStart}-${visibleEnd} of ${activeFilteredCount}`;
   const viewSwitcherStyle = {
     "--switch-index": activeViewIndex,
     "--switch-count": 3,
@@ -350,6 +348,42 @@ function AdminPage({
     }),
     [isLight],
   );
+
+  useEffect(() => {
+    const pendingView = pendingPaginationAnchorRef.current;
+    if (!pendingView || typeof window === "undefined") return undefined;
+
+    const paginationNode =
+      pendingView === "events"
+        ? eventPaginationRef.current
+        : pendingView === "users"
+          ? userPaginationRef.current
+          : locationPaginationRef.current;
+
+    if (!paginationNode) {
+      pendingPaginationAnchorRef.current = null;
+      return undefined;
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      const scrollContainer = paginationNode.closest(".profile-page");
+
+      if (scrollContainer) {
+        scrollContainer.scrollTo({
+          top: scrollContainer.scrollHeight,
+        });
+      } else {
+        paginationNode.scrollIntoView({
+          block: "end",
+          inline: "nearest",
+        });
+      }
+
+      pendingPaginationAnchorRef.current = null;
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [safeEventPage, safeLocationPage, safeUserPage]);
 
   const handleLocationFieldChange = (key) => (event) => {
     const value = event.target.value;
@@ -377,22 +411,8 @@ function AdminPage({
     setLocationPage(1);
   };
 
-  const handleSearchReset = () => {
-    if (activeView === "events") {
-      setEventSearch("");
-      setEventPage(1);
-      return;
-    }
-    if (activeView === "users") {
-      setUserSearch("");
-      setUserPage(1);
-      return;
-    }
-    setLocationSearch("");
-    setLocationPage(1);
-  };
-
   const handlePreviousPage = () => {
+    pendingPaginationAnchorRef.current = activeView;
     if (activeView === "events") {
       setEventPage((current) => Math.max(Math.min(current, eventTotalPages) - 1, 1));
       return;
@@ -405,6 +425,7 @@ function AdminPage({
   };
 
   const handleNextPage = () => {
+    pendingPaginationAnchorRef.current = activeView;
     if (activeView === "events") {
       setEventPage((current) =>
         Math.min(Math.min(current, eventTotalPages) + 1, eventTotalPages),
@@ -578,18 +599,6 @@ function AdminPage({
     }
   };
 
-  const handleReloadUsers = async () => {
-    try {
-      await reloadUsers();
-    } catch (error) {
-      showNotification(
-        error instanceof Error ? error.message : "Could not reload users right now",
-        "failure",
-        { duration: 3200 },
-      );
-    }
-  };
-
   const handleToggleUserAdmin = async (user) => {
     const userId = String(user?.id || "").trim();
     if (!userId || userId === currentUserId) return;
@@ -743,7 +752,7 @@ function AdminPage({
             <>
               <div className="admin-panel-section">
                 <div className="admin-panel-section__header">
-                  <div>
+                  <div className="admin-panel-section__intro">
                     <h3 className="admin-panel-section__title">{activeFormTitle}</h3>
                     <p className="admin-panel-section__copy">{activeFormCopy}</p>
                   </div>
@@ -763,41 +772,23 @@ function AdminPage({
 
               <div className="admin-panel-section admin-panel-section--collection">
                 <div className="admin-panel-section__header">
-                  <div>
+                  <div className="admin-panel-section__intro">
                     <h3 className="admin-panel-section__title">
                       {activeCollectionTitle}
                     </h3>
                     <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
                   </div>
-                </div>
-
-                <div className="admin-collection-tools">
-                  <label className="profile-field admin-search-field">
-                    <span className="profile-label">{activeSearchLabel}</span>
-                    <input
-                      className="profile-input"
-                      type="search"
-                      value={activeSearchValue}
-                      onChange={handleSearchChange}
-                      placeholder={activeSearchPlaceholder}
-                    />
-                  </label>
-                  <div className="admin-collection-meta">
-                    <div className="admin-results-copy">
-                      Showing {visibleStart}-{visibleEnd} of {activeFilteredCount}
-                      {activeFilteredCount !== activeTotalCount
-                        ? ` matching ${activeTotalCount} total`
-                        : ""}
-                    </div>
-                    {activeSearchValue ? (
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-toolbar-btn"
-                        onClick={handleSearchReset}
-                      >
-                        Clear search
-                      </button>
-                    ) : null}
+                  <div className="admin-collection-tools">
+                    <label className="profile-field admin-search-field">
+                      <input
+                        className="profile-input"
+                        type="search"
+                        aria-label={activeSearchLabel}
+                        value={activeSearchValue}
+                        onChange={handleSearchChange}
+                        placeholder={activeSearchPlaceholder}
+                      />
+                    </label>
                   </div>
                 </div>
 
@@ -813,38 +804,38 @@ function AdminPage({
                   }
                 />
 
-                {activeTotalPages > 1 ? (
-                  <div className="admin-pagination">
-                    <button
-                      type="button"
-                      className="glass-btn profile-action-btn admin-pagination-btn"
-                      onClick={handlePreviousPage}
-                      disabled={activePage <= 1}
-                      aria-label="Previous page"
-                    >
-                      <PaginationChevron direction="left" />
-                    </button>
-                    <div className="admin-pagination-status">
-                      Page {activePage} of {activeTotalPages}
-                    </div>
-                    <button
-                      type="button"
-                      className="glass-btn profile-action-btn admin-pagination-btn"
-                      onClick={handleNextPage}
-                      disabled={activePage >= activeTotalPages}
-                      aria-label="Next page"
-                    >
-                      <PaginationChevron direction="right" />
-                    </button>
-                  </div>
-                ) : null}
+                <div className="admin-pagination" ref={locationPaginationRef}>
+                  <div className="admin-pagination-status">{activeResultSummary}</div>
+                  {activeTotalPages > 1 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-pagination-btn"
+                        onClick={handlePreviousPage}
+                        disabled={activePage <= 1}
+                        aria-label="Previous page"
+                      >
+                        <PaginationChevron direction="left" />
+                      </button>
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-pagination-btn"
+                        onClick={handleNextPage}
+                        disabled={activePage >= activeTotalPages}
+                        aria-label="Next page"
+                      >
+                        <PaginationChevron direction="right" />
+                      </button>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </>
           ) : activeView === "events" ? (
             <>
               <div className="admin-panel-section">
                 <div className="admin-panel-section__header">
-                  <div>
+                  <div className="admin-panel-section__intro">
                     <h3 className="admin-panel-section__title">{activeFormTitle}</h3>
                     <p className="admin-panel-section__copy">{activeFormCopy}</p>
                   </div>
@@ -864,41 +855,23 @@ function AdminPage({
 
               <div className="admin-panel-section admin-panel-section--collection">
                 <div className="admin-panel-section__header">
-                  <div>
+                  <div className="admin-panel-section__intro">
                     <h3 className="admin-panel-section__title">
                       {activeCollectionTitle}
                     </h3>
                     <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
                   </div>
-                </div>
-
-                <div className="admin-collection-tools">
-                  <label className="profile-field admin-search-field">
-                    <span className="profile-label">{activeSearchLabel}</span>
-                    <input
-                      className="profile-input"
-                      type="search"
-                      value={activeSearchValue}
-                      onChange={handleSearchChange}
-                      placeholder={activeSearchPlaceholder}
-                    />
-                  </label>
-                  <div className="admin-collection-meta">
-                    <div className="admin-results-copy">
-                      Showing {visibleStart}-{visibleEnd} of {activeFilteredCount}
-                      {activeFilteredCount !== activeTotalCount
-                        ? ` matching ${activeTotalCount} total`
-                        : ""}
-                    </div>
-                    {activeSearchValue ? (
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-toolbar-btn"
-                        onClick={handleSearchReset}
-                      >
-                        Clear search
-                      </button>
-                    ) : null}
+                  <div className="admin-collection-tools">
+                    <label className="profile-field admin-search-field">
+                      <input
+                        className="profile-input"
+                        type="search"
+                        aria-label={activeSearchLabel}
+                        value={activeSearchValue}
+                        onChange={handleSearchChange}
+                        placeholder={activeSearchPlaceholder}
+                      />
+                    </label>
                   </div>
                 </div>
 
@@ -915,103 +888,54 @@ function AdminPage({
                   }
                 />
 
-                {activeTotalPages > 1 ? (
-                  <div className="admin-pagination">
-                    <button
-                      type="button"
-                      className="glass-btn profile-action-btn admin-pagination-btn"
-                      onClick={handlePreviousPage}
-                      disabled={activePage <= 1}
-                      aria-label="Previous page"
-                    >
-                      <PaginationChevron direction="left" />
-                    </button>
-                    <div className="admin-pagination-status">
-                      Page {activePage} of {activeTotalPages}
-                    </div>
-                    <button
-                      type="button"
-                      className="glass-btn profile-action-btn admin-pagination-btn"
-                      onClick={handleNextPage}
-                      disabled={activePage >= activeTotalPages}
-                      aria-label="Next page"
-                    >
-                      <PaginationChevron direction="right" />
-                    </button>
-                  </div>
-                ) : null}
+                <div className="admin-pagination" ref={eventPaginationRef}>
+                  <div className="admin-pagination-status">{activeResultSummary}</div>
+                  {activeTotalPages > 1 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-pagination-btn"
+                        onClick={handlePreviousPage}
+                        disabled={activePage <= 1}
+                        aria-label="Previous page"
+                      >
+                        <PaginationChevron direction="left" />
+                      </button>
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-pagination-btn"
+                        onClick={handleNextPage}
+                        disabled={activePage >= activeTotalPages}
+                        aria-label="Next page"
+                      >
+                        <PaginationChevron direction="right" />
+                      </button>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </>
           ) : (
             <>
-              <div className="admin-panel-section">
-                <div className="admin-panel-section__header">
-                  <div>
-                    <h3 className="admin-panel-section__title">{activeFormTitle}</h3>
-                    <p className="admin-panel-section__copy">{activeFormCopy}</p>
-                  </div>
-                </div>
-
-                <div className="profile-readonly admin-user-management-note">
-                  Change other accounts here. Access changes are stored immediately,
-                  but the affected user may need to sign out and back in before a new
-                  token reflects the updated role.
-                </div>
-                <div className="profile-readonly admin-user-management-note">
-                  Your current account is locked in this panel to avoid breaking the
-                  active admin session.
-                </div>
-              </div>
-
-              <div className="admin-section-separator" aria-hidden="true" />
-
               <div className="admin-panel-section admin-panel-section--collection">
                 <div className="admin-panel-section__header">
-                  <div>
+                  <div className="admin-panel-section__intro">
                     <h3 className="admin-panel-section__title">
                       {activeCollectionTitle}
                     </h3>
                     <p className="admin-panel-section__copy">{activeCollectionCopy}</p>
                   </div>
-                </div>
-
-                <div className="admin-collection-tools">
-                  <label className="profile-field admin-search-field">
-                    <span className="profile-label">{activeSearchLabel}</span>
-                    <input
-                      className="profile-input"
-                      type="search"
-                      value={activeSearchValue}
-                      onChange={handleSearchChange}
-                      placeholder={activeSearchPlaceholder}
-                    />
-                  </label>
-                  <div className="admin-collection-meta">
-                    <div className="admin-results-copy">
-                      Showing {visibleStart}-{visibleEnd} of {activeFilteredCount}
-                      {activeFilteredCount !== activeTotalCount
-                        ? ` matching ${activeTotalCount} total`
-                        : ""}
-                    </div>
-                    <div className="admin-collection-actions">
-                      {activeSearchValue ? (
-                        <button
-                          type="button"
-                          className="glass-btn profile-action-btn admin-toolbar-btn"
-                          onClick={handleSearchReset}
-                        >
-                          Clear search
-                        </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="glass-btn profile-action-btn admin-toolbar-btn"
-                        onClick={handleReloadUsers}
-                        disabled={areUsersLoading}
-                      >
-                        {areUsersLoading ? "Refreshing..." : "Refresh"}
-                      </button>
-                    </div>
+                  <div className="admin-collection-tools">
+                    <label className="profile-field admin-search-field">
+                      <input
+                        className="profile-input"
+                        type="search"
+                        aria-label={activeSearchLabel}
+                        value={activeSearchValue}
+                        onChange={handleSearchChange}
+                        placeholder={activeSearchPlaceholder}
+                      />
+                    </label>
                   </div>
                 </div>
 
@@ -1039,31 +963,31 @@ function AdminPage({
                   />
                 )}
 
-                {activeTotalPages > 1 ? (
-                  <div className="admin-pagination">
-                    <button
-                      type="button"
-                      className="glass-btn profile-action-btn admin-pagination-btn"
-                      onClick={handlePreviousPage}
-                      disabled={activePage <= 1}
-                      aria-label="Previous page"
-                    >
-                      <PaginationChevron direction="left" />
-                    </button>
-                    <div className="admin-pagination-status">
-                      Page {activePage} of {activeTotalPages}
-                    </div>
-                    <button
-                      type="button"
-                      className="glass-btn profile-action-btn admin-pagination-btn"
-                      onClick={handleNextPage}
-                      disabled={activePage >= activeTotalPages}
-                      aria-label="Next page"
-                    >
-                      <PaginationChevron direction="right" />
-                    </button>
-                  </div>
-                ) : null}
+                <div className="admin-pagination" ref={userPaginationRef}>
+                  <div className="admin-pagination-status">{activeResultSummary}</div>
+                  {activeTotalPages > 1 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-pagination-btn"
+                        onClick={handlePreviousPage}
+                        disabled={activePage <= 1}
+                        aria-label="Previous page"
+                      >
+                        <PaginationChevron direction="left" />
+                      </button>
+                      <button
+                        type="button"
+                        className="glass-btn profile-action-btn admin-pagination-btn"
+                        onClick={handleNextPage}
+                        disabled={activePage >= activeTotalPages}
+                        aria-label="Next page"
+                      >
+                        <PaginationChevron direction="right" />
+                      </button>
+                    </>
+                  ) : null}
+                </div>
               </div>
             </>
           )}

@@ -902,47 +902,30 @@
 }
 
 .admin-collection-tools {
+  flex: 0 1 340px;
+  width: min(100%, 340px);
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 .admin-search-field {
-  flex: 1 1 360px;
-  max-width: 540px;
+  flex: 1 1 auto;
+  width: auto;
+  margin: 0;
 }
 
 .admin-search-field .profile-input {
-  min-height: 46px;
-}
-
-.admin-collection-meta {
-  display: grid;
-  gap: 8px;
-  justify-items: end;
+  min-height: 42px;
 }
 
 .admin-results-copy {
+  flex: 0 0 auto;
   font-size: 0.82rem;
   color: var(--surface-text-muted);
   text-align: right;
-}
-
-.admin-collection-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.admin-toolbar-btn {
-  min-width: 122px;
-}
-
-.admin-user-management-note {
-  margin: 0;
+  white-space: nowrap;
 }
 
 .admin-inline-feedback {
