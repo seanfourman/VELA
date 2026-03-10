@@ -88,19 +88,19 @@
   --accent-muted: #6b7280;
 
   /* Event Colors */
-  --event-party-color: #ff375f;
-  --event-party-color-bright: #ff8aa2;
-  --event-party-glow: rgba(255, 55, 95, 0.62);
-  --event-party-ring: rgba(255, 55, 95, 0.38);
-  --event-party-soft: rgba(255, 55, 95, 0.18);
-  --event-party-border: rgba(255, 55, 95, 0.52);
-  --event-party-text: #ffe1e8;
-  --event-party-active-bg: rgba(255, 55, 95, 0.56);
-  --event-party-active-bg-hover: rgba(255, 55, 95, 0.66);
-  --event-party-active-outline: rgba(255, 55, 95, 0.4);
-  --event-party-active-shadow: rgba(255, 55, 95, 0.26);
-  --event-party-label-border: rgba(255, 55, 95, 0.62);
-  --event-party-label-ring: rgba(255, 55, 95, 0.35);
+  --event-party-color: #22c55e;
+  --event-party-color-bright: #86efac;
+  --event-party-glow: rgba(34, 197, 94, 0.62);
+  --event-party-ring: rgba(34, 197, 94, 0.38);
+  --event-party-soft: rgba(34, 197, 94, 0.18);
+  --event-party-border: rgba(34, 197, 94, 0.52);
+  --event-party-text: #dcfce7;
+  --event-party-active-bg: rgba(34, 197, 94, 0.56);
+  --event-party-active-bg-hover: rgba(34, 197, 94, 0.66);
+  --event-party-active-outline: rgba(34, 197, 94, 0.4);
+  --event-party-active-shadow: rgba(34, 197, 94, 0.26);
+  --event-party-label-border: rgba(34, 197, 94, 0.62);
+  --event-party-label-ring: rgba(34, 197, 94, 0.35);
 
   --event-special-color: #00d4ff;
   --event-special-color-bright: #7ae8ff;
@@ -235,15 +235,15 @@
   --accent-muted: #9ca3af;
 
   /* Event Colors - Light */
-  --event-party-soft: rgba(255, 55, 95, 0.22);
-  --event-party-border: rgba(190, 24, 93, 0.38);
-  --event-party-text: #9f1239;
-  --event-party-active-bg: rgba(255, 55, 95, 0.5);
-  --event-party-active-bg-hover: rgba(255, 55, 95, 0.6);
-  --event-party-active-outline: rgba(190, 24, 93, 0.34);
-  --event-party-active-shadow: rgba(190, 24, 93, 0.24);
-  --event-party-label-border: rgba(190, 24, 93, 0.5);
-  --event-party-label-ring: rgba(190, 24, 93, 0.3);
+  --event-party-soft: rgba(34, 197, 94, 0.18);
+  --event-party-border: rgba(21, 128, 61, 0.34);
+  --event-party-text: #166534;
+  --event-party-active-bg: rgba(34, 197, 94, 0.46);
+  --event-party-active-bg-hover: rgba(34, 197, 94, 0.56);
+  --event-party-active-outline: rgba(21, 128, 61, 0.3);
+  --event-party-active-shadow: rgba(21, 128, 61, 0.22);
+  --event-party-label-border: rgba(21, 128, 61, 0.44);
+  --event-party-label-ring: rgba(21, 128, 61, 0.26);
 
   --event-special-soft: rgba(0, 212, 255, 0.2);
   --event-special-border: rgba(8, 145, 178, 0.42);
