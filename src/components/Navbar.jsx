@@ -1,4 +1,5 @@
-﻿import "./styles/Navbar.css";
+import { Link } from "react-router-dom";
+import "./styles/Navbar.css";
 import velaLogo from "@/assets/vela.svg";
 import velaLogoBlack from "@/assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
@@ -47,8 +48,8 @@ function Navbar({
             />
           </div>
         ) : (
-          <a
-            href="/"
+          <Link
+            to="/"
             className="navbar-logo"
             onClick={(event) => handleNavigate(event, "/")}
           >
@@ -57,7 +58,7 @@ function Navbar({
               alt="VELA"
               className="logo-img"
             />
-          </a>
+          </Link>
         )}
 
         <div className="navbar-right">
@@ -85,4 +86,3 @@ function Navbar({
 }
 
 export default Navbar;
-

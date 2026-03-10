@@ -72,6 +72,7 @@ const useMapViewState = ({
   const favorites = useMapFavorites({
     getSpotKey,
     placedMarker,
+    selectedDarkSpot,
     setPlacedMarker,
     setSelectedDarkSpot,
   });
@@ -264,3 +265,4 @@ const useMapViewState = ({
 };
 
 export default useMapViewState;
+

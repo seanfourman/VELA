@@ -1,4 +1,5 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import userIcon from "@/assets/icons/user-icon.svg";
 import adminIcon from "@/assets/icons/admin-with-cogwheels-svgrepo-com.svg";
 import "./styles/ProfileMenu.css";
@@ -115,8 +116,8 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
           ref={menuRef}
         >
           {isAdmin ? (
-            <a
-              href="/admin"
+            <Link
+              to="/admin"
               className="profile-admin-shortcut"
               onClick={(event) => handleMenuNavigate(event, "/admin")}
               aria-label="Admin Panel"
@@ -128,7 +129,7 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
                 aria-hidden="true"
                 className="profile-admin-shortcut-icon"
               />
-            </a>
+            </Link>
           ) : null}
 
           <div className="profile-meta">
@@ -139,20 +140,20 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
           </div>
 
           <div className="profile-actions">
-            <a
-              href="/profile"
+            <Link
+              to="/profile"
               className="profile-action"
               onClick={(event) => handleMenuNavigate(event, "/profile")}
             >
               Profile
-            </a>
-            <a
-              href="/settings"
+            </Link>
+            <Link
+              to="/settings"
               className="profile-action"
               onClick={(event) => handleMenuNavigate(event, "/settings")}
             >
               Settings
-            </a>
+            </Link>
             <button
               type="button"
               className="profile-action logout"
@@ -168,4 +169,3 @@ function ProfileMenu({ auth, isLight, profile, isAdmin, onNavigate }) {
 }
 
 export default ProfileMenu;
-

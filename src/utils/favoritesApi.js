@@ -11,6 +11,25 @@ const buildSpotId = (lat, lon) => {
   return `${Number(lat).toFixed(6)},${Number(lon).toFixed(6)}`;
 };
 
+const normalizeFavoriteSpot = (value, fallback = {}) => {
+  const safe = value && typeof value === "object" ? value : {};
+  const lat = parseCoord(safe.lat ?? fallback.lat);
+  const lon = parseCoord(safe.lon ?? fallback.lon);
+
+  return {
+    spotId:
+      typeof safe.spotId === "string" && safe.spotId.trim()
+        ? safe.spotId.trim()
+        : fallback.spotId ?? buildSpotId(lat, lon),
+    lat,
+    lon,
+    createdAt:
+      typeof safe.createdAt === "string" && safe.createdAt.trim()
+        ? safe.createdAt
+        : fallback.createdAt ?? null,
+  };
+};
+
 const getAuthToken = () => {
   const token = readStoredToken();
   return typeof token === "string" ? token.trim() : "";
@@ -36,7 +55,14 @@ const authHeaders = () => {
 export async function saveFavoriteSpot({ lat, lon }) {
   const parsedLat = parseCoord(lat);
   const parsedLon = parseCoord(lon);
-  if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLon)) return;
+  if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLon)) return null;
+
+  const fallback = {
+    spotId: buildSpotId(parsedLat, parsedLon),
+    lat: parsedLat,
+    lon: parsedLon,
+    createdAt: null,
+  };
 
   const response = await fetch(buildFavoritesUrl(), {
     method: "POST",
@@ -45,7 +71,7 @@ export async function saveFavoriteSpot({ lat, lon }) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      spotId: buildSpotId(parsedLat, parsedLon),
+      spotId: fallback.spotId,
       lat: parsedLat,
       lon: parsedLon,
     }),
@@ -54,6 +80,9 @@ export async function saveFavoriteSpot({ lat, lon }) {
   if (!response.ok) {
     throw new Error(await getResponseError(response));
   }
+
+  const data = await response.json().catch(() => null);
+  return normalizeFavoriteSpot(data, fallback);
 }
 
 export async function deleteFavoriteSpot({ lat, lon, spotId }) {
@@ -62,17 +91,19 @@ export async function deleteFavoriteSpot({ lat, lon, spotId }) {
   const resolvedSpotId =
     (typeof spotId === "string" && spotId.trim()) ||
     buildSpotId(parsedLat, parsedLon);
-  if (!resolvedSpotId) return;
+  if (!resolvedSpotId) return false;
 
   const response = await fetch(buildFavoritesUrl(resolvedSpotId), {
     method: "DELETE",
     headers: authHeaders(),
   });
 
-  if (response.status === 404) return;
+  if (response.status === 404) return false;
   if (!response.ok) {
     throw new Error(await getResponseError(response));
   }
+
+  return true;
 }
 
 export async function fetchFavoriteSpots() {
@@ -92,5 +123,5 @@ export async function fetchFavoriteSpots() {
   }
 
   const data = await response.json().catch(() => []);
-  return Array.isArray(data) ? data : [];
+  return Array.isArray(data) ? data.map((item) => normalizeFavoriteSpot(item)) : [];
 }
