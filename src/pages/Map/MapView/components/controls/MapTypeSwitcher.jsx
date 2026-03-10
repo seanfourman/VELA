@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./styles/MapTypeSwitcher.css";
 
 const OPTION_META = (previewKey) => [
@@ -61,46 +61,63 @@ export default function MapTypeSwitcher({
       ref={containerRef}
       className={`map-type-switcher ${expanded ? "expanded" : ""}`}
     >
-      <button
-        className="map-type-btn map-type-current"
-        aria-label={`${current.label} map`}
-        onClick={toggleMenu}
-      >
-        <div
-          key={previewSrc}
-          className="map-type-fill fresh"
-          style={{
-            backgroundImage: `url('${previewSrc}')`,
+      <span className="map-type-tooltip-anchor map-type-tooltip-anchor--current">
+        <button
+          className="map-type-btn map-type-current"
+          aria-label={`${current.label} map`}
+          onClick={(event) => {
+            toggleMenu();
+            event.currentTarget.blur();
           }}
-        />
-        <div className="map-type-overlay" />
-        <span className="map-type-label">{current.label}</span>
-      </button>
+        >
+          <div
+            key={previewSrc}
+            className="map-type-fill fresh"
+            style={{
+              backgroundImage: `url('${previewSrc}')`,
+            }}
+          />
+          <div className="map-type-overlay" />
+          <span className="map-type-label">{current.label}</span>
+        </button>
+        <span className="map-type-tooltip-label" aria-hidden="true">
+          Map type selector
+        </span>
+      </span>
 
       <div
         className="map-type-options"
       >
         {options.map((opt) => (
-          <button
+          <span
             key={opt.id}
-            className={`map-type-btn map-type-option ${
-              opt.id === mapType ? "active" : ""
-            }`}
-            onClick={() => handleOptionChange(opt.id)}
-            aria-label={`${opt.label} map`}
+            className="map-type-tooltip-anchor map-type-tooltip-anchor--option"
           >
-            <div
-              className="map-type-fill"
-              style={{
-                backgroundImage: `url('${opt.preview}')`,
+            <button
+              className={`map-type-btn map-type-option ${
+                opt.id === mapType ? "active" : ""
+              }`}
+              onClick={(event) => {
+                handleOptionChange(opt.id);
+                event.currentTarget.blur();
               }}
-            />
-            <div className="map-type-overlay" />
-            <span className="map-type-label">{opt.label}</span>
-          </button>
+              aria-label={`${opt.label} map`}
+            >
+              <div
+                className="map-type-fill"
+                style={{
+                  backgroundImage: `url('${opt.preview}')`,
+                }}
+              />
+              <div className="map-type-overlay" />
+              <span className="map-type-label">{opt.label}</span>
+            </button>
+            <span className="map-type-tooltip-label" aria-hidden="true">
+              {opt.label}
+            </span>
+          </span>
         ))}
       </div>
     </div>
   );
 }
-

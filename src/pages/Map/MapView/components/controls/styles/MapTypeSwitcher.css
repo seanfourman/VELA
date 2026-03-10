@@ -12,7 +12,7 @@
   border: none;
   border-radius: var(--radius-md);
   z-index: 1501;
-  isolation: isolate;
+  isolation: auto;
   overflow: visible;
   transform: translate3d(0, 0, 0);
   transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
@@ -67,6 +67,58 @@
   isolation: isolate;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.15);
   z-index: 3;
+}
+
+.map-type-tooltip-anchor {
+  display: inline-flex;
+  position: relative;
+}
+
+.map-type-tooltip-label {
+  position: absolute;
+  left: auto;
+  right: 0;
+  top: auto;
+  bottom: calc(100% + 10px);
+  transform: translate(0, 6px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 8px 12px;
+  color: var(--surface-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  border: 1px solid var(--glass-border-strong);
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease, transform 0.18s ease, filter 0.2s ease;
+  z-index: 5;
+  text-align: left;
+  max-width: calc(100vw - 32px);
+  overflow: visible;
+}
+
+.map-type-tooltip-anchor:hover .map-type-tooltip-label,
+.map-type-tooltip-anchor:focus-within .map-type-tooltip-label {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+.map-container.light .map-type-tooltip-anchor--option .map-type-tooltip-label {
+  color: #ffffff;
+}
+
+.map-type-switcher.expanded > .map-type-tooltip-anchor--current .map-type-tooltip-label {
+  opacity: 0;
+  transform: translate(0, 6px);
 }
 
 .map-type-fill {
@@ -126,11 +178,13 @@
   display: inline-flex;
   gap: 6px;
   padding: 4px;
-  max-width: 0;
+  width: max-content;
   opacity: 0;
-  transform: translate(10px, -50%);
-  transition: max-width 0.28s ease, opacity 0.2s ease, transform 0.25s ease;
-  overflow: hidden;
+  visibility: hidden;
+  transform: translate(8px, -50%) scaleX(0.75);
+  transform-origin: right center;
+  transition: opacity 0.2s ease, transform 0.25s ease;
+  overflow: visible;
   pointer-events: none;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur-heavy);
@@ -138,7 +192,7 @@
   border: 1px solid var(--glass-border-strong);
   border-radius: var(--radius-md);
   box-shadow: var(--glass-shadow-elevated);
-  z-index: 2;
+  z-index: 4;
 }
 
 .map-type-options::before {
@@ -151,11 +205,24 @@
   z-index: 1;
 }
 
+.map-type-options .map-type-tooltip-anchor {
+  z-index: 2;
+}
+
+.map-type-tooltip-anchor--option .map-type-tooltip-label {
+  background: rgba(10, 12, 20, 0.92);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
 .map-type-switcher.expanded .map-type-options {
-  max-width: 220px;
   opacity: 1;
-  transform: translate(0, -50%);
+  visibility: visible;
+  transform: translate(0, -50%) scaleX(1);
   pointer-events: auto;
+  overflow: visible;
 }
 
 .map-type-option {
@@ -217,6 +284,7 @@ body.map-ui-shifted-space-weather .map-type-switcher {
     padding: 3px;
     max-width: none;
     max-height: 0;
+    visibility: hidden;
     transform: translate(-50%, 14px) scale(0.95);
     opacity: 0;
     pointer-events: none;
@@ -229,8 +297,13 @@ body.map-ui-shifted-space-weather .map-type-switcher {
 
   .map-type-switcher.expanded .map-type-options {
     max-height: 220px;
+    visibility: visible;
     transform: translate(-50%, 0) scale(1);
     opacity: 1;
     pointer-events: auto;
+  }
+
+  .map-type-tooltip-label {
+    display: none;
   }
 }
