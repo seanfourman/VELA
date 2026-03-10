@@ -81,7 +81,7 @@ export default function MapTypeSwitcher({
           <span className="map-type-label">{current.label}</span>
         </button>
         <span className="map-type-tooltip-label" aria-hidden="true">
-          Map type selector
+          Switch map type
         </span>
       </span>
 

@@ -44,7 +44,7 @@
 
 .map-type-switcher:hover,
 .map-type-switcher.expanded {
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .map-type-btn {
