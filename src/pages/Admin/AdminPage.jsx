@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import Chip from "@mui/material/Chip";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
 import showNotification from "@/utils/notifications";
@@ -157,6 +157,8 @@ function AdminPage({
   const [locationPage, setLocationPage] = useState(1);
   const [eventPage, setEventPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [isDeleteConfirmBusy, setIsDeleteConfirmBusy] = useState(false);
   const locationPaginationRef = useRef(null);
   const eventPaginationRef = useRef(null);
   const userPaginationRef = useRef(null);
@@ -340,13 +342,39 @@ function AdminPage({
     "--switch-index": activeViewIndex,
     "--switch-count": 3,
   };
-  const summaryChipSx = useMemo(
-    () => ({
-      color: isLight ? "#10223f" : "#f5f8ff",
-      borderColor: isLight ? "rgba(16, 34, 63, 0.32)" : "rgba(245, 248, 255, 0.34)",
-      bgcolor: "transparent",
-    }),
-    [isLight],
+  const adminSummaryGroups = useMemo(
+    () => [
+      {
+        id: "locations",
+        title: "Locations",
+        stats: [{ label: "Spots", value: locationList.length }],
+      },
+      {
+        id: "events",
+        title: "Events",
+        stats: [
+          { label: "Total", value: eventList.length },
+          { label: "Published", value: publishedEventsCount },
+          { label: "RSVPs", value: totalRsvps },
+        ],
+      },
+      {
+        id: "users",
+        title: "Users",
+        stats: [
+          { label: "Accounts", value: userList.length },
+          { label: "Admins", value: adminUsersCount },
+        ],
+      },
+    ],
+    [
+      adminUsersCount,
+      eventList.length,
+      locationList.length,
+      publishedEventsCount,
+      totalRsvps,
+      userList.length,
+    ],
   );
 
   useEffect(() => {
@@ -460,9 +488,9 @@ function AdminPage({
     showNotification("Editing selected event", "info", { duration: 1800 });
   };
 
-  const handleDeleteLocation = async (location) => {
+  const performDeleteLocation = async (location) => {
     const locationId = location?.id;
-    if (!locationId) return;
+    if (!locationId) return false;
 
     try {
       await deleteRecommendation({
@@ -473,6 +501,7 @@ function AdminPage({
         resetLocationForm();
       }
       showNotification("Location removed", "info", { duration: 2200 });
+      return true;
     } catch (error) {
       showNotification(
         error instanceof Error
@@ -481,18 +510,21 @@ function AdminPage({
         "failure",
         { duration: 3200 },
       );
+      return false;
     }
   };
 
-  const handleDeleteEvent = async (event) => {
+  const performDeleteEvent = async (event) => {
     const eventId = String(event?.id || "").trim();
-    if (!eventId) return;
+    if (!eventId) return false;
+
     try {
       await Promise.resolve(onDeleteStarPartyEvent?.(eventId));
       if (editingEventId && editingEventId === eventId) {
         resetEventForm();
       }
       showNotification("Event removed", "info", { duration: 2200 });
+      return true;
     } catch (error) {
       showNotification(
         error instanceof Error
@@ -501,6 +533,62 @@ function AdminPage({
         "failure",
         { duration: 3200 },
       );
+      return false;
+    }
+  };
+
+  const handleRequestDeleteLocation = (location) => {
+    const locationId = String(location?.id || "").trim();
+    if (!locationId) return;
+
+    const locationName =
+      String(location?.name || locationId || "this location").trim() || "this location";
+
+    setPendingDelete({
+      kind: "location",
+      item: location,
+      title: "Delete location?",
+      message: `${locationName} will be removed from the curated locations list. This action cannot be undone.`,
+      confirmLabel: "Delete location",
+    });
+  };
+
+  const handleRequestDeleteEvent = (event) => {
+    const eventId = String(event?.id || "").trim();
+    if (!eventId) return;
+
+    const eventTitle =
+      String(event?.title || eventId || "this event").trim() || "this event";
+
+    setPendingDelete({
+      kind: "event",
+      item: event,
+      title: "Delete event?",
+      message: `${eventTitle} will be removed from the event list. This action cannot be undone.`,
+      confirmLabel: "Delete event",
+    });
+  };
+
+  const handleCancelDelete = () => {
+    if (isDeleteConfirmBusy) return;
+    setPendingDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete || isDeleteConfirmBusy) return;
+
+    setIsDeleteConfirmBusy(true);
+    try {
+      const didDelete =
+        pendingDelete.kind === "location"
+          ? await performDeleteLocation(pendingDelete.item)
+          : await performDeleteEvent(pendingDelete.item);
+
+      if (didDelete) {
+        setPendingDelete(null);
+      }
+    } finally {
+      setIsDeleteConfirmBusy(false);
     }
   };
 
@@ -710,42 +798,27 @@ function AdminPage({
           </div>
 
           <div className="admin-summary-row">
-            <Chip
-              size="small"
-              label={`Spots ${locationList.length}`}
-              variant="outlined"
-              sx={summaryChipSx}
-            />
-            <Chip
-              size="small"
-              label={`Events ${eventList.length}`}
-              variant="outlined"
-              sx={summaryChipSx}
-            />
-            <Chip
-              size="small"
-              label={`Published ${publishedEventsCount}`}
-              variant="outlined"
-              sx={summaryChipSx}
-            />
-            <Chip
-              size="small"
-              label={`RSVPs ${totalRsvps}`}
-              variant="outlined"
-              sx={summaryChipSx}
-            />
-            <Chip
-              size="small"
-              label={`Users ${userList.length}`}
-              variant="outlined"
-              sx={summaryChipSx}
-            />
-            <Chip
-              size="small"
-              label={`Admins ${adminUsersCount}`}
-              variant="outlined"
-              sx={summaryChipSx}
-            />
+            {adminSummaryGroups.map((group) => (
+              <div
+                key={group.id}
+                className={`admin-summary-group admin-summary-group--${group.id}${
+                  activeView === group.id ? " is-active" : ""
+                }`}
+              >
+                <div className="admin-summary-group__title">{group.title}</div>
+                <div className="admin-summary-group__stats">
+                  {group.stats.map((stat) => (
+                    <div
+                      key={`${group.id}-${stat.label}`}
+                      className="admin-summary-pill"
+                    >
+                      <span className="admin-summary-pill__value">{stat.value}</span>
+                      <span className="admin-summary-pill__label">{stat.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
           {activeView === "locations" ? (
@@ -794,7 +867,7 @@ function AdminPage({
 
                 <AdminLocationList
                   locations={paginatedLocations}
-                  onDeleteLocation={handleDeleteLocation}
+                  onDeleteLocation={handleRequestDeleteLocation}
                   onEditLocation={handleEditLocation}
                   activeLocationId={editingLocationId || null}
                   emptyMessage={
@@ -878,7 +951,7 @@ function AdminPage({
                 <AdminEventList
                   events={paginatedEvents}
                   onEditEvent={handleEditEvent}
-                  onDeleteEvent={handleDeleteEvent}
+                  onDeleteEvent={handleRequestDeleteEvent}
                   onSetStatus={handleSetEventStatus}
                   activeEventId={editingEventId || null}
                   emptyMessage={
@@ -993,6 +1066,16 @@ function AdminPage({
           )}
         </section>
       )}
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title={pendingDelete?.title}
+        message={pendingDelete?.message}
+        confirmLabel={pendingDelete?.confirmLabel}
+        cancelLabel="Keep it"
+        isBusy={isDeleteConfirmBusy}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+      />
     </PageShell>
   );
 }

@@ -93,6 +93,14 @@
     align-items: flex-start;
   }
 
+  .admin-summary-row {
+    align-items: stretch;
+  }
+
+  .admin-summary-group {
+    width: 100%;
+  }
+
   .admin-panel-section__header {
     flex-direction: column;
     align-items: flex-start;
