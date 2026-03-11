@@ -640,8 +640,8 @@ function SolarSystemPanel({
 
   return (
     <div className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}>
+      <SolarSystemPanelToggle open={open} onClick={onToggleOpen} />
       <aside className="solar-system-panel">
-        <SolarSystemPanelToggle open={open} onClick={onToggleOpen} />
         {content}
       </aside>
     </div>
