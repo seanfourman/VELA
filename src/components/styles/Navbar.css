@@ -147,6 +147,11 @@
   opacity: 0.75;
 }
 
+.navbar-link-group .nav-link-button.is-active {
+  color: #ffffff;
+  opacity: 1;
+}
+
 .navbar-menu-toggle {
   display: none;
   align-items: center;

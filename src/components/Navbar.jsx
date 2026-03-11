@@ -9,7 +9,7 @@ const NAV_PLACEHOLDER_LINKS = [
   { id: "placeholder-1", label: "Placeholder 1" },
   { id: "placeholder-2", label: "Placeholder 2" },
   { id: "placeholder-3", label: "Placeholder 3" },
-  { id: "placeholder-4", label: "Placeholder 4" },
+  { id: "solar-system", label: "Solar System", path: "/solar-system" },
 ];
 
 function Navbar({
@@ -94,16 +94,27 @@ function Navbar({
     setMobileMenuOpen(false);
   };
 
-  const renderPlaceholderLink = (item, className = "nav-link") => (
-    <button
-      key={item.id}
-      type="button"
-      className={`${className} nav-link-button`}
-      onClick={closeMobileMenu}
-    >
-      {item.label}
-    </button>
-  );
+  const handleNavItemClick = (item) => {
+    closeMobileMenu();
+    if (item.path) {
+      onNavigate?.(item.path);
+    }
+  };
+
+  const renderPlaceholderLink = (item, className = "nav-link") => {
+    const isActive = item.path && currentPath === item.path;
+
+    return (
+      <button
+        key={item.id}
+        type="button"
+        className={`${className} nav-link-button${isActive ? " is-active" : ""}`}
+        onClick={() => handleNavItemClick(item)}
+      >
+        {item.label}
+      </button>
+    );
+  };
 
   return (
     <>
