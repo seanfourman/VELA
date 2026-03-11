@@ -55,7 +55,7 @@
   position: relative;
   pointer-events: auto;
   width: 100%;
-  max-height: min(77vh, 828px);
+  max-height: min(79vh, 846px);
   overflow: hidden;
   border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -440,7 +440,7 @@
 
   .solar-system-panel-mobile__sheet {
     width: min(520px, 94vw);
-    max-height: min(65vh, 558px);
+    max-height: min(67vh, 570px);
     overflow: hidden;
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.12);
