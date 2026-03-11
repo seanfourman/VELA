@@ -511,7 +511,10 @@ function SolarSystemPanelContent({
                 <button
                   type="button"
                   className={`solar-system-orbit-toggle${showOrbits ? " active" : ""}`}
-                  onClick={onToggleOrbits}
+                  onClick={(event) => {
+                    onToggleOrbits();
+                    event.currentTarget.blur();
+                  }}
                   aria-label={showOrbits ? "Hide orbit trails" : "Show orbit trails"}
                 >
                   <img src={orbitIcon} alt="" aria-hidden="true" />
