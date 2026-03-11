@@ -9,6 +9,7 @@ import AdminPage from "@/pages/Admin/AdminPage";
 import MapView from "@/pages/Map/MapView";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import SettingsPage from "@/pages/Settings/SettingsPage";
+import SolarSystemPage from "@/pages/SolarSystem/SolarSystemPage";
 
 const useDisableThreeDMode = () => {
   const { setIsThreeDModeActive } = useAppLayoutContext();
@@ -153,6 +154,13 @@ function AdminRoute() {
   );
 }
 
+function SolarSystemRoute() {
+  useDisableThreeDMode();
+  const { isLight, navigate } = useAppLayoutContext();
+
+  return <SolarSystemPage isLight={isLight} onNavigate={navigate} />;
+}
+
 function NotFoundRoute() {
   const { isLight, navigate } = useAppLayoutContext();
 
@@ -187,6 +195,7 @@ export const router = createBrowserRouter([
       { path: "profile", element: <ProfileRoute /> },
       { path: "admin", element: <AdminRoute /> },
       { path: "settings", element: <SettingsRoute /> },
+      { path: "solar-system", element: <SolarSystemRoute /> },
       { path: "*", element: <NotFoundRoute /> },
     ],
   },
