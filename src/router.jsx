@@ -156,9 +156,8 @@ function AdminRoute() {
 
 function SolarSystemRoute() {
   useDisableThreeDMode();
-  const { isLight, navigate } = useAppLayoutContext();
 
-  return <SolarSystemPage isLight={isLight} onNavigate={navigate} />;
+  return <SolarSystemPage />;
 }
 
 function NotFoundRoute() {
