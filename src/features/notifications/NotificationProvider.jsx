@@ -1,8 +1,6 @@
 import {
-  createContext,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -10,7 +8,6 @@ import ToastNotifications from "@/components/ToastNotifications";
 import { registerNotificationDispatcher } from "@/utils/notifications";
 
 const EXIT_ANIMATION_MS = 400;
-const NotificationContext = createContext(null);
 
 export function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
@@ -85,19 +82,10 @@ export function NotificationProvider({ children }) {
     };
   }, []);
 
-  const value = useMemo(
-    () => ({
-      notify,
-      dismissNotification,
-      notifications,
-    }),
-    [dismissNotification, notifications, notify],
-  );
-
   return (
-    <NotificationContext.Provider value={value}>
+    <>
       {children}
       <ToastNotifications notifications={notifications} />
-    </NotificationContext.Provider>
+    </>
   );
 }
