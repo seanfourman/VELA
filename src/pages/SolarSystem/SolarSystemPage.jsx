@@ -475,7 +475,7 @@ function SolarSystemScene({
   );
 }
 
-function SolarSystemPage({ onNavigate }) {
+function SolarSystemPage() {
   const [selectedBodyId, setSelectedBodyId] = useState("earth");
   const [trackedBodyId, setTrackedBodyId] = useState(null);
   const [showOrbits, setShowOrbits] = useState(true);
@@ -491,29 +491,6 @@ function SolarSystemPage({ onNavigate }) {
   return (
     <div className="solar-system-route">
       <section className="solar-system-stage solar-system-stage--fullscreen">
-        <div className="solar-system-topbar">
-          <div className="solar-system-titleblock">
-            <div className="solar-system-titleblock__eyebrow">Interactive model</div>
-            <h1 className="solar-system-titleblock__title">Solar System</h1>
-            <p className="solar-system-titleblock__subtitle">
-              Orbit through the major worlds, focus a planet, and inspect the system in motion.
-            </p>
-          </div>
-          <button
-            type="button"
-            className="glass-btn profile-action-btn solar-system-back"
-            onClick={() => onNavigate?.("/")}
-          >
-            Back to map
-          </button>
-        </div>
-
-        <div className="solar-system-stage__hud">
-          <div className="solar-system-chip">Drag to orbit</div>
-          <div className="solar-system-chip">Scroll to zoom</div>
-          <div className="solar-system-chip">Click a world to focus</div>
-        </div>
-
         <div className="solar-system-focus-panel">
           <div className="solar-system-focus-panel__eyebrow">Focused body</div>
           <h2 className="solar-system-focus-panel__title">{selectedBody.name}</h2>

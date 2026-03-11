@@ -1,11 +1,15 @@
 .solar-system-route {
+  --solar-overlay-top: 94px;
   position: relative;
   height: 100vh;
-  padding-top: 70px;
   box-sizing: border-box;
   background:
     radial-gradient(circle at top, rgba(255, 211, 110, 0.12), transparent 22%),
-    radial-gradient(circle at 14% 18%, rgba(87, 140, 255, 0.12), transparent 24%),
+    radial-gradient(
+      circle at 14% 18%,
+      rgba(87, 140, 255, 0.12),
+      transparent 24%
+    ),
     linear-gradient(180deg, #020611, #040a17 45%, #050a16);
   overflow: hidden;
 }
@@ -36,84 +40,9 @@
   display: block;
 }
 
-.solar-system-topbar {
-  position: absolute;
-  top: 18px;
-  left: 24px;
-  right: 24px;
-  z-index: 3;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.solar-system-titleblock {
-  max-width: 560px;
-  padding: 18px 20px;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    linear-gradient(180deg, rgba(8, 13, 24, 0.76), rgba(8, 13, 24, 0.52)),
-    rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
-}
-
-.solar-system-titleblock__eyebrow {
-  color: rgba(255, 255, 255, 0.56);
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.solar-system-titleblock__title {
-  margin: 8px 0 10px;
-  color: var(--surface-text);
-  font-size: clamp(2rem, 2.6vw, 2.8rem);
-  line-height: 0.98;
-}
-
-.solar-system-titleblock__subtitle {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.72);
-  line-height: 1.55;
-}
-
-.solar-system-back {
-  margin-top: 6px;
-  flex: 0 0 auto;
-}
-
-.solar-system-stage__hud {
-  position: absolute;
-  top: 158px;
-  left: 24px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  z-index: 2;
-}
-
-.solar-system-chip {
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .solar-system-focus-panel {
   position: absolute;
-  top: 24px;
+  top: var(--solar-overlay-top);
   right: 24px;
   z-index: 2;
   width: min(420px, calc(100% - 48px));
@@ -285,26 +214,40 @@
 
 .solar-system-pill:hover {
   transform: translateY(-1px);
-  border-color: color-mix(in srgb, var(--solar-accent, #ffffff) 52%, rgba(255, 255, 255, 0.16));
-  background: color-mix(in srgb, var(--solar-accent, #ffffff) 16%, rgba(255, 255, 255, 0.04));
+  border-color: color-mix(
+    in srgb,
+    var(--solar-accent, #ffffff) 52%,
+    rgba(255, 255, 255, 0.16)
+  );
+  background: color-mix(
+    in srgb,
+    var(--solar-accent, #ffffff) 16%,
+    rgba(255, 255, 255, 0.04)
+  );
 }
 
 .solar-system-pill.active {
-  border-color: color-mix(in srgb, var(--solar-accent, #ffffff) 68%, rgba(255, 255, 255, 0.16));
-  background: color-mix(in srgb, var(--solar-accent, #ffffff) 22%, rgba(255, 255, 255, 0.04));
-  box-shadow: 0 12px 22px color-mix(in srgb, var(--solar-accent, #ffffff) 20%, transparent);
+  border-color: color-mix(
+    in srgb,
+    var(--solar-accent, #ffffff) 68%,
+    rgba(255, 255, 255, 0.16)
+  );
+  background: color-mix(
+    in srgb,
+    var(--solar-accent, #ffffff) 22%,
+    rgba(255, 255, 255, 0.04)
+  );
+  box-shadow: 0 12px 22px
+    color-mix(in srgb, var(--solar-accent, #ffffff) 20%, transparent);
 }
 
 @media (max-width: 1120px) {
-  .solar-system-topbar {
-    flex-direction: column;
-    align-items: stretch;
-    right: auto;
-    max-width: min(560px, calc(100% - 48px));
+  .solar-system-route {
+    --solar-overlay-top: 84px;
   }
 
   .solar-system-focus-panel {
-    top: 220px;
+    top: var(--solar-overlay-top);
     width: min(420px, calc(100% - 48px));
   }
 
@@ -315,8 +258,8 @@
 
 @media (max-width: 768px) {
   .solar-system-route {
+    --solar-overlay-top: 82px;
     height: 100vh;
-    padding-top: 70px;
   }
 
   .solar-system-stage,
@@ -327,27 +270,6 @@
 
   .solar-system-canvas {
     height: 100%;
-  }
-
-  .solar-system-topbar {
-    top: 14px;
-    left: 14px;
-    right: 14px;
-    max-width: none;
-  }
-
-  .solar-system-titleblock {
-    padding: 14px 16px;
-  }
-
-  .solar-system-titleblock__title {
-    font-size: 1.8rem;
-  }
-
-  .solar-system-stage__hud {
-    top: 176px;
-    left: 14px;
-    right: 14px;
   }
 
   .solar-system-focus-panel {
