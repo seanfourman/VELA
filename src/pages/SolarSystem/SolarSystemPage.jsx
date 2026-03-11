@@ -606,6 +606,7 @@ function SolarSystemPanelToggle({ open, mobile = false, onClick }) {
 function SolarSystemPanel({
   isMobile,
   open,
+  nudgeMobileToggle = false,
   body,
   orbitSpeed,
   onOrbitSpeedChange,
@@ -629,7 +630,11 @@ function SolarSystemPanel({
 
   if (isMobile) {
     return (
-      <div className={`solar-system-panel-mobile ${open ? "open" : "collapsed"}`}>
+      <div
+        className={`solar-system-panel-mobile ${open ? "open" : "collapsed"} ${
+          nudgeMobileToggle ? "nudge" : ""
+        }`.trim()}
+      >
         <div className={`solar-system-panel-mobile__toggle-slot ${open ? "open" : "ready"}`}>
           <SolarSystemPanelToggle open={open} mobile onClick={onToggleOpen} />
         </div>
@@ -661,6 +666,8 @@ function SolarSystemPage() {
   const [orbitSpeed, setOrbitSpeed] = useState(1);
   const [isMobile, setIsMobile] = useState(initialIsMobile);
   const [focusPanelOpen, setFocusPanelOpen] = useState(!initialIsMobile);
+  const [mobilePanelNudge, setMobilePanelNudge] = useState(false);
+  const mobilePanelNudgeTimeoutRef = useRef(null);
   const selectedBody = BODY_LOOKUP[selectedBodyId] || BODY_LOOKUP.earth;
 
   useEffect(() => {
@@ -677,10 +684,46 @@ function SolarSystemPage() {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (mobilePanelNudgeTimeoutRef.current) {
+        clearTimeout(mobilePanelNudgeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const triggerMobilePanelNudge = () => {
+    if (!isMobile || focusPanelOpen) return;
+
+    if (mobilePanelNudgeTimeoutRef.current) {
+      clearTimeout(mobilePanelNudgeTimeoutRef.current);
+    }
+
+    setMobilePanelNudge(false);
+
+    requestAnimationFrame(() => {
+      setMobilePanelNudge(true);
+      mobilePanelNudgeTimeoutRef.current = setTimeout(() => {
+        setMobilePanelNudge(false);
+      }, 5000);
+    });
+  };
+
   const handleSelectBody = (bodyId) => {
     setSelectedBodyId(bodyId);
     setTrackedBodyId(bodyId);
+
+    if (isMobile) {
+      triggerMobilePanelNudge();
+      return;
+    }
+
     setFocusPanelOpen(true);
+  };
+
+  const handleTogglePanel = () => {
+    setMobilePanelNudge(false);
+    setFocusPanelOpen((value) => !value);
   };
 
   return (
@@ -689,6 +732,7 @@ function SolarSystemPage() {
         <SolarSystemPanel
           isMobile={isMobile}
           open={focusPanelOpen}
+          nudgeMobileToggle={mobilePanelNudge}
           body={selectedBody}
           orbitSpeed={orbitSpeed}
           onOrbitSpeedChange={setOrbitSpeed}
@@ -696,7 +740,7 @@ function SolarSystemPage() {
           onToggleOrbits={() => setShowOrbits((value) => !value)}
           selectedBodyId={selectedBodyId}
           onSelectBody={handleSelectBody}
-          onToggleOpen={() => setFocusPanelOpen((value) => !value)}
+          onToggleOpen={handleTogglePanel}
         />
 
         <Canvas

@@ -483,6 +483,12 @@
     bottom: calc(100% + 8px);
   }
 
+  .solar-system-panel-mobile.collapsed.nudge .solar-system-panel-toggle {
+    animation: mobile-toggle-bounce 2.4s cubic-bezier(0.28, 0.95, 0.42, 1.4) 0.12s
+      2;
+    will-change: transform;
+  }
+
   .solar-system-panel-toggle {
     position: static;
     transform: none;
@@ -509,4 +515,29 @@
     gap: 10px;
   }
 
+}
+
+@keyframes mobile-toggle-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  10% {
+    transform: translateY(-34px);
+  }
+  20% {
+    transform: translateY(0);
+  }
+  32% {
+    transform: translateY(-16px);
+  }
+  42% {
+    transform: translateY(0);
+  }
+  55% {
+    transform: translateY(-6px);
+  }
+  65% {
+    transform: translateY(0);
+  }
 }
