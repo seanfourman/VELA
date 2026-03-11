@@ -293,18 +293,21 @@
 
 .solar-system-body-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
 .solar-system-body-option {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 8px;
   min-width: 0;
-  padding: 12px 13px;
+  min-height: 92px;
+  padding: 12px 10px;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--surface-text);
   font: inherit;
@@ -342,20 +345,37 @@
   );
 }
 
-.solar-system-body-option__dot {
-  width: 10px;
-  height: 10px;
-  flex: 0 0 10px;
+.solar-system-body-option__icon-shell {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
-  background: var(--solar-accent, #ffffff);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.18);
+  background: color-mix(
+    in srgb,
+    var(--solar-accent, #ffffff) 16%,
+    rgba(255, 255, 255, 0.04)
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.solar-system-body-option__icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  filter: brightness(0) saturate(100%) invert(100%);
+  opacity: 0.96;
 }
 
 .solar-system-body-option__name {
   min-width: 0;
+  text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 0.82rem;
+  line-height: 1.1;
 }
 
 @media (max-width: 1120px) {
@@ -457,7 +477,4 @@
     gap: 10px;
   }
 
-  .solar-system-body-list {
-    grid-template-columns: 1fr;
-  }
 }

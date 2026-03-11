@@ -189,6 +189,21 @@ const BODY_LOOKUP = Object.fromEntries(
   BODY_DEFINITIONS.map((body) => [body.id, body]),
 );
 
+const planetIcon = (fileName) =>
+  new URL(`../../assets/icons/planets/${fileName}`, import.meta.url).href;
+
+const PLANET_ICON_URLS = {
+  sun: planetIcon("sun.svg"),
+  mercury: planetIcon("mercury.svg"),
+  venus: planetIcon("venus.svg"),
+  earth: planetIcon("earth.svg"),
+  mars: planetIcon("mars.svg"),
+  jupiter: planetIcon("jupiter.svg"),
+  saturn: planetIcon("saturn.svg"),
+  uranus: planetIcon("uranus.svg"),
+  neptune: planetIcon("neptune.svg"),
+};
+
 const CAMERA_HOME = new Vector3(0, 11, 31);
 const TARGET_HOME = new Vector3(0, 0, 0);
 
@@ -547,10 +562,13 @@ function SolarSystemPanelContent({
               style={{ "--solar-accent": planetBody.accent }}
               onClick={() => onSelectBody(planetBody.id)}
             >
-              <span
-                className="solar-system-body-option__dot"
-                aria-hidden="true"
-              />
+              <span className="solar-system-body-option__icon-shell" aria-hidden="true">
+                <img
+                  className="solar-system-body-option__icon"
+                  src={PLANET_ICON_URLS[planetBody.id]}
+                  alt=""
+                />
+              </span>
               <span className="solar-system-body-option__name">{planetBody.name}</span>
             </button>
           ))}
