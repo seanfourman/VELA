@@ -12,6 +12,7 @@ import {
 } from "three";
 import { PLANET_TEXTURES, resolvePlanetTexture } from "@/utils/planetUtils";
 import earthDayMap from "@/assets/planets/2k_earth_daymap.jpg";
+import orbitIcon from "@/assets/icons/orbit-svgrepo-com.svg";
 import "./styles/SolarSystemPage.css";
 
 const BODY_DEFINITIONS = [
@@ -297,7 +298,6 @@ function SolarSystemScene({
   trackedBodyId,
   showOrbits,
   orbitSpeed,
-  resetSignal,
   onSelect,
 }) {
   const controlsRef = useRef(null);
@@ -334,11 +334,6 @@ function SolarSystemScene({
     focusRequestRef.current = trackedBodyId;
     trackedPositionRef.current = null;
   }, [trackedBodyId]);
-
-  useEffect(() => {
-    focusRequestRef.current = "__home__";
-    trackedPositionRef.current = null;
-  }, [resetSignal]);
 
   useFrame((state, delta) => {
     BODY_DEFINITIONS.forEach((body) => {
@@ -481,7 +476,6 @@ function SolarSystemPanelContent({
   onOrbitSpeedChange,
   showOrbits,
   onToggleOrbits,
-  onResetView,
   selectedBodyId,
   onSelectBody,
 }) {
@@ -511,7 +505,22 @@ function SolarSystemPanelContent({
         <label className="solar-system-range" htmlFor="solar-system-speed">
           <div className="solar-system-range__row">
             <span>Orbit pace</span>
-            <span>{Math.round(orbitSpeed * 100)}%</span>
+            <div className="solar-system-range__meta">
+              <span>{Math.round(orbitSpeed * 100)}%</span>
+              <span className="solar-system-tooltip-anchor">
+                <button
+                  type="button"
+                  className={`solar-system-orbit-toggle${showOrbits ? " active" : ""}`}
+                  onClick={onToggleOrbits}
+                  aria-label={showOrbits ? "Hide orbit trails" : "Show orbit trails"}
+                >
+                  <img src={orbitIcon} alt="" aria-hidden="true" />
+                </button>
+                <span className="solar-system-tooltip-label" aria-hidden="true">
+                  {showOrbits ? "Hide orbit trails" : "Show orbit trails"}
+                </span>
+              </span>
+            </div>
           </div>
           <input
             id="solar-system-speed"
@@ -524,37 +533,22 @@ function SolarSystemPanelContent({
           />
         </label>
 
-        <div className="solar-system-actions">
-          <button
-            type="button"
-            className={`glass-btn profile-action-btn solar-system-toggle${
-              showOrbits ? " active" : ""
-            }`}
-            onClick={onToggleOrbits}
-          >
-            {showOrbits ? "Hide" : "Show"} orbit trails
-          </button>
-          <button
-            type="button"
-            className="glass-btn profile-action-btn profile-secondary"
-            onClick={onResetView}
-          >
-            Reset view
-          </button>
-        </div>
-
-        <div className="solar-system-pills solar-system-pills--panel">
+        <div className="solar-system-body-list" role="list">
           {BODY_DEFINITIONS.map((planetBody) => (
             <button
               key={planetBody.id}
               type="button"
-              className={`solar-system-pill${
+              className={`solar-system-body-option${
                 selectedBodyId === planetBody.id ? " active" : ""
               }`}
               style={{ "--solar-accent": planetBody.accent }}
               onClick={() => onSelectBody(planetBody.id)}
             >
-              {planetBody.name}
+              <span
+                className="solar-system-body-option__dot"
+                aria-hidden="true"
+              />
+              <span className="solar-system-body-option__name">{planetBody.name}</span>
             </button>
           ))}
         </div>
@@ -596,7 +590,6 @@ function SolarSystemPanel({
   onOrbitSpeedChange,
   showOrbits,
   onToggleOrbits,
-  onResetView,
   selectedBodyId,
   onSelectBody,
   onToggleOpen,
@@ -608,7 +601,6 @@ function SolarSystemPanel({
       onOrbitSpeedChange={onOrbitSpeedChange}
       showOrbits={showOrbits}
       onToggleOrbits={onToggleOrbits}
-      onResetView={onResetView}
       selectedBodyId={selectedBodyId}
       onSelectBody={onSelectBody}
     />
@@ -627,8 +619,10 @@ function SolarSystemPanel({
 
   return (
     <div className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}>
-      <aside className="solar-system-panel">{content}</aside>
-      <SolarSystemPanelToggle open={open} onClick={onToggleOpen} />
+      <aside className="solar-system-panel">
+        <SolarSystemPanelToggle open={open} onClick={onToggleOpen} />
+        {content}
+      </aside>
     </div>
   );
 }
@@ -642,7 +636,6 @@ function SolarSystemPage() {
   const [trackedBodyId, setTrackedBodyId] = useState(null);
   const [showOrbits, setShowOrbits] = useState(true);
   const [orbitSpeed, setOrbitSpeed] = useState(1);
-  const [resetSignal, setResetSignal] = useState(0);
   const [isMobile, setIsMobile] = useState(initialIsMobile);
   const [focusPanelOpen, setFocusPanelOpen] = useState(!initialIsMobile);
   const selectedBody = BODY_LOOKUP[selectedBodyId] || BODY_LOOKUP.earth;
@@ -678,10 +671,6 @@ function SolarSystemPage() {
           onOrbitSpeedChange={setOrbitSpeed}
           showOrbits={showOrbits}
           onToggleOrbits={() => setShowOrbits((value) => !value)}
-          onResetView={() => {
-            setTrackedBodyId(null);
-            setResetSignal((value) => value + 1);
-          }}
           selectedBodyId={selectedBodyId}
           onSelectBody={handleSelectBody}
           onToggleOpen={() => setFocusPanelOpen((value) => !value)}
@@ -705,7 +694,6 @@ function SolarSystemPage() {
               trackedBodyId={trackedBodyId}
               showOrbits={showOrbits}
               orbitSpeed={orbitSpeed}
-              resetSignal={resetSignal}
               onSelect={handleSelectBody}
             />
           </Suspense>
