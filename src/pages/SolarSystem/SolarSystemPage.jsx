@@ -10,7 +10,6 @@ import {
   SRGBColorSpace,
   Vector3,
 } from "three";
-import PageShell from "@/components/layout/PageShell";
 import { PLANET_TEXTURES, resolvePlanetTexture } from "@/utils/planetUtils";
 import earthDayMap from "@/assets/planets/2k_earth_daymap.jpg";
 import "./styles/SolarSystemPage.css";
@@ -189,7 +188,7 @@ const BODY_LOOKUP = Object.fromEntries(
   BODY_DEFINITIONS.map((body) => [body.id, body]),
 );
 
-const CAMERA_HOME = new Vector3(0, 13, 35);
+const CAMERA_HOME = new Vector3(0, 11, 31);
 const TARGET_HOME = new Vector3(0, 0, 0);
 
 const tuneTexture = (baseTexture, anisotropy = 4) => {
@@ -295,7 +294,6 @@ function PlanetMesh({
 }
 
 function SolarSystemScene({
-  selectedBodyId,
   trackedBodyId,
   showOrbits,
   orbitSpeed,
@@ -304,7 +302,7 @@ function SolarSystemScene({
 }) {
   const controlsRef = useRef(null);
   const bodyRefs = useRef({});
-  const focusRequestRef = useRef(selectedBodyId);
+  const focusRequestRef = useRef(null);
   const autoFocusActiveRef = useRef(false);
   const trackedPositionRef = useRef(null);
   const cameraTargetRef = useRef(CAMERA_HOME.clone());
@@ -332,9 +330,10 @@ function SolarSystemScene({
   }, [loadedTextures, textureEntries]);
 
   useEffect(() => {
-    focusRequestRef.current = selectedBodyId;
+    if (!trackedBodyId) return;
+    focusRequestRef.current = trackedBodyId;
     trackedPositionRef.current = null;
-  }, [selectedBodyId]);
+  }, [trackedBodyId]);
 
   useEffect(() => {
     focusRequestRef.current = "__home__";
@@ -476,7 +475,7 @@ function SolarSystemScene({
   );
 }
 
-function SolarSystemPage({ isLight, onNavigate }) {
+function SolarSystemPage({ onNavigate }) {
   const [selectedBodyId, setSelectedBodyId] = useState("earth");
   const [trackedBodyId, setTrackedBodyId] = useState(null);
   const [showOrbits, setShowOrbits] = useState(true);
@@ -490,145 +489,144 @@ function SolarSystemPage({ isLight, onNavigate }) {
   };
 
   return (
-    <PageShell
-      title="Solar System"
-      subtitle="Orbit through the major worlds, focus a planet, and inspect the system in motion."
-      isLight={isLight}
-      onNavigate={onNavigate}
-      className="solar-system-page"
-    >
-      <section className="profile-card glass-panel glass-panel-elevated solar-system-card">
-        <div className="solar-system-layout">
-          <div className="solar-system-stage">
-            <div className="solar-system-stage__hud">
-              <div className="solar-system-chip">Drag to orbit</div>
-              <div className="solar-system-chip">Scroll to zoom</div>
-              <div className="solar-system-chip">Click a world to focus</div>
+    <div className="solar-system-route">
+      <section className="solar-system-stage solar-system-stage--fullscreen">
+        <div className="solar-system-topbar">
+          <div className="solar-system-titleblock">
+            <div className="solar-system-titleblock__eyebrow">Interactive model</div>
+            <h1 className="solar-system-titleblock__title">Solar System</h1>
+            <p className="solar-system-titleblock__subtitle">
+              Orbit through the major worlds, focus a planet, and inspect the system in motion.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="glass-btn profile-action-btn solar-system-back"
+            onClick={() => onNavigate?.("/")}
+          >
+            Back to map
+          </button>
+        </div>
+
+        <div className="solar-system-stage__hud">
+          <div className="solar-system-chip">Drag to orbit</div>
+          <div className="solar-system-chip">Scroll to zoom</div>
+          <div className="solar-system-chip">Click a world to focus</div>
+        </div>
+
+        <div className="solar-system-focus-panel">
+          <div className="solar-system-focus-panel__eyebrow">Focused body</div>
+          <h2 className="solar-system-focus-panel__title">{selectedBody.name}</h2>
+          <p className="solar-system-focus-panel__copy">{selectedBody.description}</p>
+          <div className="solar-system-focus-panel__stats">
+            <div className="solar-system-inline-stat">
+              <span>Distance</span>
+              <strong>{selectedBody.distance}</strong>
             </div>
-            <div className="solar-system-stage__note">
-              Simplified scale for browsing. Relative order is preserved, exact astronomy is not.
+            <div className="solar-system-inline-stat">
+              <span>Day</span>
+              <strong>{selectedBody.day}</strong>
             </div>
-            <Canvas
-              className="solar-system-canvas"
-              camera={{ position: CAMERA_HOME.toArray(), fov: 45 }}
-              dpr={[1, 1.8]}
-              gl={{
-                antialias: true,
-                alpha: true,
-                powerPreference: "high-performance",
-              }}
-              onCreated={({ gl }) => {
-                gl.setClearColor(0x000000, 0);
-              }}
-            >
-              <Suspense fallback={null}>
-                <SolarSystemScene
-                  selectedBodyId={selectedBodyId}
-                  trackedBodyId={trackedBodyId}
-                  showOrbits={showOrbits}
-                  orbitSpeed={orbitSpeed}
-                  resetSignal={resetSignal}
-                  onSelect={handleSelectBody}
-                />
-              </Suspense>
-            </Canvas>
+            <div className="solar-system-inline-stat">
+              <span>Year</span>
+              <strong>{selectedBody.year}</strong>
+            </div>
+            <div className="solar-system-inline-stat">
+              <span>Moons</span>
+              <strong>{selectedBody.moons}</strong>
+            </div>
+            <div className="solar-system-inline-stat">
+              <span>Temp</span>
+              <strong>{selectedBody.temperature}</strong>
+            </div>
+          </div>
+        </div>
+
+        <Canvas
+          className="solar-system-canvas"
+          camera={{ position: CAMERA_HOME.toArray(), fov: 45 }}
+          dpr={[1, 1.8]}
+          gl={{
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance",
+          }}
+          onCreated={({ gl }) => {
+            gl.setClearColor(0x000000, 0);
+          }}
+        >
+          <Suspense fallback={null}>
+            <SolarSystemScene
+              trackedBodyId={trackedBodyId}
+              showOrbits={showOrbits}
+              orbitSpeed={orbitSpeed}
+              resetSignal={resetSignal}
+              onSelect={handleSelectBody}
+            />
+          </Suspense>
+        </Canvas>
+
+        <div className="solar-system-control-dock">
+          <div className="solar-system-control-dock__main">
+            <label className="solar-system-range" htmlFor="solar-system-speed">
+              <div className="solar-system-range__row">
+                <span>Orbit pace</span>
+                <span>{Math.round(orbitSpeed * 100)}%</span>
+              </div>
+              <input
+                id="solar-system-speed"
+                type="range"
+                min="0"
+                max="160"
+                step="5"
+                value={Math.round(orbitSpeed * 100)}
+                onChange={(event) =>
+                  setOrbitSpeed(Number(event.target.value) / 100)
+                }
+              />
+            </label>
+
+            <div className="solar-system-actions">
+              <button
+                type="button"
+                className={`glass-btn profile-action-btn solar-system-toggle${
+                  showOrbits ? " active" : ""
+                }`}
+                onClick={() => setShowOrbits((value) => !value)}
+              >
+                {showOrbits ? "Hide" : "Show"} orbit trails
+              </button>
+              <button
+                type="button"
+                className="glass-btn profile-action-btn profile-secondary"
+                onClick={() => {
+                  setTrackedBodyId(null);
+                  setResetSignal((value) => value + 1);
+                }}
+              >
+                Reset view
+              </button>
+            </div>
           </div>
 
-          <aside className="solar-system-sidebar">
-            <div className="solar-system-section">
-              <div className="solar-system-sidebar__eyebrow">Focused body</div>
-              <h2 className="solar-system-sidebar__title">{selectedBody.name}</h2>
-              <p className="solar-system-sidebar__copy">{selectedBody.description}</p>
-            </div>
-
-            <div className="solar-system-grid">
-              <div className="solar-system-stat">
-                <span className="solar-system-stat__label">Distance from Sun</span>
-                <span className="solar-system-stat__value">{selectedBody.distance}</span>
-              </div>
-              <div className="solar-system-stat">
-                <span className="solar-system-stat__label">Day length</span>
-                <span className="solar-system-stat__value">{selectedBody.day}</span>
-              </div>
-              <div className="solar-system-stat">
-                <span className="solar-system-stat__label">Year length</span>
-                <span className="solar-system-stat__value">{selectedBody.year}</span>
-              </div>
-              <div className="solar-system-stat">
-                <span className="solar-system-stat__label">Moons</span>
-                <span className="solar-system-stat__value">{selectedBody.moons}</span>
-              </div>
-              <div className="solar-system-stat solar-system-stat--wide">
-                <span className="solar-system-stat__label">Temperature</span>
-                <span className="solar-system-stat__value">{selectedBody.temperature}</span>
-              </div>
-            </div>
-
-            <div className="solar-system-section">
-              <div className="solar-system-sidebar__eyebrow">System controls</div>
-              <label className="solar-system-range" htmlFor="solar-system-speed">
-                <div className="solar-system-range__row">
-                  <span>Orbit pace</span>
-                  <span>{Math.round(orbitSpeed * 100)}%</span>
-                </div>
-                <input
-                  id="solar-system-speed"
-                  type="range"
-                  min="0"
-                  max="160"
-                  step="5"
-                  value={Math.round(orbitSpeed * 100)}
-                  onChange={(event) =>
-                    setOrbitSpeed(Number(event.target.value) / 100)
-                  }
-                />
-              </label>
-
-              <div className="solar-system-actions">
-                <button
-                  type="button"
-                  className={`glass-btn profile-action-btn solar-system-toggle${
-                    showOrbits ? " active" : ""
-                  }`}
-                  onClick={() => setShowOrbits((value) => !value)}
-                >
-                  {showOrbits ? "Hide" : "Show"} orbit trails
-                </button>
-                <button
-                  type="button"
-                  className="glass-btn profile-action-btn profile-secondary"
-                  onClick={() => {
-                    setTrackedBodyId(null);
-                    setResetSignal((value) => value + 1);
-                  }}
-                >
-                  Reset view
-                </button>
-              </div>
-            </div>
-
-            <div className="solar-system-section">
-              <div className="solar-system-sidebar__eyebrow">Jump to a world</div>
-              <div className="solar-system-pills">
-                {BODY_DEFINITIONS.map((body) => (
-                  <button
-                    key={body.id}
-                    type="button"
-                    className={`solar-system-pill${
-                      selectedBodyId === body.id ? " active" : ""
-                    }`}
-                    style={{ "--solar-accent": body.accent }}
-                    onClick={() => handleSelectBody(body.id)}
-                  >
-                    {body.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </aside>
+          <div className="solar-system-pills solar-system-pills--dock">
+            {BODY_DEFINITIONS.map((body) => (
+              <button
+                key={body.id}
+                type="button"
+                className={`solar-system-pill${
+                  selectedBodyId === body.id ? " active" : ""
+                }`}
+                style={{ "--solar-accent": body.accent }}
+                onClick={() => handleSelectBody(body.id)}
+              >
+                {body.name}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
-    </PageShell>
+    </div>
   );
 }
 
