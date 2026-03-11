@@ -475,49 +475,217 @@ function SolarSystemScene({
   );
 }
 
+function SolarSystemPanelContent({
+  body,
+  orbitSpeed,
+  onOrbitSpeedChange,
+  showOrbits,
+  onToggleOrbits,
+  onResetView,
+  selectedBodyId,
+  onSelectBody,
+}) {
+  const statItems = [
+    { label: "Distance", value: body.distance },
+    { label: "Day", value: body.day },
+    { label: "Year", value: body.year },
+    { label: "Moons", value: body.moons },
+    { label: "Temp", value: body.temperature },
+  ];
+
+  return (
+    <>
+      <div className="solar-system-focus-panel__eyebrow">Focused body</div>
+      <h2 className="solar-system-focus-panel__title">{body.name}</h2>
+      <p className="solar-system-focus-panel__copy">{body.description}</p>
+      <div className="solar-system-focus-panel__stats">
+        {statItems.map((item) => (
+          <div key={item.label} className="solar-system-inline-stat">
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+          </div>
+        ))}
+      </div>
+
+      <div className="solar-system-panel__controls">
+        <label className="solar-system-range" htmlFor="solar-system-speed">
+          <div className="solar-system-range__row">
+            <span>Orbit pace</span>
+            <span>{Math.round(orbitSpeed * 100)}%</span>
+          </div>
+          <input
+            id="solar-system-speed"
+            type="range"
+            min="0"
+            max="160"
+            step="5"
+            value={Math.round(orbitSpeed * 100)}
+            onChange={(event) => onOrbitSpeedChange(Number(event.target.value) / 100)}
+          />
+        </label>
+
+        <div className="solar-system-actions">
+          <button
+            type="button"
+            className={`glass-btn profile-action-btn solar-system-toggle${
+              showOrbits ? " active" : ""
+            }`}
+            onClick={onToggleOrbits}
+          >
+            {showOrbits ? "Hide" : "Show"} orbit trails
+          </button>
+          <button
+            type="button"
+            className="glass-btn profile-action-btn profile-secondary"
+            onClick={onResetView}
+          >
+            Reset view
+          </button>
+        </div>
+
+        <div className="solar-system-pills solar-system-pills--panel">
+          {BODY_DEFINITIONS.map((planetBody) => (
+            <button
+              key={planetBody.id}
+              type="button"
+              className={`solar-system-pill${
+                selectedBodyId === planetBody.id ? " active" : ""
+              }`}
+              style={{ "--solar-accent": planetBody.accent }}
+              onClick={() => onSelectBody(planetBody.id)}
+            >
+              {planetBody.name}
+            </button>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+function SolarSystemPanelToggle({ open, mobile = false, onClick }) {
+  const rotation = mobile ? (open ? 90 : -90) : open ? 0 : 180;
+
+  return (
+    <button
+      type="button"
+      className={`solar-system-panel-toggle ${open ? "active" : ""}`}
+      onClick={onClick}
+      aria-label={open ? "Hide solar system panel" : "Show solar system panel"}
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        style={{ transform: `rotate(${rotation}deg)` }}
+      >
+        <path d="M9 6l6 6-6 6" />
+      </svg>
+    </button>
+  );
+}
+
+function SolarSystemPanel({
+  isMobile,
+  open,
+  body,
+  orbitSpeed,
+  onOrbitSpeedChange,
+  showOrbits,
+  onToggleOrbits,
+  onResetView,
+  selectedBodyId,
+  onSelectBody,
+  onToggleOpen,
+}) {
+  const content = (
+    <SolarSystemPanelContent
+      body={body}
+      orbitSpeed={orbitSpeed}
+      onOrbitSpeedChange={onOrbitSpeedChange}
+      showOrbits={showOrbits}
+      onToggleOrbits={onToggleOrbits}
+      onResetView={onResetView}
+      selectedBodyId={selectedBodyId}
+      onSelectBody={onSelectBody}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <div className={`solar-system-panel-mobile ${open ? "open" : "collapsed"}`}>
+        <div className={`solar-system-panel-mobile__toggle-slot ${open ? "open" : "ready"}`}>
+          <SolarSystemPanelToggle open={open} mobile onClick={onToggleOpen} />
+        </div>
+        <aside className="solar-system-panel-mobile__sheet">{content}</aside>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}>
+      <aside className="solar-system-panel">{content}</aside>
+      <SolarSystemPanelToggle open={open} onClick={onToggleOpen} />
+    </div>
+  );
+}
+
 function SolarSystemPage() {
+  const initialIsMobile =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(max-width: 768px)").matches;
   const [selectedBodyId, setSelectedBodyId] = useState("earth");
   const [trackedBodyId, setTrackedBodyId] = useState(null);
   const [showOrbits, setShowOrbits] = useState(true);
   const [orbitSpeed, setOrbitSpeed] = useState(1);
   const [resetSignal, setResetSignal] = useState(0);
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
+  const [focusPanelOpen, setFocusPanelOpen] = useState(!initialIsMobile);
   const selectedBody = BODY_LOOKUP[selectedBodyId] || BODY_LOOKUP.earth;
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const handleChange = (event) => {
+      setIsMobile(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   const handleSelectBody = (bodyId) => {
     setSelectedBodyId(bodyId);
     setTrackedBodyId(bodyId);
+    setFocusPanelOpen(true);
   };
 
   return (
     <div className="solar-system-route">
       <section className="solar-system-stage solar-system-stage--fullscreen">
-        <div className="solar-system-focus-panel">
-          <div className="solar-system-focus-panel__eyebrow">Focused body</div>
-          <h2 className="solar-system-focus-panel__title">{selectedBody.name}</h2>
-          <p className="solar-system-focus-panel__copy">{selectedBody.description}</p>
-          <div className="solar-system-focus-panel__stats">
-            <div className="solar-system-inline-stat">
-              <span>Distance</span>
-              <strong>{selectedBody.distance}</strong>
-            </div>
-            <div className="solar-system-inline-stat">
-              <span>Day</span>
-              <strong>{selectedBody.day}</strong>
-            </div>
-            <div className="solar-system-inline-stat">
-              <span>Year</span>
-              <strong>{selectedBody.year}</strong>
-            </div>
-            <div className="solar-system-inline-stat">
-              <span>Moons</span>
-              <strong>{selectedBody.moons}</strong>
-            </div>
-            <div className="solar-system-inline-stat">
-              <span>Temp</span>
-              <strong>{selectedBody.temperature}</strong>
-            </div>
-          </div>
-        </div>
+        <SolarSystemPanel
+          isMobile={isMobile}
+          open={focusPanelOpen}
+          body={selectedBody}
+          orbitSpeed={orbitSpeed}
+          onOrbitSpeedChange={setOrbitSpeed}
+          showOrbits={showOrbits}
+          onToggleOrbits={() => setShowOrbits((value) => !value)}
+          onResetView={() => {
+            setTrackedBodyId(null);
+            setResetSignal((value) => value + 1);
+          }}
+          selectedBodyId={selectedBodyId}
+          onSelectBody={handleSelectBody}
+          onToggleOpen={() => setFocusPanelOpen((value) => !value)}
+        />
 
         <Canvas
           className="solar-system-canvas"
@@ -542,66 +710,6 @@ function SolarSystemPage() {
             />
           </Suspense>
         </Canvas>
-
-        <div className="solar-system-control-dock">
-          <div className="solar-system-control-dock__main">
-            <label className="solar-system-range" htmlFor="solar-system-speed">
-              <div className="solar-system-range__row">
-                <span>Orbit pace</span>
-                <span>{Math.round(orbitSpeed * 100)}%</span>
-              </div>
-              <input
-                id="solar-system-speed"
-                type="range"
-                min="0"
-                max="160"
-                step="5"
-                value={Math.round(orbitSpeed * 100)}
-                onChange={(event) =>
-                  setOrbitSpeed(Number(event.target.value) / 100)
-                }
-              />
-            </label>
-
-            <div className="solar-system-actions">
-              <button
-                type="button"
-                className={`glass-btn profile-action-btn solar-system-toggle${
-                  showOrbits ? " active" : ""
-                }`}
-                onClick={() => setShowOrbits((value) => !value)}
-              >
-                {showOrbits ? "Hide" : "Show"} orbit trails
-              </button>
-              <button
-                type="button"
-                className="glass-btn profile-action-btn profile-secondary"
-                onClick={() => {
-                  setTrackedBodyId(null);
-                  setResetSignal((value) => value + 1);
-                }}
-              >
-                Reset view
-              </button>
-            </div>
-          </div>
-
-          <div className="solar-system-pills solar-system-pills--dock">
-            {BODY_DEFINITIONS.map((body) => (
-              <button
-                key={body.id}
-                type="button"
-                className={`solar-system-pill${
-                  selectedBodyId === body.id ? " active" : ""
-                }`}
-                style={{ "--solar-accent": body.accent }}
-                onClick={() => handleSelectBody(body.id)}
-              >
-                {body.name}
-              </button>
-            ))}
-          </div>
-        </div>
       </section>
     </div>
   );
