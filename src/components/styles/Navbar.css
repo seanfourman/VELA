@@ -132,8 +132,9 @@
 
 .navbar-link-group .nav-link-button {
   color: #ffffff;
-  font-weight: 400;
+  font-weight: 700;
   letter-spacing: 0;
+  text-transform: uppercase;
   white-space: nowrap;
   transition:
     opacity 0.2s ease,
