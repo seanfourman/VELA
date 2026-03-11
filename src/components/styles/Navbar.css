@@ -210,6 +210,32 @@
   text-align: center;
 }
 
+.navbar-mobile-actions {
+  gap: 0;
+}
+
+.navbar-mobile-actions .navbar-mobile-link {
+  position: relative;
+  padding: 14px 12px;
+}
+
+.navbar-mobile-actions .navbar-mobile-link + .navbar-mobile-link::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--glass-border-strong) 18%,
+    var(--glass-border-strong) 82%,
+    transparent
+  );
+  opacity: 0.72;
+}
+
 /* Auth Button - Using Glass Button System */
 .auth-button {
   position: relative;
