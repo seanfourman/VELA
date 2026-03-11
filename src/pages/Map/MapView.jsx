@@ -6,7 +6,7 @@
   useMemo,
   useState,
 } from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer, Marker, TileLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "./MapView/styles/map-layout.css";
 import "./MapView/styles/leaflet-overrides.css";
@@ -14,12 +14,18 @@ import PlanetPanelContainer from "./PlanetPanel/PlanetPanelContainer";
 import MapTypeSwitcher from "./MapView/components/controls/MapTypeSwitcher";
 import MapQuickActions from "./MapView/components/controls/MapQuickActions";
 import LocationSearchBar from "./MapView/components/search/LocationSearchBar";
-import StargazePanel from "./MapView/components/panels/stargaze/StargazePanel";
+import StargazePanelContent from "./MapView/components/panels/stargaze/StargazePanelContent";
 import StargazePanelMobile from "./MapView/components/panels/stargaze/StargazePanelMobile";
-import SpaceWeatherPanel from "./MapView/components/panels/spaceWeather/SpaceWeatherPanel";
+import SpaceWeatherPanelContent from "./MapView/components/panels/spaceWeather/SpaceWeatherPanelContent";
 import SpaceWeatherPanelMobile from "./MapView/components/panels/spaceWeather/SpaceWeatherPanelMobile";
 import SearchDistanceSelector from "./MapView/components/controls/SearchDistanceSelector";
 import MapLibre3DLayer from "./MapView/components/layers/MapLibre3DLayer";
+import LocationMarker from "./MapView/components/layers/markers/LocationMarker";
+import PlacedMarker from "./MapView/components/layers/markers/PlacedMarker";
+import StargazeMarkers from "./MapView/components/layers/markers/StargazeMarkers";
+import DarkSpotMarkers from "./MapView/components/layers/markers/DarkSpotMarkers";
+import FavoriteOnlyMarkers from "./MapView/components/layers/markers/FavoriteOnlyMarkers";
+import StarPartyMarkers from "./MapView/components/layers/markers/StarPartyMarkers";
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -36,7 +42,10 @@ import {
   MapController,
   PopupStateHandler,
 } from "./MapView/core/MapInteractionHandlers";
-import MarkerLayers from "./MapView/components/layers/MarkerLayers";
+import {
+  favoritePinIconRemoving,
+  pinIconRemoving,
+} from "./MapView/core/markerIcons";
 import useMapViewState from "./MapView/hooks/useMapViewState";
 import useSpaceWeather from "@/features/spaceWeather/useSpaceWeather";
 import showNotification from "@/utils/notifications";
@@ -257,30 +266,177 @@ const MapView = forwardRef(function MapView(
         )}
 
         {!isThreeDMode && (
-          <MarkerLayers
-            location={location}
-            isAuthenticated={isAuthenticated}
-            mapRef={mapRef}
-            stargazeMarkerRefs={stargazeMarkerRefs}
-            placedMarkerRef={placedMarkerRef}
-            state={state}
-            derived={derived}
-            ui={ui}
-            handlers={handlers}
-            onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
-            starPartyEvents={visibleStarPartyEvents}
-            activeUserRsvpId={activeUserRsvpId}
-            onToggleStarPartyRsvp={handleToggleEventRsvp}
-          />
+          <>
+            <LocationMarker
+              location={location}
+              centerOnCoords={handlers.centerOnCoords}
+              onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
+            />
+            {state.exitingMarker ? (
+              <Marker
+                key={`removing-${
+                  state.exitingMarker.id ||
+                  `${state.exitingMarker.lat}-${state.exitingMarker.lng}`
+                }`}
+                position={[state.exitingMarker.lat, state.exitingMarker.lng]}
+                icon={
+                  state.exitingMarker.isFavorite
+                    ? favoritePinIconRemoving
+                    : pinIconRemoving
+                }
+                interactive={false}
+              />
+            ) : null}
+            <PlacedMarker
+              placedMarker={state.placedMarker}
+              placedMarkerRef={placedMarkerRef}
+              isAuthenticated={isAuthenticated}
+              isPinnedTarget={derived.isPinnedTarget}
+              onGetDirections={handlers.handleGetDirections}
+              onRemovePin={handlers.handleCloseContextMenu}
+              onToggleFavorite={handlers.handleTogglePinnedFavorite}
+              onToggleTarget={handlers.handleTogglePinnedTarget}
+              onShareLocation={() =>
+                handlers.handleShareLocation(
+                  state.placedMarker,
+                  state.placedMarker?.isFavorite
+                    ? "Favorite spot"
+                    : "Pinned location",
+                )
+              }
+              onOpenSpaceWeather={() =>
+                handleOpenSpaceWeatherAt?.(
+                  {
+                    lat: state.placedMarker?.lat,
+                    lng: state.placedMarker?.lng,
+                  },
+                  state.placedMarker?.isFavorite
+                    ? "Favorite spot"
+                    : "Pinned location",
+                )
+              }
+              isFavoriteEntering={
+                state.placedMarker
+                  ? derived.enteringFavoriteKeySet.has(
+                      handlers.getSpotKey(
+                        state.placedMarker.lat,
+                        state.placedMarker.lng,
+                      ),
+                    )
+                  : false
+              }
+              centerOnCoords={handlers.centerOnCoords}
+            />
+            <StargazeMarkers
+              spots={derived.visibleStargazeLocations}
+              isAuthenticated={isAuthenticated}
+              isMobileView={ui.isMobileView}
+              favoriteSpotKeys={derived.favoriteSpotKeys}
+              enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
+              selectedDarkSpot={state.selectedDarkSpot}
+              stargazeMarkerRefs={stargazeMarkerRefs}
+              mapRef={mapRef}
+              setActiveStargazeId={handlers.setActiveStargazeId}
+              centerOnCoords={handlers.centerOnCoords}
+              openStargazePanel={handlers.openStargazePanel}
+              handleToggleStargazeFavorite={handlers.handleToggleStargazeFavorite}
+              handleToggleStargazeTarget={handlers.handleToggleStargazeTarget}
+              handleShareLocation={handlers.handleShareLocation}
+              buildDirectionsUrl={handlers.buildDirectionsUrl}
+              getDirectionsOrigin={handlers.getDirectionsOrigin}
+              getSpotKey={handlers.getSpotKey}
+              onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
+            />
+            <DarkSpotMarkers
+              darkSpots={state.darkSpots}
+              selectedDarkSpot={state.selectedDarkSpot}
+              favoriteSpotKeys={derived.favoriteSpotKeys}
+              enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
+              isAuthenticated={isAuthenticated}
+              centerOnCoords={handlers.centerOnCoords}
+              handleToggleDarkSpotFavorite={handlers.handleToggleDarkSpotFavorite}
+              handleToggleDarkSpotTarget={handlers.handleToggleDarkSpotTarget}
+              flashShareToggle={handlers.flashShareToggle}
+              handleShareLocation={handlers.handleShareLocation}
+              buildDirectionsUrl={handlers.buildDirectionsUrl}
+              getDirectionsOrigin={handlers.getDirectionsOrigin}
+              getSpotKey={handlers.getSpotKey}
+              onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
+            />
+            <FavoriteOnlyMarkers
+              favoriteOnlySpots={derived.favoriteOnlySpots}
+              enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
+              exitingFavoriteKeySet={derived.exitingFavoriteKeySet}
+              selectedDarkSpot={state.selectedDarkSpot}
+              isAuthenticated={isAuthenticated}
+              centerOnCoords={handlers.centerOnCoords}
+              handleRemoveFavoriteSpotAnimated={
+                handlers.handleRemoveFavoriteSpotAnimated
+              }
+              handleShareLocation={handlers.handleShareLocation}
+              buildDirectionsUrl={handlers.buildDirectionsUrl}
+              getDirectionsOrigin={handlers.getDirectionsOrigin}
+              setSelectedDarkSpot={handlers.setSelectedDarkSpot}
+              onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
+            />
+            <StarPartyMarkers
+              events={visibleStarPartyEvents}
+              isAuthenticated={isAuthenticated}
+              activeUserRsvpId={activeUserRsvpId}
+              centerOnCoords={handlers.centerOnCoords}
+              handleShareLocation={handlers.handleShareLocation}
+              buildDirectionsUrl={handlers.buildDirectionsUrl}
+              getDirectionsOrigin={handlers.getDirectionsOrigin}
+              onToggleRsvp={handleToggleEventRsvp}
+            />
+          </>
         )}
       </MapContainer>
 
-      <StargazePanel
-        spot={state.stargazePanelSpot}
-        isOpen={state.isStargazePanelOpen && !ui.isMobileView}
-        onClose={handlers.handleCloseStargazePanel}
-        directionsProvider={directionsProvider}
-      />
+      <aside
+        className={`stargaze-panel glass-panel glass-panel-elevated${
+          state.isStargazePanelOpen && !ui.isMobileView ? " open" : ""
+        }`}
+        aria-hidden={!(state.isStargazePanelOpen && !ui.isMobileView)}
+      >
+        {state.stargazePanelSpot ? (
+          <>
+            <div className="stargaze-panel__header">
+              <div className="stargaze-panel__header-main">
+                <div className="stargaze-panel__title">
+                  {state.stargazePanelSpot.name}
+                </div>
+                {state.stargazePanelSpot.region || state.stargazePanelSpot.country ? (
+                  <div className="stargaze-panel__subtitle">
+                    {[state.stargazePanelSpot.region, state.stargazePanelSpot.country]
+                      .filter(Boolean)
+                      .join(" - ")}
+                  </div>
+                ) : null}
+                {state.stargazePanelSpot.type ? (
+                  <div className="stargaze-panel__chips">
+                    <span className="stargaze-panel__chip">
+                      {state.stargazePanelSpot.type}
+                    </span>
+                  </div>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                className="stargaze-panel__close"
+                onClick={handlers.handleCloseStargazePanel}
+                aria-label="Close spot details"
+              >
+                <span aria-hidden="true">X</span>
+              </button>
+            </div>
+            <StargazePanelContent
+              spot={state.stargazePanelSpot}
+              directionsProvider={directionsProvider}
+            />
+          </>
+        ) : null}
+      </aside>
       <StargazePanelMobile
         spot={state.stargazePanelSpot}
         isOpen={state.isStargazePanelOpen && ui.isMobileView}
@@ -288,15 +444,37 @@ const MapView = forwardRef(function MapView(
         directionsProvider={directionsProvider}
       />
 
-      <SpaceWeatherPanel
-        isOpen={isSpaceWeatherOpen && !ui.isMobileView}
-        onClose={handleCloseSpaceWeather}
-        snapshot={spaceWeather.snapshot}
-        location={spaceWeatherFocus || location}
-        loading={spaceWeather.loading}
-        error={spaceWeather.error}
-        focusLabel={spaceWeatherFocus?.label || null}
-      />
+      <aside
+        className={`space-weather-panel glass-panel glass-panel-elevated${
+          isSpaceWeatherOpen && !ui.isMobileView ? " open" : ""
+        }`}
+        aria-hidden={!(isSpaceWeatherOpen && !ui.isMobileView)}
+      >
+        <div className="space-weather-panel__header">
+          <div className="space-weather-panel__header-main">
+            <div className="space-weather-panel__title">Space Weather</div>
+            <div className="space-weather-panel__subtitle">
+              DONKI geomagnetic storms and Earth-directed CME models
+            </div>
+          </div>
+          <button
+            type="button"
+            className="space-weather-panel__close"
+            onClick={handleCloseSpaceWeather}
+            aria-label="Close space weather panel"
+          >
+            <span aria-hidden="true">X</span>
+          </button>
+        </div>
+
+        <SpaceWeatherPanelContent
+          snapshot={spaceWeather.snapshot}
+          location={spaceWeatherFocus || location}
+          loading={spaceWeather.loading}
+          error={spaceWeather.error}
+          focusLabel={spaceWeatherFocus?.label || null}
+        />
+      </aside>
       <SpaceWeatherPanelMobile
         isOpen={isSpaceWeatherOpen && ui.isMobileView}
         onClose={handleCloseSpaceWeather}
