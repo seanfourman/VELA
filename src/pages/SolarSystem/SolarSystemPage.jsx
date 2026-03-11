@@ -220,7 +220,16 @@ const tuneTexture = (baseTexture, anisotropy = 4) => {
 
 function OrbitRing({ radius }) {
   const geometry = useMemo(() => {
-    const points = new EllipseCurve(0, 0, radius, radius, 0, Math.PI * 2, false, 0)
+    const points = new EllipseCurve(
+      0,
+      0,
+      radius,
+      radius,
+      0,
+      Math.PI * 2,
+      false,
+      0,
+    )
       .getPoints(180)
       .map((point) => new Vector3(point.x, 0, point.y));
     return new BufferGeometry().setFromPoints(points);
@@ -233,13 +242,7 @@ function OrbitRing({ radius }) {
   );
 }
 
-function PlanetMesh({
-  body,
-  texture,
-  ringTexture,
-  registerRef,
-  onSelect,
-}) {
+function PlanetMesh({ body, texture, ringTexture, registerRef, onSelect }) {
   const ringGeometryRef = useRef(null);
 
   useEffect(() => {
@@ -253,7 +256,8 @@ function PlanetMesh({
       point.fromBufferAttribute(positions, index);
       const radius = Math.sqrt(point.x * point.x + point.y * point.y);
       const u =
-        (radius - body.ringInnerRadius) / (body.ringOuterRadius - body.ringInnerRadius);
+        (radius - body.ringInnerRadius) /
+        (body.ringOuterRadius - body.ringInnerRadius);
       const angle = Math.atan2(point.y, point.x);
       const v = (angle + Math.PI) / (Math.PI * 2);
       uvs.setXY(index, u, v);
@@ -272,7 +276,11 @@ function PlanetMesh({
       >
         <sphereGeometry args={[body.radius, 48, 48]} />
         {body.isStar ? (
-          <meshBasicMaterial map={texture} color={body.accent} toneMapped={false} />
+          <meshBasicMaterial
+            map={texture}
+            color={body.accent}
+            toneMapped={false}
+          />
         ) : (
           <meshStandardMaterial
             map={texture}
@@ -309,12 +317,7 @@ function PlanetMesh({
   );
 }
 
-function SolarSystemScene({
-  trackedBodyId,
-  showOrbits,
-  orbitSpeed,
-  onSelect,
-}) {
+function SolarSystemScene({ trackedBodyId, showOrbits, orbitSpeed, onSelect }) {
   const controlsRef = useRef(null);
   const bodyRefs = useRef({});
   const focusRequestRef = useRef(null);
@@ -358,7 +361,9 @@ function SolarSystemScene({
       if (body.orbitRadius === 0) {
         target.position.set(0, 0, 0);
       } else {
-        const angle = state.clock.getElapsedTime() * orbitSpeed * body.orbitSpeed + body.phase;
+        const angle =
+          state.clock.getElapsedTime() * orbitSpeed * body.orbitSpeed +
+          body.phase;
         target.position.set(
           Math.cos(angle) * body.orbitRadius,
           0,
@@ -384,9 +389,15 @@ function SolarSystemScene({
           ? 10
           : Math.max(body.radius * 9, body.orbitRadius > 16 ? 7.6 : 5.4);
         cameraTargetRef.current.copy(
-          target.position.clone().add(
-            new Vector3(travelDistance, travelDistance * 0.42 + 1.8, travelDistance),
-          ),
+          target.position
+            .clone()
+            .add(
+              new Vector3(
+                travelDistance,
+                travelDistance * 0.42 + 1.8,
+                travelDistance,
+              ),
+            ),
         );
         lookTargetRef.current.copy(target.position);
         autoFocusActiveRef.current = true;
@@ -413,7 +424,9 @@ function SolarSystemScene({
         const currentTrackedPosition = trackedBody.position.clone();
 
         if (trackedPositionRef.current) {
-          const deltaVector = currentTrackedPosition.clone().sub(trackedPositionRef.current);
+          const deltaVector = currentTrackedPosition
+            .clone()
+            .sub(trackedPositionRef.current);
           camera.position.add(deltaVector);
           controlsRef.current?.target.add(deltaVector);
         }
@@ -438,8 +451,16 @@ function SolarSystemScene({
         distance={220}
         decay={2}
       />
-      <directionalLight position={[12, 8, 6]} intensity={0.55} color="#d4e4ff" />
-      <directionalLight position={[-10, -6, -8]} intensity={0.15} color="#8bb7ff" />
+      <directionalLight
+        position={[12, 8, 6]}
+        intensity={0.55}
+        color="#d4e4ff"
+      />
+      <directionalLight
+        position={[-10, -6, -8]}
+        intensity={0.15}
+        color="#8bb7ff"
+      />
       <Stars
         radius={180}
         depth={90}
@@ -451,9 +472,11 @@ function SolarSystemScene({
       />
 
       {showOrbits
-        ? BODY_DEFINITIONS.filter((body) => body.orbitRadius > 0).map((body) => (
-            <OrbitRing key={`${body.id}-orbit`} radius={body.orbitRadius} />
-          ))
+        ? BODY_DEFINITIONS.filter((body) => body.orbitRadius > 0).map(
+            (body) => (
+              <OrbitRing key={`${body.id}-orbit`} radius={body.orbitRadius} />
+            ),
+          )
         : null}
 
       {BODY_DEFINITIONS.map((body) => (
@@ -530,7 +553,9 @@ function SolarSystemPanelContent({
                     onToggleOrbits();
                     event.currentTarget.blur();
                   }}
-                  aria-label={showOrbits ? "Hide orbit trails" : "Show orbit trails"}
+                  aria-label={
+                    showOrbits ? "Hide orbit trails" : "Show orbit trails"
+                  }
                 >
                   <img src={orbitIcon} alt="" aria-hidden="true" />
                 </button>
@@ -547,7 +572,9 @@ function SolarSystemPanelContent({
             max="160"
             step="5"
             value={Math.round(orbitSpeed * 100)}
-            onChange={(event) => onOrbitSpeedChange(Number(event.target.value) / 100)}
+            onChange={(event) =>
+              onOrbitSpeedChange(Number(event.target.value) / 100)
+            }
           />
         </label>
 
@@ -562,14 +589,19 @@ function SolarSystemPanelContent({
               style={{ "--solar-accent": planetBody.accent }}
               onClick={() => onSelectBody(planetBody.id)}
             >
-              <span className="solar-system-body-option__icon-shell" aria-hidden="true">
+              <span
+                className="solar-system-body-option__icon-shell"
+                aria-hidden="true"
+              >
                 <img
                   className="solar-system-body-option__icon"
                   src={PLANET_ICON_URLS[planetBody.id]}
                   alt=""
                 />
               </span>
-              <span className="solar-system-body-option__name">{planetBody.name}</span>
+              <span className="solar-system-body-option__name">
+                {planetBody.name}
+              </span>
             </button>
           ))}
         </div>
@@ -635,7 +667,9 @@ function SolarSystemPanel({
           nudgeMobileToggle ? "nudge" : ""
         }`.trim()}
       >
-        <div className={`solar-system-panel-mobile__toggle-slot ${open ? "open" : "ready"}`}>
+        <div
+          className={`solar-system-panel-mobile__toggle-slot ${open ? "open" : "ready"}`}
+        >
           <SolarSystemPanelToggle open={open} mobile onClick={onToggleOpen} />
         </div>
         <aside className="solar-system-panel-mobile__sheet">
@@ -646,7 +680,9 @@ function SolarSystemPanel({
   }
 
   return (
-    <div className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}>
+    <div
+      className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}
+    >
       <SolarSystemPanelToggle open={open} onClick={onToggleOpen} />
       <aside className="solar-system-panel">
         <div className="solar-system-panel__scroll">{content}</div>
@@ -660,8 +696,8 @@ function SolarSystemPage() {
     typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
     window.matchMedia("(max-width: 768px)").matches;
-  const [selectedBodyId, setSelectedBodyId] = useState("earth");
-  const [trackedBodyId, setTrackedBodyId] = useState(null);
+  const [selectedBodyId, setSelectedBodyId] = useState("sun");
+  const [trackedBodyId, setTrackedBodyId] = useState("null");
   const [showOrbits, setShowOrbits] = useState(true);
   const [orbitSpeed, setOrbitSpeed] = useState(1);
   const [isMobile, setIsMobile] = useState(initialIsMobile);
@@ -671,7 +707,10 @@ function SolarSystemPage() {
   const selectedBody = BODY_LOOKUP[selectedBodyId] || BODY_LOOKUP.earth;
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
       return undefined;
     }
 
