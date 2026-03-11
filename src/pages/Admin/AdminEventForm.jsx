@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { EVENT_STATUS_OPTIONS, EVENT_TYPE_OPTIONS } from "./adminConstants";
 import AdminDatePicker from "./AdminDatePicker";
 import AdminTimePicker from "./AdminTimePicker";
@@ -69,6 +70,7 @@ export default function AdminEventForm({
   };
   const startsAt = splitDateTimeValue(draft.startsAt);
   const endsAt = splitDateTimeValue(draft.endsAt);
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   const emitFieldValue = (key, value) =>
     onFieldChange(key)({
       target: { value },
@@ -210,67 +212,98 @@ export default function AdminEventForm({
         </label>
       </div>
 
-      <details className="admin-advanced-block">
-        <summary>Advanced details</summary>
-        <div className="admin-advanced-content">
-          <label className="profile-field admin-grid-span-2">
-            <span className="profile-label">End date</span>
-            <AdminDatePicker
-              value={endsAt.date}
-              onChange={(nextDate) =>
-                emitFieldValue("endsAt", mergeDateAndTime(nextDate, endsAt.time))
-              }
-            />
-          </label>
-
-          <label className="profile-field admin-grid-span-2">
-            <span className="profile-label">End time</span>
-            <AdminTimePicker
-              value={endsAt.time}
-              disabled={!endsAt.date}
-              onChange={(nextTime) =>
-                emitFieldValue("endsAt", mergeDateAndTime(endsAt.date, nextTime))
-              }
-            />
-          </label>
-
-          <label className="profile-field">
-            <span className="profile-label">Description</span>
-            <textarea
-              className="profile-textarea"
-              rows="3"
-              value={draft.description}
-              onChange={onFieldChange("description")}
-              placeholder="Public night-sky event with guided telescope stations."
-            />
-          </label>
-
-          <label className="profile-field">
-            <span className="profile-label">Meetup notes</span>
-            <textarea
-              className="profile-textarea"
-              rows="2"
-              value={draft.meetupDetails}
-              onChange={onFieldChange("meetupDetails")}
-              placeholder="Park near the south gate and follow red lights."
-            />
-          </label>
-
-          <label className="profile-field">
-            <span className="profile-label">Host checklist</span>
-            <textarea
-              className="profile-textarea"
-              rows="3"
-              value={draft.hostChecklist}
-              onChange={onFieldChange("hostChecklist")}
-              placeholder={"Bring power bank\nCheck weather radar\nPrepare backup site"}
-            />
-            <span className="admin-location-note">
-              Separate checklist items with commas or new lines.
+      <div
+        className={`admin-advanced-block${isAdvancedOpen ? " is-open" : ""}`}
+      >
+        <button
+          type="button"
+          className="admin-advanced-toggle"
+          aria-expanded={isAdvancedOpen}
+          aria-controls="admin-event-advanced-panel"
+          onClick={() => setIsAdvancedOpen((current) => !current)}
+        >
+          <span className="admin-advanced-summary__copy">
+            <span className="admin-advanced-summary__title">Advanced details</span>
+            <span className="admin-advanced-summary__hint">
+              Set end times, meetup notes, and host-side planning info.
             </span>
-          </label>
+          </span>
+          <span className="admin-advanced-summary__action" aria-hidden="true">
+            <span className="admin-advanced-summary__label-stack">
+              <span className="admin-advanced-summary__label admin-advanced-summary__label--closed">
+                Show
+              </span>
+              <span className="admin-advanced-summary__label admin-advanced-summary__label--open">
+                Hide
+              </span>
+            </span>
+            <span className="admin-advanced-summary__icon">+</span>
+          </span>
+        </button>
+        <div
+          id="admin-event-advanced-panel"
+          className="admin-advanced-panel"
+        >
+          <div className="admin-advanced-content">
+            <label className="profile-field admin-grid-span-2">
+              <span className="profile-label">End date</span>
+              <AdminDatePicker
+                value={endsAt.date}
+                onChange={(nextDate) =>
+                  emitFieldValue("endsAt", mergeDateAndTime(nextDate, endsAt.time))
+                }
+              />
+            </label>
+
+            <label className="profile-field admin-grid-span-2">
+              <span className="profile-label">End time</span>
+              <AdminTimePicker
+                value={endsAt.time}
+                disabled={!endsAt.date}
+                onChange={(nextTime) =>
+                  emitFieldValue("endsAt", mergeDateAndTime(endsAt.date, nextTime))
+                }
+              />
+            </label>
+
+            <label className="profile-field">
+              <span className="profile-label">Description</span>
+              <textarea
+                className="profile-textarea"
+                rows="3"
+                value={draft.description}
+                onChange={onFieldChange("description")}
+                placeholder="Public night-sky event with guided telescope stations."
+              />
+            </label>
+
+            <label className="profile-field">
+              <span className="profile-label">Meetup notes</span>
+              <textarea
+                className="profile-textarea"
+                rows="2"
+                value={draft.meetupDetails}
+                onChange={onFieldChange("meetupDetails")}
+                placeholder="Park near the south gate and follow red lights."
+              />
+            </label>
+
+            <label className="profile-field">
+              <span className="profile-label">Host checklist</span>
+              <textarea
+                className="profile-textarea"
+                rows="3"
+                value={draft.hostChecklist}
+                onChange={onFieldChange("hostChecklist")}
+                placeholder={"Bring power bank\nCheck weather radar\nPrepare backup site"}
+              />
+              <span className="admin-location-note">
+                Separate checklist items with commas or new lines.
+              </span>
+            </label>
+          </div>
         </div>
-      </details>
+      </div>
 
       <div className="admin-location-actions">
         <button

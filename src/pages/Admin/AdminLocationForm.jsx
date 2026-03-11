@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { INPUT_FIELDS, TEXTAREAS } from "./adminConstants";
 
 export default function AdminLocationForm({
@@ -18,6 +19,7 @@ export default function AdminLocationForm({
   );
   const primaryTextareas = TEXTAREAS.filter((item) => item.key === "description");
   const advancedTextareas = TEXTAREAS.filter((item) => item.key !== "description");
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
 
   return (
     <form className="admin-location-form" onSubmit={onSubmit}>
@@ -70,53 +72,84 @@ export default function AdminLocationForm({
         </label>
       ))}
 
-      <details className="admin-advanced-block">
-        <summary>Advanced details</summary>
-        <div className="admin-advanced-content">
-          <div className="admin-location-grid">
-            {advancedFields.map(
-              ({
-                key,
-                label,
-                className,
-                type = "text",
-                step,
-                min,
-                max,
-                placeholder,
-              }) => (
-                <label key={key} className={`profile-field ${className}`}>
-                  <span className="profile-label">{label}</span>
-                  <input
-                    className="profile-input"
-                    type={type}
-                    step={step}
-                    min={min}
-                    max={max}
-                    value={draft[key]}
-                    onChange={onFieldChange(key)}
-                    placeholder={placeholder}
-                  />
-                </label>
-              ),
-            )}
-          </div>
+      <div
+        className={`admin-advanced-block${isAdvancedOpen ? " is-open" : ""}`}
+      >
+        <button
+          type="button"
+          className="admin-advanced-toggle"
+          aria-expanded={isAdvancedOpen}
+          aria-controls="admin-location-advanced-panel"
+          onClick={() => setIsAdvancedOpen((current) => !current)}
+        >
+          <span className="admin-advanced-summary__copy">
+            <span className="admin-advanced-summary__title">Advanced details</span>
+            <span className="admin-advanced-summary__hint">
+              Add optional metadata, sources, and supporting links.
+            </span>
+          </span>
+          <span className="admin-advanced-summary__action" aria-hidden="true">
+            <span className="admin-advanced-summary__label-stack">
+              <span className="admin-advanced-summary__label admin-advanced-summary__label--closed">
+                Show
+              </span>
+              <span className="admin-advanced-summary__label admin-advanced-summary__label--open">
+                Hide
+              </span>
+            </span>
+            <span className="admin-advanced-summary__icon">+</span>
+          </span>
+        </button>
+        <div
+          id="admin-location-advanced-panel"
+          className="admin-advanced-panel"
+        >
+          <div className="admin-advanced-content">
+            <div className="admin-location-grid">
+              {advancedFields.map(
+                ({
+                  key,
+                  label,
+                  className,
+                  type = "text",
+                  step,
+                  min,
+                  max,
+                  placeholder,
+                }) => (
+                  <label key={key} className={`profile-field ${className}`}>
+                    <span className="profile-label">{label}</span>
+                    <input
+                      className="profile-input"
+                      type={type}
+                      step={step}
+                      min={min}
+                      max={max}
+                      value={draft[key]}
+                      onChange={onFieldChange(key)}
+                      placeholder={placeholder}
+                    />
+                  </label>
+                ),
+              )}
+            </div>
 
-          {advancedTextareas.map(({ key, label, placeholder, note }) => (
-            <label key={key} className="profile-field">
-              <span className="profile-label">{label}</span>
-              <textarea
-                className="profile-textarea"
-                rows="3"
-                value={draft[key]}
-                onChange={onFieldChange(key)}
-                placeholder={placeholder}
-              />
-              {note ? <span className="admin-location-note">{note}</span> : null}
-            </label>
-          ))}
+            {advancedTextareas.map(({ key, label, placeholder, note }) => (
+              <label key={key} className="profile-field">
+                <span className="profile-label">{label}</span>
+                <textarea
+                  className="profile-textarea"
+                  rows="3"
+                  value={draft[key]}
+                  onChange={onFieldChange(key)}
+                  placeholder={placeholder}
+                />
+                {note ? <span className="admin-location-note">{note}</span> : null}
+              </label>
+            ))}
+          </div>
         </div>
-      </details>
+      </div>
 
       <div className="admin-location-actions">
         <button
