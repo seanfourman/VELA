@@ -176,11 +176,15 @@
   top: 68px;
   left: 4px;
   right: auto;
-  min-width: 230px;
+  width: min(92vw, 400px);
+  min-width: 0;
+  max-width: calc(100vw - 32px);
 }
 
 .navbar-mobile-link {
   width: 100%;
+  justify-content: center;
+  text-align: center;
 }
 
 /* Auth Button - Using Glass Button System */
