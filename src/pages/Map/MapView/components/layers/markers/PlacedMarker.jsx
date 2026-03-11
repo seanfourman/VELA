@@ -4,8 +4,21 @@ import {
   favoriteSpotIconTransition,
   pinIcon,
 } from "@/pages/Map/MapView/core/markerIcons";
-import { PinnedPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
-import { resolveFavoriteMarkerIcon } from "./markerHelpers";
+import PinnedPopupContent from "@/pages/Map/MapView/components/popups/content/PinnedPopupContent";
+
+const resolveFavoriteMarkerIcon = ({
+  baseIcon,
+  isFavorite = false,
+  isEntering = false,
+  favoriteIcon,
+  favoriteTransitionIcon,
+}) => {
+  if (!isFavorite) {
+    return baseIcon;
+  }
+
+  return isEntering ? favoriteTransitionIcon : favoriteIcon;
+};
 
 export default function PlacedMarker({
   placedMarker,

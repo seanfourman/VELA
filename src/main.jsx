@@ -1,6 +1,9 @@
 import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import { NotificationProvider } from "@/features/notifications/NotificationProvider";
 import "./index.css";
-import App from "./App.jsx";
+import "./styles/app/App.css";
+import { router } from "./router";
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -8,4 +11,8 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+createRoot(document.getElementById("root")).render(
+  <NotificationProvider>
+    <RouterProvider router={router} />
+  </NotificationProvider>,
+);

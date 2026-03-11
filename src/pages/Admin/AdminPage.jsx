@@ -8,8 +8,6 @@ import {
   saveRecommendation,
 } from "@/utils/recommendationsApi";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
-import AdminAccessNotice from "./AdminAccessNotice";
-import AdminCollectionSection from "./AdminCollectionSection";
 import AdminLocationForm from "./AdminLocationForm";
 import AdminLocationList from "./AdminLocationList";
 import AdminEventForm from "./AdminEventForm";
@@ -17,15 +15,6 @@ import AdminEventList from "./AdminEventList";
 import AdminUserList from "./AdminUserList";
 import "@/pages/Settings/styles/SettingsPage.css";
 import { EMPTY_EVENT, EMPTY_LOCATION } from "./adminConstants";
-import {
-  ADMIN_PAGE_SIZE,
-  ADMIN_VIEWS,
-  createEmptyAdminViewState,
-  filterAdminItems,
-  getAdminViewContent,
-  normalizeSearchValue,
-  paginateItems,
-} from "./adminViewState";
 import {
   buildDraftFromEvent,
   buildEventFromDraft,
@@ -49,6 +38,208 @@ const compareAlphabetical = (left, right) =>
     sensitivity: "base",
     numeric: true,
   });
+
+const ADMIN_VIEWS = ["locations", "events", "users"];
+const ADMIN_PAGE_SIZE = 8;
+
+const createEmptyAdminViewState = (value = "") =>
+  Object.fromEntries(ADMIN_VIEWS.map((view) => [view, value]));
+
+const normalizeSearchValue = (value) => String(value || "").trim().toLowerCase();
+
+const buildSearchBlob = (values) =>
+  values
+    .flatMap((value) => (Array.isArray(value) ? value : [value]))
+    .map((value) => String(value || "").trim().toLowerCase())
+    .filter(Boolean)
+    .join(" ");
+
+const filterAdminItems = (view, items, query) => {
+  const safeItems = Array.isArray(items) ? items : [];
+  if (!query) return safeItems;
+
+  return safeItems.filter((item) => {
+    if (view === "events") {
+      return buildSearchBlob([
+        item?.title,
+        item?.id,
+        item?.eventType,
+        item?.status,
+        item?.description,
+        item?.meetupDetails,
+        item?.lat,
+        item?.lng,
+        item?.host?.name,
+        item?.host?.email,
+        item?.hostChecklist,
+      ]).includes(query);
+    }
+
+    if (view === "users") {
+      return buildSearchBlob([
+        item?.name,
+        item?.displayName,
+        item?.email,
+        item?.role,
+        item?.isAdmin ? "admin" : "user",
+        item?.createdAtUtc,
+        item?.bio,
+      ]).includes(query);
+    }
+
+    return buildSearchBlob([
+      item?.name,
+      item?.id,
+      item?.region,
+      item?.country,
+      item?.type,
+      item?.bestTime,
+      item?.description,
+      item?.lat,
+      item?.lng,
+    ]).includes(query);
+  });
+};
+
+const paginateItems = (items, page, pageSize = ADMIN_PAGE_SIZE) => {
+  const startIndex = (page - 1) * pageSize;
+  return items.slice(startIndex, startIndex + pageSize);
+};
+
+const getAdminViewContent = ({ activeView, isEditingLocation, isEditingEvent }) => {
+  if (activeView === "events") {
+    return {
+      searchLabel: "Search events",
+      searchPlaceholder: "Search events",
+      formTitle: isEditingEvent ? "Edit event" : "Create event",
+      formCopy: "Create and update star party events.",
+      collectionTitle: "Existing events",
+      collectionCopy: "Search, review, and manage created events.",
+    };
+  }
+
+  if (activeView === "users") {
+    return {
+      searchLabel: "Search users",
+      searchPlaceholder: "Search users",
+      formTitle: "User access",
+      formCopy: "Grant or remove admin access for other accounts.",
+      collectionTitle: "Existing users",
+      collectionCopy: "Search, review, and manage user access.",
+    };
+  }
+
+  return {
+    searchLabel: "Search locations",
+    searchPlaceholder: "Search locations",
+    formTitle: isEditingLocation ? "Edit location" : "Add location",
+    formCopy: "Create and update curated stargazing spots.",
+    collectionTitle: "Existing locations",
+    collectionCopy: "Search, review, and manage curated map spots.",
+  };
+};
+
+function AdminAccessNotice({ title, message, buttonLabel, onAction }) {
+  return (
+    <section className="profile-card glass-panel glass-panel-elevated">
+      <h2 className="profile-section-title">{title}</h2>
+      <p className="profile-section-copy">{message}</p>
+      <button
+        type="button"
+        className="glass-btn profile-action-btn"
+        onClick={onAction}
+      >
+        {buttonLabel}
+      </button>
+    </section>
+  );
+}
+
+const PaginationChevron = ({ direction }) => (
+  <svg
+    viewBox="0 0 20 20"
+    width="18"
+    height="18"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <path
+      d={direction === "left" ? "M12.5 4.5L7 10l5.5 5.5" : "M7.5 4.5L13 10l-5.5 5.5"}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+function AdminCollectionSection({
+  title,
+  copy,
+  searchLabel,
+  searchValue,
+  onSearchChange,
+  searchPlaceholder,
+  children,
+  paginationRef,
+  resultSummary,
+  page,
+  totalPages,
+  onPreviousPage,
+  onNextPage,
+}) {
+  return (
+    <div className="admin-panel-section admin-panel-section--collection">
+      <div className="admin-panel-section__header">
+        <div className="admin-panel-section__intro">
+          <h3 className="admin-panel-section__title">{title}</h3>
+          <p className="admin-panel-section__copy">{copy}</p>
+        </div>
+        <div className="admin-collection-tools">
+          <label className="profile-field admin-search-field">
+            <input
+              className="profile-input"
+              type="search"
+              aria-label={searchLabel}
+              value={searchValue}
+              onChange={onSearchChange}
+              placeholder={searchPlaceholder}
+            />
+          </label>
+        </div>
+      </div>
+
+      {children}
+
+      <div className="admin-pagination" ref={paginationRef}>
+        <div className="admin-pagination-status">{resultSummary}</div>
+        {totalPages > 1 ? (
+          <>
+            <button
+              type="button"
+              className="glass-btn profile-action-btn admin-pagination-btn"
+              onClick={onPreviousPage}
+              disabled={page <= 1}
+              aria-label="Previous page"
+            >
+              <PaginationChevron direction="left" />
+            </button>
+            <button
+              type="button"
+              className="glass-btn profile-action-btn admin-pagination-btn"
+              onClick={onNextPage}
+              disabled={page >= totalPages}
+              aria-label="Next page"
+            >
+              <PaginationChevron direction="right" />
+            </button>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}
 
 function AdminPage({
   auth,

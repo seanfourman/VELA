@@ -1,4 +1,5 @@
 import {
+  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -7,9 +8,9 @@ import {
 } from "react";
 import ToastNotifications from "@/components/ToastNotifications";
 import { registerNotificationDispatcher } from "@/utils/notifications";
-import { NotificationContext } from "./NotificationContext";
 
 const EXIT_ANIMATION_MS = 400;
+const NotificationContext = createContext(null);
 
 export function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);

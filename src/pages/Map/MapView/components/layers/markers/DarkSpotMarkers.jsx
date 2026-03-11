@@ -4,8 +4,29 @@ import {
   favoriteSpotIcon,
   favoriteSpotIconTransition,
 } from "@/pages/Map/MapView/core/markerIcons";
-import { DarkSpotPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
-import { coordinatesMatch, resolveFavoriteMarkerIcon } from "./markerHelpers";
+import DarkSpotPopupContent from "@/pages/Map/MapView/components/popups/content/DarkSpotPopupContent";
+
+const coordinatesMatch = (left, right, rightLngKey = "lng") => {
+  if (!left || !right) return false;
+  return (
+    Math.abs(Number(left.lat) - Number(right.lat)) < 1e-6 &&
+    Math.abs(Number(left.lng) - Number(right[rightLngKey])) < 1e-6
+  );
+};
+
+const resolveFavoriteMarkerIcon = ({
+  baseIcon,
+  isFavorite = false,
+  isEntering = false,
+  favoriteIcon,
+  favoriteTransitionIcon,
+}) => {
+  if (!isFavorite) {
+    return baseIcon;
+  }
+
+  return isEntering ? favoriteTransitionIcon : favoriteIcon;
+};
 
 export default function DarkSpotMarkers({
   darkSpots,

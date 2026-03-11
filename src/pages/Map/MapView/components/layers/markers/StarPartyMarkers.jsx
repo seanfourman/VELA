@@ -4,7 +4,7 @@ import {
   specialEventIcon,
   starPartyEventIcon,
 } from "@/pages/Map/MapView/core/markerIcons";
-import { StarPartyPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
+import StarPartyPopupContent from "@/pages/Map/MapView/components/popups/content/StarPartyPopupContent";
 
 const RSVP_CONFETTI_MS = 900;
 
