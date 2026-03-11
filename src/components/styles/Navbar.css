@@ -38,8 +38,8 @@
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 32px;
   flex: 1;
+  z-index: 2;
 }
 
 .navbar-left {
@@ -50,13 +50,47 @@
   justify-content: flex-end;
 }
 
+.navbar-center-band {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 26px;
+  width: min(760px, calc(100% - 260px));
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.navbar-center-band > * {
+  pointer-events: auto;
+}
+
+.navbar-link-group {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  min-width: 0;
+}
+
+.navbar-link-group--left {
+  justify-content: flex-end;
+}
+
+.navbar-link-group--right {
+  justify-content: flex-start;
+}
+
 /* Logo */
 .navbar-logo {
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .navbar-logo:hover {
@@ -69,17 +103,84 @@
 }
 
 /* Navigation Links */
-.nav-link {
+.nav-link,
+.nav-link-button,
+.navbar-mobile-link {
   color: var(--surface-text-muted);
-  text-decoration: none;
   font-size: 0.9rem;
   font-weight: 500;
-  transition: color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
   padding: 8px 0;
 }
 
-.nav-link:hover {
+.nav-link-button,
+.navbar-mobile-link {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.nav-link:hover,
+.nav-link-button:hover,
+.navbar-mobile-link:hover {
   color: var(--surface-text);
+}
+
+.navbar-menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--surface-text);
+}
+
+.navbar-menu-container {
+  position: relative;
+}
+
+.navbar-menu-toggle span {
+  position: absolute;
+  width: 16px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: currentColor;
+  transition:
+    transform 0.22s ease,
+    opacity 0.18s ease;
+}
+
+.navbar-menu-toggle span:nth-child(1) {
+  transform: translateY(-5px);
+}
+
+.navbar-menu-toggle span:nth-child(3) {
+  transform: translateY(5px);
+}
+
+.navbar-menu-toggle.is-open span:nth-child(1) {
+  transform: rotate(45deg);
+}
+
+.navbar-menu-toggle.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar-menu-toggle.is-open span:nth-child(3) {
+  transform: rotate(-45deg);
+}
+
+.navbar-mobile-menu {
+  position: absolute;
+  top: 68px;
+  left: 4px;
+  right: auto;
+  min-width: 230px;
+}
+
+.navbar-mobile-link {
+  width: 100%;
 }
 
 /* Auth Button - Using Glass Button System */
@@ -115,8 +216,12 @@
     rgba(255, 255, 255, 0.08) 75%,
     rgba(255, 255, 255, 0.35) 100%
   );
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
@@ -177,13 +282,20 @@
     padding: 0 14px;
   }
 
-  .navbar-left,
-  .navbar-right {
-    gap: 16px;
+  .navbar-center-band {
+    width: auto;
+    display: flex;
+    justify-content: center;
+    gap: 0;
   }
 
-  .nav-link {
+  .navbar-link-group {
     display: none;
+  }
+
+  .navbar-menu-toggle {
+    display: inline-flex;
+    position: relative;
   }
 
   .logo-img {
