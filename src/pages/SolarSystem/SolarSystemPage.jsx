@@ -633,7 +633,9 @@ function SolarSystemPanel({
         <div className={`solar-system-panel-mobile__toggle-slot ${open ? "open" : "ready"}`}>
           <SolarSystemPanelToggle open={open} mobile onClick={onToggleOpen} />
         </div>
-        <aside className="solar-system-panel-mobile__sheet">{content}</aside>
+        <aside className="solar-system-panel-mobile__sheet">
+          <div className="solar-system-panel-mobile__scroll">{content}</div>
+        </aside>
       </div>
     );
   }
@@ -642,7 +644,7 @@ function SolarSystemPanel({
     <div className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}>
       <SolarSystemPanelToggle open={open} onClick={onToggleOpen} />
       <aside className="solar-system-panel">
-        {content}
+        <div className="solar-system-panel__scroll">{content}</div>
       </aside>
     </div>
   );
