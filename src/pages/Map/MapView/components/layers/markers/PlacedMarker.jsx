@@ -5,6 +5,7 @@ import {
   pinIcon,
 } from "@/pages/Map/MapView/core/markerIcons";
 import { PinnedPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
+import { resolveFavoriteMarkerIcon } from "./markerHelpers";
 
 export default function PlacedMarker({
   placedMarker,
@@ -26,13 +27,13 @@ export default function PlacedMarker({
     <Marker
       key={`placed-${placedMarker.id}`}
       position={[placedMarker.lat, placedMarker.lng]}
-      icon={
-        placedMarker.isFavorite
-          ? isFavoriteEntering
-            ? favoriteSpotIconTransition
-            : favoriteSpotIcon
-          : pinIcon
-      }
+      icon={resolveFavoriteMarkerIcon({
+        baseIcon: pinIcon,
+        isFavorite: placedMarker.isFavorite,
+        isEntering: isFavoriteEntering,
+        favoriteIcon: favoriteSpotIcon,
+        favoriteTransitionIcon: favoriteSpotIconTransition,
+      })}
       ref={(marker) => {
         placedMarkerRef.current = marker || null;
       }}

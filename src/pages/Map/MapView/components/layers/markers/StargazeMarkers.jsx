@@ -5,6 +5,11 @@ import {
   stargazeIcon,
 } from "@/pages/Map/MapView/core/markerIcons";
 import { StargazePopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
+import {
+  buildMarkerDirectionsHandler,
+  coordinatesMatch,
+  resolveFavoriteMarkerIcon,
+} from "./markerHelpers";
 
 export default function StargazeMarkers({
   spots,
@@ -27,34 +32,30 @@ export default function StargazeMarkers({
   onOpenSpaceWeatherAt,
 }) {
   if (!Array.isArray(spots)) return null;
+  const directionsOrigin = getDirectionsOrigin();
 
   return spots.map((spot) => {
     const spotKey = getSpotKey(spot.lat, spot.lng);
     const isFavoriteSpot = favoriteSpotKeys.has(spotKey);
     const isFavoriteEntering = enteringFavoriteKeySet.has(spotKey);
-    const isTarget =
-      selectedDarkSpot &&
-      Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
-      Math.abs(selectedDarkSpot.lng - spot.lng) < 1e-6;
-    const directionsOrigin = getDirectionsOrigin();
-    const directionsUrl = buildDirectionsUrl(directionsOrigin, spot);
-    const handleDirections = directionsUrl
-      ? () => {
-          window.open(directionsUrl, "_blank");
-        }
-      : null;
+    const isTarget = coordinatesMatch(selectedDarkSpot, spot);
+    const handleDirections = buildMarkerDirectionsHandler({
+      buildDirectionsUrl,
+      getDirectionsOrigin: () => directionsOrigin,
+      target: spot,
+    });
 
     return (
       <Marker
         key={`stargaze-${spot.id}`}
         position={[spot.lat, spot.lng]}
-        icon={
-          isFavoriteSpot
-            ? isFavoriteEntering
-              ? favoriteSpotIconTransition
-              : favoriteSpotIcon
-            : stargazeIcon
-        }
+        icon={resolveFavoriteMarkerIcon({
+          baseIcon: stargazeIcon,
+          isFavorite: isFavoriteSpot,
+          isEntering: isFavoriteEntering,
+          favoriteIcon: favoriteSpotIcon,
+          favoriteTransitionIcon: favoriteSpotIconTransition,
+        })}
         ref={(marker) => {
           if (marker) {
             stargazeMarkerRefs.current.set(spot.id, marker);

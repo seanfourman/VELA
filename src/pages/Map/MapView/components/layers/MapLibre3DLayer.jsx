@@ -100,6 +100,51 @@ const attachAngleControls = (map, glMap) => {
   let frameId = null;
   let pendingPitch = null;
 
+  const setDraggingEnabled = (shouldEnable) => {
+    if (shouldEnable) {
+      map.dragging?.enable?.();
+      return;
+    }
+    map.dragging?.disable?.();
+  };
+
+  const rememberDraggingState = (type) => {
+    const wasEnabled = map.dragging?.enabled?.() ?? false;
+    if (type === "mouse") {
+      mouseDraggingWasEnabled = wasEnabled;
+    } else {
+      touchDraggingWasEnabled = wasEnabled;
+    }
+    if (wasEnabled) {
+      setDraggingEnabled(false);
+    }
+  };
+
+  const restoreDraggingState = (type) => {
+    const shouldEnable =
+      type === "mouse" ? mouseDraggingWasEnabled : touchDraggingWasEnabled;
+    if (!shouldEnable) return;
+
+    setDraggingEnabled(true);
+    if (type === "mouse") {
+      mouseDraggingWasEnabled = false;
+    } else {
+      touchDraggingWasEnabled = false;
+    }
+  };
+
+  const schedulePitch = (basePitch, deltaY) => {
+    pendingPitch = clamp(
+      basePitch - deltaY * PITCH_SENSITIVITY,
+      MIN_PITCH,
+      MAX_PITCH,
+    );
+
+    if (frameId == null) {
+      frameId = window.requestAnimationFrame(flushPitch);
+    }
+  };
+
   const consume = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -108,10 +153,7 @@ const attachAngleControls = (map, glMap) => {
   const finishAdjust = () => {
     if (!isAdjustingAngle) return;
     isAdjustingAngle = false;
-    if (mouseDraggingWasEnabled) {
-      map.dragging?.enable?.();
-      mouseDraggingWasEnabled = false;
-    }
+    restoreDraggingState("mouse");
   };
 
   const finishTouchAdjust = () => {
@@ -121,10 +163,7 @@ const attachAngleControls = (map, glMap) => {
     touchGestureCandidate = false;
     isTouchAdjustingAngle = false;
 
-    if (touchDraggingWasEnabled) {
-      map.dragging?.enable?.();
-      touchDraggingWasEnabled = false;
-    }
+    restoreDraggingState("touch");
   };
 
   const flushPitch = () => {
@@ -140,11 +179,7 @@ const attachAngleControls = (map, glMap) => {
     isAdjustingAngle = true;
     startY = event.clientY;
     startPitch = glMap.getPitch?.() ?? 0;
-    mouseDraggingWasEnabled = map.dragging?.enabled?.() ?? false;
-
-    if (mouseDraggingWasEnabled) {
-      map.dragging.disable();
-    }
+    rememberDraggingState("mouse");
 
     consume(event);
   };
@@ -157,15 +192,7 @@ const attachAngleControls = (map, glMap) => {
     }
 
     const deltaY = event.clientY - startY;
-    pendingPitch = clamp(
-      startPitch - deltaY * PITCH_SENSITIVITY,
-      MIN_PITCH,
-      MAX_PITCH,
-    );
-
-    if (frameId == null) {
-      frameId = window.requestAnimationFrame(flushPitch);
-    }
+    schedulePitch(startPitch, deltaY);
 
     consume(event);
   };
@@ -218,22 +245,11 @@ const attachAngleControls = (map, glMap) => {
       }
 
       isTouchAdjustingAngle = true;
-      touchDraggingWasEnabled = map.dragging?.enabled?.() ?? false;
-      if (touchDraggingWasEnabled) {
-        map.dragging.disable();
-      }
+      rememberDraggingState("touch");
       touchStartPitch = glMap.getPitch?.() ?? touchStartPitch;
     }
 
-    pendingPitch = clamp(
-      touchStartPitch - deltaY * PITCH_SENSITIVITY,
-      MIN_PITCH,
-      MAX_PITCH,
-    );
-
-    if (frameId == null) {
-      frameId = window.requestAnimationFrame(flushPitch);
-    }
+    schedulePitch(touchStartPitch, deltaY);
 
     consume(event);
   };

@@ -18,6 +18,15 @@ import AdminUserList from "./AdminUserList";
 import "@/pages/Settings/styles/SettingsPage.css";
 import { EMPTY_EVENT, EMPTY_LOCATION } from "./adminConstants";
 import {
+  ADMIN_PAGE_SIZE,
+  ADMIN_VIEWS,
+  createEmptyAdminViewState,
+  filterAdminItems,
+  getAdminViewContent,
+  normalizeSearchValue,
+  paginateItems,
+} from "./adminViewState";
+import {
   buildDraftFromEvent,
   buildEventFromDraft,
   buildEventId,
@@ -41,79 +50,6 @@ const compareAlphabetical = (left, right) =>
     numeric: true,
   });
 
-const ADMIN_PAGE_SIZE = 8;
-
-const normalizeSearchValue = (value) => String(value || "").trim().toLowerCase();
-
-const buildSearchBlob = (values) =>
-  values
-    .flatMap((value) => {
-      if (Array.isArray(value)) return value;
-      return [value];
-    })
-    .map((value) => String(value || "").trim().toLowerCase())
-    .filter(Boolean)
-    .join(" ");
-
-const matchesLocationSearch = (location, query) => {
-  if (!query) return true;
-
-  const blob = buildSearchBlob([
-    location?.name,
-    location?.id,
-    location?.region,
-    location?.country,
-    location?.type,
-    location?.bestTime,
-    location?.description,
-    location?.lat,
-    location?.lng,
-  ]);
-
-  return blob.includes(query);
-};
-
-const matchesEventSearch = (event, query) => {
-  if (!query) return true;
-
-  const blob = buildSearchBlob([
-    event?.title,
-    event?.id,
-    event?.eventType,
-    event?.status,
-    event?.description,
-    event?.meetupDetails,
-    event?.lat,
-    event?.lng,
-    event?.host?.name,
-    event?.host?.email,
-    event?.hostChecklist,
-  ]);
-
-  return blob.includes(query);
-};
-
-const matchesUserSearch = (user, query) => {
-  if (!query) return true;
-
-  const blob = buildSearchBlob([
-    user?.name,
-    user?.displayName,
-    user?.email,
-    user?.role,
-    user?.isAdmin ? "admin" : "user",
-    user?.createdAtUtc,
-    user?.bio,
-  ]);
-
-  return blob.includes(query);
-};
-
-const paginateItems = (items, page, pageSize) => {
-  const startIndex = (page - 1) * pageSize;
-  return items.slice(startIndex, startIndex + pageSize);
-};
-
 function AdminPage({
   auth,
   isAdmin,
@@ -133,12 +69,12 @@ function AdminPage({
   const [locationDraft, setLocationDraft] = useState(EMPTY_LOCATION);
   const [eventDraft, setEventDraft] = useState(EMPTY_EVENT);
   const [activeView, setActiveView] = useState("locations");
-  const [locationSearch, setLocationSearch] = useState("");
-  const [eventSearch, setEventSearch] = useState("");
-  const [userSearch, setUserSearch] = useState("");
-  const [locationPage, setLocationPage] = useState(1);
-  const [eventPage, setEventPage] = useState(1);
-  const [userPage, setUserPage] = useState(1);
+  const [searchByView, setSearchByView] = useState(() =>
+    createEmptyAdminViewState(""),
+  );
+  const [pageByView, setPageByView] = useState(() =>
+    createEmptyAdminViewState(1),
+  );
   const [pendingDelete, setPendingDelete] = useState(null);
   const [isDeleteConfirmBusy, setIsDeleteConfirmBusy] = useState(false);
   const locationPaginationRef = useRef(null);
@@ -181,56 +117,57 @@ function AdminPage({
       ),
     );
   }, [managedUsers]);
-  const normalizedLocationSearch = useMemo(
-    () => normalizeSearchValue(locationSearch),
-    [locationSearch],
+  const listByView = useMemo(
+    () => ({
+      locations: locationList,
+      events: eventList,
+      users: userList,
+    }),
+    [eventList, locationList, userList],
   );
-  const normalizedEventSearch = useMemo(
-    () => normalizeSearchValue(eventSearch),
-    [eventSearch],
-  );
-  const normalizedUserSearch = useMemo(
-    () => normalizeSearchValue(userSearch),
-    [userSearch],
-  );
-  const filteredLocationList = useMemo(
+  const normalizedSearchByView = useMemo(
     () =>
-      locationList.filter((location) =>
-        matchesLocationSearch(location, normalizedLocationSearch),
+      Object.fromEntries(
+        ADMIN_VIEWS.map((view) => [view, normalizeSearchValue(searchByView[view])]),
       ),
-    [locationList, normalizedLocationSearch],
+    [searchByView],
   );
-  const filteredEventList = useMemo(
-    () => eventList.filter((event) => matchesEventSearch(event, normalizedEventSearch)),
-    [eventList, normalizedEventSearch],
+  const filteredByView = useMemo(
+    () =>
+      Object.fromEntries(
+        ADMIN_VIEWS.map((view) => [
+          view,
+          filterAdminItems(view, listByView[view], normalizedSearchByView[view]),
+        ]),
+      ),
+    [listByView, normalizedSearchByView],
   );
-  const filteredUserList = useMemo(
-    () => userList.filter((user) => matchesUserSearch(user, normalizedUserSearch)),
-    [normalizedUserSearch, userList],
+  const totalPagesByView = useMemo(
+    () =>
+      Object.fromEntries(
+        ADMIN_VIEWS.map((view) => [
+          view,
+          Math.max(1, Math.ceil(filteredByView[view].length / ADMIN_PAGE_SIZE)),
+        ]),
+      ),
+    [filteredByView],
   );
-  const locationTotalPages = Math.max(
-    1,
-    Math.ceil(filteredLocationList.length / ADMIN_PAGE_SIZE),
+  const safePageByView = useMemo(
+    () =>
+      Object.fromEntries(
+        ADMIN_VIEWS.map((view) => [view, Math.min(pageByView[view], totalPagesByView[view])]),
+      ),
+    [pageByView, totalPagesByView],
   );
-  const eventTotalPages = Math.max(
-    1,
-    Math.ceil(filteredEventList.length / ADMIN_PAGE_SIZE),
-  );
-  const userTotalPages = Math.max(1, Math.ceil(filteredUserList.length / ADMIN_PAGE_SIZE));
-  const safeLocationPage = Math.min(locationPage, locationTotalPages);
-  const safeEventPage = Math.min(eventPage, eventTotalPages);
-  const safeUserPage = Math.min(userPage, userTotalPages);
-  const paginatedLocations = useMemo(
-    () => paginateItems(filteredLocationList, safeLocationPage, ADMIN_PAGE_SIZE),
-    [filteredLocationList, safeLocationPage],
-  );
-  const paginatedEvents = useMemo(
-    () => paginateItems(filteredEventList, safeEventPage, ADMIN_PAGE_SIZE),
-    [filteredEventList, safeEventPage],
-  );
-  const paginatedUsers = useMemo(
-    () => paginateItems(filteredUserList, safeUserPage, ADMIN_PAGE_SIZE),
-    [filteredUserList, safeUserPage],
+  const paginatedByView = useMemo(
+    () =>
+      Object.fromEntries(
+        ADMIN_VIEWS.map((view) => [
+          view,
+          paginateItems(filteredByView[view], safePageByView[view], ADMIN_PAGE_SIZE),
+        ]),
+      ),
+    [filteredByView, safePageByView],
   );
   const publishedEventsCount = useMemo(
     () => eventList.filter((event) => event.status === "published").length,
@@ -248,71 +185,23 @@ function AdminPage({
       ),
     [eventList],
   );
-  const activeViewIndex = activeView === "events" ? 1 : activeView === "users" ? 2 : 0;
-  const activeSearchValue =
-    activeView === "events"
-      ? eventSearch
-      : activeView === "users"
-        ? userSearch
-        : locationSearch;
-  const activeFilteredCount =
-    activeView === "events"
-      ? filteredEventList.length
-      : activeView === "users"
-        ? filteredUserList.length
-        : filteredLocationList.length;
-  const activePage =
-    activeView === "events"
-      ? safeEventPage
-      : activeView === "users"
-        ? safeUserPage
-        : safeLocationPage;
-  const activeTotalPages =
-    activeView === "events"
-      ? eventTotalPages
-      : activeView === "users"
-        ? userTotalPages
-        : locationTotalPages;
-  const activeSearchLabel =
-    activeView === "events"
-      ? "Search events"
-      : activeView === "users"
-        ? "Search users"
-        : "Search locations";
-  const activeSearchPlaceholder =
-    activeView === "events"
-      ? "Search events"
-      : activeView === "users"
-        ? "Search users"
-        : "Search locations";
-  const activeFormTitle =
-    activeView === "events"
-      ? isEditingEvent
-        ? "Edit event"
-        : "Create event"
-      : activeView === "users"
-        ? "User access"
-      : isEditingLocation
-        ? "Edit location"
-        : "Add location";
-  const activeFormCopy =
-    activeView === "events"
-      ? "Create and update star party events."
-      : activeView === "users"
-        ? "Grant or remove admin access for other accounts."
-      : "Create and update curated stargazing spots.";
-  const activeCollectionTitle =
-    activeView === "events"
-      ? "Existing events"
-      : activeView === "users"
-        ? "Existing users"
-        : "Existing locations";
-  const activeCollectionCopy =
-    activeView === "events"
-      ? "Search, review, and manage created events."
-      : activeView === "users"
-        ? "Search, review, and manage user access."
-      : "Search, review, and manage curated map spots.";
+  const activeViewIndex = Math.max(0, ADMIN_VIEWS.indexOf(activeView));
+  const activeViewContent = useMemo(
+    () =>
+      getAdminViewContent({
+        activeView,
+        isEditingLocation,
+        isEditingEvent,
+      }),
+    [activeView, isEditingEvent, isEditingLocation],
+  );
+  const activeSearchValue = searchByView[activeView];
+  const activeFilteredCount = filteredByView[activeView].length;
+  const activePage = safePageByView[activeView];
+  const activeTotalPages = totalPagesByView[activeView];
+  const paginatedLocations = paginatedByView.locations;
+  const paginatedEvents = paginatedByView.events;
+  const paginatedUsers = paginatedByView.users;
   const visibleStart =
     activeFilteredCount === 0 ? 0 : (activePage - 1) * ADMIN_PAGE_SIZE + 1;
   const visibleEnd =
@@ -358,7 +247,6 @@ function AdminPage({
       userList.length,
     ],
   );
-
   useEffect(() => {
     const pendingView = pendingPaginationAnchorRef.current;
     if (!pendingView || typeof window === "undefined") return undefined;
@@ -393,7 +281,7 @@ function AdminPage({
     });
 
     return () => window.cancelAnimationFrame(frameId);
-  }, [safeEventPage, safeLocationPage, safeUserPage]);
+  }, [safePageByView]);
 
   const handleLocationFieldChange = (key) => (event) => {
     const value = event.target.value;
@@ -407,50 +295,27 @@ function AdminPage({
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
-    if (activeView === "events") {
-      setEventSearch(value);
-      setEventPage(1);
-      return;
-    }
-    if (activeView === "users") {
-      setUserSearch(value);
-      setUserPage(1);
-      return;
-    }
-    setLocationSearch(value);
-    setLocationPage(1);
+    setSearchByView((current) => ({ ...current, [activeView]: value }));
+    setPageByView((current) => ({ ...current, [activeView]: 1 }));
   };
 
   const handlePreviousPage = () => {
     pendingPaginationAnchorRef.current = activeView;
-    if (activeView === "events") {
-      setEventPage((current) => Math.max(Math.min(current, eventTotalPages) - 1, 1));
-      return;
-    }
-    if (activeView === "users") {
-      setUserPage((current) => Math.max(Math.min(current, userTotalPages) - 1, 1));
-      return;
-    }
-    setLocationPage((current) => Math.max(Math.min(current, locationTotalPages) - 1, 1));
+    setPageByView((current) => ({
+      ...current,
+      [activeView]: Math.max(Math.min(current[activeView], activeTotalPages) - 1, 1),
+    }));
   };
 
   const handleNextPage = () => {
     pendingPaginationAnchorRef.current = activeView;
-    if (activeView === "events") {
-      setEventPage((current) =>
-        Math.min(Math.min(current, eventTotalPages) + 1, eventTotalPages),
-      );
-      return;
-    }
-    if (activeView === "users") {
-      setUserPage((current) =>
-        Math.min(Math.min(current, userTotalPages) + 1, userTotalPages),
-      );
-      return;
-    }
-    setLocationPage((current) =>
-      Math.min(Math.min(current, locationTotalPages) + 1, locationTotalPages),
-    );
+    setPageByView((current) => ({
+      ...current,
+      [activeView]: Math.min(
+        Math.min(current[activeView], activeTotalPages) + 1,
+        activeTotalPages,
+      ),
+    }));
   };
 
   const resetLocationForm = () => setLocationDraft(EMPTY_LOCATION);
@@ -808,8 +673,8 @@ function AdminPage({
               <div className="admin-panel-section">
                 <div className="admin-panel-section__header">
                   <div className="admin-panel-section__intro">
-                    <h3 className="admin-panel-section__title">{activeFormTitle}</h3>
-                    <p className="admin-panel-section__copy">{activeFormCopy}</p>
+                    <h3 className="admin-panel-section__title">{activeViewContent.formTitle}</h3>
+                    <p className="admin-panel-section__copy">{activeViewContent.formCopy}</p>
                   </div>
                 </div>
 
@@ -826,12 +691,12 @@ function AdminPage({
               <div className="admin-section-separator" aria-hidden="true" />
 
               <AdminCollectionSection
-                title={activeCollectionTitle}
-                copy={activeCollectionCopy}
-                searchLabel={activeSearchLabel}
+                title={activeViewContent.collectionTitle}
+                copy={activeViewContent.collectionCopy}
+                searchLabel={activeViewContent.searchLabel}
                 searchValue={activeSearchValue}
                 onSearchChange={handleSearchChange}
-                searchPlaceholder={activeSearchPlaceholder}
+                searchPlaceholder={activeViewContent.searchPlaceholder}
                 paginationRef={locationPaginationRef}
                 resultSummary={activeResultSummary}
                 page={activePage}
@@ -845,7 +710,7 @@ function AdminPage({
                   onEditLocation={handleEditLocation}
                   activeLocationId={editingLocationId || null}
                   emptyMessage={
-                    normalizedLocationSearch
+                    normalizedSearchByView.locations
                       ? "No curated locations match this search"
                       : "No curated locations yet"
                   }
@@ -857,8 +722,8 @@ function AdminPage({
               <div className="admin-panel-section">
                 <div className="admin-panel-section__header">
                   <div className="admin-panel-section__intro">
-                    <h3 className="admin-panel-section__title">{activeFormTitle}</h3>
-                    <p className="admin-panel-section__copy">{activeFormCopy}</p>
+                    <h3 className="admin-panel-section__title">{activeViewContent.formTitle}</h3>
+                    <p className="admin-panel-section__copy">{activeViewContent.formCopy}</p>
                   </div>
                 </div>
 
@@ -875,12 +740,12 @@ function AdminPage({
               <div className="admin-section-separator" aria-hidden="true" />
 
               <AdminCollectionSection
-                title={activeCollectionTitle}
-                copy={activeCollectionCopy}
-                searchLabel={activeSearchLabel}
+                title={activeViewContent.collectionTitle}
+                copy={activeViewContent.collectionCopy}
+                searchLabel={activeViewContent.searchLabel}
                 searchValue={activeSearchValue}
                 onSearchChange={handleSearchChange}
-                searchPlaceholder={activeSearchPlaceholder}
+                searchPlaceholder={activeViewContent.searchPlaceholder}
                 paginationRef={eventPaginationRef}
                 resultSummary={activeResultSummary}
                 page={activePage}
@@ -895,7 +760,7 @@ function AdminPage({
                   onSetStatus={handleSetEventStatus}
                   activeEventId={editingEventId || null}
                   emptyMessage={
-                    normalizedEventSearch
+                    normalizedSearchByView.events
                       ? "No events match this search"
                       : "No events created yet"
                   }
@@ -905,12 +770,12 @@ function AdminPage({
           ) : (
             <>
               <AdminCollectionSection
-                title={activeCollectionTitle}
-                copy={activeCollectionCopy}
-                searchLabel={activeSearchLabel}
+                title={activeViewContent.collectionTitle}
+                copy={activeViewContent.collectionCopy}
+                searchLabel={activeViewContent.searchLabel}
                 searchValue={activeSearchValue}
                 onSearchChange={handleSearchChange}
-                searchPlaceholder={activeSearchPlaceholder}
+                searchPlaceholder={activeViewContent.searchPlaceholder}
                 paginationRef={userPaginationRef}
                 resultSummary={activeResultSummary}
                 page={activePage}
@@ -935,7 +800,7 @@ function AdminPage({
                     pendingUserId={pendingUserId || null}
                     onToggleAdmin={handleToggleUserAdmin}
                     emptyMessage={
-                      normalizedUserSearch
+                      normalizedSearchByView.users
                         ? "No users match this search"
                         : "No users available yet"
                     }

@@ -5,6 +5,11 @@ import {
   favoriteSpotIconTransition,
 } from "@/pages/Map/MapView/core/markerIcons";
 import { FavoritePopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
+import {
+  buildMarkerDirectionsHandler,
+  coordinatesMatch,
+  resolveFavoriteMarkerIcon,
+} from "./markerHelpers";
 
 export default function FavoriteOnlyMarkers({
   favoriteOnlySpots,
@@ -21,21 +26,17 @@ export default function FavoriteOnlyMarkers({
   onOpenSpaceWeatherAt,
 }) {
   if (!Array.isArray(favoriteOnlySpots)) return null;
+  const directionsOrigin = getDirectionsOrigin();
 
   return favoriteOnlySpots.map((spot) => {
-    const directionsOrigin = getDirectionsOrigin();
     const isEntering = enteringFavoriteKeySet.has(spot.key);
     const isExiting = exitingFavoriteKeySet.has(spot.key);
-    const isSelected =
-      selectedDarkSpot &&
-      Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
-      Math.abs(selectedDarkSpot.lng - spot.lng) < 1e-6;
-    const directionsUrl = buildDirectionsUrl(directionsOrigin, spot);
-    const handleDirections = directionsUrl
-      ? () => {
-          window.open(directionsUrl, "_blank");
-        }
-      : null;
+    const isSelected = coordinatesMatch(selectedDarkSpot, spot);
+    const handleDirections = buildMarkerDirectionsHandler({
+      buildDirectionsUrl,
+      getDirectionsOrigin: () => directionsOrigin,
+      target: spot,
+    });
     const handleRemoveFavorite = () =>
       handleRemoveFavoriteSpotAnimated(spot.key);
     const handleToggleTarget = () => {
@@ -54,13 +55,15 @@ export default function FavoriteOnlyMarkers({
       <Marker
         key={`favorite-${spot.key}`}
         position={[spot.lat, spot.lng]}
-        icon={
-          isExiting
-            ? favoritePinIconRemoving
-            : isEntering
-              ? favoriteSpotIconTransition
-              : favoriteSpotIcon
-        }
+        icon={resolveFavoriteMarkerIcon({
+          baseIcon: favoriteSpotIcon,
+          isFavorite: true,
+          isEntering,
+          isExiting,
+          favoriteIcon: favoriteSpotIcon,
+          favoriteTransitionIcon: favoriteSpotIconTransition,
+          favoriteRemovingIcon: favoritePinIconRemoving,
+        })}
         eventHandlers={{
           popupopen: () => centerOnCoords(spot.lat, spot.lng),
         }}

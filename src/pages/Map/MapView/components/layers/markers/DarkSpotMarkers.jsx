@@ -5,6 +5,7 @@ import {
   favoriteSpotIconTransition,
 } from "@/pages/Map/MapView/core/markerIcons";
 import { DarkSpotPopupContent } from "@/pages/Map/MapView/components/popups/PopupContent";
+import { coordinatesMatch, resolveFavoriteMarkerIcon } from "./markerHelpers";
 
 export default function DarkSpotMarkers({
   darkSpots,
@@ -28,22 +29,19 @@ export default function DarkSpotMarkers({
     const spotKey = getSpotKey(spot.lat, spot.lon);
     const isFavoriteSpot = favoriteSpotKeys.has(spotKey);
     const isFavoriteEntering = enteringFavoriteKeySet.has(spotKey);
-    const isSelected =
-      selectedDarkSpot &&
-      Math.abs(selectedDarkSpot.lat - spot.lat) < 1e-6 &&
-      Math.abs(selectedDarkSpot.lng - spot.lon) < 1e-6;
+    const isSelected = coordinatesMatch(selectedDarkSpot, spot, "lon");
 
     return (
       <Marker
         key={`darkspot-${index}`}
         position={[spot.lat, spot.lon]}
-        icon={
-          isFavoriteSpot
-            ? isFavoriteEntering
-              ? favoriteSpotIconTransition
-              : favoriteSpotIcon
-            : darkSpotIcon
-        }
+        icon={resolveFavoriteMarkerIcon({
+          baseIcon: darkSpotIcon,
+          isFavorite: isFavoriteSpot,
+          isEntering: isFavoriteEntering,
+          favoriteIcon: favoriteSpotIcon,
+          favoriteTransitionIcon: favoriteSpotIconTransition,
+        })}
         eventHandlers={{
           popupopen: () => centerOnCoords(spot.lat, spot.lon),
         }}
