@@ -701,7 +701,7 @@ function SolarSystemPage() {
   const [showOrbits, setShowOrbits] = useState(true);
   const [orbitSpeed, setOrbitSpeed] = useState(1);
   const [isMobile, setIsMobile] = useState(initialIsMobile);
-  const [focusPanelOpen, setFocusPanelOpen] = useState(!initialIsMobile);
+  const [focusPanelOpen, setFocusPanelOpen] = useState(false);
   const [mobilePanelNudge, setMobilePanelNudge] = useState(false);
   const mobilePanelNudgeTimeoutRef = useRef(null);
   const selectedBody = BODY_LOOKUP[selectedBodyId] || BODY_LOOKUP.earth;
