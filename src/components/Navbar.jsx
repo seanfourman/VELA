@@ -6,8 +6,6 @@ import velaLogoBlack from "@/assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
 
 const NAV_PLACEHOLDER_LINKS = [
-  { id: "discover", label: "Discover", path: "/discover" },
-  { id: "gear-lab", label: "Gear Lab", path: "/gear-lab" },
   { id: "moon-phase", label: "Moon Phase", path: "/moon-phase" },
   { id: "solar-system", label: "Solar System", path: "/solar-system" },
 ];
@@ -158,7 +156,7 @@ function Navbar({
 
         <div className="navbar-center-band">
           <div className="navbar-link-group navbar-link-group--left">
-            {NAV_PLACEHOLDER_LINKS.slice(0, 2).map((item) => renderPlaceholderLink(item))}
+            {NAV_PLACEHOLDER_LINKS.slice(0, 1).map((item) => renderPlaceholderLink(item))}
           </div>
 
           {isHome ? (
@@ -184,7 +182,7 @@ function Navbar({
           )}
 
           <div className="navbar-link-group navbar-link-group--right">
-            {NAV_PLACEHOLDER_LINKS.slice(2).map((item) => renderPlaceholderLink(item))}
+            {NAV_PLACEHOLDER_LINKS.slice(1).map((item) => renderPlaceholderLink(item))}
           </div>
         </div>
 

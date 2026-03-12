@@ -6,8 +6,6 @@ import PageShell from "@/components/layout/PageShell";
 import AppLayout, { useAppLayoutContext } from "@/layouts/AppLayout";
 import AuthPage from "@/pages/Auth/AuthPage";
 import AdminPage from "@/pages/Admin/AdminPage";
-import DiscoverPage from "@/pages/Discover/DiscoverPage";
-import GearLabPage from "@/pages/GearLab/GearLabPage";
 import MapView from "@/pages/Map/MapView";
 import MoonPhasePage from "@/pages/MoonPhase/MoonPhasePage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
@@ -157,13 +155,6 @@ function AdminRoute() {
   );
 }
 
-function DiscoverRoute() {
-  useDisableThreeDMode();
-  const { isLight, navigate } = useAppLayoutContext();
-
-  return <DiscoverPage isLight={isLight} onNavigate={navigate} />;
-}
-
 function MoonPhaseRoute() {
   useDisableThreeDMode();
   const { isLight, navigate, location, locationStatus } = useAppLayoutContext();
@@ -176,13 +167,6 @@ function MoonPhaseRoute() {
       locationStatus={locationStatus}
     />
   );
-}
-
-function GearLabRoute() {
-  useDisableThreeDMode();
-  const { isLight, navigate } = useAppLayoutContext();
-
-  return <GearLabPage isLight={isLight} onNavigate={navigate} />;
 }
 
 function SolarSystemRoute() {
@@ -222,8 +206,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <MapRoute /> },
       { path: "auth", element: <AuthRoute /> },
-      { path: "discover", element: <DiscoverRoute /> },
-      { path: "gear-lab", element: <GearLabRoute /> },
+      { path: "discover", element: <Navigate to="/" replace /> },
+      { path: "gear-lab", element: <Navigate to="/" replace /> },
       { path: "moon-phase", element: <MoonPhaseRoute /> },
       { path: "night-planner", element: <Navigate to="/moon-phase" replace /> },
       { path: "profile", element: <ProfileRoute /> },
