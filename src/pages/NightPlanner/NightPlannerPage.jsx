@@ -68,7 +68,16 @@ function computeStargazingScore(moonIllumination) {
 
 function StatBox({ label, value, subtext, highlightColor }) {
   return (
-    <Card sx={{ background: "rgba(255,255,255,0.03)", height: "100%" }}>
+    <Card
+      sx={{
+        background: "rgba(255,255,255,0.03)",
+        height: "100%",
+        transition: "box-shadow 0.25s ease, border-color 0.25s ease",
+        "&:hover": {
+          transform: "none",
+        },
+      }}
+    >
       <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%", justifyContent: "flex-start" }}>
         <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em", mb: 1 }}>
           {label}
@@ -77,7 +86,7 @@ function StatBox({ label, value, subtext, highlightColor }) {
           {value}
         </Typography>
         {subtext && (
-          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem", mt: "auto", pt: 1 }}>
+          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem", mt: 1, pt: 0 }}>
             {subtext}
           </Typography>
         )}
