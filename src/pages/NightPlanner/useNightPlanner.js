@@ -563,12 +563,17 @@ function buildSimulatedObservationPlan(moonIllumination) {
     moonIllumination <= 45 ? 0.5 : 0.2,
     moonIllumination,
   );
+  const scoreSubtext =
+    moonIllumination > 65
+      ? "Bright moonlight reduces contrast."
+      : moonIllumination > 40
+        ? "Some moonlight will soften contrast."
+        : "Low moonlight keeps the sky darker.";
 
   return {
     score,
     scoreLabel: getScoreLabel(score),
-    scoreSubtext:
-      "Simulation mode uses moon phase and illumination only. Reset to Current for live local timing.",
+    scoreSubtext,
     bestWindow:
       moonIllumination > 65
         ? "After moonset"

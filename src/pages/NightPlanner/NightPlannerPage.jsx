@@ -253,7 +253,7 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
               <StatBox
                 label="Stargazing Score"
                 value={`${observationPlan.score}/100`}
-                subtext={`${observationPlan.scoreSubtext} Conditions rate as ${observationPlan.scoreLabel.toLowerCase()}.`}
+                subtext={observationPlan.scoreSubtext}
                 highlightColor={scoreColor}
               />
             </Box>
