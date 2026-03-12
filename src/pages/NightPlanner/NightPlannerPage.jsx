@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -189,7 +189,7 @@ function StatBox({ label, value, subtext, highlightColor }) {
 const MOON_MARKS = Array.from({ length: 65 }).map((_, i) => {
   const val = i / 64;
   // Major phase ticks (every 8th mark)
-  if (i === 0 || i === 64) return { value: val, label: i === 0 ? "New" : "" };
+  if (i === 0 || i === 64) return { value: val, label: "New" };
   if (i === 8) return { value: val, label: "Waxing" };
   if (i === 16) return { value: val, label: "1st Qtr" };
   if (i === 24) return { value: val, label: "Gibbous" };
@@ -213,6 +213,55 @@ function NightPlannerPage({ isLight, onNavigate }) {
   
   // Re-calculate derived data based on the interactive slider
   const moon = useMemo(() => computeMoonPhase(sliderFraction), [sliderFraction]);
+  
+  // Proximity scaling effect for slider ticks
+  useEffect(() => {
+    const thumbIndex = Math.round(sliderFraction * 64);
+    
+    // Scale marks
+    const marks = document.querySelectorAll(".moon-phase-slider .MuiSlider-mark");
+    marks.forEach((mark) => {
+      const idx = parseInt(mark.getAttribute("data-index"), 10);
+      if (isNaN(idx)) return;
+      const distance = Math.abs(idx - thumbIndex);
+      let scaleY = 1;
+      let scaleX = 1;
+      if (distance === 0) { scaleY = 2.5; scaleX = 1.6; }
+      else if (distance === 1) { scaleY = 1.8; scaleX = 1.25; }
+      else if (distance === 2) { scaleY = 1.4; scaleX = 1.1; }
+      else if (distance === 3) { scaleY = 1.15; scaleX = 1.05; }
+      
+      mark.style.transform = `scale(${scaleX}, ${scaleY})`;
+      mark.style.transition = "transform 0.1s ease-out";
+    });
+
+    // Scale labels
+    const labels = document.querySelectorAll(".moon-phase-slider .MuiSlider-markLabel");
+    labels.forEach((label) => {
+      const idx = parseInt(label.getAttribute("data-index"), 10);
+      if (isNaN(idx)) return;
+      const distance = Math.abs(idx - thumbIndex);
+      let scale = 1;
+      let color = "rgba(255, 255, 255, 0.5)";
+      let textShadow = "none";
+      
+      if (distance <= 2) {
+        scale = 1.7;
+        color = "rgba(255, 255, 255, 1)";
+        textShadow = "0 0 15px rgba(255,255,255,1)";
+      } else if (distance <= 5) {
+        scale = 1.25;
+        color = "rgba(255, 255, 255, 0.9)";
+        textShadow = "0 0 8px rgba(255,255,255,0.5)";
+      }
+      
+      // Keep translateX(-50%) so MUI labels remain perfectly centered
+      label.style.transform = `translateX(-50%) scale(${scale})`;
+      label.style.transition = "transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out";
+      label.style.color = color;
+      label.style.textShadow = textShadow;
+    });
+  }, [sliderFraction]);
   
   const score = useMemo(
     () => computeStargazingScore(moon.illumination),

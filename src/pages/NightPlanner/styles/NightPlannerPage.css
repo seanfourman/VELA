@@ -97,13 +97,13 @@
 }
 
 .moon-phase-slider .MuiSlider-thumb {
-  width: 16px;
-  height: 16px;
+  width: 4px;
+  height: 48px;
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(92, 107, 192, 0.6);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 24px rgba(92, 107, 192, 0.8);
   border: none;
-  border-radius: 50%;
-  margin-top: -4px;
+  border-radius: 2px;
+  margin-top: 0;
 }
 
 /* Base state for all marks (the 'minor' ticks) */
@@ -156,7 +156,7 @@
 .moon-phase-slider .MuiSlider-markLabel {
   color: rgba(255, 255, 255, 0.5) !important;
   font-size: 0.75rem !important;
-  margin-top: 14px;
+  margin-top: 42px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 600;
