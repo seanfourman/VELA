@@ -431,14 +431,14 @@ function getRecommendedTargets(moonlessRatio, moonIllumination) {
 
   if (moonlessRatio >= 0.35 || moonIllumination <= 65) {
     return {
-      label: "Clusters & Bright Nebulae",
+      label: "Clusters & Nebulae",
       subtext:
         "Partial moon-free windows favor brighter deep-sky targets with more contrast.",
     };
   }
 
   return {
-    label: "Planets & Bright Stars",
+    label: "Planets & Stars",
     subtext: "Moonlight dominates tonight, so high-contrast targets will hold up best.",
   };
 }
