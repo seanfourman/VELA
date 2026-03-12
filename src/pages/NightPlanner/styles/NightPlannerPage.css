@@ -181,8 +181,10 @@
 
 @media (max-width: 768px) {
   .night-planner-page {
-    height: auto;
+    height: 100%;
+    min-height: 100dvh;
     overflow-y: auto;
+    overflow-x: hidden;
   }
 
   .night-planner-page .profile-page__content {
