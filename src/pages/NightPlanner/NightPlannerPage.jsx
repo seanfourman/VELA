@@ -137,8 +137,7 @@ function getLiveMoonData(date = new Date()) {
   );
   const illuminationFraction = (1 + Math.cos(incidenceAngle)) / 2;
   const phaseFraction =
-    0.5 +
-    (0.5 * incidenceAngle * (brightLimbAngle < 0 ? -1 : 1)) / Math.PI;
+    0.5 + (0.5 * incidenceAngle * (brightLimbAngle < 0 ? -1 : 1)) / Math.PI;
   const normalizedPhase = normalizePhaseFraction(phaseFraction);
 
   return {
@@ -176,8 +175,6 @@ function computeStargazingScore(moonIllumination) {
   return Math.round(moonFactor * 0.6 + nightFactor * 0.4);
 }
 
-
-
 function StatBox({ label, value, subtext, highlightColor }) {
   return (
     <Card
@@ -190,15 +187,46 @@ function StatBox({ label, value, subtext, highlightColor }) {
         },
       }}
     >
-      <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%", justifyContent: "flex-start" }}>
-        <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em", mb: 1 }}>
+      <CardContent
+        sx={{
+          p: 3,
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          justifyContent: "flex-start",
+        }}
+      >
+        <Typography
+          sx={{
+            color: "rgba(255,255,255,0.55)",
+            fontSize: "0.8rem",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+            mb: 1,
+          }}
+        >
           {label}
         </Typography>
-        <Typography sx={{ fontSize: "2rem", fontWeight: 700, color: highlightColor || "#fff", lineHeight: 1.1, mb: 0.5 }}>
+        <Typography
+          sx={{
+            fontSize: "2rem",
+            fontWeight: 700,
+            color: highlightColor || "#fff",
+            lineHeight: 1.1,
+            mb: 0.5,
+          }}
+        >
           {value}
         </Typography>
         {subtext && (
-          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem", mt: 1, pt: 0 }}>
+          <Typography
+            sx={{
+              color: "rgba(255,255,255,0.45)",
+              fontSize: "0.8rem",
+              mt: 1,
+              pt: 0,
+            }}
+          >
             {subtext}
           </Typography>
         )}
@@ -217,46 +245,62 @@ const MOON_MARKS = Array.from({ length: 65 }).map((_, i) => {
   if (i === 40) return { value: val, label: "Gibbous" };
   if (i === 48) return { value: val, label: "3rd Qtr" };
   if (i === 56) return { value: val, label: "Waning" };
-  
+
   // Minor ticks
   return { value: val };
 });
 
 function NightPlannerPage({ isLight, onNavigate }) {
   const showGlobe = useMemo(() => isProbablyHardwareAccelerated(), []);
-  
+
   // Actual real-world moon phase
   const actualMoon = useMemo(() => computeMoonPhase(), []);
-  
+
   // Interactive slider state
   const [sliderFraction, setSliderFraction] = useState(actualMoon.fraction);
-  
+
   // Re-calculate derived data based on the interactive slider
-  const moon = useMemo(() => computeMoonPhase(sliderFraction), [sliderFraction]);
-  
+  const moon = useMemo(
+    () => computeMoonPhase(sliderFraction),
+    [sliderFraction],
+  );
+
   // Proximity scaling effect for slider ticks
   useEffect(() => {
     const thumbIndex = Math.round(sliderFraction * 64);
-    
+
     // Scale marks
-    const marks = document.querySelectorAll(".moon-phase-slider .MuiSlider-mark");
+    const marks = document.querySelectorAll(
+      ".moon-phase-slider .MuiSlider-mark",
+    );
     marks.forEach((mark) => {
       const idx = parseInt(mark.getAttribute("data-index"), 10);
       if (isNaN(idx)) return;
       const distance = Math.abs(idx - thumbIndex);
       let scaleY = 1;
       let scaleX = 1;
-      if (distance === 0) { scaleY = 1.8; scaleX = 1.25; }
-      else if (distance === 1) { scaleY = 1.4; scaleX = 1.15; }
-      else if (distance === 2) { scaleY = 1.2; scaleX = 1.05; }
-      else if (distance === 3) { scaleY = 1.05; scaleX = 1.02; }
-      
+      if (distance === 0) {
+        scaleY = 1.8;
+        scaleX = 1.25;
+      } else if (distance === 1) {
+        scaleY = 1.4;
+        scaleX = 1.15;
+      } else if (distance === 2) {
+        scaleY = 1.2;
+        scaleX = 1.05;
+      } else if (distance === 3) {
+        scaleY = 1.05;
+        scaleX = 1.02;
+      }
+
       mark.style.transform = `translate(-50%, -50%) scale(${scaleX}, ${scaleY})`;
       mark.style.transition = "transform 0.1s ease-out";
     });
 
     // Scale labels
-    const labels = document.querySelectorAll(".moon-phase-slider .MuiSlider-markLabel");
+    const labels = document.querySelectorAll(
+      ".moon-phase-slider .MuiSlider-markLabel",
+    );
     labels.forEach((label) => {
       const idx = parseInt(label.getAttribute("data-index"), 10);
       if (isNaN(idx)) return;
@@ -264,7 +308,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
       let scale = 1;
       let color = "rgba(255, 255, 255, 0.5)";
       let textShadow = "none";
-      
+
       if (distance <= 2) {
         scale = 1.25;
         color = "rgba(255, 255, 255, 1)";
@@ -274,15 +318,16 @@ function NightPlannerPage({ isLight, onNavigate }) {
         color = "rgba(255, 255, 255, 0.8)";
         textShadow = "0 0 5px rgba(255,255,255,0.3)";
       }
-      
+
       // Keep translateX(-50%) so MUI labels remain perfectly centered
       label.style.transform = `translateX(-50%) scale(${scale})`;
-      label.style.transition = "transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out";
+      label.style.transition =
+        "transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out";
       label.style.color = color;
       label.style.textShadow = textShadow;
     });
   }, [sliderFraction]);
-  
+
   const score = useMemo(
     () => computeStargazingScore(moon.illumination),
     [moon.illumination],
@@ -295,12 +340,22 @@ function NightPlannerPage({ isLight, onNavigate }) {
     />
   ) : null;
 
-  const scoreColor = score >= 75 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
-  const scoreLabel = score >= 75 ? "Excellent" : score >= 50 ? "Good" : score >= 25 ? "Fair" : "Poor conditions";
-  
+  const scoreColor =
+    score >= 75 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const scoreLabel =
+    score >= 75
+      ? "Excellent"
+      : score >= 50
+        ? "Good"
+        : score >= 25
+          ? "Fair"
+          : "Poor conditions";
+
   const bestWindow = moon.illumination > 60 ? "After moonset" : "All night";
-  const recommendedTarget = moon.illumination > 60 ? "Planets & Bright Stars" : "Deep-Sky Objects";
-  const showResetToCurrent = Math.abs(sliderFraction - actualMoon.fraction) > 0.05;
+  const recommendedTarget =
+    moon.illumination > 60 ? "Planets & Bright Stars" : "Deep-Sky Objects";
+  const showResetToCurrent =
+    Math.abs(sliderFraction - actualMoon.fraction) > 0.05;
 
   return (
     <ThemeProvider theme={velaTheme}>
@@ -322,135 +377,146 @@ function NightPlannerPage({ isLight, onNavigate }) {
             minHeight: 0,
           }}
         >
-          <Box 
-            sx={{ 
+          <Box
+            sx={{
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
-              textAlign: "center", 
+              textAlign: "center",
               flex: "1 1 auto",
               minHeight: 0,
               width: "100%",
-              pb: 4
+              pt: { xs: 0, md: 26 },
+              pb: 4,
             }}
           >
-          <Typography 
-            component="h1" 
-            sx={{ 
-              fontSize: "clamp(3rem, 8vw, 6rem)", 
-              fontWeight: 800, 
-              letterSpacing: "-0.03em",
-              lineHeight: 1.2,
-              pb: 1,
-              background: "linear-gradient(to bottom, #ffffff 0%, rgba(255,255,255,0.6) 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent"
-            }}
-          >
-            {moon.name}
-          </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: "1.1rem", mt: 2, textTransform: "uppercase", letterSpacing: "0.1em" }}>
-            Day {moon.dayInCycle} of lunar cycle
-          </Typography>
-
-          <Box 
-            sx={{ 
-              mb: { xs: 6, md: 8 }, 
-              position: "relative",
-              width: { xs: "100%", md: "100vw" }, 
-              left: { xs: "auto", md: "50%" },
-              transform: { xs: "none", md: "translateX(-50%)" },
-              px: { xs: 1, md: 8 } 
-            }}
-          >
-            <Slider
-              value={sliderFraction}
-              min={0}
-              max={1}
-              step={0.001}
-              onChange={(e, val) => setSliderFraction(val)}
-              aria-label="Moon Phase Interactive Slider"
-              marks={MOON_MARKS}
-              className="moon-phase-slider"
-            />
-            <Box
+            <Typography
+              component="h1"
               sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                mt: 4,
-                minHeight: 40,
+                fontSize: "clamp(3rem, 8vw, 6rem)",
+                fontWeight: 800,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.2,
+                pb: 1,
+                background:
+                  "linear-gradient(to bottom, #ffffff 0%, rgba(255,255,255,0.6) 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
               }}
             >
-              <Typography
-                onClick={() => setSliderFraction(actualMoon.fraction)}
+              {moon.name}
+            </Typography>
+            <Typography
+              sx={{
+                color: "rgba(255,255,255,0.5)",
+                fontSize: "1.1rem",
+                mt: 2,
+                textTransform: "uppercase",
+                letterSpacing: "0.1em",
+              }}
+            >
+              Day {moon.dayInCycle} of lunar cycle
+            </Typography>
+
+            <Box
+              sx={{
+                mb: { xs: 6, md: 8 },
+                position: "relative",
+                width: { xs: "100%", md: "100vw" },
+                left: { xs: "auto", md: "50%" },
+                transform: { xs: "none", md: "translateX(-50%)" },
+                px: { xs: 1, md: 8 },
+              }}
+            >
+              <Slider
+                value={sliderFraction}
+                min={0}
+                max={1}
+                step={0.001}
+                onChange={(e, val) => setSliderFraction(val)}
+                aria-label="Moon Phase Interactive Slider"
+                marks={MOON_MARKS}
+                className="moon-phase-slider"
+              />
+              <Box
                 sx={{
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  color: "rgba(255, 255, 255, 0.8)",
-                  cursor: "pointer",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  border: "1px solid rgba(255, 255, 255, 0.24)",
-                  borderRadius: "24px",
-                  px: 3,
-                  py: 1,
-                  background: "rgba(255, 255, 255, 0.04)",
-                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
-                  transition: "all 0.2s ease",
-                  visibility: showResetToCurrent ? "visible" : "hidden",
-                  opacity: showResetToCurrent ? 1 : 0,
-                  pointerEvents: showResetToCurrent ? "auto" : "none",
-                  "&:hover": {
-                    color: "#fff",
-                    borderColor: "rgba(255, 255, 255, 0.34)",
-                    background: "rgba(255, 255, 255, 0.08)",
-                  },
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  mt: 4,
+                  minHeight: 40,
                 }}
               >
-                Reset to Current
-              </Typography>
+                <Typography
+                  onClick={() => setSliderFraction(actualMoon.fraction)}
+                  sx={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    color: "rgba(255, 255, 255, 0.8)",
+                    cursor: "pointer",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    border: "1px solid rgba(255, 255, 255, 0.24)",
+                    borderRadius: "24px",
+                    px: 3,
+                    py: 1,
+                    background: "rgba(255, 255, 255, 0.04)",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
+                    transition: "all 0.2s ease",
+                    visibility: showResetToCurrent ? "visible" : "hidden",
+                    opacity: showResetToCurrent ? 1 : 0,
+                    pointerEvents: showResetToCurrent ? "auto" : "none",
+                    "&:hover": {
+                      color: "#fff",
+                      borderColor: "rgba(255, 255, 255, 0.34)",
+                      background: "rgba(255, 255, 255, 0.08)",
+                    },
+                  }}
+                >
+                  Reset to Current
+                </Typography>
+              </Box>
             </Box>
           </Box>
-        </Box>
 
-        {/* Professional Data Grid */}
-        <Box className="night-dashboard-grid" sx={{ mt: "auto" }}>
-          <Box className="night-grid-item">
-            <StatBox 
-              label="Stargazing Score" 
-              value={`${score}/100`} 
-              subtext={`Conditions are rated as ${scoreLabel.toLowerCase()} based on lunar illumination and time of night.`}
-              highlightColor={scoreColor}
-            />
+          {/* Professional Data Grid */}
+          <Box className="night-dashboard-grid" sx={{ mt: "auto" }}>
+            <Box className="night-grid-item">
+              <StatBox
+                label="Stargazing Score"
+                value={`${score}/100`}
+                subtext={`Conditions are rated as ${scoreLabel.toLowerCase()} based on lunar illumination and time of night.`}
+                highlightColor={scoreColor}
+              />
+            </Box>
+            <Box className="night-grid-item">
+              <StatBox
+                label="Illumination"
+                value={`${moon.illumination}%`}
+                subtext={
+                  moon.illumination > 60
+                    ? "High lunar glare expected."
+                    : "Dark sky conditions."
+                }
+              />
+            </Box>
+            <Box className="night-grid-item">
+              <StatBox label="Optimum Window" value={bestWindow} />
+            </Box>
+            <Box className="night-grid-item">
+              <StatBox
+                label="Recommended Targets"
+                value={recommendedTarget}
+                subtext={
+                  moon.illumination > 60
+                    ? "The moon's brightness washes out faint nebulae. Stick to point sources."
+                    : "Perfect conditions for hunting galaxies, star clusters, and the Milky Way."
+                }
+              />
+            </Box>
           </Box>
-          <Box className="night-grid-item">
-            <StatBox 
-              label="Illumination" 
-              value={`${moon.illumination}%`} 
-              subtext={moon.illumination > 60 ? "High lunar glare expected." : "Dark sky conditions."}
-            />
-          </Box>
-          <Box className="night-grid-item">
-            <StatBox 
-              label="Optimum Window" 
-              value={bestWindow} 
-            />
-          </Box>
-          <Box className="night-grid-item">
-            <StatBox 
-              label="Recommended Targets" 
-              value={recommendedTarget} 
-              subtext={moon.illumination > 60 
-                ? "The moon's brightness washes out faint nebulae. Stick to point sources." 
-                : "Perfect conditions for hunting galaxies, star clusters, and the Milky Way."}
-            />
-          </Box>
-        </Box>
 
-
-        
-        {/* End of layout wrapper */}
+          {/* End of layout wrapper */}
         </Box>
       </PageShell>
     </ThemeProvider>
