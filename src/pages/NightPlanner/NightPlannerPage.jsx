@@ -191,12 +191,24 @@ function NightPlannerPage({ isLight, onNavigate }) {
         className="night-planner-page"
         hideBackButton={true}
       >
-        <Box sx={{ display: "flex", flexDirection: "column", width: "100%", flexGrow: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            flex: "1 1 auto",
+            minHeight: 0,
+          }}
+        >
           <Box 
             sx={{ 
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
               textAlign: "center", 
+              flex: "1 1 auto",
+              minHeight: 0,
               width: "100%",
-              mt: { xs: "calc(50vh - 280px)", md: "calc(50vh - 320px)" },
               pb: 4
             }}
           >
@@ -269,7 +281,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
         </Box>
 
         {/* Professional Data Grid */}
-        <Box className="night-dashboard-grid">
+        <Box className="night-dashboard-grid" sx={{ mt: "auto" }}>
           <Box className="night-grid-item">
             <StatBox 
               label="Stargazing Score" 
