@@ -8,9 +8,6 @@ import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
 import LinearProgress from "@mui/material/LinearProgress";
-import Accordion from "@mui/material/Accordion";
-import AccordionSummary from "@mui/material/AccordionSummary";
-import AccordionDetails from "@mui/material/AccordionDetails";
 import Slider from "@mui/material/Slider";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
@@ -67,105 +64,7 @@ function computeStargazingScore(moonIllumination) {
   return Math.round(moonFactor * 0.6 + nightFactor * 0.4);
 }
 
-const TWILIGHT_STAGES = [
-  {
-    label: "Sunset",
-    description: "The Sun dips below the horizon.",
-    color: "#ff8a65",
-  },
-  {
-    label: "Civil Twilight",
-    description: "Sky is bright. Planets like Venus become visible.",
-    color: "#ffab40",
-  },
-  {
-    label: "Nautical Twilight",
-    description: "Horizon fades. Brighter stars and constellations appear.",
-    color: "#7e57c2",
-  },
-  {
-    label: "Astro Twilight",
-    description: "Sky is nearly dark. Faint objects start to show.",
-    color: "#5c6bc0",
-  },
-  {
-    label: "Full Night",
-    description:
-      "True darkness — ideal for deep-sky targets, meteor showers, and the Milky Way.",
-    color: "#26c6da",
-  },
-];
 
-const TIPS = [
-  {
-    title: "What to Look For Tonight",
-    content:
-      "Start with the brightest objects — the Moon and visible planets are easy targets. Then move to prominent constellations near the zenith where atmospheric distortion is lowest. If the Moon is bright, focus on double stars and planets rather than faint nebulae.",
-  },
-  {
-    title: "Best Viewing Practices",
-    content:
-      "Give your eyes at least 20 minutes to dark-adapt. Use a red flashlight to preserve night vision. Dress warmer than you think — standing still in the dark gets cold fast. Sit or recline to reduce neck strain during overhead observing.",
-  },
-  {
-    title: "Astrophotography Tips",
-    content:
-      "For phone shots of the Moon, use manual mode with low ISO (100-400) and fast shutter. For star trails, aim for 15-30 second exposures at ISO 1600+. A simple phone tripod mount makes a huge difference. Stack multiple exposures for cleaner results.",
-  },
-  {
-    title: "Gear Suggestions for Tonight",
-    content:
-      "Binoculars (7×50 or 10×50) are the most underrated stargazing tool — great for star clusters, the Moon's craters, and Jupiter's moons. If using a telescope, start with your lowest-power eyepiece to find targets, then increase magnification.",
-  },
-];
-
-const ExpandChevron = () => (
-  <svg
-    width="22"
-    height="22"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    style={{ opacity: 0.6 }}
-  >
-    <path d="M6 9l6 6 6-6" />
-  </svg>
-);
-
-function TwilightTimeline() {
-  return (
-    <Box className="night-twilight">
-      <Typography variant="h6" sx={{ fontSize: "1.05rem", mb: 2 }}>
-        Twilight Phases
-      </Typography>
-      {TWILIGHT_STAGES.map((stage, i) => (
-        <Box key={stage.label} className="night-twilight-step">
-          <Box className="night-twilight-step__indicator">
-            <Box
-              className="night-twilight-dot"
-              sx={{
-                bgcolor: stage.color,
-                boxShadow: `0 0 8px ${stage.color}88`,
-              }}
-            />
-            {i < TWILIGHT_STAGES.length - 1 && (
-              <Box className="night-twilight-connector" />
-            )}
-          </Box>
-          <Box sx={{ flex: 1, pb: 1 }}>
-            <Typography sx={{ fontWeight: 600, fontSize: "0.9rem", mb: 0.25 }}>
-              {stage.label}
-            </Typography>
-            <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8rem", lineHeight: 1.45 }}>
-              {stage.description}
-            </Typography>
-          </Box>
-        </Box>
-      ))}
-    </Box>
-  );
-}
 
 function StatBox({ label, value, subtext, highlightColor }) {
   return (
@@ -395,40 +294,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
           </Box>
         </Box>
 
-        <Divider sx={{ my: 4, borderColor: "rgba(255,255,255,0.08)" }} />
 
-        {/* Lower Details: Twilight & Tips */}
-        <Box className="night-details-grid">
-          <Card sx={{ background: "rgba(255,255,255,0.02)", flex: 1 }}>
-            <CardContent sx={{ p: 4 }}>
-              <TwilightTimeline />
-            </CardContent>
-          </Card>
-
-          <Card sx={{ background: "rgba(255,255,255,0.02)", flex: 1.5 }}>
-            <CardContent sx={{ p: 4 }}>
-              <Typography variant="h6" sx={{ fontSize: "1.05rem", mb: 2 }}>
-                Observer's Log
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                {TIPS.map((tip) => (
-                  <Accordion key={tip.title} disableGutters>
-                    <AccordionSummary expandIcon={<ExpandChevron />}>
-                      <Typography sx={{ fontWeight: 500, fontSize: "0.9rem" }}>
-                        {tip.title}
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Typography sx={{ color: "rgba(255,255,255,0.65)", fontSize: "0.85rem", lineHeight: 1.6 }}>
-                        {tip.content}
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
-                ))}
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
         
         {/* End of layout wrapper */}
         </Box>
