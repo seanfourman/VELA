@@ -186,17 +186,17 @@ function StatBox({ label, value, subtext, highlightColor }) {
     </Card>
   );
 }
-const MOON_MARKS = Array.from({ length: 101 }).map((_, i) => {
-  const val = i / 100;
-  // Major phase ticks
-  if (i === 0 || i === 100) return { value: val, label: i === 0 ? "New" : "" };
-  if (i === 12) return { value: val, label: "Waxing" };
-  if (i === 25) return { value: val, label: "1st Qtr" };
-  if (i === 38) return { value: val, label: "Gibbous" };
-  if (i === 50) return { value: val, label: "Full" };
-  if (i === 62) return { value: val, label: "Gibbous" };
-  if (i === 75) return { value: val, label: "3rd Qtr" };
-  if (i === 88) return { value: val, label: "Waning" };
+const MOON_MARKS = Array.from({ length: 65 }).map((_, i) => {
+  const val = i / 64;
+  // Major phase ticks (every 8th mark)
+  if (i === 0 || i === 64) return { value: val, label: i === 0 ? "New" : "" };
+  if (i === 8) return { value: val, label: "Waxing" };
+  if (i === 16) return { value: val, label: "1st Qtr" };
+  if (i === 24) return { value: val, label: "Gibbous" };
+  if (i === 32) return { value: val, label: "Full" };
+  if (i === 40) return { value: val, label: "Gibbous" };
+  if (i === 48) return { value: val, label: "3rd Qtr" };
+  if (i === 56) return { value: val, label: "Waning" };
   
   // Minor ticks
   return { value: val };

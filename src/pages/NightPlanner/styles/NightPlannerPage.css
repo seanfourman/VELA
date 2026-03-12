@@ -108,60 +108,62 @@
 
 /* Base state for all marks (the 'minor' ticks) */
 .moon-phase-slider .MuiSlider-mark {
-  background-color: rgba(255, 255, 255, 0.15) !important;
-  width: 1px !important;
-  height: 8px !important;
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  width: 2px !important;
+  height: 14px !important;
   margin-top: 0;
+  border-radius: 1px;
 }
 
 /* Active minor ticks (passed by thumb) */
 .moon-phase-slider .MuiSlider-markActive {
-  background-color: rgba(255, 255, 255, 0.4) !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
 }
 
 /* Highlight the specific marks that have labels (the 'major' phases) */
 .moon-phase-slider .MuiSlider-mark:has(+ .MuiSlider-markLabel),
-.moon-phase-slider .MuiSlider-mark:nth-child(2), /* 0 */
-.moon-phase-slider .MuiSlider-mark:nth-child(26), /* 0.125 (12 * 2 + 2) wait, let's just make the labeled ones bigger using a standard MUI class target if we can, but since MUI wraps marks with labels differently, we will use pseudo-classes based on the provided values */
 .moon-phase-slider [data-index="0"] .MuiSlider-mark,
-.moon-phase-slider [data-index="12"] .MuiSlider-mark,
-.moon-phase-slider [data-index="25"] .MuiSlider-mark,
-.moon-phase-slider [data-index="38"] .MuiSlider-mark,
-.moon-phase-slider [data-index="50"] .MuiSlider-mark,
-.moon-phase-slider [data-index="62"] .MuiSlider-mark,
-.moon-phase-slider [data-index="75"] .MuiSlider-mark,
-.moon-phase-slider [data-index="88"] .MuiSlider-mark,
-.moon-phase-slider [data-index="100"] .MuiSlider-mark {
-   height: 16px !important;
-   background-color: rgba(255, 255, 255, 0.4) !important;
-   width: 2px !important;
-   margin-top: -4px;
+.moon-phase-slider [data-index="8"] .MuiSlider-mark,
+.moon-phase-slider [data-index="16"] .MuiSlider-mark,
+.moon-phase-slider [data-index="24"] .MuiSlider-mark,
+.moon-phase-slider [data-index="32"] .MuiSlider-mark,
+.moon-phase-slider [data-index="40"] .MuiSlider-mark,
+.moon-phase-slider [data-index="48"] .MuiSlider-mark,
+.moon-phase-slider [data-index="56"] .MuiSlider-mark,
+.moon-phase-slider [data-index="64"] .MuiSlider-mark {
+   height: 28px !important;
+   background-color: rgba(255, 255, 255, 0.5) !important;
+   width: 3px !important;
+   margin-top: -7px;
+   border-radius: 2px;
 }
 
 /* Active major ticks */
 .moon-phase-slider [data-index="0"] .MuiSlider-markActive,
-.moon-phase-slider [data-index="12"] .MuiSlider-markActive,
-.moon-phase-slider [data-index="25"] .MuiSlider-markActive,
-.moon-phase-slider [data-index="38"] .MuiSlider-markActive,
-.moon-phase-slider [data-index="50"] .MuiSlider-markActive,
-.moon-phase-slider [data-index="62"] .MuiSlider-markActive,
-.moon-phase-slider [data-index="75"] .MuiSlider-markActive,
-.moon-phase-slider [data-index="88"] .MuiSlider-markActive,
-.moon-phase-slider [data-index="100"] .MuiSlider-markActive {
-   background-color: rgba(255, 255, 255, 0.8) !important;
+.moon-phase-slider [data-index="8"] .MuiSlider-markActive,
+.moon-phase-slider [data-index="16"] .MuiSlider-markActive,
+.moon-phase-slider [data-index="24"] .MuiSlider-markActive,
+.moon-phase-slider [data-index="32"] .MuiSlider-markActive,
+.moon-phase-slider [data-index="40"] .MuiSlider-markActive,
+.moon-phase-slider [data-index="48"] .MuiSlider-markActive,
+.moon-phase-slider [data-index="56"] .MuiSlider-markActive,
+.moon-phase-slider [data-index="64"] .MuiSlider-markActive {
+   background-color: rgba(255, 255, 255, 0.95) !important;
+   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 /* Specific styling for the labels themselves */
 .moon-phase-slider .MuiSlider-markLabel {
-  color: rgba(255, 255, 255, 0.4) !important;
-  font-size: 0.65rem !important;
-  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 0.75rem !important;
+  margin-top: 14px;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 500;
+  letter-spacing: 0.08em;
+  font-weight: 600;
 }
 .moon-phase-slider .MuiSlider-markLabelActive {
-  color: rgba(255, 255, 255, 0.8) !important;
+  color: rgba(255, 255, 255, 1) !important;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 .moon-phase-slider .MuiSlider-thumb:hover,
