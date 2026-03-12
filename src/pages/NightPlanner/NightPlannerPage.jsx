@@ -240,22 +240,30 @@ function NightPlannerPage({ isLight, onNavigate }) {
               className="moon-phase-slider"
             />
             {Math.abs(sliderFraction - actualMoon.fraction) > 0.05 && (
-              <Typography 
-                onClick={() => setSliderFraction(actualMoon.fraction)}
-                sx={{ 
-                  position: "absolute", 
-                  top: -32, 
-                  right: { xs: 32, md: 64 }, 
-                  fontSize: "0.75rem", 
-                  color: "#aaddff", 
-                  cursor: "pointer", 
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  "&:hover": { textDecoration: "underline" } 
-                }}
-              >
-                Reset to Current
-              </Typography>
+              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+                <Typography 
+                  onClick={() => setSliderFraction(actualMoon.fraction)}
+                  sx={{ 
+                    fontSize: "0.75rem", 
+                    color: "rgba(255, 255, 255, 0.7)", 
+                    cursor: "pointer", 
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    borderRadius: "24px",
+                    px: 3,
+                    py: 1,
+                    transition: "all 0.2s ease",
+                    "&:hover": { 
+                      color: "#fff",
+                      borderColor: "rgba(255, 255, 255, 0.5)",
+                      background: "rgba(255, 255, 255, 0.05)"
+                    } 
+                  }}
+                >
+                  Reset to Current
+                </Typography>
+              </Box>
             )}
           </Box>
         </Box>
