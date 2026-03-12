@@ -56,7 +56,7 @@ function StatBox({ label, value, subtext, highlightColor }) {
             fontSize: "2rem",
             fontWeight: 700,
             color: highlightColor || "#fff",
-            lineHeight: 1.1,
+            lineHeight: 1.2,
             mb: 0.5,
             whiteSpace: "nowrap",
             overflow: "hidden",
