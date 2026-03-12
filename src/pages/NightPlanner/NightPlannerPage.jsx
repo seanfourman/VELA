@@ -292,8 +292,15 @@ function NightPlannerPage({ isLight, onNavigate }) {
         className="night-planner-page"
         hideBackButton={true}
       >
-        {/* Massive Hero Title */}
-        <Box sx={{ textAlign: "center", pt: 4, pb: 6, width: "100%" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", width: "100%", flexGrow: 1 }}>
+          <Box 
+            sx={{ 
+              textAlign: "center", 
+              width: "100%",
+              mt: { xs: "calc(50vh - 280px)", md: "calc(50vh - 320px)" },
+              pb: 4
+            }}
+          >
           <Typography 
             component="h1" 
             sx={{ 
@@ -301,7 +308,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
               fontWeight: 800, 
               letterSpacing: "-0.03em",
               lineHeight: 1.2,
-              pb: 1, // Add bottom padding to stop descender clipping (like 'g', 'q')
+              pb: 1,
               background: "linear-gradient(to bottom, #ffffff 0%, rgba(255,255,255,0.6) 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent"
@@ -313,13 +320,10 @@ function NightPlannerPage({ isLight, onNavigate }) {
             Day {moon.dayInCycle} of lunar cycle
           </Typography>
 
-          {/* Interactive Moon Slider (Ruler style) */}
           <Box 
             sx={{ 
-              mt: 14, 
-              mb: 8, 
+              mb: { xs: 6, md: 8 }, 
               position: "relative",
-              // Break out of container on larger screens, stay within on mobile
               width: { xs: "100%", md: "100vw" }, 
               left: { xs: "auto", md: "50%" },
               transform: { xs: "none", md: "translateX(-50%)" },
@@ -341,7 +345,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
                 onClick={() => setSliderFraction(actualMoon.fraction)}
                 sx={{ 
                   position: "absolute", 
-                  top: -24, 
+                  top: -32, 
                   right: { xs: 32, md: 64 }, 
                   fontSize: "0.75rem", 
                   color: "#aaddff", 
@@ -424,6 +428,9 @@ function NightPlannerPage({ isLight, onNavigate }) {
               </Box>
             </CardContent>
           </Card>
+        </Box>
+        
+        {/* End of layout wrapper */}
         </Box>
       </PageShell>
     </ThemeProvider>
