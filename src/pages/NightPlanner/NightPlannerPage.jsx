@@ -265,22 +265,25 @@ function NightPlannerPage({ isLight, onNavigate }) {
                 onClick={() => setSliderFraction(actualMoon.fraction)}
                 sx={{
                   fontSize: "0.75rem",
-                  color: "rgba(255, 255, 255, 0.7)",
+                  fontWeight: 600,
+                  color: "rgba(255, 255, 255, 0.8)",
                   cursor: "pointer",
                   textTransform: "uppercase",
                   letterSpacing: "0.1em",
-                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  border: "1px solid rgba(255, 255, 255, 0.24)",
                   borderRadius: "24px",
                   px: 3,
                   py: 1,
+                  background: "rgba(255, 255, 255, 0.04)",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
                   transition: "all 0.2s ease",
                   visibility: showResetToCurrent ? "visible" : "hidden",
                   opacity: showResetToCurrent ? 1 : 0,
                   pointerEvents: showResetToCurrent ? "auto" : "none",
                   "&:hover": {
                     color: "#fff",
-                    borderColor: "rgba(255, 255, 255, 0.5)",
-                    background: "rgba(255, 255, 255, 0.05)",
+                    borderColor: "rgba(255, 255, 255, 0.34)",
+                    background: "rgba(255, 255, 255, 0.08)",
                   },
                 }}
               >
