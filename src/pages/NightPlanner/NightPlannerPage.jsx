@@ -170,7 +170,7 @@ function TwilightTimeline() {
 function StatBox({ label, value, subtext, highlightColor }) {
   return (
     <Card sx={{ background: "rgba(255,255,255,0.03)", height: "100%" }}>
-      <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center" }}>
+      <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%", justifyContent: "flex-start" }}>
         <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em", mb: 1 }}>
           {label}
         </Typography>
@@ -363,7 +363,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
 
         {/* Professional Data Grid */}
         <Box className="night-dashboard-grid">
-          <Box className="night-grid-item night-grid-item--tall">
+          <Box className="night-grid-item">
             <StatBox 
               label="Stargazing Score" 
               value={`${score}/100`} 
@@ -384,7 +384,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
               value={bestWindow} 
             />
           </Box>
-          <Box className="night-grid-item night-grid-item--wide">
+          <Box className="night-grid-item">
             <StatBox 
               label="Recommended Targets" 
               value={recommendedTarget} 

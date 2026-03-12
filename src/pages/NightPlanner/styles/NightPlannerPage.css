@@ -4,14 +4,13 @@
    ======================================== */
 
 .night-planner-page .profile-page__content {
-  max-width: 1000px; /* Slightly wider for the dashboard grid */
+  max-width: 1440px; /* Much wider for the single-row dashboard grid */
 }
 
 /* ---- Dashboard Grid ---- */
 .night-dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(2, minmax(140px, auto));
+  grid-template-columns: 1fr 1fr 1fr 1.5fr;
   gap: 16px;
   width: 100%;
 }
@@ -22,16 +21,7 @@
   overflow: hidden;
 }
 
-/* Make the score box span 2 rows vertically */
-.night-grid-item--tall {
-  grid-row: span 2;
-  grid-column: span 1;
-}
 
-/* Make the target recommendation span full width of remaining columns */
-.night-grid-item--wide {
-  grid-column: span 3;
-}
 
 /* ---- Twilight Timeline Restyle ---- */
 .night-twilight {
@@ -178,14 +168,7 @@
     grid-template-columns: repeat(2, 1fr);
   }
   
-  .night-grid-item--tall {
-    grid-row: span 1;
-    grid-column: span 2;
-  }
-  
-  .night-grid-item--wide {
-    grid-column: span 2;
-  }
+
 }
 
 @media (max-width: 768px) {
@@ -211,10 +194,6 @@
     grid-template-columns: 1fr;
   }
   
-  .night-grid-item--tall,
-  .night-grid-item--wide {
-    grid-column: span 1;
-  }
 
   .night-details-grid {
     flex-direction: column;
