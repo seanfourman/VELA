@@ -95,7 +95,10 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
   const activeFraction = isFollowingLiveMoon
     ? actualMoon.fraction
     : sliderFraction;
-  const moon = useMemo(() => computeMoonPhase(activeFraction), [activeFraction]);
+  const moon = useMemo(
+    () => computeMoonPhase(activeFraction),
+    [activeFraction],
+  );
 
   const handleSliderChange = (_event, value) => {
     setIsFollowingLiveMoon(false);
@@ -169,7 +172,7 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
               flex: "1 1 auto",
               minHeight: 0,
               width: "100%",
-              pt: { xs: 0, md: 26 },
+              pt: { xs: 0, md: 20 },
               pb: 4,
             }}
           >
