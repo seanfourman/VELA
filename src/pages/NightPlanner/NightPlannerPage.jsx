@@ -231,7 +231,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
       else if (distance === 2) { scaleY = 1.2; scaleX = 1.05; }
       else if (distance === 3) { scaleY = 1.05; scaleX = 1.02; }
       
-      mark.style.transform = `scale(${scaleX}, ${scaleY})`;
+      mark.style.transform = `translate(-50%, -50%) scale(${scaleX}, ${scaleY})`;
       mark.style.transition = "transform 0.1s ease-out";
     });
 
@@ -314,8 +314,8 @@ function NightPlannerPage({ isLight, onNavigate }) {
           {/* Interactive Moon Slider (Ruler style) */}
           <Box 
             sx={{ 
-              mt: 6, 
-              mb: 4, 
+              mt: 14, 
+              mb: 8, 
               position: "relative",
               // Break out of container to span full screen width
               width: "100vw", 
