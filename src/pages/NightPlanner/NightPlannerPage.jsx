@@ -299,7 +299,8 @@ function NightPlannerPage({ isLight, onNavigate }) {
               fontSize: "clamp(3rem, 8vw, 6rem)", 
               fontWeight: 800, 
               letterSpacing: "-0.03em",
-              lineHeight: 1,
+              lineHeight: 1.1,
+              pb: 1, // Add bottom padding to stop descender clipping (like 'g', 'q')
               background: "linear-gradient(to bottom, #ffffff 0%, rgba(255,255,255,0.6) 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent"
