@@ -10,6 +10,7 @@ export default function PageShell({
   headerActions,
   onNavigate,
   onBack,
+  hideHeader = false,
   hideBackButton = false,
   children,
 }) {
@@ -37,26 +38,28 @@ export default function PageShell({
         </div>
       ) : null}
       <div className="profile-page__content">
-        <header className="profile-page__header">
-          <div>
-            <h1 className="profile-page__title">{title}</h1>
-            {subtitle ? (
-              <p className="profile-page__subtitle">{subtitle}</p>
-            ) : null}
-          </div>
-          <div className="profile-page__header-actions">
-            {!hideBackButton && (
-              <button
-                type="button"
-                className="glass-btn profile-action-btn"
-                onClick={handleBackToMap}
-              >
-                Back to map
-              </button>
-            )}
-            {headerActions}
-          </div>
-        </header>
+        {!hideHeader ? (
+          <header className="profile-page__header">
+            <div>
+              <h1 className="profile-page__title">{title}</h1>
+              {subtitle ? (
+                <p className="profile-page__subtitle">{subtitle}</p>
+              ) : null}
+            </div>
+            <div className="profile-page__header-actions">
+              {!hideBackButton && (
+                <button
+                  type="button"
+                  className="glass-btn profile-action-btn"
+                  onClick={handleBackToMap}
+                >
+                  Back to map
+                </button>
+              )}
+              {headerActions}
+            </div>
+          </header>
+        ) : null}
         {children}
       </div>
     </div>

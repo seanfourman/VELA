@@ -166,9 +166,16 @@ function DiscoverRoute() {
 
 function NightPlannerRoute() {
   useDisableThreeDMode();
-  const { isLight, navigate } = useAppLayoutContext();
+  const { isLight, navigate, location, locationStatus } = useAppLayoutContext();
 
-  return <NightPlannerPage isLight={isLight} onNavigate={navigate} />;
+  return (
+    <NightPlannerPage
+      isLight={isLight}
+      onNavigate={navigate}
+      location={location}
+      locationStatus={locationStatus}
+    />
+  );
 }
 
 function GearLabRoute() {

@@ -1,179 +1,23 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
-import Chip from "@mui/material/Chip";
-import CircularProgress from "@mui/material/CircularProgress";
-import Divider from "@mui/material/Divider";
-import LinearProgress from "@mui/material/LinearProgress";
 import Slider from "@mui/material/Slider";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import velaTheme from "@/utils/muiTheme";
+import {
+  computeMoonPhase,
+  isMoonPhaseSimulation,
+  MOON_MARKS,
+  useLiveMoonPhase,
+  useMoonSliderEffects,
+  useObservationPlan,
+} from "./useNightPlanner";
 import "./styles/NightPlannerPage.css";
-
-/* ---- Moon-phase calculation ---- */
-const SYNODIC_MONTH_DAYS = 29.530588853;
-const PRIMARY_PHASE_WINDOW = 0.015;
-const RAD = Math.PI / 180;
-const EARTH_OBLIQUITY = RAD * 23.4397;
-
-function normalizePhaseFraction(fraction) {
-  return ((fraction % 1) + 1) % 1;
-}
-
-function getMoonPhaseName(fraction) {
-  const phase = normalizePhaseFraction(fraction);
-
-  if (phase <= PRIMARY_PHASE_WINDOW || phase >= 1 - PRIMARY_PHASE_WINDOW) {
-    return "New Moon";
-  }
-
-  if (Math.abs(phase - 0.25) <= PRIMARY_PHASE_WINDOW) {
-    return "First Quarter";
-  }
-
-  if (Math.abs(phase - 0.5) <= PRIMARY_PHASE_WINDOW) {
-    return "Full Moon";
-  }
-
-  if (Math.abs(phase - 0.75) <= PRIMARY_PHASE_WINDOW) {
-    return "Last Quarter";
-  }
-
-  if (phase < 0.25) return "Waxing Crescent";
-  if (phase < 0.5) return "Waxing Gibbous";
-  if (phase < 0.75) return "Waning Gibbous";
-  return "Waning Crescent";
-}
-
-function toJulianDate(date) {
-  return date.valueOf() / 86400000 - 0.5 + 2440588;
-}
-
-function toDaysSinceJ2000(date) {
-  return toJulianDate(date) - 2451545;
-}
-
-function getRightAscension(longitude, latitude) {
-  return Math.atan2(
-    Math.sin(longitude) * Math.cos(EARTH_OBLIQUITY) -
-      Math.tan(latitude) * Math.sin(EARTH_OBLIQUITY),
-    Math.cos(longitude),
-  );
-}
-
-function getDeclination(longitude, latitude) {
-  return Math.asin(
-    Math.sin(latitude) * Math.cos(EARTH_OBLIQUITY) +
-      Math.cos(latitude) * Math.sin(EARTH_OBLIQUITY) * Math.sin(longitude),
-  );
-}
-
-function getSolarMeanAnomaly(daysSinceJ2000) {
-  return RAD * (357.5291 + 0.98560028 * daysSinceJ2000);
-}
-
-function getEclipticLongitude(meanAnomaly) {
-  const equationOfCenter =
-    RAD *
-    (1.9148 * Math.sin(meanAnomaly) +
-      0.02 * Math.sin(2 * meanAnomaly) +
-      0.0003 * Math.sin(3 * meanAnomaly));
-  const perihelion = RAD * 102.9372;
-  return meanAnomaly + equationOfCenter + perihelion + Math.PI;
-}
-
-function getSunCoordinates(daysSinceJ2000) {
-  const meanAnomaly = getSolarMeanAnomaly(daysSinceJ2000);
-  const longitude = getEclipticLongitude(meanAnomaly);
-
-  return {
-    rightAscension: getRightAscension(longitude, 0),
-    declination: getDeclination(longitude, 0),
-  };
-}
-
-function getMoonCoordinates(daysSinceJ2000) {
-  const longitude = RAD * (218.316 + 13.176396 * daysSinceJ2000);
-  const meanAnomaly = RAD * (134.963 + 13.064993 * daysSinceJ2000);
-  const latitudeArgument = RAD * (93.272 + 13.22935 * daysSinceJ2000);
-  const correctedLongitude = longitude + RAD * 6.289 * Math.sin(meanAnomaly);
-  const latitude = RAD * 5.128 * Math.sin(latitudeArgument);
-  const distanceKm = 385001 - 20905 * Math.cos(meanAnomaly);
-
-  return {
-    rightAscension: getRightAscension(correctedLongitude, latitude),
-    declination: getDeclination(correctedLongitude, latitude),
-    distanceKm,
-  };
-}
-
-function getLiveMoonData(date = new Date()) {
-  const daysSinceJ2000 = toDaysSinceJ2000(date);
-  const sun = getSunCoordinates(daysSinceJ2000);
-  const moon = getMoonCoordinates(daysSinceJ2000);
-  const sunDistanceKm = 149598000;
-  const phaseAngle = Math.acos(
-    Math.sin(sun.declination) * Math.sin(moon.declination) +
-      Math.cos(sun.declination) *
-        Math.cos(moon.declination) *
-        Math.cos(sun.rightAscension - moon.rightAscension),
-  );
-  const incidenceAngle = Math.atan2(
-    sunDistanceKm * Math.sin(phaseAngle),
-    moon.distanceKm - sunDistanceKm * Math.cos(phaseAngle),
-  );
-  const brightLimbAngle = Math.atan2(
-    Math.cos(sun.declination) *
-      Math.sin(sun.rightAscension - moon.rightAscension),
-    Math.sin(sun.declination) * Math.cos(moon.declination) -
-      Math.cos(sun.declination) *
-        Math.sin(moon.declination) *
-        Math.cos(sun.rightAscension - moon.rightAscension),
-  );
-  const illuminationFraction = (1 + Math.cos(incidenceAngle)) / 2;
-  const phaseFraction =
-    0.5 + (0.5 * incidenceAngle * (brightLimbAngle < 0 ? -1 : 1)) / Math.PI;
-  const normalizedPhase = normalizePhaseFraction(phaseFraction);
-
-  return {
-    fraction: normalizedPhase,
-    illumination: Math.round(illuminationFraction * 100),
-    name: getMoonPhaseName(normalizedPhase),
-    dayInCycle: Math.round(normalizedPhase * SYNODIC_MONTH_DAYS),
-  };
-}
-
-function computeMoonPhase(fractionOverride) {
-  if (fractionOverride === undefined) {
-    return getLiveMoonData();
-  }
-
-  const fraction = normalizePhaseFraction(fractionOverride);
-  const illumination = Math.round(
-    ((1 - Math.cos(fraction * 2 * Math.PI)) / 2) * 100,
-  );
-
-  return {
-    fraction,
-    illumination,
-    name: getMoonPhaseName(fraction),
-    dayInCycle: Math.round(fraction * SYNODIC_MONTH_DAYS),
-  };
-}
-
-function computeStargazingScore(moonIllumination) {
-  const moonFactor = 100 - moonIllumination;
-  const now = new Date();
-  const hour = now.getHours();
-  const nightFactor =
-    hour >= 22 || hour <= 4 ? 100 : hour >= 20 || hour <= 6 ? 70 : 30;
-  return Math.round(moonFactor * 0.6 + nightFactor * 0.4);
-}
 
 function StatBox({ label, value, subtext, highlightColor }) {
   return (
@@ -218,7 +62,7 @@ function StatBox({ label, value, subtext, highlightColor }) {
         >
           {value}
         </Typography>
-        {subtext && (
+        {subtext ? (
           <Typography
             sx={{
               color: "rgba(255,255,255,0.45)",
@@ -229,109 +73,40 @@ function StatBox({ label, value, subtext, highlightColor }) {
           >
             {subtext}
           </Typography>
-        )}
+        ) : null}
       </CardContent>
     </Card>
   );
 }
-const MOON_MARKS = Array.from({ length: 65 }).map((_, i) => {
-  const val = i / 64;
-  // Major phase ticks (every 8th mark)
-  if (i === 0 || i === 64) return { value: val, label: "New" };
-  if (i === 8) return { value: val, label: "Waxing" };
-  if (i === 16) return { value: val, label: "1st Qtr" };
-  if (i === 24) return { value: val, label: "Gibbous" };
-  if (i === 32) return { value: val, label: "Full" };
-  if (i === 40) return { value: val, label: "Gibbous" };
-  if (i === 48) return { value: val, label: "3rd Qtr" };
-  if (i === 56) return { value: val, label: "Waning" };
 
-  // Minor ticks
-  return { value: val };
-});
-
-function NightPlannerPage({ isLight, onNavigate }) {
+function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
   const showGlobe = useMemo(() => isProbablyHardwareAccelerated(), []);
-
-  // Actual real-world moon phase
-  const actualMoon = useMemo(() => computeMoonPhase(), []);
-
-  // Interactive slider state
+  const sliderScopeRef = useRef(null);
+  const actualMoon = useLiveMoonPhase();
   const [sliderFraction, setSliderFraction] = useState(actualMoon.fraction);
 
-  // Re-calculate derived data based on the interactive slider
-  const moon = useMemo(
-    () => computeMoonPhase(sliderFraction),
-    [sliderFraction],
+  const isSimulating = isMoonPhaseSimulation(
+    sliderFraction,
+    actualMoon.fraction,
   );
+  const activeFraction = isSimulating ? sliderFraction : actualMoon.fraction;
+  const moon = useMemo(() => computeMoonPhase(activeFraction), [activeFraction]);
 
-  // Proximity scaling effect for slider ticks
-  useEffect(() => {
-    const thumbIndex = Math.round(sliderFraction * 64);
+  useMoonSliderEffects(sliderScopeRef, activeFraction);
 
-    // Scale marks
-    const marks = document.querySelectorAll(
-      ".moon-phase-slider .MuiSlider-mark",
-    );
-    marks.forEach((mark) => {
-      const idx = parseInt(mark.getAttribute("data-index"), 10);
-      if (isNaN(idx)) return;
-      const distance = Math.abs(idx - thumbIndex);
-      let scaleY = 1;
-      let scaleX = 1;
-      if (distance === 0) {
-        scaleY = 1.8;
-        scaleX = 1.25;
-      } else if (distance === 1) {
-        scaleY = 1.4;
-        scaleX = 1.15;
-      } else if (distance === 2) {
-        scaleY = 1.2;
-        scaleX = 1.05;
-      } else if (distance === 3) {
-        scaleY = 1.05;
-        scaleX = 1.02;
-      }
-
-      mark.style.transform = `translate(-50%, -50%) scale(${scaleX}, ${scaleY})`;
-      mark.style.transition = "transform 0.1s ease-out";
-    });
-
-    // Scale labels
-    const labels = document.querySelectorAll(
-      ".moon-phase-slider .MuiSlider-markLabel",
-    );
-    labels.forEach((label) => {
-      const idx = parseInt(label.getAttribute("data-index"), 10);
-      if (isNaN(idx)) return;
-      const distance = Math.abs(idx - thumbIndex);
-      let scale = 1;
-      let color = "rgba(255, 255, 255, 0.5)";
-      let textShadow = "none";
-
-      if (distance <= 2) {
-        scale = 1.25;
-        color = "rgba(255, 255, 255, 1)";
-        textShadow = "0 0 10px rgba(255,255,255,0.8)";
-      } else if (distance <= 4) {
-        scale = 1.1;
-        color = "rgba(255, 255, 255, 0.8)";
-        textShadow = "0 0 5px rgba(255,255,255,0.3)";
-      }
-
-      // Keep translateX(-50%) so MUI labels remain perfectly centered
-      label.style.transform = `translateX(-50%) scale(${scale})`;
-      label.style.transition =
-        "transform 0.1s ease-out, color 0.1s ease-out, text-shadow 0.1s ease-out";
-      label.style.color = color;
-      label.style.textShadow = textShadow;
-    });
-  }, [sliderFraction]);
-
-  const score = useMemo(
-    () => computeStargazingScore(moon.illumination),
-    [moon.illumination],
-  );
+  const observationPlan = useObservationPlan({
+    actualMoon,
+    moon,
+    isSimulating,
+    location,
+    locationStatus,
+  });
+  const scoreColor =
+    observationPlan.score >= 75
+      ? "#22c55e"
+      : observationPlan.score >= 50
+        ? "#f59e0b"
+        : "#ef4444";
 
   const hero = showGlobe ? (
     <MoonGlobe
@@ -340,32 +115,16 @@ function NightPlannerPage({ isLight, onNavigate }) {
     />
   ) : null;
 
-  const scoreColor =
-    score >= 75 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
-  const scoreLabel =
-    score >= 75
-      ? "Excellent"
-      : score >= 50
-        ? "Good"
-        : score >= 25
-          ? "Fair"
-          : "Poor conditions";
-
-  const bestWindow = moon.illumination > 60 ? "After moonset" : "All night";
-  const recommendedTarget =
-    moon.illumination > 60 ? "Planets & Bright Stars" : "Deep-Sky Objects";
-  const showResetToCurrent =
-    Math.abs(sliderFraction - actualMoon.fraction) > 0.05;
-
   return (
     <ThemeProvider theme={velaTheme}>
       <PageShell
-        title="" // We handle the title manually via the huge hero text
+        title=""
         subtitle=""
         isLight={isLight}
         onNavigate={onNavigate}
         hero={hero}
         className="night-planner-page"
+        hideHeader={true}
         hideBackButton={true}
       >
         <Box
@@ -419,6 +178,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
             </Typography>
 
             <Box
+              ref={sliderScopeRef}
               sx={{
                 mb: { xs: 6, md: 8 },
                 position: "relative",
@@ -429,11 +189,13 @@ function NightPlannerPage({ isLight, onNavigate }) {
               }}
             >
               <Slider
-                value={sliderFraction}
+                value={activeFraction}
                 min={0}
                 max={1}
                 step={0.001}
-                onChange={(e, val) => setSliderFraction(val)}
+                onChange={(e, val) =>
+                  setSliderFraction(Array.isArray(val) ? val[0] : val)
+                }
                 aria-label="Moon Phase Interactive Slider"
                 marks={MOON_MARKS}
                 className="moon-phase-slider"
@@ -463,9 +225,9 @@ function NightPlannerPage({ isLight, onNavigate }) {
                     background: "rgba(255, 255, 255, 0.04)",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
                     transition: "all 0.2s ease",
-                    visibility: showResetToCurrent ? "visible" : "hidden",
-                    opacity: showResetToCurrent ? 1 : 0,
-                    pointerEvents: showResetToCurrent ? "auto" : "none",
+                    visibility: isSimulating ? "visible" : "hidden",
+                    opacity: isSimulating ? 1 : 0,
+                    pointerEvents: isSimulating ? "auto" : "none",
                     "&:hover": {
                       color: "#fff",
                       borderColor: "rgba(255, 255, 255, 0.34)",
@@ -479,13 +241,12 @@ function NightPlannerPage({ isLight, onNavigate }) {
             </Box>
           </Box>
 
-          {/* Professional Data Grid */}
           <Box className="night-dashboard-grid" sx={{ mt: "auto" }}>
             <Box className="night-grid-item">
               <StatBox
                 label="Stargazing Score"
-                value={`${score}/100`}
-                subtext={`Conditions are rated as ${scoreLabel.toLowerCase()} based on lunar illumination and time of night.`}
+                value={`${observationPlan.score}/100`}
+                subtext={`${observationPlan.scoreSubtext} Conditions rate as ${observationPlan.scoreLabel.toLowerCase()}.`}
                 highlightColor={scoreColor}
               />
             </Box>
@@ -501,22 +262,20 @@ function NightPlannerPage({ isLight, onNavigate }) {
               />
             </Box>
             <Box className="night-grid-item">
-              <StatBox label="Optimum Window" value={bestWindow} />
+              <StatBox
+                label="Optimum Window"
+                value={observationPlan.bestWindow}
+                subtext={observationPlan.bestWindowSubtext}
+              />
             </Box>
             <Box className="night-grid-item">
               <StatBox
                 label="Recommended Targets"
-                value={recommendedTarget}
-                subtext={
-                  moon.illumination > 60
-                    ? "The moon's brightness washes out faint nebulae. Stick to point sources."
-                    : "Perfect conditions for hunting galaxies, star clusters, and the Milky Way."
-                }
+                value={observationPlan.recommendedTarget}
+                subtext={observationPlan.recommendedTargetSubtext}
               />
             </Box>
           </Box>
-
-          {/* End of layout wrapper */}
         </Box>
       </PageShell>
     </ThemeProvider>
