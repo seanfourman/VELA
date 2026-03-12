@@ -16,42 +16,154 @@ import velaTheme from "@/utils/muiTheme";
 import "./styles/NightPlannerPage.css";
 
 /* ---- Moon-phase calculation ---- */
-function computeMoonPhase(fractionOverride) {
-  const synodicMonth = 29.53058770576;
-  let fraction;
-  let position;
+const SYNODIC_MONTH_DAYS = 29.530588853;
+const PRIMARY_PHASE_WINDOW = 0.015;
+const RAD = Math.PI / 180;
+const EARTH_OBLIQUITY = RAD * 23.4397;
 
-  if (fractionOverride !== undefined) {
-    fraction = fractionOverride;
-    position = fraction * synodicMonth;
-  } else {
-    const now = new Date();
-    const knownNewMoon = new Date("2000-01-06T18:14:00Z");
-    const daysSince = (now - knownNewMoon) / 86400000;
-    position = ((daysSince % synodicMonth) + synodicMonth) % synodicMonth;
-    fraction = position / synodicMonth;
+function normalizePhaseFraction(fraction) {
+  return ((fraction % 1) + 1) % 1;
+}
+
+function getMoonPhaseName(fraction) {
+  const phase = normalizePhaseFraction(fraction);
+
+  if (phase <= PRIMARY_PHASE_WINDOW || phase >= 1 - PRIMARY_PHASE_WINDOW) {
+    return "New Moon";
   }
 
+  if (Math.abs(phase - 0.25) <= PRIMARY_PHASE_WINDOW) {
+    return "First Quarter";
+  }
+
+  if (Math.abs(phase - 0.5) <= PRIMARY_PHASE_WINDOW) {
+    return "Full Moon";
+  }
+
+  if (Math.abs(phase - 0.75) <= PRIMARY_PHASE_WINDOW) {
+    return "Last Quarter";
+  }
+
+  if (phase < 0.25) return "Waxing Crescent";
+  if (phase < 0.5) return "Waxing Gibbous";
+  if (phase < 0.75) return "Waning Gibbous";
+  return "Waning Crescent";
+}
+
+function toJulianDate(date) {
+  return date.valueOf() / 86400000 - 0.5 + 2440588;
+}
+
+function toDaysSinceJ2000(date) {
+  return toJulianDate(date) - 2451545;
+}
+
+function getRightAscension(longitude, latitude) {
+  return Math.atan2(
+    Math.sin(longitude) * Math.cos(EARTH_OBLIQUITY) -
+      Math.tan(latitude) * Math.sin(EARTH_OBLIQUITY),
+    Math.cos(longitude),
+  );
+}
+
+function getDeclination(longitude, latitude) {
+  return Math.asin(
+    Math.sin(latitude) * Math.cos(EARTH_OBLIQUITY) +
+      Math.cos(latitude) * Math.sin(EARTH_OBLIQUITY) * Math.sin(longitude),
+  );
+}
+
+function getSolarMeanAnomaly(daysSinceJ2000) {
+  return RAD * (357.5291 + 0.98560028 * daysSinceJ2000);
+}
+
+function getEclipticLongitude(meanAnomaly) {
+  const equationOfCenter =
+    RAD *
+    (1.9148 * Math.sin(meanAnomaly) +
+      0.02 * Math.sin(2 * meanAnomaly) +
+      0.0003 * Math.sin(3 * meanAnomaly));
+  const perihelion = RAD * 102.9372;
+  return meanAnomaly + equationOfCenter + perihelion + Math.PI;
+}
+
+function getSunCoordinates(daysSinceJ2000) {
+  const meanAnomaly = getSolarMeanAnomaly(daysSinceJ2000);
+  const longitude = getEclipticLongitude(meanAnomaly);
+
+  return {
+    rightAscension: getRightAscension(longitude, 0),
+    declination: getDeclination(longitude, 0),
+  };
+}
+
+function getMoonCoordinates(daysSinceJ2000) {
+  const longitude = RAD * (218.316 + 13.176396 * daysSinceJ2000);
+  const meanAnomaly = RAD * (134.963 + 13.064993 * daysSinceJ2000);
+  const latitudeArgument = RAD * (93.272 + 13.22935 * daysSinceJ2000);
+  const correctedLongitude = longitude + RAD * 6.289 * Math.sin(meanAnomaly);
+  const latitude = RAD * 5.128 * Math.sin(latitudeArgument);
+  const distanceKm = 385001 - 20905 * Math.cos(meanAnomaly);
+
+  return {
+    rightAscension: getRightAscension(correctedLongitude, latitude),
+    declination: getDeclination(correctedLongitude, latitude),
+    distanceKm,
+  };
+}
+
+function getLiveMoonData(date = new Date()) {
+  const daysSinceJ2000 = toDaysSinceJ2000(date);
+  const sun = getSunCoordinates(daysSinceJ2000);
+  const moon = getMoonCoordinates(daysSinceJ2000);
+  const sunDistanceKm = 149598000;
+  const phaseAngle = Math.acos(
+    Math.sin(sun.declination) * Math.sin(moon.declination) +
+      Math.cos(sun.declination) *
+        Math.cos(moon.declination) *
+        Math.cos(sun.rightAscension - moon.rightAscension),
+  );
+  const incidenceAngle = Math.atan2(
+    sunDistanceKm * Math.sin(phaseAngle),
+    moon.distanceKm - sunDistanceKm * Math.cos(phaseAngle),
+  );
+  const brightLimbAngle = Math.atan2(
+    Math.cos(sun.declination) *
+      Math.sin(sun.rightAscension - moon.rightAscension),
+    Math.sin(sun.declination) * Math.cos(moon.declination) -
+      Math.cos(sun.declination) *
+        Math.sin(moon.declination) *
+        Math.cos(sun.rightAscension - moon.rightAscension),
+  );
+  const illuminationFraction = (1 + Math.cos(incidenceAngle)) / 2;
+  const phaseFraction =
+    0.5 +
+    (0.5 * incidenceAngle * (brightLimbAngle < 0 ? -1 : 1)) / Math.PI;
+  const normalizedPhase = normalizePhaseFraction(phaseFraction);
+
+  return {
+    fraction: normalizedPhase,
+    illumination: Math.round(illuminationFraction * 100),
+    name: getMoonPhaseName(normalizedPhase),
+    dayInCycle: Math.round(normalizedPhase * SYNODIC_MONTH_DAYS),
+  };
+}
+
+function computeMoonPhase(fractionOverride) {
+  if (fractionOverride === undefined) {
+    return getLiveMoonData();
+  }
+
+  const fraction = normalizePhaseFraction(fractionOverride);
   const illumination = Math.round(
     ((1 - Math.cos(fraction * 2 * Math.PI)) / 2) * 100,
   );
 
-  let name;
-  if (fraction < 0.0625) name = "New Moon";
-  else if (fraction < 0.1875) name = "Waxing Crescent";
-  else if (fraction < 0.3125) name = "First Quarter";
-  else if (fraction < 0.4375) name = "Waxing Gibbous";
-  else if (fraction < 0.5625) name = "Full Moon";
-  else if (fraction < 0.6875) name = "Waning Gibbous";
-  else if (fraction < 0.8125) name = "Last Quarter";
-  else if (fraction < 0.9375) name = "Waning Crescent";
-  else name = "New Moon";
-
   return {
     fraction,
     illumination,
-    name,
-    dayInCycle: Math.round(position),
+    name: getMoonPhaseName(fraction),
+    dayInCycle: Math.round(fraction * SYNODIC_MONTH_DAYS),
   };
 }
 
