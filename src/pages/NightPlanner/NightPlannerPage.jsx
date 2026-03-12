@@ -179,6 +179,7 @@ function NightPlannerPage({ isLight, onNavigate }) {
   
   const bestWindow = moon.illumination > 60 ? "After moonset" : "All night";
   const recommendedTarget = moon.illumination > 60 ? "Planets & Bright Stars" : "Deep-Sky Objects";
+  const showResetToCurrent = Math.abs(sliderFraction - actualMoon.fraction) > 0.05;
 
   return (
     <ThemeProvider theme={velaTheme}>
@@ -251,32 +252,41 @@ function NightPlannerPage({ isLight, onNavigate }) {
               marks={MOON_MARKS}
               className="moon-phase-slider"
             />
-            {Math.abs(sliderFraction - actualMoon.fraction) > 0.05 && (
-              <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-                <Typography 
-                  onClick={() => setSliderFraction(actualMoon.fraction)}
-                  sx={{ 
-                    fontSize: "0.75rem", 
-                    color: "rgba(255, 255, 255, 0.7)", 
-                    cursor: "pointer", 
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    borderRadius: "24px",
-                    px: 3,
-                    py: 1,
-                    transition: "all 0.2s ease",
-                    "&:hover": { 
-                      color: "#fff",
-                      borderColor: "rgba(255, 255, 255, 0.5)",
-                      background: "rgba(255, 255, 255, 0.05)"
-                    } 
-                  }}
-                >
-                  Reset to Current
-                </Typography>
-              </Box>
-            )}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                mt: 4,
+                minHeight: 40,
+              }}
+            >
+              <Typography
+                onClick={() => setSliderFraction(actualMoon.fraction)}
+                sx={{
+                  fontSize: "0.75rem",
+                  color: "rgba(255, 255, 255, 0.7)",
+                  cursor: "pointer",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.1em",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  borderRadius: "24px",
+                  px: 3,
+                  py: 1,
+                  transition: "all 0.2s ease",
+                  visibility: showResetToCurrent ? "visible" : "hidden",
+                  opacity: showResetToCurrent ? 1 : 0,
+                  pointerEvents: showResetToCurrent ? "auto" : "none",
+                  "&:hover": {
+                    color: "#fff",
+                    borderColor: "rgba(255, 255, 255, 0.5)",
+                    background: "rgba(255, 255, 255, 0.05)",
+                  },
+                }}
+              >
+                Reset to Current
+              </Typography>
+            </Box>
           </Box>
         </Box>
 
