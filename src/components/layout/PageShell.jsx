@@ -1,4 +1,4 @@
-﻿import "./styles/PageShell.css";
+import "./styles/PageShell.css";
 import { navigateToMapHome } from "@/utils/navigation";
 
 export default function PageShell({
@@ -10,6 +10,7 @@ export default function PageShell({
   headerActions,
   onNavigate,
   onBack,
+  hideBackButton = false,
   children,
 }) {
   const rootClassName = [
@@ -44,13 +45,15 @@ export default function PageShell({
             ) : null}
           </div>
           <div className="profile-page__header-actions">
-            <button
-              type="button"
-              className="glass-btn profile-action-btn"
-              onClick={handleBackToMap}
-            >
-              Back to map
-            </button>
+            {!hideBackButton && (
+              <button
+                type="button"
+                className="glass-btn profile-action-btn"
+                onClick={handleBackToMap}
+              >
+                Back to map
+              </button>
+            )}
             {headerActions}
           </div>
         </header>
