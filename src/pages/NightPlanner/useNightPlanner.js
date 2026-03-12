@@ -526,7 +526,7 @@ function buildLiveObservationPlan(date, location, moonIllumination) {
   return {
     score,
     scoreLabel: getScoreLabel(score),
-    scoreSubtext: `Moon below the horizon for ${formatDuration(moonlessDurationMs)} of tonight's ${formatDuration(nightDurationMs)} dark window.`,
+    scoreSubtext: `Dark sky for ${formatDuration(moonlessDurationMs)} of tonight's ${formatDuration(nightDurationMs)}.`,
     bestWindow: bestWindow.label,
     bestWindowSubtext: bestWindow.subtext,
     recommendedTarget: recommendedTargets.label,
@@ -546,8 +546,8 @@ function buildFallbackObservationPlan(moonIllumination, locationStatus) {
     scoreLabel: getScoreLabel(score),
     scoreSubtext:
       locationStatus === "active"
-        ? "Local night data is still resolving."
-        : "Enable location for moonrise and moonset based planning.",
+        ? "Local night timing is still loading."
+        : "Enable location for live moon timing.",
     bestWindow:
       locationStatus === "active" ? "Calculating..." : "Enable location",
     bestWindowSubtext:
@@ -565,10 +565,10 @@ function buildSimulatedObservationPlan(moonIllumination) {
   );
   const scoreSubtext =
     moonIllumination > 65
-      ? "Bright moonlight reduces contrast."
+      ? "Bright moonlight will wash out faint targets."
       : moonIllumination > 40
-        ? "Some moonlight will soften contrast."
-        : "Low moonlight keeps the sky darker.";
+        ? "Some moonlight will soften faint detail."
+        : "Low moonlight leaves better contrast tonight.";
 
   return {
     score,
