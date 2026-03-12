@@ -11,7 +11,6 @@ import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import velaTheme from "@/utils/muiTheme";
 import {
   computeMoonPhase,
-  isMoonPhaseSimulation,
   MOON_MARKS,
   useLiveMoonPhase,
   useMoonSliderEffects,
@@ -84,13 +83,23 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
   const sliderScopeRef = useRef(null);
   const actualMoon = useLiveMoonPhase();
   const [sliderFraction, setSliderFraction] = useState(actualMoon.fraction);
+  const [isFollowingLiveMoon, setIsFollowingLiveMoon] = useState(true);
 
-  const isSimulating = isMoonPhaseSimulation(
-    sliderFraction,
-    actualMoon.fraction,
-  );
-  const activeFraction = isSimulating ? sliderFraction : actualMoon.fraction;
+  const isSimulating = !isFollowingLiveMoon;
+  const activeFraction = isFollowingLiveMoon
+    ? actualMoon.fraction
+    : sliderFraction;
   const moon = useMemo(() => computeMoonPhase(activeFraction), [activeFraction]);
+
+  const handleSliderChange = (_event, value) => {
+    setIsFollowingLiveMoon(false);
+    setSliderFraction(Array.isArray(value) ? value[0] : value);
+  };
+
+  const handleResetToCurrent = () => {
+    setIsFollowingLiveMoon(true);
+    setSliderFraction(actualMoon.fraction);
+  };
 
   useMoonSliderEffects(sliderScopeRef, activeFraction);
 
@@ -193,9 +202,7 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
                 min={0}
                 max={1}
                 step={0.001}
-                onChange={(e, val) =>
-                  setSliderFraction(Array.isArray(val) ? val[0] : val)
-                }
+                onChange={handleSliderChange}
                 aria-label="Moon Phase Interactive Slider"
                 marks={MOON_MARKS}
                 className="moon-phase-slider"
@@ -210,7 +217,7 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
                 }}
               >
                 <Typography
-                  onClick={() => setSliderFraction(actualMoon.fraction)}
+                  onClick={handleResetToCurrent}
                   sx={{
                     fontSize: "0.75rem",
                     fontWeight: 600,
