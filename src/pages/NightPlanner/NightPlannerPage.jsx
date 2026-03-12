@@ -226,10 +226,10 @@ function NightPlannerPage({ isLight, onNavigate }) {
       const distance = Math.abs(idx - thumbIndex);
       let scaleY = 1;
       let scaleX = 1;
-      if (distance === 0) { scaleY = 2.5; scaleX = 1.6; }
-      else if (distance === 1) { scaleY = 1.8; scaleX = 1.25; }
-      else if (distance === 2) { scaleY = 1.4; scaleX = 1.1; }
-      else if (distance === 3) { scaleY = 1.15; scaleX = 1.05; }
+      if (distance === 0) { scaleY = 1.8; scaleX = 1.25; }
+      else if (distance === 1) { scaleY = 1.4; scaleX = 1.15; }
+      else if (distance === 2) { scaleY = 1.2; scaleX = 1.05; }
+      else if (distance === 3) { scaleY = 1.05; scaleX = 1.02; }
       
       mark.style.transform = `scale(${scaleX}, ${scaleY})`;
       mark.style.transition = "transform 0.1s ease-out";
@@ -246,13 +246,13 @@ function NightPlannerPage({ isLight, onNavigate }) {
       let textShadow = "none";
       
       if (distance <= 2) {
-        scale = 1.7;
-        color = "rgba(255, 255, 255, 1)";
-        textShadow = "0 0 15px rgba(255,255,255,1)";
-      } else if (distance <= 5) {
         scale = 1.25;
-        color = "rgba(255, 255, 255, 0.9)";
-        textShadow = "0 0 8px rgba(255,255,255,0.5)";
+        color = "rgba(255, 255, 255, 1)";
+        textShadow = "0 0 10px rgba(255,255,255,0.8)";
+      } else if (distance <= 4) {
+        scale = 1.1;
+        color = "rgba(255, 255, 255, 0.8)";
+        textShadow = "0 0 5px rgba(255,255,255,0.3)";
       }
       
       // Keep translateX(-50%) so MUI labels remain perfectly centered
