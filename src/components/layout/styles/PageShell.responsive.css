@@ -1,4 +1,4 @@
-﻿@keyframes profile-stars-fade {
+@keyframes profile-stars-fade {
   to {
     opacity: var(--profile-stars-opacity);
     transform: scale(1);
@@ -24,8 +24,8 @@
   }
 
   .profile-page__earth-canvas {
-    width: min(86vmin, 460px);
-    height: min(86vmin, 460px);
+    width: min(86vmin, 200px);
+    height: min(86vmin, 200px);
   }
 
   .profile-page__header {

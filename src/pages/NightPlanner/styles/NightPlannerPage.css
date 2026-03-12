@@ -188,6 +188,24 @@
   }
 }
 
+@media (max-width: 768px) {
+  /* Fix overlapping text on mobile */
+  .moon-phase-slider .MuiSlider-markLabel {
+    font-size: 0.5rem !important;
+    letter-spacing: 0;
+  }
+  
+  /* Force planet to shrink down without getting overridden and center it */
+  .night-planner-page .profile-page__earth-canvas {
+    position: absolute !important;
+    top: 30% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 250px !important;
+    height: 250px !important;
+  }
+}
+
 @media (max-width: 640px) {
   .night-dashboard-grid {
     grid-template-columns: 1fr;

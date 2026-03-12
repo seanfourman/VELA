@@ -318,11 +318,11 @@ function NightPlannerPage({ isLight, onNavigate }) {
               mt: 14, 
               mb: 8, 
               position: "relative",
-              // Break out of container to span full screen width
-              width: "100vw", 
-              left: "50%",
-              transform: "translateX(-50%)",
-              px: { xs: 4, md: 8 } 
+              // Break out of container on larger screens, stay within on mobile
+              width: { xs: "100%", md: "100vw" }, 
+              left: { xs: "auto", md: "50%" },
+              transform: { xs: "none", md: "translateX(-50%)" },
+              px: { xs: 1, md: 8 } 
             }}
           >
             <Slider
