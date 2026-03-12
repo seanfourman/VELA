@@ -1,15 +1,15 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useEffect } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import brokenWebLinkIcon from "@/assets/icons/broken-web-link-svgrepo-com.svg";
 import PageShell from "@/components/layout/PageShell";
 import AppLayout, { useAppLayoutContext } from "@/layouts/AppLayout";
 import AuthPage from "@/pages/Auth/AuthPage";
 import AdminPage from "@/pages/Admin/AdminPage";
 import DiscoverPage from "@/pages/Discover/DiscoverPage";
-import NightPlannerPage from "@/pages/NightPlanner/NightPlannerPage";
 import GearLabPage from "@/pages/GearLab/GearLabPage";
 import MapView from "@/pages/Map/MapView";
+import MoonPhasePage from "@/pages/MoonPhase/MoonPhasePage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import SettingsPage from "@/pages/Settings/SettingsPage";
 import SolarSystemPage from "@/pages/SolarSystem/SolarSystemPage";
@@ -164,12 +164,12 @@ function DiscoverRoute() {
   return <DiscoverPage isLight={isLight} onNavigate={navigate} />;
 }
 
-function NightPlannerRoute() {
+function MoonPhaseRoute() {
   useDisableThreeDMode();
   const { isLight, navigate, location, locationStatus } = useAppLayoutContext();
 
   return (
-    <NightPlannerPage
+    <MoonPhasePage
       isLight={isLight}
       onNavigate={navigate}
       location={location}
@@ -223,8 +223,9 @@ export const router = createBrowserRouter([
       { index: true, element: <MapRoute /> },
       { path: "auth", element: <AuthRoute /> },
       { path: "discover", element: <DiscoverRoute /> },
-      { path: "night-planner", element: <NightPlannerRoute /> },
       { path: "gear-lab", element: <GearLabRoute /> },
+      { path: "moon-phase", element: <MoonPhaseRoute /> },
+      { path: "night-planner", element: <Navigate to="/moon-phase" replace /> },
       { path: "profile", element: <ProfileRoute /> },
       { path: "admin", element: <AdminRoute /> },
       { path: "settings", element: <SettingsRoute /> },

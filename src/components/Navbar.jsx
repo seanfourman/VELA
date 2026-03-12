@@ -7,8 +7,8 @@ import ProfileMenu from "./ProfileMenu";
 
 const NAV_PLACEHOLDER_LINKS = [
   { id: "discover", label: "Discover", path: "/discover" },
-  { id: "night-planner", label: "Night Planner", path: "/night-planner" },
   { id: "gear-lab", label: "Gear Lab", path: "/gear-lab" },
+  { id: "moon-phase", label: "Moon Phase", path: "/moon-phase" },
   { id: "solar-system", label: "Solar System", path: "/solar-system" },
 ];
 

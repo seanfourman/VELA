@@ -16,8 +16,8 @@ import {
   useLiveMoonPhase,
   useMoonSliderEffects,
   useObservationPlan,
-} from "./useNightPlanner";
-import "./styles/NightPlannerPage.css";
+} from "./useMoonPhase";
+import "./styles/MoonPhasePage.css";
 
 function StatBox({ label, value, subtext, highlightColor }) {
   return (
@@ -82,7 +82,7 @@ function StatBox({ label, value, subtext, highlightColor }) {
   );
 }
 
-function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
+function MoonPhasePage({ isLight, onNavigate, location, locationStatus }) {
   const showGlobe = useMemo(() => isProbablyHardwareAccelerated(), []);
   const sliderScopeRef = useRef(null);
   const actualMoon = useLiveMoonPhase();
@@ -150,7 +150,7 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
         isLight={isLight}
         onNavigate={onNavigate}
         hero={hero}
-        className="night-planner-page"
+        className="moon-phase-page"
         hideHeader={true}
         hideBackButton={true}
       >
@@ -269,8 +269,8 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
             </Box>
           </Box>
 
-          <Box className="night-dashboard-grid" sx={{ mt: "auto" }}>
-            <Box className="night-grid-item">
+          <Box className="moon-phase-dashboard-grid" sx={{ mt: "auto" }}>
+            <Box className="moon-phase-grid-item">
               <StatBox
                 label="Stargazing Score"
                 value={`${observationPlan.score}/100`}
@@ -278,7 +278,7 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
                 highlightColor={scoreColor}
               />
             </Box>
-            <Box className="night-grid-item">
+            <Box className="moon-phase-grid-item">
               <StatBox
                 label="Illumination"
                 value={`${moon.illumination}%`}
@@ -289,14 +289,14 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
                 }
               />
             </Box>
-            <Box className="night-grid-item">
+            <Box className="moon-phase-grid-item">
               <StatBox
                 label="Optimum Window"
                 value={observationPlan.bestWindow}
                 subtext={observationPlan.bestWindowSubtext}
               />
             </Box>
-            <Box className="night-grid-item">
+            <Box className="moon-phase-grid-item">
               <StatBox
                 label="Recommended Targets"
                 value={observationPlan.recommendedTarget}
@@ -310,4 +310,4 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
   );
 }
 
-export default NightPlannerPage;
+export default MoonPhasePage;

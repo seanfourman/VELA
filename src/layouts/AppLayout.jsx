@@ -19,7 +19,16 @@ import showNotification from "@/utils/notifications";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import { isAdminUser, normalizePath } from "@/utils/appState";
 
-const ZOOM_OUT_ROUTES = new Set(["/auth", "/profile", "/settings", "/admin", "/discover", "/night-planner", "/gear-lab"]);
+const ZOOM_OUT_ROUTES = new Set([
+  "/auth",
+  "/profile",
+  "/settings",
+  "/admin",
+  "/discover",
+  "/moon-phase",
+  "/night-planner",
+  "/gear-lab",
+]);
 export const AppLayoutContext = createContext(null);
 
 export const useAppLayoutContext = () => {

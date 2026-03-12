@@ -1,35 +1,33 @@
 /* ========================================
-   NIGHT PLANNER PAGE — Professional Redesign
+   MOON PHASE PAGE
    Background: default PageShell dark sky
    ======================================== */
 
-.night-planner-page .profile-page__content {
-  max-width: 1440px; /* Much wider for the single-row dashboard grid */
+.moon-phase-page .profile-page__content {
+  max-width: 1440px;
   min-height: 100%;
   height: 100%;
   justify-content: flex-start;
 }
 
-.night-planner-page {
+.moon-phase-page {
   height: 100vh;
   overflow: hidden;
 }
 
 /* ---- Dashboard Grid ---- */
-.night-dashboard-grid {
+.moon-phase-dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1.5fr;
   gap: 16px;
   width: 100%;
 }
 
-.night-grid-item {
+.moon-phase-grid-item {
   position: relative;
   border-radius: 16px;
   overflow: hidden;
 }
-
-
 
 /* ---- Twilight Timeline Restyle ---- */
 .night-twilight {
@@ -69,7 +67,11 @@
   width: 2px;
   flex: 1;
   min-height: 24px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.15),
+    rgba(255, 255, 255, 0.05)
+  );
   margin-top: 8px;
   border-radius: 2px;
 }
@@ -88,7 +90,6 @@
   padding: 30px 0 !important;
 }
 
-/* Hide the background line entirely, we only want the ticks */
 .moon-phase-slider .MuiSlider-track,
 .moon-phase-slider .MuiSlider-rail {
   display: none !important;
@@ -98,13 +99,14 @@
   width: 4px;
   height: 48px;
   background-color: #fff;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 24px rgba(92, 107, 192, 0.8);
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.9),
+    0 0 24px rgba(92, 107, 192, 0.8);
   border: none;
   border-radius: 2px;
   margin-top: 0;
 }
 
-/* Base state for all marks (the 'minor' ticks) */
 .moon-phase-slider .MuiSlider-mark {
   background-color: rgba(255, 255, 255, 0.25) !important;
   width: 2px !important;
@@ -113,12 +115,10 @@
   border-radius: 1px;
 }
 
-/* Active minor ticks (passed by thumb) */
 .moon-phase-slider .MuiSlider-markActive {
   background-color: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* Highlight the specific marks that have labels (the 'major' phases) */
 .moon-phase-slider .MuiSlider-mark:has(+ .MuiSlider-markLabel),
 .moon-phase-slider [data-index="0"] .MuiSlider-mark,
 .moon-phase-slider [data-index="8"] .MuiSlider-mark,
@@ -129,14 +129,13 @@
 .moon-phase-slider [data-index="48"] .MuiSlider-mark,
 .moon-phase-slider [data-index="56"] .MuiSlider-mark,
 .moon-phase-slider [data-index="64"] .MuiSlider-mark {
-   height: 28px !important;
-   background-color: rgba(255, 255, 255, 0.5) !important;
-   width: 3px !important;
-   margin-top: 0;
-   border-radius: 2px;
+  height: 28px !important;
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  width: 3px !important;
+  margin-top: 0;
+  border-radius: 2px;
 }
 
-/* Active major ticks */
 .moon-phase-slider [data-index="0"] .MuiSlider-markActive,
 .moon-phase-slider [data-index="8"] .MuiSlider-markActive,
 .moon-phase-slider [data-index="16"] .MuiSlider-markActive,
@@ -146,11 +145,10 @@
 .moon-phase-slider [data-index="48"] .MuiSlider-markActive,
 .moon-phase-slider [data-index="56"] .MuiSlider-markActive,
 .moon-phase-slider [data-index="64"] .MuiSlider-markActive {
-   background-color: rgba(255, 255, 255, 0.95) !important;
-   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-/* Specific styling for the labels themselves */
 .moon-phase-slider .MuiSlider-markLabel {
   color: rgba(255, 255, 255, 0.5) !important;
   font-size: 0.75rem !important;
@@ -159,6 +157,7 @@
   letter-spacing: 0.08em;
   font-weight: 600;
 }
+
 .moon-phase-slider .MuiSlider-markLabelActive {
   color: rgba(255, 255, 255, 1) !important;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
@@ -167,39 +166,37 @@
 .moon-phase-slider .MuiSlider-thumb:hover,
 .moon-phase-slider .MuiSlider-thumb.Mui-focusVisible,
 .moon-phase-slider .MuiSlider-thumb.Mui-active {
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 0 8px rgba(92, 107, 192, 0.2) !important;
+  box-shadow:
+    0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 0 8px rgba(92, 107, 192, 0.2) !important;
 }
 
 /* ---- Responsive Adjustments ---- */
 @media (max-width: 900px) {
-  .night-dashboard-grid {
+  .moon-phase-dashboard-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
-
 }
 
 @media (max-width: 768px) {
-  .night-planner-page {
+  .moon-phase-page {
     height: 100%;
     min-height: 100dvh;
     overflow-y: auto;
     overflow-x: hidden;
   }
 
-  .night-planner-page .profile-page__content {
+  .moon-phase-page .profile-page__content {
     min-height: calc(100vh - 128px);
     height: auto;
   }
 
-  /* Fix overlapping text on mobile */
   .moon-phase-slider .MuiSlider-markLabel {
     font-size: 0.5rem !important;
     letter-spacing: 0;
   }
-  
-  /* Force planet to shrink down without getting overridden and center it */
-  .night-planner-page .profile-page__earth-canvas {
+
+  .moon-phase-page .profile-page__earth-canvas {
     position: absolute !important;
     top: 30% !important;
     left: 50% !important;
@@ -210,10 +207,9 @@
 }
 
 @media (max-width: 640px) {
-  .night-dashboard-grid {
+  .moon-phase-dashboard-grid {
     grid-template-columns: 1fr;
   }
-  
 
   .night-details-grid {
     flex-direction: column;
