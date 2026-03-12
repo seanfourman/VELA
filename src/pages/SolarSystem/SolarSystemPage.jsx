@@ -442,7 +442,7 @@ function SolarSystemScene({ trackedBodyId, showOrbits, orbitSpeed, onSelect }) {
 
   return (
     <>
-      <color attach="background" args={["#040912"]} />
+      <color attach="background" args={["#000000"]} />
       <ambientLight intensity={0.22} />
       <pointLight
         position={[0, 0, 0]}

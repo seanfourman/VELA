@@ -2,14 +2,7 @@
   position: relative;
   height: 100vh;
   box-sizing: border-box;
-  background:
-    radial-gradient(circle at top, rgba(255, 211, 110, 0.12), transparent 22%),
-    radial-gradient(
-      circle at 14% 18%,
-      rgba(87, 140, 255, 0.12),
-      transparent 24%
-    ),
-    linear-gradient(180deg, #020611, #040a17 45%, #050a16);
+  background: #000;
   overflow: hidden;
 }
 
