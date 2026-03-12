@@ -11,6 +11,7 @@ import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import velaTheme from "@/utils/muiTheme";
 import {
   computeMoonPhase,
+  isMoonPhaseSimulation,
   MOON_MARKS,
   useLiveMoonPhase,
   useMoonSliderEffects,
@@ -85,7 +86,9 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
   const [sliderFraction, setSliderFraction] = useState(actualMoon.fraction);
   const [isFollowingLiveMoon, setIsFollowingLiveMoon] = useState(true);
 
-  const isSimulating = !isFollowingLiveMoon;
+  const isSimulating =
+    !isFollowingLiveMoon &&
+    isMoonPhaseSimulation(sliderFraction, actualMoon.fraction);
   const activeFraction = isFollowingLiveMoon
     ? actualMoon.fraction
     : sliderFraction;
@@ -94,6 +97,15 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
   const handleSliderChange = (_event, value) => {
     setIsFollowingLiveMoon(false);
     setSliderFraction(Array.isArray(value) ? value[0] : value);
+  };
+
+  const handleSliderCommit = (_event, value) => {
+    const nextFraction = Array.isArray(value) ? value[0] : value;
+
+    if (!isMoonPhaseSimulation(nextFraction, actualMoon.fraction)) {
+      setIsFollowingLiveMoon(true);
+      setSliderFraction(actualMoon.fraction);
+    }
   };
 
   const handleResetToCurrent = () => {
@@ -203,6 +215,7 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
                 max={1}
                 step={0.001}
                 onChange={handleSliderChange}
+                onChangeCommitted={handleSliderCommit}
                 aria-label="Moon Phase Interactive Slider"
                 marks={MOON_MARKS}
                 className="moon-phase-slider"
@@ -230,6 +243,8 @@ function NightPlannerPage({ isLight, onNavigate, location, locationStatus }) {
                     px: 3,
                     py: 1,
                     background: "rgba(255, 255, 255, 0.04)",
+                    backdropFilter: "blur(14px)",
+                    WebkitBackdropFilter: "blur(14px)",
                     boxShadow: "0 4px 12px rgba(0, 0, 0, 0.12)",
                     transition: "all 0.2s ease",
                     visibility: isSimulating ? "visible" : "hidden",

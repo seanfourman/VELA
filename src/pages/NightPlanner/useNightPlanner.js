@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 const SYNODIC_MONTH_DAYS = 29.530588853;
 const PRIMARY_PHASE_WINDOW = 0.015;
-const LIVE_PHASE_THRESHOLD = 0.05;
+const LIVE_PHASE_THRESHOLD = 0.02;
 const RAD = Math.PI / 180;
 const EARTH_OBLIQUITY = RAD * 23.4397;
 const JULIAN_UNIX_EPOCH = 2440588;
@@ -409,6 +409,10 @@ function getObservationScore(moonlessRatio, moonIllumination) {
   return Math.max(0, Math.min(100, score));
 }
 
+function getIlluminationOnlyScore(moonIllumination) {
+  return Math.max(0, Math.min(100, Math.round(100 - moonIllumination)));
+}
+
 function getScoreLabel(score) {
   if (score >= 75) return "Excellent";
   if (score >= 50) return "Good";
@@ -535,7 +539,7 @@ function buildLiveObservationPlan(date, location, moonIllumination) {
 }
 
 function buildFallbackObservationPlan(moonIllumination, locationStatus) {
-  const score = Math.round((100 - moonIllumination) * 0.6);
+  const score = getIlluminationOnlyScore(moonIllumination);
   const recommendedTargets = getRecommendedTargets(
     moonIllumination <= 45 ? 0.45 : 0.2,
     moonIllumination,
@@ -558,7 +562,7 @@ function buildFallbackObservationPlan(moonIllumination, locationStatus) {
 }
 
 function buildSimulatedObservationPlan(moonIllumination) {
-  const score = Math.round((100 - moonIllumination) * 0.7);
+  const score = getIlluminationOnlyScore(moonIllumination);
   const recommendedTargets = getRecommendedTargets(
     moonIllumination <= 45 ? 0.5 : 0.2,
     moonIllumination,
