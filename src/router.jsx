@@ -6,6 +6,9 @@ import PageShell from "@/components/layout/PageShell";
 import AppLayout, { useAppLayoutContext } from "@/layouts/AppLayout";
 import AuthPage from "@/pages/Auth/AuthPage";
 import AdminPage from "@/pages/Admin/AdminPage";
+import DiscoverPage from "@/pages/Discover/DiscoverPage";
+import NightPlannerPage from "@/pages/NightPlanner/NightPlannerPage";
+import GearLabPage from "@/pages/GearLab/GearLabPage";
 import MapView from "@/pages/Map/MapView";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import SettingsPage from "@/pages/Settings/SettingsPage";
@@ -154,6 +157,27 @@ function AdminRoute() {
   );
 }
 
+function DiscoverRoute() {
+  useDisableThreeDMode();
+  const { isLight, navigate } = useAppLayoutContext();
+
+  return <DiscoverPage isLight={isLight} onNavigate={navigate} />;
+}
+
+function NightPlannerRoute() {
+  useDisableThreeDMode();
+  const { isLight, navigate } = useAppLayoutContext();
+
+  return <NightPlannerPage isLight={isLight} onNavigate={navigate} />;
+}
+
+function GearLabRoute() {
+  useDisableThreeDMode();
+  const { isLight, navigate } = useAppLayoutContext();
+
+  return <GearLabPage isLight={isLight} onNavigate={navigate} />;
+}
+
 function SolarSystemRoute() {
   useDisableThreeDMode();
 
@@ -191,6 +215,9 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <MapRoute /> },
       { path: "auth", element: <AuthRoute /> },
+      { path: "discover", element: <DiscoverRoute /> },
+      { path: "night-planner", element: <NightPlannerRoute /> },
+      { path: "gear-lab", element: <GearLabRoute /> },
       { path: "profile", element: <ProfileRoute /> },
       { path: "admin", element: <AdminRoute /> },
       { path: "settings", element: <SettingsRoute /> },

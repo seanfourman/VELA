@@ -6,7 +6,7 @@ import {
   LinearMipmapLinearFilter,
   SRGBColorSpace,
 } from "three";
-import moonMap from "@/assets/planets/2k_moon.jpg";
+import neptuneMap from "@/assets/planets/2k_neptune.jpg";
 
 const tuneTexture = (baseTexture, anisotropy = 4) => {
   if (!baseTexture) return baseTexture;
@@ -19,39 +19,27 @@ const tuneTexture = (baseTexture, anisotropy = 4) => {
   return cloned;
 };
 
-function MoonSurface({ textureUrl }) {
+function NeptuneSurface({ textureUrl }) {
   const baseTexture = useTexture(textureUrl);
   const surfaceMap = useMemo(() => tuneTexture(baseTexture, 6), [baseTexture]);
   const meshRef = useRef(null);
 
   useFrame((_, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.06 * delta;
+      meshRef.current.rotation.y += 0.08 * delta;
     }
   });
 
   return (
     <mesh ref={meshRef}>
       <sphereGeometry args={[1, 64, 64]} />
-      <meshStandardMaterial map={surfaceMap} roughness={0.9} metalness={0.05} />
+      <meshStandardMaterial map={surfaceMap} roughness={0.7} metalness={0.1} />
     </mesh>
   );
 }
 
-export default function MoonGlobe({ phaseFraction = 0.5, className }) {
-  // Compute light position based on the moon phase fraction (0 to 1).
-  // 0 = New Moon (light from behind)
-  // 0.25 = First Quarter (light from right)
-  // 0.5 = Full Moon (light from front)
-  // 0.75 = Last Quarter (light from left)
-  const lightPos = useMemo(() => {
-    const angle = phaseFraction * Math.PI * 2;
-    const distance = 5;
-    const x = Math.sin(angle) * distance;
-    const z = -Math.cos(angle) * distance;
-    // Add a slight top-down angle so craters cast slight shadows even at full moon
-    return [x, 0.4, z];
-  }, [phaseFraction]);
+export default function NeptuneGlobe({ variant = "night", className }) {
+  const isDay = variant === "day";
 
   return (
     <Canvas
@@ -63,24 +51,17 @@ export default function MoonGlobe({ phaseFraction = 0.5, className }) {
         gl.setClearColor(0x000000, 0);
       }}
     >
-      {/* Very dim ambient light so the dark side is barely visible */}
-      <ambientLight intensity={0.03} />
-      
-      {/* Main sun light casting the phase */}
+      <ambientLight intensity={isDay ? 0.75 : 0.4} />
       <directionalLight
-        position={lightPos}
-        intensity={1.8}
+        position={[3, 2, 2]}
+        intensity={isDay ? 1.1 : 0.8}
       />
-      
-      {/* Faint blueish fill light from Earth-shine (bounce light from Earth) */}
       <directionalLight
-        position={[-lightPos[0], -0.4, -lightPos[2]]}
-        intensity={0.05}
-        color="#88bbff"
+        position={[-3, -2, -1]}
+        intensity={isDay ? 0.35 : 0.2}
       />
-
       <Suspense fallback={null}>
-        <MoonSurface textureUrl={moonMap} />
+        <NeptuneSurface textureUrl={neptuneMap} />
       </Suspense>
     </Canvas>
   );

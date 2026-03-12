@@ -1,0 +1,109 @@
+/* ========================================
+   NIGHT PLANNER PAGE — Layout only
+   Background: see aurora.css
+   ======================================== */
+
+
+.night-planner-page .profile-page__content {
+  max-width: 900px;
+}
+
+.night-section {
+  padding: 28px 24px !important;
+}
+
+/* ---- Top row: score + moon ---- */
+.night-top-row {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ---- Score ring ---- */
+.night-score-ring {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 200px;
+}
+
+.night-score-ring__inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---- Stat grid ---- */
+.night-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* ---- Twilight ---- */
+.night-twilight {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-left: 4px;
+}
+
+.night-twilight-step {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 18px;
+}
+
+.night-twilight-step:last-child {
+  padding-bottom: 0;
+}
+
+.night-twilight-step__indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.night-twilight-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.night-twilight-connector {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-top: 4px;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 640px) {
+  .night-top-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .night-score-ring {
+    align-self: center;
+  }
+
+  .night-stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .night-section {
+    padding: 20px 16px !important;
+  }
+}

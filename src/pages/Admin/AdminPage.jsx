@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import PageShell from "@/components/layout/PageShell";
-import MoonGlobe from "@/components/planets/MoonGlobe";
+import NeptuneGlobe from "@/components/planets/NeptuneGlobe";
 import showNotification from "@/utils/notifications";
 import {
   deleteRecommendation,
@@ -758,7 +758,7 @@ function AdminPage({
   };
 
   const hero = showPlanet ? (
-    <MoonGlobe
+    <NeptuneGlobe
       variant={isLight ? "day" : "night"}
       className="profile-page__earth-canvas"
     />

@@ -6,9 +6,9 @@ import velaLogoBlack from "@/assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
 
 const NAV_PLACEHOLDER_LINKS = [
-  { id: "placeholder-1", label: "Placeholder 1" },
-  { id: "placeholder-2", label: "Placeholder 2" },
-  { id: "placeholder-3", label: "Placeholder 3" },
+  { id: "discover", label: "Discover", path: "/discover" },
+  { id: "night-planner", label: "Night Planner", path: "/night-planner" },
+  { id: "gear-lab", label: "Gear Lab", path: "/gear-lab" },
   { id: "solar-system", label: "Solar System", path: "/solar-system" },
 ];
 
