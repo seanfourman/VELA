@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -11,22 +11,30 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
+import Slider from "@mui/material/Slider";
 import PageShell from "@/components/layout/PageShell";
 import MoonGlobe from "@/components/planets/MoonGlobe";
 import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
 import velaTheme from "@/utils/muiTheme";
-import "@/styles/aurora.css";
 import "./styles/NightPlannerPage.css";
 
 /* ---- Moon-phase calculation ---- */
-function computeMoonPhase() {
-  const now = new Date();
-  const knownNewMoon = new Date("2000-01-06T18:14:00Z");
+function computeMoonPhase(fractionOverride) {
   const synodicMonth = 29.53058770576;
-  const daysSince = (now - knownNewMoon) / 86400000;
-  const position =
-    ((daysSince % synodicMonth) + synodicMonth) % synodicMonth;
-  const fraction = position / synodicMonth;
+  let fraction;
+  let position;
+
+  if (fractionOverride !== undefined) {
+    fraction = fractionOverride;
+    position = fraction * synodicMonth;
+  } else {
+    const now = new Date();
+    const knownNewMoon = new Date("2000-01-06T18:14:00Z");
+    const daysSince = (now - knownNewMoon) / 86400000;
+    position = ((daysSince % synodicMonth) + synodicMonth) % synodicMonth;
+    fraction = position / synodicMonth;
+  }
+
   const illumination = Math.round(
     ((1 - Math.cos(fraction * 2 * Math.PI)) / 2) * 100,
   );
@@ -42,30 +50,10 @@ function computeMoonPhase() {
   else if (fraction < 0.9375) name = "Waning Crescent";
   else name = "New Moon";
 
-  const emoji =
-    fraction < 0.0625
-      ? "🌑"
-      : fraction < 0.1875
-        ? "🌒"
-        : fraction < 0.3125
-          ? "🌓"
-          : fraction < 0.4375
-            ? "🌔"
-            : fraction < 0.5625
-              ? "🌕"
-              : fraction < 0.6875
-                ? "🌖"
-                : fraction < 0.8125
-                  ? "🌗"
-                  : fraction < 0.9375
-                    ? "🌘"
-                    : "🌑";
-
   return {
     fraction,
     illumination,
     name,
-    emoji,
     dayInCycle: Math.round(position),
   };
 }
@@ -82,31 +70,26 @@ function computeStargazingScore(moonIllumination) {
 const TWILIGHT_STAGES = [
   {
     label: "Sunset",
-    icon: "🌅",
     description: "The Sun dips below the horizon.",
     color: "#ff8a65",
   },
   {
     label: "Civil Twilight",
-    icon: "🌇",
     description: "Sky is bright. Planets like Venus become visible.",
     color: "#ffab40",
   },
   {
     label: "Nautical Twilight",
-    icon: "🌆",
     description: "Horizon fades. Brighter stars and constellations appear.",
     color: "#7e57c2",
   },
   {
     label: "Astro Twilight",
-    icon: "🌌",
     description: "Sky is nearly dark. Faint objects start to show.",
     color: "#5c6bc0",
   },
   {
     label: "Full Night",
-    icon: "✨",
     description:
       "True darkness — ideal for deep-sky targets, meteor showers, and the Milky Way.",
     color: "#26c6da",
@@ -150,101 +133,12 @@ const ExpandChevron = () => (
   </svg>
 );
 
-function ScoreRing({ score }) {
-  const color =
-    score >= 75 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
-  const label =
-    score >= 75
-      ? "Excellent"
-      : score >= 50
-        ? "Good"
-        : score >= 25
-          ? "Fair"
-          : "Poor";
-  return (
-    <Box className="night-score-ring">
-      <Box sx={{ position: "relative", display: "inline-flex" }}>
-        <CircularProgress
-          variant="determinate"
-          value={100}
-          size={180}
-          thickness={3}
-          sx={{ color: "rgba(255,255,255,0.08)", position: "absolute" }}
-        />
-        <CircularProgress
-          variant="determinate"
-          value={score}
-          size={180}
-          thickness={3}
-          sx={{ color, filter: `drop-shadow(0 0 8px ${color}66)` }}
-        />
-        <Box className="night-score-ring__inner">
-          <Typography sx={{ fontSize: "2.8rem", fontWeight: 700, color, lineHeight: 1 }}>
-            {score}
-          </Typography>
-          <Typography sx={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.55)", mt: 0.5 }}>
-            {label}
-          </Typography>
-        </Box>
-      </Box>
-      <Typography sx={{ mt: 1.5, fontSize: "0.85rem", color: "rgba(255,255,255,0.55)", textAlign: "center" }}>
-        Stargazing Score
-      </Typography>
-    </Box>
-  );
-}
-
-function MoonPhaseWidget({ moon }) {
-  return (
-    <Card sx={{ background: "rgba(255,255,255,0.05)" }}>
-      <CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <Typography sx={{ fontSize: "3rem", lineHeight: 1 }}>{moon.emoji}</Typography>
-          <Box>
-            <Typography variant="h6" sx={{ fontSize: "1rem" }}>
-              {moon.name}
-            </Typography>
-            <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8rem" }}>
-              Day {moon.dayInCycle} of cycle
-            </Typography>
-          </Box>
-        </Box>
-        <Box sx={{ mb: 1 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-            <Typography sx={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.65)" }}>
-              Illumination
-            </Typography>
-            <Typography sx={{ fontSize: "0.8rem", fontWeight: 600 }}>
-              {moon.illumination}%
-            </Typography>
-          </Box>
-          <LinearProgress
-            variant="determinate"
-            value={moon.illumination}
-            sx={{
-              height: 6,
-              borderRadius: 3,
-              bgcolor: "rgba(255,255,255,0.08)",
-              "& .MuiLinearProgress-bar": {
-                borderRadius: 3,
-                bgcolor: moon.illumination > 60 ? "#f59e0b" : "#22c55e",
-              },
-            }}
-          />
-        </Box>
-        <Typography sx={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.45)", mt: 1 }}>
-          {moon.illumination > 60
-            ? "Bright Moon — stick to planets, double stars, and bright targets."
-            : "Dark sky conditions — great for deep-sky objects and the Milky Way."}
-        </Typography>
-      </CardContent>
-    </Card>
-  );
-}
-
 function TwilightTimeline() {
   return (
     <Box className="night-twilight">
+      <Typography variant="h6" sx={{ fontSize: "1.05rem", mb: 2 }}>
+        Twilight Phases
+      </Typography>
       {TWILIGHT_STAGES.map((stage, i) => (
         <Box key={stage.label} className="night-twilight-step">
           <Box className="night-twilight-step__indicator">
@@ -259,14 +153,11 @@ function TwilightTimeline() {
               <Box className="night-twilight-connector" />
             )}
           </Box>
-          <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.25 }}>
-              <Typography sx={{ fontSize: "1.1rem" }}>{stage.icon}</Typography>
-              <Typography sx={{ fontWeight: 600, fontSize: "0.88rem" }}>
-                {stage.label}
-              </Typography>
-            </Box>
-            <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.78rem", lineHeight: 1.45 }}>
+          <Box sx={{ flex: 1, pb: 1 }}>
+            <Typography sx={{ fontWeight: 600, fontSize: "0.9rem", mb: 0.25 }}>
+              {stage.label}
+            </Typography>
+            <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8rem", lineHeight: 1.45 }}>
               {stage.description}
             </Typography>
           </Box>
@@ -276,9 +167,53 @@ function TwilightTimeline() {
   );
 }
 
+function StatBox({ label, value, subtext, highlightColor }) {
+  return (
+    <Card sx={{ background: "rgba(255,255,255,0.03)", height: "100%" }}>
+      <CardContent sx={{ p: 3, display: "flex", flexDirection: "column", height: "100%", justifyContent: "center" }}>
+        <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8rem", textTransform: "uppercase", letterSpacing: "0.05em", mb: 1 }}>
+          {label}
+        </Typography>
+        <Typography sx={{ fontSize: "2rem", fontWeight: 700, color: highlightColor || "#fff", lineHeight: 1.1, mb: 0.5 }}>
+          {value}
+        </Typography>
+        {subtext && (
+          <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.8rem", mt: "auto", pt: 1 }}>
+            {subtext}
+          </Typography>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+const MOON_MARKS = Array.from({ length: 101 }).map((_, i) => {
+  const val = i / 100;
+  // Major phase ticks
+  if (i === 0 || i === 100) return { value: val, label: i === 0 ? "New" : "" };
+  if (i === 12) return { value: val, label: "Waxing" };
+  if (i === 25) return { value: val, label: "1st Qtr" };
+  if (i === 38) return { value: val, label: "Gibbous" };
+  if (i === 50) return { value: val, label: "Full" };
+  if (i === 62) return { value: val, label: "Gibbous" };
+  if (i === 75) return { value: val, label: "3rd Qtr" };
+  if (i === 88) return { value: val, label: "Waning" };
+  
+  // Minor ticks
+  return { value: val };
+});
+
 function NightPlannerPage({ isLight, onNavigate }) {
   const showGlobe = useMemo(() => isProbablyHardwareAccelerated(), []);
-  const moon = useMemo(() => computeMoonPhase(), []);
+  
+  // Actual real-world moon phase
+  const actualMoon = useMemo(() => computeMoonPhase(), []);
+  
+  // Interactive slider state
+  const [sliderFraction, setSliderFraction] = useState(actualMoon.fraction);
+  
+  // Re-calculate derived data based on the interactive slider
+  const moon = useMemo(() => computeMoonPhase(sliderFraction), [sliderFraction]);
+  
   const score = useMemo(
     () => computeStargazingScore(moon.illumination),
     [moon.illumination],
@@ -291,122 +226,154 @@ function NightPlannerPage({ isLight, onNavigate }) {
     />
   ) : null;
 
+  const scoreColor = score >= 75 ? "#22c55e" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const scoreLabel = score >= 75 ? "Excellent" : score >= 50 ? "Good" : score >= 25 ? "Fair" : "Poor conditions";
+  
+  const bestWindow = moon.illumination > 60 ? "After moonset" : "All night";
+  const recommendedTarget = moon.illumination > 60 ? "Planets & Bright Stars" : "Deep-Sky Objects";
+
   return (
     <ThemeProvider theme={velaTheme}>
       <PageShell
-        title="Night Planner"
-        subtitle="Check tonight's conditions and plan your stargazing session."
+        title="" // We handle the title manually via the huge hero text
+        subtitle=""
         isLight={isLight}
         onNavigate={onNavigate}
         hero={hero}
         className="night-planner-page"
       >
-        {/* Score + Moon row */}
-        <section className="profile-card glass-panel glass-panel-elevated night-section">
-          <Box className="night-top-row">
-            <ScoreRing score={score} />
-            <Box sx={{ flex: 1, minWidth: 260 }}>
-              <MoonPhaseWidget moon={moon} />
-            </Box>
-          </Box>
-        </section>
-
-        <Divider sx={{ my: 3, borderColor: "rgba(255,255,255,0.08)" }} />
-
-        {/* Conditions summary */}
-        <section className="profile-card glass-panel glass-panel-elevated night-section">
-          <Typography variant="h5" sx={{ mb: 0.5 }}>
-            Tonight at a Glance
+        {/* Massive Hero Title */}
+        <Box sx={{ textAlign: "center", pt: 4, pb: 6, width: "100%" }}>
+          <Typography 
+            component="h1" 
+            sx={{ 
+              fontSize: "clamp(3rem, 8vw, 6rem)", 
+              fontWeight: 800, 
+              letterSpacing: "-0.03em",
+              lineHeight: 1,
+              background: "linear-gradient(to bottom, #ffffff 0%, rgba(255,255,255,0.6) 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent"
+            }}
+          >
+            {moon.name}
           </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.85rem", mb: 2 }}>
-            Quick stats for your stargazing session.
+          <Typography sx={{ color: "rgba(255,255,255,0.5)", fontSize: "1.1rem", mt: 2, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+            Day {moon.dayInCycle} of lunar cycle
           </Typography>
-          <Box className="night-stat-grid">
-            {[
-              {
-                label: "Moon Phase",
-                value: moon.name,
-                icon: moon.emoji,
-              },
-              {
-                label: "Illumination",
-                value: `${moon.illumination}%`,
-                icon: "💡",
-              },
-              {
-                label: "Best Window",
-                value:
-                  moon.illumination > 60
-                    ? "After moonset"
-                    : "All night",
-                icon: "🕐",
-              },
-              {
-                label: "Recommended",
-                value:
-                  moon.illumination > 60
-                    ? "Planets & Moon"
-                    : "Deep-sky objects",
-                icon: "🎯",
-              },
-            ].map((stat) => (
-              <Card
-                key={stat.label}
-                sx={{ background: "rgba(255,255,255,0.04)", textAlign: "center" }}
+
+          {/* Interactive Moon Slider (Ruler style) */}
+          <Box 
+            sx={{ 
+              mt: 6, 
+              mb: 4, 
+              position: "relative",
+              // Break out of container to span full screen width
+              width: "100vw", 
+              left: "50%",
+              transform: "translateX(-50%)",
+              px: { xs: 4, md: 8 } 
+            }}
+          >
+            <Slider
+              value={sliderFraction}
+              min={0}
+              max={1}
+              step={0.001}
+              onChange={(e, val) => setSliderFraction(val)}
+              aria-label="Moon Phase Interactive Slider"
+              marks={MOON_MARKS}
+              className="moon-phase-slider"
+            />
+            {Math.abs(sliderFraction - actualMoon.fraction) > 0.05 && (
+              <Typography 
+                onClick={() => setSliderFraction(actualMoon.fraction)}
+                sx={{ 
+                  position: "absolute", 
+                  top: -24, 
+                  right: { xs: 32, md: 64 }, 
+                  fontSize: "0.75rem", 
+                  color: "#aaddff", 
+                  cursor: "pointer", 
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  "&:hover": { textDecoration: "underline" } 
+                }}
               >
-                <CardContent sx={{ py: 2 }}>
-                  <Typography sx={{ fontSize: "1.6rem", mb: 0.75 }}>
-                    {stat.icon}
-                  </Typography>
-                  <Typography sx={{ fontWeight: 600, fontSize: "0.95rem", mb: 0.25 }}>
-                    {stat.value}
-                  </Typography>
-                  <Typography sx={{ color: "rgba(255,255,255,0.45)", fontSize: "0.75rem" }}>
-                    {stat.label}
-                  </Typography>
-                </CardContent>
-              </Card>
-            ))}
+                Reset to Current
+              </Typography>
+            )}
           </Box>
-        </section>
+        </Box>
 
-        <Divider sx={{ my: 3, borderColor: "rgba(255,255,255,0.08)" }} />
-
-        {/* Twilight timeline */}
-        <section className="profile-card glass-panel glass-panel-elevated night-section">
-          <Typography variant="h5" sx={{ mb: 0.5 }}>
-            Twilight Phases
-          </Typography>
-          <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.85rem", mb: 2.5 }}>
-            How total darkness unfolds after sunset.
-          </Typography>
-          <TwilightTimeline />
-        </section>
-
-        <Divider sx={{ my: 3, borderColor: "rgba(255,255,255,0.08)" }} />
-
-        {/* Tips */}
-        <section className="profile-card glass-panel glass-panel-elevated night-section">
-          <Typography variant="h5" sx={{ mb: 2 }}>
-            Stargazing Tips
-          </Typography>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-            {TIPS.map((tip) => (
-              <Accordion key={tip.title} disableGutters>
-                <AccordionSummary expandIcon={<ExpandChevron />}>
-                  <Typography sx={{ fontWeight: 500, fontSize: "0.9rem" }}>
-                    {tip.title}
-                  </Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Typography sx={{ color: "rgba(255,255,255,0.7)", fontSize: "0.84rem", lineHeight: 1.6 }}>
-                    {tip.content}
-                  </Typography>
-                </AccordionDetails>
-              </Accordion>
-            ))}
+        {/* Professional Data Grid */}
+        <Box className="night-dashboard-grid">
+          <Box className="night-grid-item night-grid-item--tall">
+            <StatBox 
+              label="Stargazing Score" 
+              value={`${score}/100`} 
+              subtext={`Conditions are rated as ${scoreLabel.toLowerCase()} based on lunar illumination and time of night.`}
+              highlightColor={scoreColor}
+            />
           </Box>
-        </section>
+          <Box className="night-grid-item">
+            <StatBox 
+              label="Illumination" 
+              value={`${moon.illumination}%`} 
+              subtext={moon.illumination > 60 ? "High lunar glare expected." : "Dark sky conditions."}
+            />
+          </Box>
+          <Box className="night-grid-item">
+            <StatBox 
+              label="Optimum Window" 
+              value={bestWindow} 
+            />
+          </Box>
+          <Box className="night-grid-item night-grid-item--wide">
+            <StatBox 
+              label="Recommended Targets" 
+              value={recommendedTarget} 
+              subtext={moon.illumination > 60 
+                ? "The moon's brightness washes out faint nebulae. Stick to point sources." 
+                : "Perfect conditions for hunting galaxies, star clusters, and the Milky Way."}
+            />
+          </Box>
+        </Box>
+
+        <Divider sx={{ my: 4, borderColor: "rgba(255,255,255,0.08)" }} />
+
+        {/* Lower Details: Twilight & Tips */}
+        <Box className="night-details-grid">
+          <Card sx={{ background: "rgba(255,255,255,0.02)", flex: 1 }}>
+            <CardContent sx={{ p: 4 }}>
+              <TwilightTimeline />
+            </CardContent>
+          </Card>
+
+          <Card sx={{ background: "rgba(255,255,255,0.02)", flex: 1.5 }}>
+            <CardContent sx={{ p: 4 }}>
+              <Typography variant="h6" sx={{ fontSize: "1.05rem", mb: 2 }}>
+                Observer's Log
+              </Typography>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {TIPS.map((tip) => (
+                  <Accordion key={tip.title} disableGutters>
+                    <AccordionSummary expandIcon={<ExpandChevron />}>
+                      <Typography sx={{ fontWeight: 500, fontSize: "0.9rem" }}>
+                        {tip.title}
+                      </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography sx={{ color: "rgba(255,255,255,0.65)", fontSize: "0.85rem", lineHeight: 1.6 }}>
+                        {tip.content}
+                      </Typography>
+                    </AccordionDetails>
+                  </Accordion>
+                ))}
+              </Box>
+            </CardContent>
+          </Card>
+        </Box>
       </PageShell>
     </ThemeProvider>
   );
