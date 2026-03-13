@@ -24,8 +24,24 @@ const FULL_VISIBLE_WINDOW = {
   width: VIEWBOX_WIDTH,
   height: VIEWBOX_HEIGHT,
 };
+const MOBILE_CONTENT_PADDING_X = 2;
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const CONSTELLATION_CONTENT_BOUNDS = CONSTELLATIONS.reduce(
+  (bounds, constellation) => {
+    constellation.stars.forEach((star) => {
+      bounds.minX = Math.min(bounds.minX, star.x);
+      bounds.maxX = Math.max(bounds.maxX, star.x);
+    });
+
+    bounds.minX = Math.min(bounds.minX, constellation.label.x);
+    bounds.maxX = Math.max(bounds.maxX, constellation.label.x);
+
+    return bounds;
+  },
+  { minX: VIEWBOX_WIDTH, maxX: 0 },
+);
 
 const getViewportSize = () => {
   if (typeof window === "undefined") {
@@ -70,20 +86,52 @@ const getVisibleWindow = (isMobile, viewportSize) => {
   };
 };
 
-const clampPan = (pan, zoom, visibleWindow = FULL_VISIBLE_WINDOW) => ({
-  x: clamp(
-    pan.x,
-    visibleWindow.x + visibleWindow.width - VIEWBOX_WIDTH * zoom,
-    visibleWindow.x,
-  ),
-  y: clamp(
-    pan.y,
-    visibleWindow.y + visibleWindow.height - VIEWBOX_HEIGHT * zoom,
-    visibleWindow.y,
-  ),
-});
+const clampPan = (
+  pan,
+  zoom,
+  visibleWindow = FULL_VISIBLE_WINDOW,
+  constrainToConstellationContent = false,
+) => {
+  const minPanX = visibleWindow.x + visibleWindow.width - VIEWBOX_WIDTH * zoom;
+  const maxPanX = visibleWindow.x;
+  const minPanY = visibleWindow.y + visibleWindow.height - VIEWBOX_HEIGHT * zoom;
+  const maxPanY = visibleWindow.y;
 
-const getCenteredPan = (zoom, visibleWindow = FULL_VISIBLE_WINDOW) =>
+  if (!constrainToConstellationContent) {
+    return {
+      x: clamp(pan.x, minPanX, maxPanX),
+      y: clamp(pan.y, minPanY, maxPanY),
+    };
+  }
+
+  const contentMinX = Math.max(
+    0,
+    CONSTELLATION_CONTENT_BOUNDS.minX - MOBILE_CONTENT_PADDING_X,
+  );
+  const contentMaxX = Math.min(
+    VIEWBOX_WIDTH,
+    CONSTELLATION_CONTENT_BOUNDS.maxX + MOBILE_CONTENT_PADDING_X,
+  );
+  const constrainedMinPanX = Math.max(
+    minPanX,
+    visibleWindow.x + visibleWindow.width - contentMaxX * zoom,
+  );
+  const constrainedMaxPanX = Math.min(
+    maxPanX,
+    visibleWindow.x - contentMinX * zoom,
+  );
+
+  return {
+    x: clamp(pan.x, constrainedMinPanX, constrainedMaxPanX),
+    y: clamp(pan.y, minPanY, maxPanY),
+  };
+};
+
+const getCenteredPan = (
+  zoom,
+  visibleWindow = FULL_VISIBLE_WINDOW,
+  constrainToConstellationContent = false,
+) =>
   clampPan(
     {
       x: VIEW_CENTER.x - VIEW_CENTER.x * zoom,
@@ -91,6 +139,7 @@ const getCenteredPan = (zoom, visibleWindow = FULL_VISIBLE_WINDOW) =>
     },
     zoom,
     visibleWindow,
+    constrainToConstellationContent,
   );
 
 const getLabelTextAnchor = (align) => {
@@ -103,6 +152,7 @@ const getConstellationFocusPan = (
   constellation,
   zoom,
   visibleWindow = FULL_VISIBLE_WINDOW,
+  constrainToConstellationContent = false,
 ) => {
   const centroid = getConstellationCentroid(constellation);
   return clampPan(
@@ -112,6 +162,7 @@ const getConstellationFocusPan = (
     },
     zoom,
     visibleWindow,
+    constrainToConstellationContent,
   );
 };
 
@@ -242,10 +293,10 @@ function ConstellationsPage() {
   const [selectedId, setSelectedId] = useState(DEFAULT_SELECTED_ID);
   const [hoveredId, setHoveredId] = useState("");
   const [pan, setPan] = useState(() =>
-    getCenteredPan(FIXED_VIEW_SCALE, initialVisibleWindow),
+    getCenteredPan(FIXED_VIEW_SCALE, initialVisibleWindow, initialIsMobile),
   );
   const [targetPan, setTargetPan] = useState(() =>
-    getCenteredPan(FIXED_VIEW_SCALE, initialVisibleWindow),
+    getCenteredPan(FIXED_VIEW_SCALE, initialVisibleWindow, initialIsMobile),
   );
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -285,9 +336,11 @@ function ConstellationsPage() {
 
       setViewportSize(nextViewportSize);
       setIsMobile(nextIsMobile);
-      setPan((current) => clampPan(current, FIXED_VIEW_SCALE, nextVisibleWindow));
+      setPan((current) =>
+        clampPan(current, FIXED_VIEW_SCALE, nextVisibleWindow, nextIsMobile),
+      );
       setTargetPan((current) =>
-        clampPan(current, FIXED_VIEW_SCALE, nextVisibleWindow),
+        clampPan(current, FIXED_VIEW_SCALE, nextVisibleWindow, nextIsMobile),
       );
     };
 
@@ -384,7 +437,12 @@ function ConstellationsPage() {
     if (!focus) return;
 
     setTargetPan(
-      getConstellationFocusPan(nextConstellation, FIXED_VIEW_SCALE, visibleWindow),
+      getConstellationFocusPan(
+        nextConstellation,
+        FIXED_VIEW_SCALE,
+        visibleWindow,
+        isMobile,
+      ),
     );
   };
 
@@ -447,6 +505,7 @@ function ConstellationsPage() {
       },
       FIXED_VIEW_SCALE,
       visibleWindow,
+      isMobile,
     );
 
     setPan(nextPan);
