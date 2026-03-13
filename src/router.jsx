@@ -7,6 +7,7 @@ import AppLayout, { useAppLayoutContext } from "@/layouts/AppLayout";
 import AuthPage from "@/pages/Auth/AuthPage";
 import AdminPage from "@/pages/Admin/AdminPage";
 import ConstellationsPage from "@/pages/Constellations/ConstellationsPage";
+import DiscoveryPage from "@/pages/Discovery/DiscoveryPage";
 import MapView from "@/pages/Map/MapView";
 import MoonPhasePage from "@/pages/MoonPhase/MoonPhasePage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
@@ -71,6 +72,34 @@ function AuthRoute() {
   const { auth, isLight, navigate } = useAppLayoutContext();
 
   return <AuthPage auth={auth} isLight={isLight} onNavigate={navigate} />;
+}
+
+function DiscoveryRoute() {
+  useDisableThreeDMode();
+  const {
+    auth,
+    isLight,
+    navigate,
+    location,
+    locationStatus,
+    stargazeLocations,
+    starPartyEvents,
+    settings,
+  } = useAppLayoutContext();
+
+  return (
+    <DiscoveryPage
+      auth={auth}
+      isLight={isLight}
+      onNavigate={navigate}
+      location={location}
+      locationStatus={locationStatus}
+      stargazeLocations={stargazeLocations}
+      starPartyEvents={starPartyEvents}
+      directionsProvider={settings.directionsProvider}
+      defaultRadiusKm={settings.searchDistance}
+    />
+  );
 }
 
 function ProfileRoute() {
@@ -213,7 +242,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <MapRoute /> },
       { path: "auth", element: <AuthRoute /> },
-      { path: "discover", element: <Navigate to="/" replace /> },
+      { path: "discover", element: <DiscoveryRoute /> },
       { path: "gear-lab", element: <Navigate to="/" replace /> },
       { path: "moon-phase", element: <MoonPhaseRoute /> },
       { path: "constellations", element: <ConstellationsRoute /> },
