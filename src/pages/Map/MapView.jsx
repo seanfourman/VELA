@@ -34,6 +34,7 @@ import {
   LOCATION_ZOOM,
   LONG_PRESS_MS,
   MAP_TILES,
+  MARKER_VISIBILITY_ZOOM,
   MAX_ZOOM,
   MIN_ZOOM,
 } from "./MapView/core/mapConfig";
@@ -42,6 +43,7 @@ import {
   LongPressHandler,
   MapAnimator,
   MapController,
+  MapZoomTracker,
   PopupStateHandler,
 } from "./MapView/core/MapInteractionHandlers";
 import {
@@ -81,6 +83,7 @@ const MapView = forwardRef(function MapView(
   const [isThreeDMode, setIsThreeDMode] = useState(false);
   const [isSpaceWeatherOpen, setIsSpaceWeatherOpen] = useState(false);
   const [spaceWeatherFocus, setSpaceWeatherFocus] = useState(null);
+  const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
   const handledMapSelectionRef = useRef(null);
   const spaceWeather = useSpaceWeather();
 
@@ -114,6 +117,7 @@ const MapView = forwardRef(function MapView(
     !isThreeDMode &&
     mapType === "satellite" &&
     satelliteReadableShadowsEnabled;
+  const showZoomedMapMarkers = mapZoom >= MARKER_VISIBILITY_ZOOM;
   const visibleStarPartyEvents = useMemo(() => {
     if (!Array.isArray(starPartyEvents)) return [];
     return starPartyEvents.filter((event) => {
@@ -388,6 +392,7 @@ const MapView = forwardRef(function MapView(
         )}
 
         <MapController mapRef={mapRef} />
+        <MapZoomTracker onZoomChange={setMapZoom} />
         {!isThreeDMode && (
           <>
             <DoubleClickHandler onDoubleClick={handlers.handleDoubleClick} />
@@ -470,68 +475,72 @@ const MapView = forwardRef(function MapView(
               }
               centerOnCoords={handlers.centerOnCoords}
             />
-            <StargazeMarkers
-              spots={derived.visibleStargazeLocations}
-              isAuthenticated={isAuthenticated}
-              isMobileView={ui.isMobileView}
-              favoriteSpotKeys={derived.favoriteSpotKeys}
-              enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
-              selectedDarkSpot={state.selectedDarkSpot}
-              stargazeMarkerRefs={stargazeMarkerRefs}
-              mapRef={mapRef}
-              setActiveStargazeId={handlers.setActiveStargazeId}
-              centerOnCoords={handlers.centerOnCoords}
-              openStargazePanel={handlers.openStargazePanel}
-              handleToggleStargazeFavorite={handlers.handleToggleStargazeFavorite}
-              handleToggleStargazeTarget={handlers.handleToggleStargazeTarget}
-              handleShareLocation={handlers.handleShareLocation}
-              buildDirectionsUrl={handlers.buildDirectionsUrl}
-              getDirectionsOrigin={handlers.getDirectionsOrigin}
-              getSpotKey={handlers.getSpotKey}
-              onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
-            />
-            <DarkSpotMarkers
-              darkSpots={state.darkSpots}
-              selectedDarkSpot={state.selectedDarkSpot}
-              favoriteSpotKeys={derived.favoriteSpotKeys}
-              enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
-              isAuthenticated={isAuthenticated}
-              centerOnCoords={handlers.centerOnCoords}
-              handleToggleDarkSpotFavorite={handlers.handleToggleDarkSpotFavorite}
-              handleToggleDarkSpotTarget={handlers.handleToggleDarkSpotTarget}
-              flashShareToggle={handlers.flashShareToggle}
-              handleShareLocation={handlers.handleShareLocation}
-              buildDirectionsUrl={handlers.buildDirectionsUrl}
-              getDirectionsOrigin={handlers.getDirectionsOrigin}
-              getSpotKey={handlers.getSpotKey}
-              onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
-            />
-            <FavoriteOnlyMarkers
-              favoriteOnlySpots={derived.favoriteOnlySpots}
-              enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
-              exitingFavoriteKeySet={derived.exitingFavoriteKeySet}
-              selectedDarkSpot={state.selectedDarkSpot}
-              isAuthenticated={isAuthenticated}
-              centerOnCoords={handlers.centerOnCoords}
-              handleRemoveFavoriteSpotAnimated={
-                handlers.handleRemoveFavoriteSpotAnimated
-              }
-              handleShareLocation={handlers.handleShareLocation}
-              buildDirectionsUrl={handlers.buildDirectionsUrl}
-              getDirectionsOrigin={handlers.getDirectionsOrigin}
-              setSelectedDarkSpot={handlers.setSelectedDarkSpot}
-              onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
-            />
-            <StarPartyMarkers
-              events={visibleStarPartyEvents}
-              isAuthenticated={isAuthenticated}
-              activeUserRsvpId={activeUserRsvpId}
-              centerOnCoords={handlers.centerOnCoords}
-              handleShareLocation={handlers.handleShareLocation}
-              buildDirectionsUrl={handlers.buildDirectionsUrl}
-              getDirectionsOrigin={handlers.getDirectionsOrigin}
-              onToggleRsvp={handleToggleEventRsvp}
-            />
+            {showZoomedMapMarkers ? (
+              <>
+                <StargazeMarkers
+                  spots={derived.visibleStargazeLocations}
+                  isAuthenticated={isAuthenticated}
+                  isMobileView={ui.isMobileView}
+                  favoriteSpotKeys={derived.favoriteSpotKeys}
+                  enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
+                  selectedDarkSpot={state.selectedDarkSpot}
+                  stargazeMarkerRefs={stargazeMarkerRefs}
+                  mapRef={mapRef}
+                  setActiveStargazeId={handlers.setActiveStargazeId}
+                  centerOnCoords={handlers.centerOnCoords}
+                  openStargazePanel={handlers.openStargazePanel}
+                  handleToggleStargazeFavorite={handlers.handleToggleStargazeFavorite}
+                  handleToggleStargazeTarget={handlers.handleToggleStargazeTarget}
+                  handleShareLocation={handlers.handleShareLocation}
+                  buildDirectionsUrl={handlers.buildDirectionsUrl}
+                  getDirectionsOrigin={handlers.getDirectionsOrigin}
+                  getSpotKey={handlers.getSpotKey}
+                  onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
+                />
+                <DarkSpotMarkers
+                  darkSpots={state.darkSpots}
+                  selectedDarkSpot={state.selectedDarkSpot}
+                  favoriteSpotKeys={derived.favoriteSpotKeys}
+                  enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
+                  isAuthenticated={isAuthenticated}
+                  centerOnCoords={handlers.centerOnCoords}
+                  handleToggleDarkSpotFavorite={handlers.handleToggleDarkSpotFavorite}
+                  handleToggleDarkSpotTarget={handlers.handleToggleDarkSpotTarget}
+                  flashShareToggle={handlers.flashShareToggle}
+                  handleShareLocation={handlers.handleShareLocation}
+                  buildDirectionsUrl={handlers.buildDirectionsUrl}
+                  getDirectionsOrigin={handlers.getDirectionsOrigin}
+                  getSpotKey={handlers.getSpotKey}
+                  onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
+                />
+                <FavoriteOnlyMarkers
+                  favoriteOnlySpots={derived.favoriteOnlySpots}
+                  enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
+                  exitingFavoriteKeySet={derived.exitingFavoriteKeySet}
+                  selectedDarkSpot={state.selectedDarkSpot}
+                  isAuthenticated={isAuthenticated}
+                  centerOnCoords={handlers.centerOnCoords}
+                  handleRemoveFavoriteSpotAnimated={
+                    handlers.handleRemoveFavoriteSpotAnimated
+                  }
+                  handleShareLocation={handlers.handleShareLocation}
+                  buildDirectionsUrl={handlers.buildDirectionsUrl}
+                  getDirectionsOrigin={handlers.getDirectionsOrigin}
+                  setSelectedDarkSpot={handlers.setSelectedDarkSpot}
+                  onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
+                />
+                <StarPartyMarkers
+                  events={visibleStarPartyEvents}
+                  isAuthenticated={isAuthenticated}
+                  activeUserRsvpId={activeUserRsvpId}
+                  centerOnCoords={handlers.centerOnCoords}
+                  handleShareLocation={handlers.handleShareLocation}
+                  buildDirectionsUrl={handlers.buildDirectionsUrl}
+                  getDirectionsOrigin={handlers.getDirectionsOrigin}
+                  onToggleRsvp={handleToggleEventRsvp}
+                />
+              </>
+            ) : null}
           </>
         )}
       </MapContainer>

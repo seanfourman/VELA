@@ -33,6 +33,20 @@ function MapController({ mapRef }) {
   return null;
 }
 
+function MapZoomTracker({ onZoomChange }) {
+  const map = useMapEvents({
+    zoomend: () => {
+      onZoomChange?.(map.getZoom());
+    },
+  });
+
+  useEffect(() => {
+    onZoomChange?.(map.getZoom());
+  }, [map, onZoomChange]);
+
+  return null;
+}
+
 function DoubleClickHandler({ onDoubleClick }) {
   useMapEvents({
     dblclick: (e) => {
@@ -160,6 +174,7 @@ function PopupStateHandler({ onPopupStateChange, onPopupClose }) {
 export {
   MapAnimator,
   MapController,
+  MapZoomTracker,
   DoubleClickHandler,
   LongPressHandler,
   PopupStateHandler,
