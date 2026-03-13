@@ -10,10 +10,10 @@ import {
 import "../SolarSystem/styles/SolarSystemPage.css";
 import "./styles/ConstellationsPage.css";
 
-const DEFAULT_SELECTED_ID = "vela";
 const FIXED_VIEW_SCALE = 1.16;
 const VIEW_EASING = 0.14;
 const PAN_EPSILON = 0.025;
+const DEFAULT_STAGE_ACCENT = "#8ecdf4";
 const VIEW_CENTER = {
   x: VIEWBOX_WIDTH / 2,
   y: VIEWBOX_HEIGHT / 2,
@@ -196,6 +196,19 @@ function ConstellationsPanelToggle({ open, mobile = false, onClick }) {
 }
 
 function ConstellationsPanelContent({ constellation, leadingStars }) {
+  if (!constellation) {
+    return (
+      <div className="constellations-detail">
+        <div className="constellations-detail__eyebrow">Star archive</div>
+        <h2 className="constellations-detail__title">Select a constellation</h2>
+        <p className="constellations-detail__headline">Nothing is focused yet.</p>
+        <p className="constellations-detail__description">
+          Tap or click any constellation on the map to inspect it here.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="constellations-detail">
       <div className="constellations-detail__eyebrow">Selected constellation</div>
@@ -290,7 +303,7 @@ function ConstellationsPage() {
   const dragRef = useRef(null);
   const suppressClickRef = useRef(false);
   const mobilePanelNudgeTimeoutRef = useRef(null);
-  const [selectedId, setSelectedId] = useState(DEFAULT_SELECTED_ID);
+  const [selectedId, setSelectedId] = useState("");
   const [hoveredId, setHoveredId] = useState("");
   const [pan, setPan] = useState(() =>
     getCenteredPan(FIXED_VIEW_SCALE, initialVisibleWindow, initialIsMobile),
@@ -307,15 +320,18 @@ function ConstellationsPage() {
 
   const backgroundStars = useMemo(() => buildAmbientStars(220, 23), []);
   const deepFieldStars = useMemo(() => buildAmbientStars(140, 71), []);
-  const selectedConstellation =
-    CONSTELLATIONS_BY_ID[selectedId] ?? CONSTELLATIONS_BY_ID[DEFAULT_SELECTED_ID];
+  const selectedConstellation = selectedId ? CONSTELLATIONS_BY_ID[selectedId] ?? null : null;
+  const accentConstellation =
+    (hoveredId ? CONSTELLATIONS_BY_ID[hoveredId] : null) ?? selectedConstellation;
   const visibleWindow = getVisibleWindow(isMobile, viewportSize);
   const leadingStars = useMemo(
     () =>
-      [...selectedConstellation.stars]
-        .sort((left, right) => right.size - left.size)
-        .slice(0, 4)
-        .map((star) => star.name),
+      selectedConstellation
+        ? [...selectedConstellation.stars]
+            .sort((left, right) => right.size - left.size)
+            .slice(0, 4)
+            .map((star) => star.name)
+        : [],
     [selectedConstellation],
   );
 
@@ -387,8 +403,8 @@ function ConstellationsPage() {
   const stageStyle = {
     "--pointer-x": pointer.x.toFixed(3),
     "--pointer-y": pointer.y.toFixed(3),
-    "--constellation-accent": selectedConstellation.accent,
-    "--constellation-accent-soft": `${selectedConstellation.accent}33`,
+    "--constellation-accent": accentConstellation?.accent ?? DEFAULT_STAGE_ACCENT,
+    "--constellation-accent-soft": `${accentConstellation?.accent ?? DEFAULT_STAGE_ACCENT}33`,
   };
 
   const updatePointerFromEvent = (event) => {
@@ -423,8 +439,14 @@ function ConstellationsPage() {
   };
 
   const selectConstellation = (id, { focus = true } = {}) => {
-    const nextConstellation =
-      CONSTELLATIONS_BY_ID[id] ?? CONSTELLATIONS_BY_ID[DEFAULT_SELECTED_ID];
+    const nextConstellation = CONSTELLATIONS_BY_ID[id];
+    if (!nextConstellation) {
+      setSelectedId("");
+      if (focus) {
+        setTargetPan(getCenteredPan(FIXED_VIEW_SCALE, visibleWindow, isMobile));
+      }
+      return;
+    }
 
     setSelectedId(nextConstellation.id);
 
@@ -627,7 +649,7 @@ function ConstellationsPage() {
                   const starLookup = Object.fromEntries(
                     constellation.stars.map((star) => [star.id, star]),
                   );
-                  const isSelected = constellation.id === selectedConstellation.id;
+                  const isSelected = constellation.id === selectedId;
                   const isHovered = constellation.id === hoveredId;
                   const isActive = isSelected || isHovered;
                   const centroid = getConstellationCentroid(constellation);
