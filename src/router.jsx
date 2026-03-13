@@ -56,6 +56,7 @@ function MapRoute() {
       starPartyEvents={starPartyEvents}
       directionsProvider={settings.directionsProvider}
       showRecommendedSpots={settings.showRecommendedSpots}
+      satelliteReadableShadowsEnabled={settings.satelliteReadableShadows}
       lightOverlayEnabled={settings.lightOverlayEnabled}
       onToggleLightOverlay={(next) =>
         handleUpdateSettings({ lightOverlayEnabled: next })

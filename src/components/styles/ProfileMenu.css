@@ -169,6 +169,20 @@
   opacity: 0.75;
 }
 
+.navbar.satellite.satellite-readable .profile-dropdown {
+  text-shadow: var(--navbar-readable-text-shadow);
+}
+
+.navbar.satellite.satellite-readable .profile-menu__icon,
+.navbar.satellite.satellite-readable .profile-admin-shortcut-icon {
+  filter: invert(1) var(--navbar-readable-icon-shadow);
+  opacity: 0.96;
+}
+
+.navbar.satellite.satellite-readable .profile-admin-shortcut::after {
+  text-shadow: var(--navbar-readable-text-shadow);
+}
+
 .profile-actions {
   display: flex;
   flex-direction: column;

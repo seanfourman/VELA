@@ -15,6 +15,7 @@ const NAV_LINKS = [
 function Navbar({
   mapType,
   forceLight = false,
+  satelliteReadableShadowsEnabled = true,
   auth,
   profile,
   isAdmin,
@@ -28,8 +29,17 @@ function Navbar({
       : window.location.pathname;
   const isHome = currentPath === "/";
   const isLight = isHome && (forceLight || mapType === "light");
+  const isSatellite = isHome && !forceLight && mapType === "satellite";
+  const isSatelliteReadable = isSatellite && satelliteReadableShadowsEnabled;
   const isAuthScreen = currentPath === "/auth";
   const logoSrc = !isHome ? velaLogo : isLight ? velaLogoBlack : velaLogo;
+  const navbarToneClasses = [
+    isLight ? "light" : "",
+    isSatellite ? "satellite" : "",
+    isSatelliteReadable ? "satellite-readable" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const mobileMenuRef = useRef(null);
@@ -121,8 +131,8 @@ function Navbar({
 
   return (
     <>
-      <div className={`navbar-blur ${isLight ? "light" : ""}`} />
-      <nav className={`navbar ${isLight ? "light" : ""}`}>
+      <div className={`navbar-blur${navbarToneClasses ? ` ${navbarToneClasses}` : ""}`} />
+      <nav className={`navbar${navbarToneClasses ? ` ${navbarToneClasses}` : ""}`}>
         <div className="navbar-left">
           <div className="profile-menu-container navbar-menu-container">
             <button

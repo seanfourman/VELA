@@ -39,6 +39,21 @@
   transform: rotate(180deg);
 }
 
+.map-container.satellite.satellite-readable .distance-toggle .label {
+  color: #ffffff;
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
+.map-container.satellite.satellite-readable .distance-toggle .chevron {
+  opacity: 0.92;
+  filter: var(--satellite-readable-icon-shadow);
+}
+
+.map-container.satellite.satellite-readable .distance-menu,
+.map-container.satellite.satellite-readable .menu-option {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
 .distance-menu {
   position: absolute;
   top: 100%;

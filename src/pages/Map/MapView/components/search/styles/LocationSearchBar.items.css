@@ -197,10 +197,14 @@
 .map-container.light .location-search__name,
 .map-container.light .location-search__meta,
 .map-container.light .location-search__coords,
-.map-container.satellite .location-search__name,
-.map-container.satellite .location-search__meta,
-.map-container.satellite .location-search__coords {
+.map-container.satellite.satellite-readable .location-search__name,
+.map-container.satellite.satellite-readable .location-search__meta,
+.map-container.satellite.satellite-readable .location-search__coords {
   text-shadow: var(--search-readable-text-shadow);
+}
+
+.map-container.satellite.satellite-readable .location-search__item-icon img {
+  filter: brightness(0) invert(1) var(--satellite-readable-icon-shadow);
 }
 
 .location-search__meta {

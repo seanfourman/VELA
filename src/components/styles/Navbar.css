@@ -32,6 +32,8 @@
   padding: 0 14px;
   background: none;
   z-index: 1000;
+  --navbar-readable-text-shadow: none;
+  --navbar-readable-icon-shadow: none;
 }
 
 .navbar-left,
@@ -159,6 +161,46 @@
 .navbar.light .navbar-link-group .nav-link-button:hover,
 .navbar.light .navbar-link-group .nav-link-button.is-active {
   color: #111111;
+}
+
+.navbar.satellite.satellite-readable {
+  --navbar-readable-text-shadow:
+    0 1px 1px rgba(2, 6, 23, 0.85),
+    0 0 10px rgba(2, 6, 23, 0.55);
+  --navbar-readable-icon-shadow:
+    drop-shadow(0 1px 1px rgba(2, 6, 23, 0.85))
+    drop-shadow(0 0 10px rgba(2, 6, 23, 0.45));
+}
+
+.navbar.satellite.satellite-readable .navbar-link-group .nav-link-button,
+.navbar.satellite.satellite-readable .navbar-mobile-link {
+  text-shadow:
+    var(--navbar-readable-text-shadow);
+}
+
+.navbar.satellite.satellite-readable .logo-img {
+  filter: var(--navbar-readable-icon-shadow);
+}
+
+.navbar.satellite.satellite-readable .auth-button,
+.navbar.satellite.satellite-readable .navbar-menu-toggle {
+  text-shadow:
+    var(--navbar-readable-text-shadow);
+}
+
+.navbar.satellite.satellite-readable .navbar-menu-toggle span {
+  box-shadow:
+    0 1px 1px rgba(2, 6, 23, 0.8),
+    0 0 8px rgba(2, 6, 23, 0.45);
+}
+
+.navbar-blur.satellite.satellite-readable {
+  background: linear-gradient(
+    to bottom,
+    rgba(2, 6, 23, 0.28) 0%,
+    rgba(2, 6, 23, 0.12) 45%,
+    transparent 100%
+  );
 }
 
 .navbar-menu-toggle {

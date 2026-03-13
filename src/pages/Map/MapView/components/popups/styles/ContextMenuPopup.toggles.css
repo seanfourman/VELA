@@ -218,6 +218,10 @@
   color: #ffffff;
 }
 
+.map-container.satellite.satellite-readable .target-toggle-label {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
 .target-toggle-icon {
   width: 22px;
   height: 22px;
@@ -245,4 +249,20 @@
 .context-menu-popup .target-toggle.active .target-toggle-icon,
 .context-menu-popup .favorite-toggle.active .favorite-toggle-icon {
   filter: brightness(0) invert(1);
+}
+
+.map-container.satellite.satellite-readable .target-toggle-icon,
+.map-container.satellite.satellite-readable .favorite-toggle-icon {
+  filter: var(--satellite-readable-icon-shadow);
+}
+
+.map-container.satellite.satellite-readable
+  .context-menu-popup
+  .target-toggle.active
+  .target-toggle-icon,
+.map-container.satellite.satellite-readable
+  .context-menu-popup
+  .favorite-toggle.active
+  .favorite-toggle-icon {
+  filter: brightness(0) invert(1) var(--satellite-readable-icon-shadow);
 }

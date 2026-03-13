@@ -37,6 +37,10 @@
   z-index: 1;
 }
 
+.map-container.satellite.satellite-readable .planet-info-card {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
 .planet-info-card.middle-offset {
   left: 325px;
 }
@@ -143,6 +147,10 @@
   filter: none;
 }
 
+.map-container.satellite.satellite-readable .planet-info-action-icon {
+  filter: brightness(0) invert(1) var(--satellite-readable-icon-shadow);
+}
+
 .planet-info-action-btn svg {
   width: 14px;
   height: 14px;
@@ -152,6 +160,10 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
+}
+
+.map-container.satellite.satellite-readable .planet-info-action-btn svg {
+  filter: var(--satellite-readable-icon-shadow);
 }
 
 .planet-info-action-label {

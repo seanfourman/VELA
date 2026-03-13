@@ -259,3 +259,8 @@
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.22);
 }
+
+.map-container.satellite.satellite-readable .stat-help,
+.map-container.satellite.satellite-readable .stat-help::after {
+  text-shadow: var(--satellite-readable-text-shadow);
+}

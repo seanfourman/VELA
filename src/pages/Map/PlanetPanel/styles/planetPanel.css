@@ -138,6 +138,10 @@
   background: rgba(185, 28, 28, 0.12);
 }
 
+.map-container.satellite.satellite-readable .planet-empty {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
 /* Toggle */
 .planet-panel-toggle {
   position: absolute;
@@ -194,6 +198,16 @@
 
 .planet-panel-toggle:active {
   transform: translateY(-50%) scale(0.97);
+}
+
+.map-container.satellite.satellite-readable .planet-scroll-btn,
+.map-container.satellite.satellite-readable .planet-panel-toggle {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
+.map-container.satellite.satellite-readable .planet-scroll-btn svg,
+.map-container.satellite.satellite-readable .planet-panel-toggle svg {
+  filter: var(--satellite-readable-icon-shadow);
 }
 
 .planet-panel-wrapper .planet-panel-toggle {

@@ -116,6 +116,10 @@
   color: #ffffff;
 }
 
+.map-container.satellite.satellite-readable .map-type-tooltip-label {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
 .map-type-switcher.expanded > .map-type-tooltip-anchor--current .map-type-tooltip-label {
   opacity: 0;
   transform: translate(0, 6px);

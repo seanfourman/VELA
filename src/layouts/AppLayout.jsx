@@ -189,6 +189,7 @@ function AppLayout() {
         <Navbar
           mapType={mapType}
           forceLight={isMapRoute && isThreeDModeActive}
+          satelliteReadableShadowsEnabled={settings.satelliteReadableShadows}
           auth={auth}
           profile={profileSettings}
           isAdmin={isAdmin}

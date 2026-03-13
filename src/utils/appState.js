@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS = {
   highAccuracyLocation: true,
   searchDistance: SEARCH_DISTANCE_OPTIONS[0],
   accessibilityMode: false,
+  satelliteReadableShadows: true,
 };
 export const DEFAULT_PROFILE = {
   displayName: "",
@@ -45,6 +46,10 @@ export const normalizeSettings = (value) => {
       safe.accessibilityMode === undefined
         ? DEFAULT_SETTINGS.accessibilityMode
         : Boolean(safe.accessibilityMode),
+    satelliteReadableShadows:
+      safe.satelliteReadableShadows === undefined
+        ? DEFAULT_SETTINGS.satelliteReadableShadows
+        : Boolean(safe.satelliteReadableShadows),
   };
 };
 

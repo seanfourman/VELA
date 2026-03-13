@@ -9,6 +9,10 @@
   color: var(--surface-text);
 }
 
+.map-container.satellite.satellite-readable .context-menu-popup {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
 .context-menu-popup__scroll {
   display: flex;
   flex-direction: column;
@@ -243,4 +247,14 @@
 .popup-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.map-container.satellite.satellite-readable .popup-btn,
+.map-container.satellite.satellite-readable .popup-btn__label,
+.map-container.satellite.satellite-readable .popup-btn__origin {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
+.map-container.satellite.satellite-readable .popup-btn svg {
+  filter: var(--satellite-readable-icon-shadow);
 }

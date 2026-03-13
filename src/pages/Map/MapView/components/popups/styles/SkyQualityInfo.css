@@ -34,6 +34,10 @@
   min-height: 160px;
 }
 
+.map-container.satellite.satellite-readable .sky-quality-info {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
 .sky-quality-heading {
   display: flex;
   align-items: center;
@@ -154,6 +158,11 @@
 .map-container.light .metric-help::after {
   color: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.map-container.satellite.satellite-readable .metric-help,
+.map-container.satellite.satellite-readable .metric-help::after {
+  text-shadow: var(--satellite-readable-text-shadow);
 }
 
 .sky-quality-block-label {

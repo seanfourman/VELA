@@ -66,6 +66,7 @@ const MapView = forwardRef(function MapView(
     authUser,
     directionsProvider = "google",
     showRecommendedSpots = true,
+    satelliteReadableShadowsEnabled = true,
     lightOverlayEnabled = false,
     onToggleLightOverlay,
     searchDistance = 10,
@@ -107,6 +108,10 @@ const MapView = forwardRef(function MapView(
     placedMarkerId !== null &&
     Number.isFinite(contextMenuLat) &&
     Number.isFinite(contextMenuLng);
+  const isSatelliteReadable =
+    !isThreeDMode &&
+    mapType === "satellite" &&
+    satelliteReadableShadowsEnabled;
   const visibleStarPartyEvents = useMemo(() => {
     if (!Array.isArray(starPartyEvents)) return [];
     return starPartyEvents.filter((event) => {
@@ -289,7 +294,9 @@ const MapView = forwardRef(function MapView(
     <div
       className={`map-container visible ${mapTypeClass}${
         ui.isSearchFocused ? " search-focused" : ""
-      }${ui.isPopupOpen ? " popup-open" : ""}`}
+      }${ui.isPopupOpen ? " popup-open" : ""}${
+        isSatelliteReadable ? " satellite-readable" : ""
+      }`}
     >
       <PlanetPanelContainer
         ref={planetPanelRef}

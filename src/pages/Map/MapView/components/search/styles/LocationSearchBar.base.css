@@ -41,10 +41,9 @@
   --search-readable-text-shadow: none;
 }
 
-.map-container.satellite .location-search {
+.map-container.satellite.satellite-readable .location-search {
   --search-readable-text-shadow:
-    0 1px 1px rgba(2, 6, 23, 0.62),
-    0 0 6px rgba(2, 6, 23, 0.3);
+    var(--satellite-readable-text-shadow);
 }
 
 .location-search__form {
@@ -112,10 +111,20 @@
   unicode-bidi: plaintext;
 }
 
+.map-container.satellite.satellite-readable .location-search__input {
+  color: #ffffff;
+  text-shadow: var(--search-readable-text-shadow);
+}
+
 .location-search__input::placeholder {
   color: var(--placeholder-text);
   text-align: center;
   transition: opacity 0.15s ease;
+}
+
+.map-container.satellite.satellite-readable .location-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: var(--search-readable-text-shadow);
 }
 
 .location-search__input:focus::placeholder {

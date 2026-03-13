@@ -138,6 +138,18 @@ body.map-ui-shifted-space-weather .map-quick-actions {
   opacity: 0.92;
 }
 
+.map-container.satellite.satellite-readable .quick-action-label {
+  text-shadow: var(--satellite-readable-text-shadow);
+}
+
+.map-container.satellite.satellite-readable .quick-action-icon {
+  filter:
+    brightness(0)
+    invert(1)
+    var(--satellite-readable-icon-shadow);
+  opacity: 0.98;
+}
+
 .location-control {
   display: flex;
   align-items: center;
