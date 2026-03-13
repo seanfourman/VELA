@@ -318,10 +318,14 @@
 
 .constellation-lines line {
   fill: none;
-  stroke: color-mix(in srgb, var(--constellation-color) 82%, #f4fbff);
+  stroke: color-mix(in srgb, var(--constellation-color) 88%, #f7fbff);
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.96;
+  opacity: 0.98;
+  filter: drop-shadow(0 0 0.55px rgba(255, 255, 255, 0.5))
+    drop-shadow(
+      0 0 1.3px color-mix(in srgb, var(--constellation-color), transparent 56%)
+    );
   transition:
     stroke-width 180ms ease,
     opacity 180ms ease;
@@ -331,7 +335,7 @@
 .constellation-group:not(.is-selected):not(.is-hovered)
   .constellation-lines
   line {
-  opacity: 0.7;
+  opacity: 0.82;
 }
 
 .constellation-star {

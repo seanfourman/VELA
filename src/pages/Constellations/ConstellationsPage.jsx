@@ -747,7 +747,7 @@ function ConstellationsPage() {
                               y1={fromStar.y}
                               x2={toStar.x}
                               y2={toStar.y}
-                              strokeWidth={isSelected ? 0.32 : 0.22}
+                              strokeWidth={isSelected ? 0.42 : 0.3}
                             />
                           );
                         })}
