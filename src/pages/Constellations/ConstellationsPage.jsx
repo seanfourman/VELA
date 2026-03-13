@@ -1,0 +1,541 @@
+import { useMemo, useRef, useState } from "react";
+import {
+  buildAmbientStars,
+  CONSTELLATIONS,
+  CONSTELLATIONS_BY_ID,
+  getConstellationCentroid,
+  VIEWBOX_HEIGHT,
+  VIEWBOX_WIDTH,
+} from "./constellationData";
+import "./styles/ConstellationsPage.css";
+
+const DEFAULT_SELECTED_ID = "vela";
+const DEFAULT_ZOOM = 1.16;
+const MIN_ZOOM = 1.04;
+const MAX_ZOOM = 1.62;
+const VIEW_CENTER = {
+  x: VIEWBOX_WIDTH / 2,
+  y: VIEWBOX_HEIGHT / 2,
+};
+
+const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+
+const clampPan = (pan, zoom) => ({
+  x: clamp(pan.x, VIEWBOX_WIDTH - VIEWBOX_WIDTH * zoom, 0),
+  y: clamp(pan.y, VIEWBOX_HEIGHT - VIEWBOX_HEIGHT * zoom, 0),
+});
+
+const getCenteredPan = (zoom) =>
+  clampPan(
+    {
+      x: VIEW_CENTER.x - VIEW_CENTER.x * zoom,
+      y: VIEW_CENTER.y - VIEW_CENTER.y * zoom,
+    },
+    zoom,
+  );
+
+const getLabelTextAnchor = (align) => {
+  if (align === "end") return "end";
+  if (align === "middle") return "middle";
+  return "start";
+};
+
+const getConstellationFocusPan = (constellation, zoom) => {
+  const centroid = getConstellationCentroid(constellation);
+  return clampPan(
+    {
+      x: VIEW_CENTER.x - centroid.x * zoom,
+      y: VIEW_CENTER.y - centroid.y * zoom,
+    },
+    zoom,
+  );
+};
+
+function ConstellationsPage() {
+  const stageRef = useRef(null);
+  const dragRef = useRef(null);
+  const suppressClickRef = useRef(false);
+  const [selectedId, setSelectedId] = useState(DEFAULT_SELECTED_ID);
+  const [hoveredId, setHoveredId] = useState("");
+  const [zoom, setZoom] = useState(DEFAULT_ZOOM);
+  const [pan, setPan] = useState(() => getCenteredPan(DEFAULT_ZOOM));
+  const [pointer, setPointer] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+
+  const backgroundStars = useMemo(() => buildAmbientStars(220, 23), []);
+  const deepFieldStars = useMemo(() => buildAmbientStars(140, 71), []);
+  const selectedConstellation =
+    CONSTELLATIONS_BY_ID[selectedId] ?? CONSTELLATIONS_BY_ID[DEFAULT_SELECTED_ID];
+  const hoverConstellation = hoveredId ? CONSTELLATIONS_BY_ID[hoveredId] : null;
+  const highlightedConstellation = hoverConstellation ?? selectedConstellation;
+  const leadingStars = useMemo(
+    () =>
+      [...selectedConstellation.stars]
+        .sort((left, right) => right.size - left.size)
+        .slice(0, 4)
+        .map((star) => star.name),
+    [selectedConstellation],
+  );
+
+  const stageStyle = {
+    "--pointer-x": pointer.x.toFixed(3),
+    "--pointer-y": pointer.y.toFixed(3),
+    "--constellation-accent": selectedConstellation.accent,
+    "--constellation-accent-soft": `${selectedConstellation.accent}33`,
+  };
+
+  const updatePointerFromEvent = (event) => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const bounds = stage.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+
+    const normalizedX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
+    const normalizedY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+    setPointer({
+      x: clamp(normalizedX, -1, 1),
+      y: clamp(normalizedY, -1, 1),
+    });
+  };
+
+  const selectConstellation = (id, { focus = true, focusZoom } = {}) => {
+    const nextConstellation =
+      CONSTELLATIONS_BY_ID[id] ?? CONSTELLATIONS_BY_ID[DEFAULT_SELECTED_ID];
+    const nextZoom = clamp(
+      typeof focusZoom === "number" ? focusZoom : Math.max(zoom, 1.22),
+      MIN_ZOOM,
+      MAX_ZOOM,
+    );
+
+    setSelectedId(nextConstellation.id);
+    if (!focus) return;
+
+    setZoom(nextZoom);
+    setPan(getConstellationFocusPan(nextConstellation, nextZoom));
+  };
+
+  const handleResetView = () => {
+    setZoom(DEFAULT_ZOOM);
+    setPan(getCenteredPan(DEFAULT_ZOOM));
+    setSelectedId(DEFAULT_SELECTED_ID);
+    setHoveredId("");
+  };
+
+  const handleZoomChange = (delta) => {
+    const nextZoom = clamp(zoom + delta, MIN_ZOOM, MAX_ZOOM);
+    if (nextZoom === zoom) return;
+
+    const centerWorldX = (VIEW_CENTER.x - pan.x) / zoom;
+    const centerWorldY = (VIEW_CENTER.y - pan.y) / zoom;
+    const nextPan = clampPan(
+      {
+        x: VIEW_CENTER.x - centerWorldX * nextZoom,
+        y: VIEW_CENTER.y - centerWorldY * nextZoom,
+      },
+      nextZoom,
+    );
+
+    setZoom(nextZoom);
+    setPan(nextPan);
+  };
+
+  const handleViewportPointerDown = (event) => {
+    if (event.button !== 0) return;
+
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      clientX: event.clientX,
+      clientY: event.clientY,
+      pan,
+      moved: false,
+    };
+    suppressClickRef.current = false;
+    setIsDragging(false);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleViewportPointerMove = (event) => {
+    updatePointerFromEvent(event);
+
+    const dragState = dragRef.current;
+    const stage = stageRef.current;
+    if (!dragState || dragState.pointerId !== event.pointerId || !stage) return;
+
+    const bounds = stage.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+
+    const deltaX = event.clientX - dragState.clientX;
+    const deltaY = event.clientY - dragState.clientY;
+    if (Math.abs(deltaX) > 4 || Math.abs(deltaY) > 4) {
+      dragState.moved = true;
+      suppressClickRef.current = true;
+      setIsDragging(true);
+    }
+
+    const worldDeltaX = (deltaX / bounds.width) * VIEWBOX_WIDTH;
+    const worldDeltaY = (deltaY / bounds.height) * VIEWBOX_HEIGHT;
+
+    setPan(
+      clampPan(
+        {
+          x: dragState.pan.x + worldDeltaX,
+          y: dragState.pan.y + worldDeltaY,
+        },
+        zoom,
+      ),
+    );
+  };
+
+  const handleViewportPointerUp = (event) => {
+    if (dragRef.current?.pointerId !== event.pointerId) return;
+
+    dragRef.current = null;
+    event.currentTarget.releasePointerCapture(event.pointerId);
+    window.setTimeout(() => {
+      suppressClickRef.current = false;
+    }, 0);
+    setIsDragging(false);
+  };
+
+  const handleViewportPointerLeave = () => {
+    dragRef.current = null;
+    setIsDragging(false);
+    setPointer({ x: 0, y: 0 });
+    setHoveredId("");
+  };
+
+  const handleWheel = (event) => {
+    event.preventDefault();
+    const delta = clamp(-event.deltaY * 0.0012, -0.12, 0.12);
+    handleZoomChange(delta);
+  };
+
+  const handleConstellationClick = (id) => {
+    if (suppressClickRef.current) return;
+    selectConstellation(id);
+  };
+
+  return (
+    <section className="constellations-stage" style={stageStyle}>
+      <div className="constellations-stage__backdrop" aria-hidden="true">
+        <div className="constellations-nebula constellations-nebula--one" />
+        <div className="constellations-nebula constellations-nebula--two" />
+        <div className="constellations-nebula constellations-nebula--three" />
+        <div className="constellations-grid-glow" />
+      </div>
+
+      <header className="constellations-hero glass-panel glass-panel-elevated">
+        <p className="constellations-hero__eyebrow">VELA STAR ARCHIVE</p>
+        <h1 className="constellations-hero__title">Constellations</h1>
+        <p className="constellations-hero__copy">
+          Drag the sky like a navigational chart. Hover to wake a pattern, click to
+          focus it, and keep Vela at the center of the experience.
+        </p>
+        <div className="constellations-hero__meta">
+          <span className="glass-pill">18 major constellations</span>
+          <span className="glass-pill">
+            Live focus: {highlightedConstellation.name}
+          </span>
+          <span className="glass-pill">Mouse-reactive parallax</span>
+        </div>
+      </header>
+
+      <div className="constellations-toolbar glass-panel glass-panel-elevated">
+        <div className="constellations-toolbar__row">
+          <div className="constellations-toolbar__label">Zoom</div>
+          <div className="constellations-toolbar__controls">
+            <button
+              type="button"
+              className="glass-icon-btn constellations-toolbar__button"
+              onClick={() => handleZoomChange(-0.08)}
+              aria-label="Zoom out"
+            >
+              -
+            </button>
+            <div className="constellations-toolbar__value">
+              {Math.round(zoom * 100)}%
+            </div>
+            <button
+              type="button"
+              className="glass-icon-btn constellations-toolbar__button"
+              onClick={() => handleZoomChange(0.08)}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
+          </div>
+        </div>
+        <div className="constellations-toolbar__actions">
+          <button
+            type="button"
+            className="glass-btn constellations-toolbar__action"
+            onClick={() => selectConstellation(DEFAULT_SELECTED_ID)}
+          >
+            Focus Vela
+          </button>
+          <button
+            type="button"
+            className="glass-btn constellations-toolbar__action constellations-toolbar__action--ghost"
+            onClick={handleResetView}
+          >
+            Reset sky
+          </button>
+        </div>
+      </div>
+
+      <div className="constellations-detail glass-panel glass-panel-elevated">
+        <div className="constellations-detail__eyebrow">Selected constellation</div>
+        <h2 className="constellations-detail__title">{selectedConstellation.name}</h2>
+        <p className="constellations-detail__headline">
+          {selectedConstellation.headline}
+        </p>
+        <div className="constellations-detail__stats">
+          <div className="constellations-stat">
+            <span>Region</span>
+            <strong>{selectedConstellation.region}</strong>
+          </div>
+          <div className="constellations-stat">
+            <span>Best seen</span>
+            <strong>{selectedConstellation.bestSeen}</strong>
+          </div>
+          <div className="constellations-stat">
+            <span>Stars</span>
+            <strong>{selectedConstellation.stars.length}</strong>
+          </div>
+          <div className="constellations-stat">
+            <span>Links</span>
+            <strong>{selectedConstellation.connections.length}</strong>
+          </div>
+        </div>
+        <p className="constellations-detail__description">
+          {selectedConstellation.description}
+        </p>
+        <div className="constellations-detail__known-for">
+          <span>Known for</span>
+          <strong>{selectedConstellation.knownFor}</strong>
+        </div>
+        <div className="constellations-detail__stars">
+          {leadingStars.map((starName) => (
+            <span key={starName} className="constellations-star-chip">
+              {starName}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div
+        ref={stageRef}
+        className={`constellations-viewport${isDragging ? " is-dragging" : ""}`}
+        onPointerDown={handleViewportPointerDown}
+        onPointerMove={handleViewportPointerMove}
+        onPointerUp={handleViewportPointerUp}
+        onPointerCancel={handleViewportPointerUp}
+        onPointerLeave={handleViewportPointerLeave}
+        onWheel={handleWheel}
+      >
+        <div className="constellations-map-shell">
+          <svg
+            viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+            className="constellations-map"
+            role="img"
+            aria-label="Interactive map of major constellations including Vela"
+            shapeRendering="geometricPrecision"
+            textRendering="geometricPrecision"
+          >
+            <defs>
+              <radialGradient id="constellations-vignette" cx="50%" cy="50%" r="75%">
+                <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+                <stop offset="100%" stopColor="rgba(1,7,15,0.96)" />
+              </radialGradient>
+            </defs>
+
+            <g
+              className="constellations-star-layer constellations-star-layer--deep"
+              transform={`translate(${(pan.x * 0.18 + pointer.x * 1.6).toFixed(
+                3,
+              )} ${(pan.y * 0.18 + pointer.y * 1.1).toFixed(3)})`}
+            >
+              {deepFieldStars.map((star) => (
+                <circle
+                  key={star.id}
+                  className="constellations-ambient-star constellations-ambient-star--deep"
+                  cx={star.x}
+                  cy={star.y}
+                  r={star.size}
+                  style={{
+                    "--twinkle-duration": `${star.duration + 2.2}s`,
+                    "--twinkle-delay": `${star.delay}s`,
+                    "--twinkle-opacity": star.opacity * 0.72,
+                  }}
+                />
+              ))}
+            </g>
+
+            <g
+              className="constellations-star-layer"
+              transform={`translate(${(pan.x * 0.42 + pointer.x * 1.1).toFixed(
+                3,
+              )} ${(pan.y * 0.42 + pointer.y * 0.8).toFixed(3)})`}
+            >
+              {backgroundStars.map((star) => (
+                <circle
+                  key={star.id}
+                  className="constellations-ambient-star"
+                  cx={star.x}
+                  cy={star.y}
+                  r={star.size}
+                  style={{
+                    "--twinkle-duration": `${star.duration}s`,
+                    "--twinkle-delay": `${star.delay}s`,
+                    "--twinkle-opacity": star.opacity,
+                  }}
+                />
+              ))}
+            </g>
+
+            <g
+              className="constellations-network-layer"
+              transform={`translate(${(pan.x + pointer.x * 0.8).toFixed(3)} ${(
+                pan.y + pointer.y * 0.5
+              ).toFixed(3)})`}
+            >
+              <g transform={`scale(${zoom.toFixed(3)})`}>
+                {CONSTELLATIONS.map((constellation) => {
+                  const starLookup = Object.fromEntries(
+                    constellation.stars.map((star) => [star.id, star]),
+                  );
+                  const isSelected = constellation.id === selectedConstellation.id;
+                  const isHovered = constellation.id === hoveredId;
+                  const isActive = isSelected || isHovered;
+                  const centroid = getConstellationCentroid(constellation);
+
+                  return (
+                    <g
+                      key={constellation.id}
+                      className={`constellation-group${isSelected ? " is-selected" : ""}${
+                        isHovered ? " is-hovered" : ""
+                      }`}
+                      onPointerEnter={() => setHoveredId(constellation.id)}
+                      onPointerLeave={() => setHoveredId((current) =>
+                        current === constellation.id ? "" : current,
+                      )}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleConstellationClick(constellation.id);
+                      }}
+                      style={{
+                        "--constellation-color": constellation.accent,
+                        "--constellation-glow": isActive ? 1 : 0.55,
+                      }}
+                    >
+                      <circle
+                        className="constellation-aura"
+                        cx={centroid.x}
+                        cy={centroid.y}
+                        r={isSelected ? 6.5 : 4.5}
+                      />
+
+                      <g className="constellation-hit-lines" aria-hidden="true">
+                        {constellation.connections.map(([fromId, toId]) => {
+                          const fromStar = starLookup[fromId];
+                          const toStar = starLookup[toId];
+                          if (!fromStar || !toStar) return null;
+
+                          return (
+                            <line
+                              key={`${fromId}-${toId}-hit`}
+                              x1={fromStar.x}
+                              y1={fromStar.y}
+                              x2={toStar.x}
+                              y2={toStar.y}
+                              stroke="transparent"
+                              strokeWidth="2.2"
+                            />
+                          );
+                        })}
+                      </g>
+
+                      <g className="constellation-lines">
+                        {constellation.connections.map(([fromId, toId]) => {
+                          const fromStar = starLookup[fromId];
+                          const toStar = starLookup[toId];
+                          if (!fromStar || !toStar) return null;
+
+                          return (
+                            <line
+                              key={`${fromId}-${toId}`}
+                              x1={fromStar.x}
+                              y1={fromStar.y}
+                              x2={toStar.x}
+                              y2={toStar.y}
+                              strokeWidth={isSelected ? 0.32 : 0.22}
+                            />
+                          );
+                        })}
+                      </g>
+
+                      <g className="constellation-stars">
+                        {constellation.stars.map((star, index) => (
+                          <circle
+                            key={star.id}
+                            cx={star.x}
+                            cy={star.y}
+                            r={0.16 + star.size * 0.16}
+                            className="constellation-star"
+                            style={{
+                              "--star-delay": `${(index * 0.22).toFixed(2)}s`,
+                            }}
+                          />
+                        ))}
+                      </g>
+
+                      <text
+                        x={constellation.label.x}
+                        y={constellation.label.y}
+                        className="constellation-label"
+                        textAnchor={getLabelTextAnchor(constellation.label.align)}
+                      >
+                        {constellation.name}
+                      </text>
+                    </g>
+                  );
+                })}
+              </g>
+            </g>
+
+            <rect
+              x="0"
+              y="0"
+              width={VIEWBOX_WIDTH}
+              height={VIEWBOX_HEIGHT}
+              fill="url(#constellations-vignette)"
+              pointerEvents="none"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div className="constellations-rail">
+        {CONSTELLATIONS.map((constellation) => {
+          const isActive = constellation.id === selectedConstellation.id;
+          return (
+            <button
+              key={constellation.id}
+              type="button"
+              className={`constellations-rail__item${isActive ? " is-active" : ""}`}
+              style={{ "--constellation-color": constellation.accent }}
+              onClick={() => selectConstellation(constellation.id)}
+            >
+              {constellation.name}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+export default ConstellationsPage;

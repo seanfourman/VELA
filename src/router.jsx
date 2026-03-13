@@ -6,6 +6,7 @@ import PageShell from "@/components/layout/PageShell";
 import AppLayout, { useAppLayoutContext } from "@/layouts/AppLayout";
 import AuthPage from "@/pages/Auth/AuthPage";
 import AdminPage from "@/pages/Admin/AdminPage";
+import ConstellationsPage from "@/pages/Constellations/ConstellationsPage";
 import MapView from "@/pages/Map/MapView";
 import MoonPhasePage from "@/pages/MoonPhase/MoonPhasePage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
@@ -175,6 +176,12 @@ function SolarSystemRoute() {
   return <SolarSystemPage />;
 }
 
+function ConstellationsRoute() {
+  useDisableThreeDMode();
+
+  return <ConstellationsPage />;
+}
+
 function NotFoundRoute() {
   const { isLight, navigate } = useAppLayoutContext();
 
@@ -209,6 +216,7 @@ export const router = createBrowserRouter([
       { path: "discover", element: <Navigate to="/" replace /> },
       { path: "gear-lab", element: <Navigate to="/" replace /> },
       { path: "moon-phase", element: <MoonPhaseRoute /> },
+      { path: "constellations", element: <ConstellationsRoute /> },
       { path: "night-planner", element: <Navigate to="/moon-phase" replace /> },
       { path: "profile", element: <ProfileRoute /> },
       { path: "admin", element: <AdminRoute /> },

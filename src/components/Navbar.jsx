@@ -5,8 +5,9 @@ import velaLogo from "@/assets/vela.svg";
 import velaLogoBlack from "@/assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
 
-const NAV_PLACEHOLDER_LINKS = [
+const NAV_LINKS = [
   { id: "moon-phase", label: "Moon Phase", path: "/moon-phase" },
+  { id: "constellations", label: "Constellations", path: "/constellations" },
   { id: "solar-system", label: "Solar System", path: "/solar-system" },
 ];
 
@@ -99,6 +100,9 @@ function Navbar({
     }
   };
 
+  const leftNavLinks = NAV_LINKS.slice(0, Math.ceil(NAV_LINKS.length / 2));
+  const rightNavLinks = NAV_LINKS.slice(Math.ceil(NAV_LINKS.length / 2));
+
   const renderPlaceholderLink = (item, className = "nav-link") => {
     const isActive = item.path && currentPath === item.path;
 
@@ -145,7 +149,7 @@ function Navbar({
                 }`}
               >
                 <div className="profile-actions navbar-mobile-actions">
-                  {NAV_PLACEHOLDER_LINKS.map((item) =>
+                  {NAV_LINKS.map((item) =>
                     renderPlaceholderLink(item, "profile-action navbar-mobile-link"),
                   )}
                 </div>
@@ -156,7 +160,7 @@ function Navbar({
 
         <div className="navbar-center-band">
           <div className="navbar-link-group navbar-link-group--left">
-            {NAV_PLACEHOLDER_LINKS.slice(0, 1).map((item) => renderPlaceholderLink(item))}
+            {leftNavLinks.map((item) => renderPlaceholderLink(item))}
           </div>
 
           {isHome ? (
@@ -182,7 +186,7 @@ function Navbar({
           )}
 
           <div className="navbar-link-group navbar-link-group--right">
-            {NAV_PLACEHOLDER_LINKS.slice(1).map((item) => renderPlaceholderLink(item))}
+            {rightNavLinks.map((item) => renderPlaceholderLink(item))}
           </div>
         </div>
 
