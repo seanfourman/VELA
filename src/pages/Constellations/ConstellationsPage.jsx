@@ -198,20 +198,24 @@ function ConstellationsPage() {
   );
 
   useEffect(() => {
-    if (
-      typeof window === "undefined" ||
-      typeof window.matchMedia !== "function"
-    ) {
+    if (typeof window === "undefined") {
       return undefined;
     }
 
-    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const mediaQuery =
+      typeof window.matchMedia === "function"
+        ? window.matchMedia("(max-width: 768px)")
+        : null;
+
     const handleChange = (event) => {
       setIsMobile(event.matches);
     };
 
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    mediaQuery?.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQuery?.removeEventListener("change", handleChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -420,6 +424,7 @@ function ConstellationsPage() {
             className="constellations-map"
             role="img"
             aria-label="Interactive map of major constellations including Vela"
+            preserveAspectRatio={isMobile ? "xMidYMid slice" : "xMidYMid meet"}
             shapeRendering="geometricPrecision"
             textRendering="geometricPrecision"
           >
