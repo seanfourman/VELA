@@ -70,8 +70,6 @@ function ConstellationsPage() {
   const deepFieldStars = useMemo(() => buildAmbientStars(140, 71), []);
   const selectedConstellation =
     CONSTELLATIONS_BY_ID[selectedId] ?? CONSTELLATIONS_BY_ID[DEFAULT_SELECTED_ID];
-  const hoverConstellation = hoveredId ? CONSTELLATIONS_BY_ID[hoveredId] : null;
-  const highlightedConstellation = hoverConstellation ?? selectedConstellation;
   const leadingStars = useMemo(
     () =>
       [...selectedConstellation.stars]
@@ -225,22 +223,6 @@ function ConstellationsPage() {
         <div className="constellations-nebula constellations-nebula--three" />
         <div className="constellations-grid-glow" />
       </div>
-
-      <header className="constellations-hero glass-panel glass-panel-elevated">
-        <p className="constellations-hero__eyebrow">VELA STAR ARCHIVE</p>
-        <h1 className="constellations-hero__title">Constellations</h1>
-        <p className="constellations-hero__copy">
-          Drag the sky like a navigational chart. Hover to wake a pattern, click to
-          focus it, and keep Vela at the center of the experience.
-        </p>
-        <div className="constellations-hero__meta">
-          <span className="glass-pill">18 major constellations</span>
-          <span className="glass-pill">
-            Live focus: {highlightedConstellation.name}
-          </span>
-          <span className="glass-pill">Mouse-reactive parallax</span>
-        </div>
-      </header>
 
       <div className="constellations-detail glass-panel glass-panel-elevated">
         <div className="constellations-detail__eyebrow">Selected constellation</div>

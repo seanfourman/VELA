@@ -87,37 +87,25 @@
     translate(calc(var(--pointer-x) * -8px), calc(var(--pointer-y) * -8px));
 }
 
-.constellations-hero,
 .constellations-detail,
 .constellations-rail {
   z-index: var(--panel-z);
 }
 
-.constellations-hero,
 .constellations-detail {
   position: absolute;
 }
 
-.constellations-hero,
 .constellations-detail,
 .constellations-rail {
   isolation: isolate;
 }
 
-.constellations-hero > *,
 .constellations-detail > * {
   position: relative;
   z-index: 2;
 }
 
-.constellations-hero {
-  top: 98px;
-  left: 24px;
-  width: min(430px, calc(100vw - 48px));
-  padding: 20px 22px 18px;
-}
-
-.constellations-hero__eyebrow,
 .constellations-detail__eyebrow {
   margin: 0;
   color: rgba(238, 244, 255, 0.62);
@@ -127,7 +115,6 @@
   text-transform: uppercase;
 }
 
-.constellations-hero__title,
 .constellations-detail__title {
   margin: 10px 0 8px;
   font-family:
@@ -138,23 +125,11 @@
   line-height: 0.95;
 }
 
-.constellations-hero__title {
-  font-size: clamp(2.7rem, 5vw, 4.8rem);
-}
-
-.constellations-hero__copy,
 .constellations-detail__description,
 .constellations-detail__headline {
   margin: 0;
   color: rgba(240, 245, 255, 0.72);
   line-height: 1.58;
-}
-
-.constellations-hero__meta {
-  margin-top: 18px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
 }
 
 .constellations-detail {
@@ -493,16 +468,10 @@
 }
 
 @media (max-width: 860px) {
-  .constellations-hero,
   .constellations-detail {
     left: 16px;
     right: 16px;
     width: auto;
-  }
-
-  .constellations-hero {
-    top: 88px;
-    padding-right: 18px;
   }
 
   .constellations-detail {
@@ -521,14 +490,6 @@
   .constellations-stage {
     min-height: 100svh;
     height: 100svh;
-  }
-
-  .constellations-hero {
-    padding: 18px 16px;
-  }
-
-  .constellations-hero__title {
-    font-size: clamp(2.4rem, 10vw, 3.3rem);
   }
 
   .constellations-detail {
