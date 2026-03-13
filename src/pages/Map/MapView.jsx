@@ -56,6 +56,7 @@ import { getRsvpUserId } from "@/features/starParty/starPartyUtils";
 const MapView = forwardRef(function MapView(
   {
     mapSelection,
+    onConsumeMapSelection,
     location,
     locationStatus,
     mapType,
@@ -245,6 +246,9 @@ const MapView = forwardRef(function MapView(
     if (!mapSelection?.requestId) return undefined;
     if (handledMapSelectionRef.current === mapSelection.requestId) return undefined;
 
+    handledMapSelectionRef.current = mapSelection.requestId;
+    onConsumeMapSelection?.();
+
     const selectionTimer = window.setTimeout(() => {
       if (mapSelection.type === "stargaze") {
         const matchedSpot =
@@ -276,8 +280,6 @@ const MapView = forwardRef(function MapView(
       } else {
         return;
       }
-
-      handledMapSelectionRef.current = mapSelection.requestId;
     }, 0);
 
     return () => {
@@ -287,6 +289,7 @@ const MapView = forwardRef(function MapView(
     handleCoordinateSearch,
     handleStargazeSearch,
     mapSelection,
+    onConsumeMapSelection,
     stargazeLocations,
   ]);
 

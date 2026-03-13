@@ -1,6 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
-import { useEffect } from "react";
-import { createBrowserRouter, Navigate, useLocation as useRouterLocation } from "react-router-dom";
+import { useCallback, useEffect } from "react";
+import {
+  createBrowserRouter,
+  Navigate,
+  useLocation as useRouterLocation,
+  useNavigate as useRouterNavigate,
+} from "react-router-dom";
 import brokenWebLinkIcon from "@/assets/icons/broken-web-link-svgrepo-com.svg";
 import PageShell from "@/components/layout/PageShell";
 import AppLayout, { useAppLayoutContext } from "@/layouts/AppLayout";
@@ -24,6 +29,7 @@ const useDisableThreeDMode = () => {
 
 function MapRoute() {
   const routeLocation = useRouterLocation();
+  const routerNavigate = useRouterNavigate();
   const {
     mapViewRef,
     location,
@@ -40,11 +46,36 @@ function MapRoute() {
     setIsThreeDModeActive,
   } = useAppLayoutContext();
   const mapSelection = routeLocation.state?.mapSelection ?? null;
+  const handleConsumeMapSelection = useCallback(() => {
+    if (!routeLocation.state?.mapSelection) return;
+
+    const nextState = { ...(routeLocation.state || {}) };
+    delete nextState.mapSelection;
+
+    routerNavigate(
+      {
+        pathname: routeLocation.pathname,
+        search: routeLocation.search,
+        hash: routeLocation.hash,
+      },
+      {
+        replace: true,
+        state: Object.keys(nextState).length ? nextState : null,
+      },
+    );
+  }, [
+    routeLocation.hash,
+    routeLocation.pathname,
+    routeLocation.search,
+    routeLocation.state,
+    routerNavigate,
+  ]);
 
   return (
     <MapView
       ref={mapViewRef}
       mapSelection={mapSelection}
+      onConsumeMapSelection={handleConsumeMapSelection}
       onThreeDModeChange={setIsThreeDModeActive}
       location={location}
       locationStatus={locationStatus}
