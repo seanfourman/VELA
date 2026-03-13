@@ -137,6 +137,29 @@ function DiscoveryRoute() {
   );
 }
 
+function HardwareAccelerationUnavailableRoute({ pageName }) {
+  const { isLight, navigate } = useAppLayoutContext();
+
+  return (
+    <PageShell
+      title={`${pageName} unavailable`}
+      subtitle="This page needs browser hardware acceleration, which appears to be disabled in your browser."
+      isLight={isLight}
+      onNavigate={navigate}
+    >
+      <section className="profile-card glass-panel glass-panel-elevated not-found-card">
+        <h2 className="profile-section-title not-found-card__code">
+          Hardware acceleration required
+        </h2>
+        <p className="profile-section-copy">
+          Enable hardware acceleration in your browser settings and reload VELA to
+          use this experience.
+        </p>
+      </section>
+    </PageShell>
+  );
+}
+
 function ProfileRoute() {
   useDisableThreeDMode();
   const {
@@ -222,7 +245,17 @@ function AdminRoute() {
 
 function MoonPhaseRoute() {
   useDisableThreeDMode();
-  const { isLight, navigate, location, locationStatus } = useAppLayoutContext();
+  const {
+    hardwareAccelerationEnabled,
+    isLight,
+    navigate,
+    location,
+    locationStatus,
+  } = useAppLayoutContext();
+
+  if (!hardwareAccelerationEnabled) {
+    return <HardwareAccelerationUnavailableRoute pageName="Moon Phase" />;
+  }
 
   return (
     <MoonPhasePage
@@ -236,14 +269,35 @@ function MoonPhaseRoute() {
 
 function SolarSystemRoute() {
   useDisableThreeDMode();
+  const { hardwareAccelerationEnabled } = useAppLayoutContext();
+
+  if (!hardwareAccelerationEnabled) {
+    return <HardwareAccelerationUnavailableRoute pageName="Solar System" />;
+  }
 
   return <SolarSystemPage />;
 }
 
 function ConstellationsRoute() {
   useDisableThreeDMode();
+  const { hardwareAccelerationEnabled } = useAppLayoutContext();
+
+  if (!hardwareAccelerationEnabled) {
+    return <HardwareAccelerationUnavailableRoute pageName="Constellations" />;
+  }
 
   return <ConstellationsPage />;
+}
+
+function NightPlannerRoute() {
+  useDisableThreeDMode();
+  const { hardwareAccelerationEnabled } = useAppLayoutContext();
+
+  if (!hardwareAccelerationEnabled) {
+    return <HardwareAccelerationUnavailableRoute pageName="Night Planner" />;
+  }
+
+  return <Navigate to="/moon-phase" replace />;
 }
 
 function NotFoundRoute() {
@@ -281,7 +335,7 @@ export const router = createBrowserRouter([
       { path: "gear-lab", element: <Navigate to="/" replace /> },
       { path: "moon-phase", element: <MoonPhaseRoute /> },
       { path: "constellations", element: <ConstellationsRoute /> },
-      { path: "night-planner", element: <Navigate to="/moon-phase" replace /> },
+      { path: "night-planner", element: <NightPlannerRoute /> },
       { path: "profile", element: <ProfileRoute /> },
       { path: "admin", element: <AdminRoute /> },
       { path: "settings", element: <SettingsRoute /> },

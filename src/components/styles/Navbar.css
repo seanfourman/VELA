@@ -154,12 +154,27 @@
   opacity: 1;
 }
 
+.navbar-link-group .nav-link-button.is-disabled,
+.navbar-mobile-link.is-disabled {
+  opacity: 0.34;
+  cursor: not-allowed;
+}
+
+.navbar-link-group .nav-link-button.is-disabled:hover,
+.navbar-mobile-link.is-disabled:hover {
+  opacity: 0.34;
+}
+
 .navbar.light .navbar-link-group .nav-link-button {
   color: #111111;
 }
 
 .navbar.light .navbar-link-group .nav-link-button:hover,
 .navbar.light .navbar-link-group .nav-link-button.is-active {
+  color: #111111;
+}
+
+.navbar.light .navbar-link-group .nav-link-button.is-disabled:hover {
   color: #111111;
 }
 

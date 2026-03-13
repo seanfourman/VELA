@@ -1,5 +1,12 @@
 let cachedHwAcceleration = null;
 
+export const HARDWARE_ACCELERATION_REQUIRED_ROUTES = new Set([
+  "/constellations",
+  "/moon-phase",
+  "/night-planner",
+  "/solar-system",
+]);
+
 const detectHardwareAcceleration = () => {
   const canvas = document.createElement("canvas");
   const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
@@ -22,4 +29,8 @@ export function isProbablyHardwareAccelerated() {
   }
 
   return cachedHwAcceleration;
+}
+
+export function requiresHardwareAccelerationRoute(pathname) {
+  return HARDWARE_ACCELERATION_REQUIRED_ROUTES.has(pathname);
 }

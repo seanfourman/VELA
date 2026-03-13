@@ -16,7 +16,10 @@ import { useStarPartyEvents } from "@/features/app/hooks/useStarPartyEvents";
 import { useStargazeLocations } from "@/features/app/hooks/useStargazeLocations";
 import { useUserPreferences } from "@/features/app/hooks/useUserPreferences";
 import showNotification from "@/utils/notifications";
-import { isProbablyHardwareAccelerated } from "@/utils/hardwareUtils";
+import {
+  isProbablyHardwareAccelerated,
+  requiresHardwareAccelerationRoute,
+} from "@/utils/hardwareUtils";
 import { isAdminUser, normalizePath } from "@/utils/appState";
 
 const ZOOM_OUT_ROUTES = new Set([
@@ -69,6 +72,10 @@ function AppLayout() {
   const routerNavigate = useNavigate();
   const routeLocation = useLocation();
   const transitionTimeoutRef = useRef(null);
+  const hardwareAccelerationEnabled = useMemo(
+    () => isProbablyHardwareAccelerated(),
+    [],
+  );
 
   const currentRoute = normalizePath(routeLocation.pathname);
   const isMapRoute = currentRoute === "/";
@@ -78,14 +85,14 @@ function AppLayout() {
   const routeIsLight = isMapRoute && isLight;
 
   useEffect(() => {
-    if (!isProbablyHardwareAccelerated()) {
+    if (!hardwareAccelerationEnabled) {
       showNotification(
-        "Hardware acceleration appears to be disabled. Performance and visuals may be affected",
+        "Hardware acceleration appears to be disabled. Moon Phase, Constellations, and Solar System are unavailable.",
         "failure",
         { duration: 6000 },
       );
     }
-  }, []);
+  }, [hardwareAccelerationEnabled]);
 
   useEffect(() => {
     return () => {
@@ -100,6 +107,18 @@ function AppLayout() {
       const nextPath = normalizePath(path);
       const hasRouteState = options && Object.prototype.hasOwnProperty.call(options, "state");
       if (nextPath === currentRoute && !hasRouteState && !options.replace) return;
+
+      if (
+        !hardwareAccelerationEnabled &&
+        requiresHardwareAccelerationRoute(nextPath)
+      ) {
+        showNotification(
+          "Enable browser hardware acceleration to open that page.",
+          "failure",
+          { duration: 2800 },
+        );
+        return;
+      }
 
       if (transitionTimeoutRef.current) {
         clearTimeout(transitionTimeoutRef.current);
@@ -121,7 +140,7 @@ function AppLayout() {
 
       routerNavigate(nextPath, options);
     },
-    [currentRoute, routerNavigate],
+    [currentRoute, hardwareAccelerationEnabled, routerNavigate],
   );
 
   const value = useMemo(
@@ -153,6 +172,7 @@ function AppLayout() {
       navigate,
       isThreeDModeActive,
       setIsThreeDModeActive,
+      hardwareAccelerationEnabled,
     }),
     [
       auth,
@@ -167,6 +187,7 @@ function AppLayout() {
       handleSetStarPartyEventStatus,
       handleToggleStarPartyRsvp,
       handleUpdateSettings,
+      hardwareAccelerationEnabled,
       isAdmin,
       isThreeDModeActive,
       location,
@@ -190,6 +211,7 @@ function AppLayout() {
           mapType={mapType}
           forceLight={isMapRoute && isThreeDModeActive}
           satelliteReadableShadowsEnabled={settings.satelliteReadableShadows}
+          hardwareAccelerationEnabled={hardwareAccelerationEnabled}
           auth={auth}
           profile={profileSettings}
           isAdmin={isAdmin}

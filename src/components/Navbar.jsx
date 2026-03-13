@@ -7,15 +7,31 @@ import ProfileMenu from "./ProfileMenu";
 
 const NAV_LINKS = [
   { id: "discover", label: "Discovery", path: "/discover" },
-  { id: "constellations", label: "Constellations", path: "/constellations" },
-  { id: "moon-phase", label: "Moon Phase", path: "/moon-phase" },
-  { id: "solar-system", label: "Solar System", path: "/solar-system" },
+  {
+    id: "constellations",
+    label: "Constellations",
+    path: "/constellations",
+    requiresHardwareAcceleration: true,
+  },
+  {
+    id: "moon-phase",
+    label: "Moon Phase",
+    path: "/moon-phase",
+    requiresHardwareAcceleration: true,
+  },
+  {
+    id: "solar-system",
+    label: "Solar System",
+    path: "/solar-system",
+    requiresHardwareAcceleration: true,
+  },
 ];
 
 function Navbar({
   mapType,
   forceLight = false,
   satelliteReadableShadowsEnabled = true,
+  hardwareAccelerationEnabled = true,
   auth,
   profile,
   isAdmin,
@@ -115,14 +131,24 @@ function Navbar({
   const rightNavLinks = NAV_LINKS.slice(Math.ceil(NAV_LINKS.length / 2));
 
   const renderPlaceholderLink = (item, className = "nav-link") => {
-    const isActive = item.path && currentPath === item.path;
+    const isDisabled =
+      item.requiresHardwareAcceleration && !hardwareAccelerationEnabled;
+    const isActive = !isDisabled && item.path && currentPath === item.path;
+    const disabledTitle = isDisabled
+      ? "Requires browser hardware acceleration"
+      : undefined;
 
     return (
       <button
         key={item.id}
         type="button"
-        className={`${className} nav-link-button${isActive ? " is-active" : ""}`}
+        className={`${className} nav-link-button${isActive ? " is-active" : ""}${
+          isDisabled ? " is-disabled" : ""
+        }`}
         onClick={() => handleNavItemClick(item)}
+        disabled={isDisabled}
+        aria-disabled={isDisabled}
+        title={disabledTitle}
       >
         {item.label}
       </button>
