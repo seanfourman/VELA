@@ -124,6 +124,7 @@
   background: transparent;
   cursor: pointer;
   font: inherit;
+  position: relative;
 }
 
 .nav-link:hover,
@@ -176,6 +177,44 @@
 
 .navbar.light .navbar-link-group .nav-link-button.is-disabled:hover {
   color: #111111;
+}
+
+.nav-link-button.is-disabled::after,
+.navbar-mobile-link.is-disabled::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  min-width: 180px;
+  max-width: 220px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: rgba(10, 12, 20, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  color: var(--surface-text);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: normal;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 8;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+}
+
+.nav-link-button.is-disabled:hover::after,
+.nav-link-button.is-disabled:focus-visible::after,
+.navbar-mobile-link.is-disabled:hover::after,
+.navbar-mobile-link.is-disabled:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
 }
 
 .navbar.satellite.satellite-readable {

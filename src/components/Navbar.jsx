@@ -134,8 +134,8 @@ function Navbar({
     const isDisabled =
       item.requiresHardwareAcceleration && !hardwareAccelerationEnabled;
     const isActive = !isDisabled && item.path && currentPath === item.path;
-    const disabledTitle = isDisabled
-      ? "Requires browser hardware acceleration"
+    const disabledTooltip = isDisabled
+      ? "Disabled without hardware acceleration"
       : undefined;
 
     return (
@@ -146,9 +146,8 @@ function Navbar({
           isDisabled ? " is-disabled" : ""
         }`}
         onClick={() => handleNavItemClick(item)}
-        disabled={isDisabled}
         aria-disabled={isDisabled}
-        title={disabledTitle}
+        data-tooltip={disabledTooltip}
       >
         {item.label}
       </button>
