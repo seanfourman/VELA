@@ -10,12 +10,9 @@ import {
 import "./styles/ConstellationsPage.css";
 
 const DEFAULT_SELECTED_ID = "vela";
-const DEFAULT_ZOOM = 1.16;
-const MIN_ZOOM = 1.04;
-const MAX_ZOOM = 1.62;
+const FIXED_VIEW_SCALE = 1.16;
 const VIEW_EASING = 0.14;
 const PAN_EPSILON = 0.025;
-const ZOOM_EPSILON = 0.0015;
 const VIEW_CENTER = {
   x: VIEWBOX_WIDTH / 2,
   y: VIEWBOX_HEIGHT / 2,
@@ -54,10 +51,9 @@ const getConstellationFocusPan = (constellation, zoom) => {
   );
 };
 
-const isViewSettled = (left, right) =>
-  Math.abs(left.zoom - right.zoom) < ZOOM_EPSILON &&
-  Math.abs(left.pan.x - right.pan.x) < PAN_EPSILON &&
-  Math.abs(left.pan.y - right.pan.y) < PAN_EPSILON;
+const isPanSettled = (left, right) =>
+  Math.abs(left.x - right.x) < PAN_EPSILON &&
+  Math.abs(left.y - right.y) < PAN_EPSILON;
 
 function ConstellationsPage() {
   const stageRef = useRef(null);
@@ -65,17 +61,10 @@ function ConstellationsPage() {
   const suppressClickRef = useRef(false);
   const [selectedId, setSelectedId] = useState(DEFAULT_SELECTED_ID);
   const [hoveredId, setHoveredId] = useState("");
-  const [view, setView] = useState(() => ({
-    zoom: DEFAULT_ZOOM,
-    pan: getCenteredPan(DEFAULT_ZOOM),
-  }));
-  const [targetView, setTargetView] = useState(() => ({
-    zoom: DEFAULT_ZOOM,
-    pan: getCenteredPan(DEFAULT_ZOOM),
-  }));
+  const [pan, setPan] = useState(() => getCenteredPan(FIXED_VIEW_SCALE));
+  const [targetPan, setTargetPan] = useState(() => getCenteredPan(FIXED_VIEW_SCALE));
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const { zoom, pan } = view;
 
   const backgroundStars = useMemo(() => buildAmbientStars(220, 23), []);
   const deepFieldStars = useMemo(() => buildAmbientStars(140, 71), []);
@@ -93,22 +82,19 @@ function ConstellationsPage() {
   );
 
   useEffect(() => {
-    if (isDragging || isViewSettled(view, targetView)) {
+    if (isDragging || isPanSettled(pan, targetPan)) {
       return undefined;
     }
 
     const frameId = window.requestAnimationFrame(() => {
-      setView((current) => {
-        if (isViewSettled(current, targetView)) {
-          return targetView;
+      setPan((current) => {
+        if (isPanSettled(current, targetPan)) {
+          return targetPan;
         }
 
         return {
-          zoom: current.zoom + (targetView.zoom - current.zoom) * VIEW_EASING,
-          pan: {
-            x: current.pan.x + (targetView.pan.x - current.pan.x) * VIEW_EASING,
-            y: current.pan.y + (targetView.pan.y - current.pan.y) * VIEW_EASING,
-          },
+          x: current.x + (targetPan.x - current.x) * VIEW_EASING,
+          y: current.y + (targetPan.y - current.y) * VIEW_EASING,
         };
       });
     });
@@ -116,7 +102,7 @@ function ConstellationsPage() {
     return () => {
       window.cancelAnimationFrame(frameId);
     };
-  }, [isDragging, targetView, view]);
+  }, [isDragging, pan, targetPan]);
 
   const stageStyle = {
     "--pointer-x": pointer.x.toFixed(3),
@@ -139,51 +125,20 @@ function ConstellationsPage() {
     });
   };
 
-  const selectConstellation = (id, { focus = true, focusZoom } = {}) => {
+  const selectConstellation = (id, { focus = true } = {}) => {
     const nextConstellation =
       CONSTELLATIONS_BY_ID[id] ?? CONSTELLATIONS_BY_ID[DEFAULT_SELECTED_ID];
-    const nextZoom = clamp(
-      typeof focusZoom === "number" ? focusZoom : Math.max(targetView.zoom, 1.22),
-      MIN_ZOOM,
-      MAX_ZOOM,
-    );
 
     setSelectedId(nextConstellation.id);
     if (!focus) return;
 
-    setTargetView({
-      zoom: nextZoom,
-      pan: getConstellationFocusPan(nextConstellation, nextZoom),
-    });
+    setTargetPan(getConstellationFocusPan(nextConstellation, FIXED_VIEW_SCALE));
   };
 
   const handleResetView = () => {
-    setTargetView({
-      zoom: DEFAULT_ZOOM,
-      pan: getCenteredPan(DEFAULT_ZOOM),
-    });
+    setTargetPan(getCenteredPan(FIXED_VIEW_SCALE));
     setSelectedId(DEFAULT_SELECTED_ID);
     setHoveredId("");
-  };
-
-  const handleZoomChange = (delta) => {
-    const nextZoom = clamp(targetView.zoom + delta, MIN_ZOOM, MAX_ZOOM);
-    if (nextZoom === targetView.zoom) return;
-
-    const centerWorldX = (VIEW_CENTER.x - pan.x) / zoom;
-    const centerWorldY = (VIEW_CENTER.y - pan.y) / zoom;
-    const nextPan = clampPan(
-      {
-        x: VIEW_CENTER.x - centerWorldX * nextZoom,
-        y: VIEW_CENTER.y - centerWorldY * nextZoom,
-      },
-      nextZoom,
-    );
-
-    setTargetView({
-      zoom: nextZoom,
-      pan: nextPan,
-    });
   };
 
   const handleViewportPointerDown = (event) => {
@@ -198,7 +153,7 @@ function ConstellationsPage() {
     const stage = stageRef.current;
     if (!stage) return;
 
-    setTargetView(view);
+    setTargetPan(pan);
 
     dragRef.current = {
       pointerId: event.pointerId,
@@ -238,11 +193,11 @@ function ConstellationsPage() {
         x: dragState.pan.x + worldDeltaX,
         y: dragState.pan.y + worldDeltaY,
       },
-      zoom,
+      FIXED_VIEW_SCALE,
     );
 
-    setView((current) => ({ ...current, pan: nextPan }));
-    setTargetView((current) => ({ ...current, pan: nextPan }));
+    setPan(nextPan);
+    setTargetPan(nextPan);
   };
 
   const handleViewportPointerUp = (event) => {
@@ -261,12 +216,6 @@ function ConstellationsPage() {
     setIsDragging(false);
     setPointer({ x: 0, y: 0 });
     setHoveredId("");
-  };
-
-  const handleWheel = (event) => {
-    event.preventDefault();
-    const delta = clamp(-event.deltaY * 0.0012, -0.12, 0.12);
-    handleZoomChange(delta);
   };
 
   const handleConstellationClick = (id) => {
@@ -300,30 +249,7 @@ function ConstellationsPage() {
       </header>
 
       <div className="constellations-toolbar glass-panel glass-panel-elevated">
-        <div className="constellations-toolbar__row">
-          <div className="constellations-toolbar__label">Zoom</div>
-          <div className="constellations-toolbar__controls">
-            <button
-              type="button"
-              className="glass-icon-btn constellations-toolbar__button"
-              onClick={() => handleZoomChange(-0.08)}
-              aria-label="Zoom out"
-            >
-              -
-            </button>
-            <div className="constellations-toolbar__value">
-              {Math.round(zoom * 100)}%
-            </div>
-            <button
-              type="button"
-              className="glass-icon-btn constellations-toolbar__button"
-              onClick={() => handleZoomChange(0.08)}
-              aria-label="Zoom in"
-            >
-              +
-            </button>
-          </div>
-        </div>
+        <div className="constellations-toolbar__label">Camera</div>
         <div className="constellations-toolbar__actions">
           <button
             type="button"
@@ -390,7 +316,6 @@ function ConstellationsPage() {
         onPointerUp={handleViewportPointerUp}
         onPointerCancel={handleViewportPointerUp}
         onPointerLeave={handleViewportPointerLeave}
-        onWheel={handleWheel}
       >
         <div className="constellations-map-shell">
           <svg
@@ -451,7 +376,7 @@ function ConstellationsPage() {
                 pan.y + pointer.y * 0.5
               ).toFixed(3)})`}
             >
-              <g transform={`scale(${zoom.toFixed(3)})`}>
+              <g transform={`scale(${FIXED_VIEW_SCALE.toFixed(3)})`}>
                 {CONSTELLATIONS.map((constellation) => {
                   const starLookup = Object.fromEntries(
                     constellation.stars.map((star) => [star.id, star]),
