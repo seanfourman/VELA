@@ -307,6 +307,7 @@ function ConstellationsPage() {
   const [focusPanelOpen, setFocusPanelOpen] = useState(false);
   const [mobilePanelNudge, setMobilePanelNudge] = useState(false);
 
+  const microStars = useMemo(() => buildAmbientStars(360, 11), []);
   const backgroundStars = useMemo(() => buildAmbientStars(220, 23), []);
   const deepFieldStars = useMemo(() => buildAmbientStars(140, 71), []);
   const selectedConstellation = selectedId ? CONSTELLATIONS_BY_ID[selectedId] ?? null : null;
@@ -646,6 +647,28 @@ function ConstellationsPage() {
             shapeRendering="geometricPrecision"
             textRendering="geometricPrecision"
           >
+            <g
+              className="constellations-star-layer constellations-star-layer--micro"
+              transform={`translate(${(pan.x * 0.08 + pointer.x * 0.7).toFixed(
+                3,
+              )} ${(pan.y * 0.08 + pointer.y * 0.45).toFixed(3)})`}
+            >
+              {microStars.map((star) => (
+                <circle
+                  key={star.id}
+                  className="constellations-ambient-star constellations-ambient-star--micro"
+                  cx={star.x}
+                  cy={star.y}
+                  r={0.035 + star.size * 0.09}
+                  style={{
+                    "--twinkle-duration": `${star.duration + 3.2}s`,
+                    "--twinkle-delay": `${star.delay}s`,
+                    "--twinkle-opacity": star.opacity * 0.22,
+                  }}
+                />
+              ))}
+            </g>
+
             <g
               className="constellations-star-layer constellations-star-layer--deep"
               transform={`translate(${(pan.x * 0.18 + pointer.x * 1.6).toFixed(

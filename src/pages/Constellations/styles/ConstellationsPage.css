@@ -275,6 +275,10 @@
   fill: rgba(110, 168, 242, 0.6);
 }
 
+.constellations-ambient-star--micro {
+  fill: rgba(214, 228, 255, 0.48);
+}
+
 .constellation-group {
   cursor: pointer;
   transition:
