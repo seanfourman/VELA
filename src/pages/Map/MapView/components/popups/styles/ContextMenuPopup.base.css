@@ -83,10 +83,9 @@
 }
 
 .popup-coords-label-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
   width: 100%;
   max-width: 100%;
   min-height: 20px;
@@ -107,7 +106,7 @@
 }
 
 .popup-coords-label-shell {
-  grid-column: 2;
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -128,17 +127,19 @@
 }
 
 .popup-coords-edit-trigger {
-  grid-column: 3;
+  position: absolute;
+  top: 50%;
+  left: calc(100% + 6px);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  justify-self: start;
   flex: 0 0 auto;
   width: 14px;
   height: 14px;
   padding: 0;
   color: inherit;
   cursor: pointer;
+  transform: translateY(-50%);
   transition: opacity 0.18s ease;
 }
 
@@ -182,6 +183,7 @@
   letter-spacing: inherit;
   text-align: center;
   text-transform: inherit;
+  transform: translateY(1px);
   box-shadow: none;
 }
 

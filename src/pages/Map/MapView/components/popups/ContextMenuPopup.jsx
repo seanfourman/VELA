@@ -272,24 +272,24 @@ export default function ContextMenuPopup({
                   {displayHeaderLabel}
                 </span>
               )}
+              {canRenameFavorite ? (
+                <span
+                  className="popup-coords-edit-trigger"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Rename favorite"
+                  style={{ "--popup-edit-icon": `url("${editIcon}")` }}
+                  onClick={beginFavoriteNameEdit}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    beginFavoriteNameEdit(event);
+                  }}
+                >
+                  <span aria-hidden="true" className="popup-coords-edit-icon" />
+                </span>
+              ) : null}
             </span>
-            {canRenameFavorite ? (
-              <span
-                className="popup-coords-edit-trigger"
-                role="button"
-                tabIndex={0}
-                aria-label="Rename favorite"
-                style={{ "--popup-edit-icon": `url("${editIcon}")` }}
-                onClick={beginFavoriteNameEdit}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") return;
-                  event.preventDefault();
-                  beginFavoriteNameEdit(event);
-                }}
-              >
-                <span aria-hidden="true" className="popup-coords-edit-icon" />
-              </span>
-            ) : null}
           </span>
           <span
             className="popup-coords-value popup-coords-value--copyable"
