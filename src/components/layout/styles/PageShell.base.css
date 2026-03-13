@@ -75,6 +75,17 @@
   width: min(100vmin, 1000px);
   height: min(100vmin, 1000px);
   filter: drop-shadow(0 30px 90px rgba(0, 0, 0, 0.45));
+  pointer-events: none;
+}
+
+.profile-page__earth-canvas canvas {
+  pointer-events: none;
+}
+
+.profile-page__hit-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
 }
 
 .profile-page__content {
@@ -84,7 +95,7 @@
   flex-direction: column;
   gap: 28px;
   position: relative;
-  z-index: 3;
+  z-index: 4;
   min-height: calc(100vh - 150px);
   justify-content: center;
 }

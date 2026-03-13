@@ -1,4 +1,3 @@
-import { useCallback, useRef } from "react";
 import "./styles/PageShell.css";
 import { navigateToMapHome } from "@/utils/navigation";
 
@@ -15,8 +14,6 @@ export default function PageShell({
   hideBackButton = false,
   children,
 }) {
-  const pageRef = useRef(null);
-  const contentRef = useRef(null);
   const rootClassName = [
     "profile-page",
     className,
@@ -33,46 +30,15 @@ export default function PageShell({
     navigateToMapHome({ navigate: onNavigate });
   };
 
-  const handleBackgroundWheel = useCallback((event) => {
-    const pageNode = pageRef.current;
-    const contentNode = contentRef.current;
-    const targetNode = event.target;
-
-    if (!pageNode || !contentNode || !(targetNode instanceof Node)) {
-      return;
-    }
-
-    if (contentNode.contains(targetNode)) {
-      return;
-    }
-
-    if (pageNode.scrollHeight <= pageNode.clientHeight) {
-      return;
-    }
-
-    const deltaMultiplier =
-      event.deltaMode === 1
-        ? 16
-        : event.deltaMode === 2
-          ? pageNode.clientHeight
-          : 1;
-
-    event.preventDefault();
-    pageNode.scrollBy({
-      top: event.deltaY * deltaMultiplier,
-      left: event.deltaX * deltaMultiplier,
-      behavior: "auto",
-    });
-  }, []);
-
   return (
-    <div ref={pageRef} className={rootClassName} onWheel={handleBackgroundWheel}>
+    <div className={rootClassName}>
       {hero ? (
         <div className="profile-page__earth" aria-hidden="true">
           {hero}
         </div>
       ) : null}
-      <div ref={contentRef} className="profile-page__content">
+      <div className="profile-page__hit-surface" aria-hidden="true" />
+      <div className="profile-page__content">
         {!hideHeader ? (
           <header className="profile-page__header">
             <div>
