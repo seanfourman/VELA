@@ -322,6 +322,20 @@ function ConstellationsPage() {
     [selectedConstellation],
   );
 
+  const updatePointerFromEvent = (event) => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const bounds = stage.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return;
+
+    const normalizedX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
+    const normalizedY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
+    setPointer({
+      x: clamp(normalizedX, -1, 1),
+      y: clamp(normalizedY, -1, 1),
+    });
+  };
+
   useEffect(() => {
     if (typeof window === "undefined") {
       return undefined;
@@ -368,6 +382,39 @@ function ConstellationsPage() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const resetPointerState = () => {
+      setPointer({ x: 0, y: 0 });
+      setHoveredId("");
+    };
+
+    const handleWindowPointerMove = (event) => {
+      if (event.pointerType === "touch") return;
+      updatePointerFromEvent(event);
+    };
+
+    const handleWindowPointerOut = (event) => {
+      if (event.relatedTarget !== null) return;
+      resetPointerState();
+    };
+
+    window.addEventListener("pointermove", handleWindowPointerMove, {
+      passive: true,
+    });
+    window.addEventListener("pointerout", handleWindowPointerOut);
+    window.addEventListener("blur", resetPointerState);
+
+    return () => {
+      window.removeEventListener("pointermove", handleWindowPointerMove);
+      window.removeEventListener("pointerout", handleWindowPointerOut);
+      window.removeEventListener("blur", resetPointerState);
+    };
+  }, []);
+
+  useEffect(() => {
     if (isDragging || isPanSettled(pan, targetPan)) {
       return undefined;
     }
@@ -397,20 +444,6 @@ function ConstellationsPage() {
     "--constellation-accent-soft": `${
       selectedConstellation?.accent ?? DEFAULT_STAGE_ACCENT
     }33`,
-  };
-
-  const updatePointerFromEvent = (event) => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    const bounds = stage.getBoundingClientRect();
-    if (!bounds.width || !bounds.height) return;
-
-    const normalizedX = ((event.clientX - bounds.left) / bounds.width - 0.5) * 2;
-    const normalizedY = ((event.clientY - bounds.top) / bounds.height - 0.5) * 2;
-    setPointer({
-      x: clamp(normalizedX, -1, 1),
-      y: clamp(normalizedY, -1, 1),
-    });
   };
 
   const triggerMobilePanelNudge = () => {
@@ -569,27 +602,13 @@ function ConstellationsPage() {
     setIsDragging(false);
   };
 
-  const handleStagePointerMove = (event) => {
-    updatePointerFromEvent(event);
-  };
-
-  const handleStagePointerLeave = () => {
-    setPointer({ x: 0, y: 0 });
-    setHoveredId("");
-  };
-
   const handleConstellationClick = (id) => {
     if (suppressClickRef.current) return;
     selectConstellation(id);
   };
 
   return (
-    <section
-      className="constellations-stage"
-      style={stageStyle}
-      onPointerMove={handleStagePointerMove}
-      onPointerLeave={handleStagePointerLeave}
-    >
+    <section className="constellations-stage" style={stageStyle}>
       <div className="constellations-stage__backdrop" aria-hidden="true">
         <div className="constellations-nebula constellations-nebula--one" />
         <div className="constellations-nebula constellations-nebula--two" />
