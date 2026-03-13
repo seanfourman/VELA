@@ -5,7 +5,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-  padding: 0;
+  padding: 110px 32px 40px;
   isolation: isolate;
   --profile-stars-opacity: 0.72;
   --profile-earth-opacity: 0.92;
@@ -77,14 +77,6 @@
   filter: drop-shadow(0 30px 90px rgba(0, 0, 0, 0.45));
 }
 
-.profile-page__scroll-surface {
-  width: 100%;
-  min-height: 100%;
-  position: relative;
-  z-index: 3;
-  padding: 110px 32px 40px;
-}
-
 .profile-page__content {
   max-width: 960px;
   margin: 0 auto;
@@ -92,7 +84,7 @@
   flex-direction: column;
   gap: 28px;
   position: relative;
-  width: min(100%, 960px);
+  z-index: 3;
   min-height: calc(100vh - 150px);
   justify-content: center;
 }
@@ -240,4 +232,3 @@
 .not-found-card .profile-section-copy {
   max-width: 42ch;
 }
-
