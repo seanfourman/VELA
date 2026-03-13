@@ -321,8 +321,6 @@ function ConstellationsPage() {
   const backgroundStars = useMemo(() => buildAmbientStars(220, 23), []);
   const deepFieldStars = useMemo(() => buildAmbientStars(140, 71), []);
   const selectedConstellation = selectedId ? CONSTELLATIONS_BY_ID[selectedId] ?? null : null;
-  const accentConstellation =
-    (hoveredId ? CONSTELLATIONS_BY_ID[hoveredId] : null) ?? selectedConstellation;
   const visibleWindow = getVisibleWindow(isMobile, viewportSize);
   const leadingStars = useMemo(
     () =>
@@ -403,8 +401,10 @@ function ConstellationsPage() {
   const stageStyle = {
     "--pointer-x": pointer.x.toFixed(3),
     "--pointer-y": pointer.y.toFixed(3),
-    "--constellation-accent": accentConstellation?.accent ?? DEFAULT_STAGE_ACCENT,
-    "--constellation-accent-soft": `${accentConstellation?.accent ?? DEFAULT_STAGE_ACCENT}33`,
+    "--constellation-accent": selectedConstellation?.accent ?? DEFAULT_STAGE_ACCENT,
+    "--constellation-accent-soft": `${
+      selectedConstellation?.accent ?? DEFAULT_STAGE_ACCENT
+    }33`,
   };
 
   const updatePointerFromEvent = (event) => {
