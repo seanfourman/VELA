@@ -97,14 +97,6 @@
   text-transform: uppercase;
 }
 
-.popup-coords-label-row.is-custom {
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: var(--surface-text);
-}
-
 .popup-coords-label-shell {
   position: relative;
   display: inline-flex;
