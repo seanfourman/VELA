@@ -17,6 +17,7 @@ const useMapActionHandlers = ({
   contextMenu,
   placedMarker,
   selectedDarkSpot,
+  activeStargazeSpot,
   favoriteSpotKeys,
   planetQuerySource,
   fetchPlanetsForLocation,
@@ -50,6 +51,29 @@ const useMapActionHandlers = ({
     };
   }, []);
 
+  const showVisiblePlanetsForTarget = useCallback(
+    (
+      target,
+      { label, source, force = true, openPanel = true } = {},
+    ) => {
+      if (!target) return;
+
+      if (openPanel) {
+        if (isCoarsePointerEnv()) {
+          planetPanelRef.current?.nudgeToggle?.();
+        } else {
+          planetPanelRef.current?.openPanel("manual");
+        }
+      }
+
+      fetchPlanetsForLocation(target.lat, target.lng, label, {
+        force,
+        source,
+      });
+    },
+    [fetchPlanetsForLocation, planetPanelRef],
+  );
+
   const handleSnapToLocation = useCallback(() => {
     if (!location || !mapRef.current) return;
 
@@ -68,17 +92,13 @@ const useMapActionHandlers = ({
       });
     }
 
-    if (isCoarsePointerEnv()) {
-      planetPanelRef.current?.nudgeToggle?.();
-    } else {
-      planetPanelRef.current?.openPanel("manual");
-    }
-
-    fetchPlanetsForLocation(location.lat, location.lng, "Visible from your sky", {
+    showVisiblePlanetsForTarget(location, {
+      label: "Visible from your sky",
       force: true,
       source: "location",
+      openPanel: true,
     });
-  }, [fetchPlanetsForLocation, location, mapRef, planetPanelRef]);
+  }, [location, mapRef, showVisiblePlanetsForTarget]);
 
   const handleDoubleClick = useCallback(
     (latlng) => {
@@ -108,38 +128,48 @@ const useMapActionHandlers = ({
     ]
   );
 
-  const handleGetVisiblePlanets = useCallback(() => {
-    const target = getPrimaryTarget({
-      selectedDarkSpot,
-      placedMarker,
-      location,
-      contextMenu,
-    });
-    if (!target) return;
+  const handleGetVisiblePlanets = useCallback(
+    (override = null) => {
+      const target =
+        override?.target ||
+        getPrimaryTarget({
+          selectedDarkSpot,
+          placedMarker,
+          activeStargazeSpot,
+          location,
+          contextMenu,
+        });
+      if (!target) return;
 
-    const { label, source } = buildPlanetRequestMeta({
-      selectedDarkSpot,
-      placedMarker,
+      const requestMeta = buildPlanetRequestMeta({
+        selectedDarkSpot,
+        placedMarker,
+        activeStargazeSpot,
+        location,
+      });
+
+      showVisiblePlanetsForTarget(target, {
+        label: override?.label ?? requestMeta.label,
+        source: override?.source ?? requestMeta.source,
+        force: override?.force ?? true,
+        openPanel: override?.openPanel ?? true,
+      });
+    },
+    [
+      activeStargazeSpot,
+      contextMenu,
       location,
-    });
-    planetPanelRef.current?.openPanel("manual");
-    fetchPlanetsForLocation(target.lat, target.lng, label, {
-      force: true,
-      source,
-    });
-  }, [
-    contextMenu,
-    fetchPlanetsForLocation,
-    location,
-    placedMarker,
-    planetPanelRef,
-    selectedDarkSpot,
-  ]);
+      placedMarker,
+      selectedDarkSpot,
+      showVisiblePlanetsForTarget,
+    ],
+  );
 
   const handleFetchDarkSpots = useCallback(async () => {
     const target = getPrimaryTarget({
       selectedDarkSpot,
       placedMarker,
+      activeStargazeSpot,
       location,
       contextMenu,
     });
@@ -164,6 +194,7 @@ const useMapActionHandlers = ({
     mapRef,
     placedMarker,
     searchDistance,
+    activeStargazeSpot,
     selectedDarkSpot,
     setDarkSpots,
   ]);
@@ -203,12 +234,13 @@ const useMapActionHandlers = ({
   useEffect(() => {
     if (!location) return;
     if (isPinnedPlanetSource(planetQuerySource)) return;
+    if (planetQuerySource === "stargaze" && activeStargazeSpot) return;
     if (skipAutoLocationRef.current) return;
 
     fetchPlanetsForLocation(location.lat, location.lng, "Visible from your sky", {
       source: "location",
     });
-  }, [location, planetQuerySource, fetchPlanetsForLocation]);
+  }, [activeStargazeSpot, location, planetQuerySource, fetchPlanetsForLocation]);
 
   return {
     handleSnapToLocation,

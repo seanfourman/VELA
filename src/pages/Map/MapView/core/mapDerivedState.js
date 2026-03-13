@@ -1,9 +1,18 @@
-export function getQuickActionTitles({ selectedDarkSpot, hasPinnedSpot, hasAnyLocation }) {
+export function getQuickActionTitles({
+  selectedDarkSpot,
+  hasPinnedSpot,
+  activeStargazeSpot,
+  hasAnyLocation,
+}) {
   const selectedTargetLabel = selectedDarkSpot?.label || "stargazing spot";
   const selectedTargetLabelLower = selectedTargetLabel.toLowerCase();
+  const stargazeLabel = activeStargazeSpot?.name || "selected spot";
+  const stargazeLabelLower = stargazeLabel.toLowerCase();
 
   const quickPlanetsTitle = selectedDarkSpot
     ? `Visible planets from ${selectedTargetLabelLower}`
+    : activeStargazeSpot
+    ? `Visible planets from ${stargazeLabelLower}`
     : hasPinnedSpot
     ? "Visible planets from pinned spot"
     : hasAnyLocation
@@ -12,6 +21,8 @@ export function getQuickActionTitles({ selectedDarkSpot, hasPinnedSpot, hasAnyLo
 
   const quickDarkSpotsTitle = selectedDarkSpot
     ? `Find spots near the ${selectedTargetLabelLower}`
+    : activeStargazeSpot
+    ? `Find spots near ${stargazeLabelLower}`
     : hasPinnedSpot
     ? "Find stargazing spots near the pin"
     : hasAnyLocation

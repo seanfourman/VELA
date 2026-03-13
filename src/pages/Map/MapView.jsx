@@ -100,6 +100,7 @@ const MapView = forwardRef(function MapView(
   const closeStargazePanel = handlers.handleCloseStargazePanel;
   const handleCoordinateSearch = handlers.handleCoordinateSearch;
   const handleStargazeSearch = handlers.handleStargazeSearch;
+  const handleGetVisiblePlanets = handlers.handleGetVisiblePlanets;
   const ensureSpaceWeatherLoaded = spaceWeather.ensureLoaded;
   const activeUserRsvpId = getRsvpUserId(authUser);
   const placedMarkerId = state.placedMarker?.id ?? null;
@@ -258,6 +259,13 @@ const MapView = forwardRef(function MapView(
 
         if (matchedSpot) {
           handleStargazeSearch(matchedSpot);
+          handleGetVisiblePlanets({
+            target: matchedSpot,
+            label: `Visible from ${matchedSpot.name || "selected spot"}`,
+            source: "stargaze",
+            openPanel: false,
+            force: true,
+          });
         } else if (
           Number.isFinite(mapSelection.lat) &&
           Number.isFinite(mapSelection.lng)
@@ -265,6 +273,16 @@ const MapView = forwardRef(function MapView(
           handleCoordinateSearch({
             lat: mapSelection.lat,
             lng: mapSelection.lng,
+          });
+          handleGetVisiblePlanets({
+            target: {
+              lat: mapSelection.lat,
+              lng: mapSelection.lng,
+            },
+            label: "Visible from pinned spot",
+            source: "pin",
+            openPanel: false,
+            force: true,
           });
         } else {
           return;
@@ -277,6 +295,16 @@ const MapView = forwardRef(function MapView(
           lat: mapSelection.lat,
           lng: mapSelection.lng,
         });
+        handleGetVisiblePlanets({
+          target: {
+            lat: mapSelection.lat,
+            lng: mapSelection.lng,
+          },
+          label: "Visible from pinned spot",
+          source: "pin",
+          openPanel: false,
+          force: true,
+        });
       } else {
         return;
       }
@@ -287,6 +315,7 @@ const MapView = forwardRef(function MapView(
     };
   }, [
     handleCoordinateSearch,
+    handleGetVisiblePlanets,
     handleStargazeSearch,
     mapSelection,
     onConsumeMapSelection,

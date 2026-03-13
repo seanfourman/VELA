@@ -91,6 +91,7 @@ const useMapViewState = ({
     contextMenu,
     placedMarker,
     selectedDarkSpot,
+    activeStargazeSpot: stargaze.activeStargazeSpot,
     favoriteSpotKeys: favorites.favoriteSpotKeys,
     planetQuerySource: planetQuery?.source,
     fetchPlanetsForLocation,
@@ -124,10 +125,14 @@ const useMapViewState = ({
 
   const hasPinnedSpot = Boolean(placedMarker);
   const hasAnyLocation =
-    hasPinnedSpot || Boolean(location) || Boolean(selectedDarkSpot);
+    hasPinnedSpot ||
+    Boolean(location) ||
+    Boolean(selectedDarkSpot) ||
+    Boolean(stargaze.activeStargazeSpot);
   const { quickPlanetsTitle, quickDarkSpotsTitle } = getQuickActionTitles({
     selectedDarkSpot,
     hasPinnedSpot,
+    activeStargazeSpot: stargaze.activeStargazeSpot,
     hasAnyLocation,
   });
   const searchPlaceholder = getSearchPlaceholder(showRecommendedSpots);
