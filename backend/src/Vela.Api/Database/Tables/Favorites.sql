@@ -7,9 +7,16 @@ BEGIN
         SpotId NVARCHAR(200) NOT NULL,
         Lat FLOAT NOT NULL,
         Lon FLOAT NOT NULL,
+        CustomName NVARCHAR(120) NULL,
         CreatedAtUtc DATETIME2 NOT NULL CONSTRAINT DF_Favorites_CreatedAtUtc DEFAULT(SYSUTCDATETIME()),
         CONSTRAINT FK_Favorites_Users FOREIGN KEY(UserId) REFERENCES Users(Id) ON DELETE CASCADE
     );
+END;
+
+IF COL_LENGTH(N'Favorites', N'CustomName') IS NULL
+BEGIN
+    ALTER TABLE Favorites
+    ADD CustomName NVARCHAR(120) NULL;
 END;
 
 IF NOT EXISTS (

@@ -50,6 +50,24 @@ public static class RequestValidator
             errors.Add("Valid lat/lon are required.");
         }
 
+        var customName = (request.CustomName ?? string.Empty).Trim();
+        if (customName.Length > 120)
+        {
+            errors.Add("customName must be at most 120 characters.");
+        }
+
+        return errors;
+    }
+
+    public static List<string> ValidateFavoriteUpdateRequest(UpdateFavoriteRequestDto request)
+    {
+        var errors = new List<string>();
+        var customName = (request.CustomName ?? string.Empty).Trim();
+        if (customName.Length > 120)
+        {
+            errors.Add("customName must be at most 120 characters.");
+        }
+
         return errors;
     }
 

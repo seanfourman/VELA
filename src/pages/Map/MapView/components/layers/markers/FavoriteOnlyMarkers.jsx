@@ -61,6 +61,7 @@ export default function FavoriteOnlyMarkers({
   selectedDarkSpot,
   isAuthenticated,
   centerOnCoords,
+  handleRenameFavoriteSpot,
   handleRemoveFavoriteSpotAnimated,
   handleShareLocation,
   buildDirectionsUrl,
@@ -117,6 +118,7 @@ export default function FavoriteOnlyMarkers({
             isAuthenticated={isAuthenticated}
             isSelected={isSelected}
             onGetDirections={handleDirections}
+            onRenameFavoriteName={handleRenameFavoriteSpot}
             onRemoveFavorite={handleRemoveFavorite}
             onToggleTarget={handleToggleTarget}
             onShareLocation={() =>

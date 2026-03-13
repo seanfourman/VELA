@@ -3,6 +3,7 @@ import showNotification from "@/utils/notifications";
 import { FAVORITE_EXIT_MS } from "@/pages/Map/MapView/core/mapConfig";
 import {
   loadFavoriteSpots,
+  renameFavorite,
   removeFavorite,
   saveFavorite,
 } from "./favoritesStorage";
@@ -19,6 +20,14 @@ const upsertFavoriteSpot = (collection, nextSpot) => {
 };
 
 const FAVORITE_ENTRY_MS = 360;
+const MAX_CUSTOM_NAME_LENGTH = 120;
+
+const normalizeCustomFavoriteName = (value) => {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return trimmed.slice(0, MAX_CUSTOM_NAME_LENGTH);
+};
 
 const useMapFavorites = ({
   getSpotKey,
@@ -104,6 +113,7 @@ const useMapFavorites = ({
       lng,
       spotId: extras.spotId ?? null,
       createdAt: extras.createdAt ?? null,
+      customName: normalizeCustomFavoriteName(extras.customName),
     }),
     [getSpotKey],
   );
@@ -149,6 +159,21 @@ const useMapFavorites = ({
   const persistRemoveFavoriteSpot = useCallback(async ({ lat, lng, spotId }) => {
     return removeFavorite({ lat, lng, spotId });
   }, []);
+
+  const persistRenameFavoriteSpot = useCallback(
+    async ({ lat, lng, spotId, customName }) => {
+      return renameFavorite(
+        {
+          lat,
+          lng,
+          spotId,
+          customName,
+        },
+        getSpotKey,
+      );
+    },
+    [getSpotKey],
+  );
 
   const setPlacedMarkerFavoriteState = useCallback(
     (spotKey, isFavorite) => {
@@ -396,6 +421,55 @@ const useMapFavorites = ({
     setSelectedDarkSpot,
   ]);
 
+  const handleRenameFavoriteSpot = useCallback(
+    async (favoriteSpot, nextCustomName) => {
+      if (!favoriteSpot?.key) return null;
+
+      const normalizedName = normalizeCustomFavoriteName(nextCustomName);
+      const previousCustomName = normalizeCustomFavoriteName(
+        favoriteSpot.customName,
+      );
+
+      if (normalizedName === previousCustomName) {
+        return favoriteSpot;
+      }
+
+      const optimisticSpot = {
+        ...favoriteSpot,
+        customName: normalizedName,
+      };
+
+      setFavoriteSpots((prev) => upsertFavoriteSpot(prev, optimisticSpot));
+
+      try {
+        const saved = await persistRenameFavoriteSpot({
+          lat: favoriteSpot.lat,
+          lng: favoriteSpot.lng,
+          spotId: favoriteSpot.spotId,
+          customName: normalizedName,
+        });
+        const resolvedSpot = saved ?? optimisticSpot;
+        setFavoriteSpots((prev) => upsertFavoriteSpot(prev, resolvedSpot));
+        showNotification(
+          normalizedName ? "Favorite name saved" : "Favorite name cleared",
+          "success",
+          { duration: 1800 },
+        );
+        return resolvedSpot;
+      } catch (error) {
+        setFavoriteSpots((prev) =>
+          upsertFavoriteSpot(prev, {
+            ...favoriteSpot,
+            customName: previousCustomName,
+          }),
+        );
+        reportFavoriteError(error, "Could not save favorite name right now");
+        return null;
+      }
+    },
+    [persistRenameFavoriteSpot, reportFavoriteError],
+  );
+
   return {
     favoriteSpots,
     setFavoriteSpots,
@@ -408,6 +482,7 @@ const useMapFavorites = ({
     handleTogglePinnedFavorite,
     handleToggleStargazeFavorite,
     handleRemoveFavoriteSpotAnimated,
+    handleRenameFavoriteSpot,
   };
 };
 

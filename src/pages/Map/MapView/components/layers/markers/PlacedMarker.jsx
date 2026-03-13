@@ -22,12 +22,14 @@ const resolveFavoriteMarkerIcon = ({
 
 export default function PlacedMarker({
   placedMarker,
+  favoriteSpot,
   placedMarkerRef,
   isAuthenticated,
   isPinnedTarget,
   onGetDirections,
   onRemovePin,
   onToggleFavorite,
+  onRenameFavoriteName,
   onToggleTarget,
   onShareLocation,
   onOpenSpaceWeather,
@@ -57,11 +59,13 @@ export default function PlacedMarker({
       <Popup>
         <PinnedPopupContent
           placedMarker={placedMarker}
+          favoriteSpot={favoriteSpot}
           isAuthenticated={isAuthenticated}
           isPinnedTarget={isPinnedTarget}
           onGetDirections={onGetDirections}
           onRemovePin={onRemovePin}
           onToggleFavorite={onToggleFavorite}
+          onRenameFavoriteName={onRenameFavoriteName}
           onToggleTarget={onToggleTarget}
           onShareLocation={onShareLocation}
           onOpenSpaceWeather={onOpenSpaceWeather}

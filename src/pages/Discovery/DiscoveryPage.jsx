@@ -525,7 +525,10 @@ export default function DiscoveryPage({
 
         return {
           ...spot,
-          name: matchedLocation?.name || "Saved favorite",
+          name:
+            (typeof spot.customName === "string" && spot.customName.trim()) ||
+            matchedLocation?.name ||
+            "Saved favorite",
           description:
             matchedLocation?.description ||
             `Saved coordinates: ${spot.lat.toFixed(3)}, ${spot.lng.toFixed(3)}`,

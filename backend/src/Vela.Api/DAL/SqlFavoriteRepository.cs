@@ -33,25 +33,19 @@ public sealed class SqlFavoriteRepository : IFavoriteRepository
         return favorites;
     }
 
-    public FavoriteSpotDto SaveFavorite(Guid userId, string spotId, double lat, double lon)
+    public FavoriteSpotDto SaveFavorite(
+        Guid userId,
+        string spotId,
+        double lat,
+        double lon,
+        string? customName
+    )
     {
         using var connection = _connectionFactory.CreateOpenConnection();
-        using var getCommand = SqlStoredProcedureCommandBuilder.Create(
-            "SP_GetFavoriteByUserAndSpot",
-            connection,
-            new Dictionary<string, object>
-            {
-                { "@UserId", userId },
-                { "@SpotId", spotId.Trim() },
-            }
-        );
-
-        using (var reader = getCommand.ExecuteReader())
+        var existing = GetFavoriteByUserAndSpot(connection, userId, spotId.Trim());
+        if (existing is not null)
         {
-            if (reader.Read())
-            {
-                return MapReaderToFavorite(reader);
-            }
+            return existing;
         }
 
         var createdAt = DateTime.UtcNow;
@@ -65,6 +59,7 @@ public sealed class SqlFavoriteRepository : IFavoriteRepository
                 { "@SpotId", spotId.Trim() },
                 { "@Lat", lat },
                 { "@Lon", lon },
+                { "@CustomName", (object?)customName ?? DBNull.Value },
                 { "@CreatedAtUtc", createdAt },
             }
         );
@@ -76,7 +71,36 @@ public sealed class SqlFavoriteRepository : IFavoriteRepository
             Lat = lat,
             Lon = lon,
             CreatedAt = createdAt,
+            CustomName = customName,
         };
+    }
+
+    public FavoriteSpotDto? UpdateFavorite(Guid userId, string spotId, string? customName)
+    {
+        using var connection = _connectionFactory.CreateOpenConnection();
+        using var command = SqlStoredProcedureCommandBuilder.Create(
+            "SP_UpdateFavoriteCustomName",
+            connection,
+            new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+                { "@SpotId", spotId.Trim() },
+                { "@CustomName", (object?)customName ?? DBNull.Value },
+            }
+        );
+        var affectedRowsParam = new SqlParameter("@AffectedRows", SqlDbType.Int)
+        {
+            Direction = ParameterDirection.Output,
+        };
+        command.Parameters.Add(affectedRowsParam);
+        command.ExecuteNonQuery();
+
+        if (Convert.ToInt32(affectedRowsParam.Value) <= 0)
+        {
+            return null;
+        }
+
+        return GetFavoriteByUserAndSpot(connection, userId, spotId.Trim());
     }
 
     public bool DeleteFavorite(Guid userId, string spotId)
@@ -109,6 +133,34 @@ public sealed class SqlFavoriteRepository : IFavoriteRepository
             Lat = Convert.ToDouble(reader["Lat"]),
             Lon = Convert.ToDouble(reader["Lon"]),
             CreatedAt = Convert.ToDateTime(reader["CreatedAtUtc"]),
+            CustomName = reader["CustomName"] == DBNull.Value
+                ? null
+                : reader["CustomName"].ToString(),
         };
+    }
+
+    private static FavoriteSpotDto? GetFavoriteByUserAndSpot(
+        SqlConnection connection,
+        Guid userId,
+        string spotId
+    )
+    {
+        using var getCommand = SqlStoredProcedureCommandBuilder.Create(
+            "SP_GetFavoriteByUserAndSpot",
+            connection,
+            new Dictionary<string, object>
+            {
+                { "@UserId", userId },
+                { "@SpotId", spotId },
+            }
+        );
+
+        using var reader = getCommand.ExecuteReader();
+        if (!reader.Read())
+        {
+            return null;
+        }
+
+        return MapReaderToFavorite(reader);
     }
 }

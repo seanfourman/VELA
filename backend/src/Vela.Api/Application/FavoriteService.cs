@@ -23,7 +23,22 @@ public sealed class FavoriteService : IFavoriteService
             ? BuildSpotId(request.Lat, request.Lon)
             : request.SpotId.Trim();
 
-        return _favoriteRepository.SaveFavorite(userId, spotId, request.Lat, request.Lon);
+        return _favoriteRepository.SaveFavorite(
+            userId,
+            spotId,
+            request.Lat,
+            request.Lon,
+            NormalizeCustomName(request.CustomName)
+        );
+    }
+
+    public FavoriteSpotDto? Update(Guid userId, string spotId, UpdateFavoriteRequestDto request)
+    {
+        return _favoriteRepository.UpdateFavorite(
+            userId,
+            spotId.Trim(),
+            NormalizeCustomName(request.CustomName)
+        );
     }
 
     public bool Delete(Guid userId, string spotId)
@@ -34,5 +49,15 @@ public sealed class FavoriteService : IFavoriteService
     private static string BuildSpotId(double lat, double lon)
     {
         return $"{lat:F6},{lon:F6}";
+    }
+
+    private static string? NormalizeCustomName(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return value.Trim();
     }
 }

@@ -59,6 +59,7 @@ export default function StargazeMarkers({
   spots,
   isAuthenticated,
   isMobileView,
+  favoriteSpotsByKey,
   favoriteSpotKeys,
   enteringFavoriteKeySet,
   isExiting = false,
@@ -68,6 +69,7 @@ export default function StargazeMarkers({
   setActiveStargazeId,
   centerOnCoords,
   openStargazePanel,
+  handleRenameFavoriteSpot,
   handleToggleStargazeFavorite,
   handleToggleStargazeTarget,
   handleShareLocation,
@@ -81,6 +83,7 @@ export default function StargazeMarkers({
 
   return spots.map((spot) => {
     const spotKey = getSpotKey(spot.lat, spot.lng);
+    const favoriteSpot = favoriteSpotsByKey?.get(spotKey) || null;
     const isFavoriteSpot = favoriteSpotKeys.has(spotKey);
     const isFavoriteEntering = enteringFavoriteKeySet.has(spotKey);
     const isTarget = coordinatesMatch(selectedDarkSpot, spot);
@@ -131,6 +134,7 @@ export default function StargazeMarkers({
         <Popup className={isExiting ? "popup-exiting" : undefined}>
           <StargazePopupContent
             spot={spot}
+            favoriteSpot={favoriteSpot}
             isMobileView={isMobileView}
             isAuthenticated={isAuthenticated}
             isFavoriteSpot={isFavoriteSpot}
@@ -140,6 +144,7 @@ export default function StargazeMarkers({
               openStargazePanel(spot);
               mapRef.current?.closePopup();
             }}
+            onRenameFavoriteName={handleRenameFavoriteSpot}
             onToggleFavorite={() => handleToggleStargazeFavorite(spot)}
             onToggleTarget={() => handleToggleStargazeTarget(spot)}
             onShareLocation={() =>

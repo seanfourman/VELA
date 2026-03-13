@@ -1,4 +1,6 @@
-﻿import SkyQualityInfo from "./SkyQualityInfo";
+import { useEffect, useRef, useState } from "react";
+import SkyQualityInfo from "./SkyQualityInfo";
+import editIcon from "@/assets/icons/edit-svgrepo-com.svg";
 import favoriteIcon from "@/assets/icons/favorite-icon.svg";
 import targetIcon from "@/assets/icons/target-icon.svg";
 import shareIcon from "@/assets/icons/share-icon.svg";
@@ -23,8 +25,13 @@ export default function ContextMenuPopup({
   isTarget,
   onToggleTarget,
   onShareLocation,
+  favoriteName,
+  onRenameFavoriteName,
 }) {
-  if (!coords) return null;
+  const [isEditingFavoriteName, setIsEditingFavoriteName] = useState(false);
+  const [favoriteNameDraft, setFavoriteNameDraft] = useState("");
+  const favoriteNameInputRef = useRef(null);
+  const favoriteNameCancelRef = useRef(false);
 
   const stopPopupEvent = (event) => {
     event.stopPropagation();
@@ -61,19 +68,70 @@ export default function ContextMenuPopup({
   const resolvedRemoveLabel = removeLabel || "Remove Pin";
   const resolvedExtraLabel = extraActionLabel || "View details";
   const coordinatesLabel = formatCoordinatesLabel({
-    lat: coords.lat,
-    lng: coords.lng,
+    lat: coords?.lat ?? 0,
+    lng: coords?.lng ?? 0,
   });
+  const resolvedFavoriteName =
+    typeof favoriteName === "string" && favoriteName.trim()
+      ? favoriteName.trim()
+      : "";
+  const canRenameFavorite =
+    Boolean(isFavorite) && typeof onRenameFavoriteName === "function";
+  const displayHeaderLabel = resolvedFavoriteName || resolvedCoordsLabel;
+  const headerInputSize = Math.max(
+    (favoriteNameDraft || displayHeaderLabel).length,
+    resolvedCoordsLabel.length,
+    1
+  );
+  const headerRowClassName = `popup-coords-label-row${
+    resolvedFavoriteName ? " is-custom" : ""
+  }${canRenameFavorite ? " is-editable" : ""}`;
+
   const handleCopyCoords = (event) => {
     event.stopPropagation();
     void copyCoordinates({ lat: coords.lat, lng: coords.lng });
   };
+
   const handleCopyCoordsKeyDown = (event) => {
     if (event.key !== "Enter" && event.key !== " ") return;
     event.preventDefault();
     event.stopPropagation();
     void copyCoordinates({ lat: coords.lat, lng: coords.lng });
   };
+
+  const beginFavoriteNameEdit = (event) => {
+    event.stopPropagation();
+    if (!canRenameFavorite) return;
+    favoriteNameCancelRef.current = false;
+    setFavoriteNameDraft(resolvedFavoriteName);
+    setIsEditingFavoriteName(true);
+  };
+
+  const cancelFavoriteNameEdit = () => {
+    favoriteNameCancelRef.current = true;
+    setFavoriteNameDraft(resolvedFavoriteName);
+    setIsEditingFavoriteName(false);
+  };
+
+  const commitFavoriteNameEdit = () => {
+    if (!canRenameFavorite) return;
+    if (favoriteNameCancelRef.current) {
+      favoriteNameCancelRef.current = false;
+      setFavoriteNameDraft(resolvedFavoriteName);
+      setIsEditingFavoriteName(false);
+      return;
+    }
+    onRenameFavoriteName?.(favoriteNameDraft);
+    setIsEditingFavoriteName(false);
+  };
+
+  useEffect(() => {
+    if (!isEditingFavoriteName) return;
+    favoriteNameInputRef.current?.focus?.();
+    favoriteNameInputRef.current?.select?.();
+  }, [isEditingFavoriteName]);
+
+  if (!coords) return null;
 
   return (
     <div
@@ -176,8 +234,62 @@ export default function ContextMenuPopup({
       ) : null}
       <div className="context-menu-popup__scroll">
         <div className="popup-coords">
-          <span key={resolvedCoordsLabel} className="popup-coords-label">
-            {resolvedCoordsLabel}
+          <span className={headerRowClassName}>
+            <span className="popup-coords-label-shell">
+              {canRenameFavorite && isEditingFavoriteName ? (
+                <input
+                  ref={favoriteNameInputRef}
+                  type="text"
+                  className="popup-coords-label-input"
+                  value={favoriteNameDraft}
+                  size={headerInputSize}
+                  maxLength={120}
+                  placeholder={displayHeaderLabel}
+                  onChange={(event) => {
+                    setFavoriteNameDraft(event.target.value);
+                  }}
+                  onBlur={commitFavoriteNameEdit}
+                  onClick={stopPopupEvent}
+                  onDoubleClick={stopPopupEvent}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      commitFavoriteNameEdit();
+                      return;
+                    }
+                    if (event.key === "Escape") {
+                      event.preventDefault();
+                      cancelFavoriteNameEdit();
+                    }
+                  }}
+                />
+              ) : (
+                <span
+                  key={displayHeaderLabel}
+                  className="popup-coords-label"
+                  onDoubleClick={canRenameFavorite ? beginFavoriteNameEdit : undefined}
+                >
+                  {displayHeaderLabel}
+                </span>
+              )}
+            </span>
+            {canRenameFavorite ? (
+              <span
+                className="popup-coords-edit-trigger"
+                role="button"
+                tabIndex={0}
+                aria-label="Rename favorite"
+                style={{ "--popup-edit-icon": `url("${editIcon}")` }}
+                onClick={beginFavoriteNameEdit}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  beginFavoriteNameEdit(event);
+                }}
+              >
+                <span aria-hidden="true" className="popup-coords-edit-icon" />
+              </span>
+            ) : null}
           </span>
           <span
             className="popup-coords-value popup-coords-value--copyable"

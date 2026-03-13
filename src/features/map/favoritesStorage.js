@@ -2,6 +2,7 @@ import {
   deleteFavoriteSpot,
   fetchFavoriteSpots,
   saveFavoriteSpot,
+  updateFavoriteSpotName,
 } from "@/utils/favoritesApi";
 
 const toFavoriteMapItem = (item, getSpotKey) => {
@@ -16,6 +17,10 @@ const toFavoriteMapItem = (item, getSpotKey) => {
     lng: lon,
     spotId: item?.spotId ?? null,
     createdAt: item?.createdAt ?? null,
+    customName:
+      typeof item?.customName === "string" && item.customName.trim()
+        ? item.customName.trim()
+        : null,
   };
 };
 
@@ -39,4 +44,17 @@ export const saveFavorite = async (lat, lng, getSpotKey) => {
 
 export const removeFavorite = async ({ lat, lng, spotId }) => {
   return deleteFavoriteSpot({ lat, lon: lng, spotId });
+};
+
+export const renameFavorite = async (
+  { lat, lng, spotId, customName },
+  getSpotKey,
+) => {
+  const updated = await updateFavoriteSpotName({
+    lat,
+    lon: lng,
+    spotId,
+    customName,
+  });
+  return toFavoriteMapItem(updated, getSpotKey);
 };

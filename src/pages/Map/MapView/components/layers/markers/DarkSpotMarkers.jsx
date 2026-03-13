@@ -39,11 +39,13 @@ const resolveFavoriteMarkerIcon = ({
 export default function DarkSpotMarkers({
   darkSpots,
   selectedDarkSpot,
+  favoriteSpotsByKey,
   favoriteSpotKeys,
   enteringFavoriteKeySet,
   isExiting = false,
   isAuthenticated,
   centerOnCoords,
+  handleRenameFavoriteSpot,
   handleToggleDarkSpotFavorite,
   handleToggleDarkSpotTarget,
   flashShareToggle,
@@ -57,6 +59,7 @@ export default function DarkSpotMarkers({
 
   return darkSpots.map((spot, index) => {
     const spotKey = getSpotKey(spot.lat, spot.lon);
+    const favoriteSpot = favoriteSpotsByKey?.get(spotKey) || null;
     const isFavoriteSpot = favoriteSpotKeys.has(spotKey);
     const isFavoriteEntering = enteringFavoriteKeySet.has(spotKey);
     const isSelected = coordinatesMatch(selectedDarkSpot, spot, "lon");
@@ -83,9 +86,11 @@ export default function DarkSpotMarkers({
         <Popup className={isExiting ? "popup-exiting" : undefined}>
           <DarkSpotPopupContent
             spot={spot}
+            favoriteSpot={favoriteSpot}
             isAuthenticated={isAuthenticated}
             isFavoriteSpot={isFavoriteSpot}
             isSelected={isSelected}
+            onRenameFavoriteName={handleRenameFavoriteSpot}
             onToggleTarget={() => handleToggleDarkSpotTarget(spot)}
             onToggleFavorite={() => handleToggleDarkSpotFavorite(spot)}
             onShareLocation={() =>

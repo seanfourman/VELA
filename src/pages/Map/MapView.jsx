@@ -111,6 +111,7 @@ const MapView = forwardRef(function MapView(
   const handleCoordinateSearch = handlers.handleCoordinateSearch;
   const handleStargazeSearch = handlers.handleStargazeSearch;
   const handleGetVisiblePlanets = handlers.handleGetVisiblePlanets;
+  const handleRenameFavoriteSpot = handlers.handleRenameFavoriteSpot;
   const ensureSpaceWeatherLoaded = spaceWeather.ensureLoaded;
   const activeUserRsvpId = getRsvpUserId(authUser);
   const placedMarkerId = state.placedMarker?.id ?? null;
@@ -124,6 +125,15 @@ const MapView = forwardRef(function MapView(
     !isThreeDMode &&
     mapType === "satellite" &&
     satelliteReadableShadowsEnabled;
+  const placedMarkerFavorite =
+    state.placedMarker &&
+    derived.favoriteSpotsByKey.has(
+      handlers.getSpotKey(state.placedMarker.lat, state.placedMarker.lng),
+    )
+      ? derived.favoriteSpotsByKey.get(
+          handlers.getSpotKey(state.placedMarker.lat, state.placedMarker.lng),
+        ) || null
+      : null;
   const visibleStarPartyEvents = useMemo(() => {
     if (!Array.isArray(starPartyEvents)) return [];
     return starPartyEvents.filter((event) => {
@@ -492,12 +502,14 @@ const MapView = forwardRef(function MapView(
             ) : null}
             <PlacedMarker
               placedMarker={state.placedMarker}
+              favoriteSpot={placedMarkerFavorite}
               placedMarkerRef={placedMarkerRef}
               isAuthenticated={isAuthenticated}
               isPinnedTarget={derived.isPinnedTarget}
               onGetDirections={handlers.handleGetDirections}
               onRemovePin={handlers.handleCloseContextMenu}
               onToggleFavorite={handlers.handleTogglePinnedFavorite}
+              onRenameFavoriteName={handleRenameFavoriteSpot}
               onToggleTarget={handlers.handleTogglePinnedTarget}
               onShareLocation={() =>
                 handlers.handleShareLocation(
@@ -536,6 +548,7 @@ const MapView = forwardRef(function MapView(
                   spots={derived.visibleStargazeLocations}
                   isAuthenticated={isAuthenticated}
                   isMobileView={ui.isMobileView}
+                  favoriteSpotsByKey={derived.favoriteSpotsByKey}
                   favoriteSpotKeys={derived.favoriteSpotKeys}
                   enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
                   isExiting={areZoomMarkersExiting}
@@ -545,6 +558,7 @@ const MapView = forwardRef(function MapView(
                   setActiveStargazeId={handlers.setActiveStargazeId}
                   centerOnCoords={handlers.centerOnCoords}
                   openStargazePanel={handlers.openStargazePanel}
+                  handleRenameFavoriteSpot={handleRenameFavoriteSpot}
                   handleToggleStargazeFavorite={handlers.handleToggleStargazeFavorite}
                   handleToggleStargazeTarget={handlers.handleToggleStargazeTarget}
                   handleShareLocation={handlers.handleShareLocation}
@@ -556,11 +570,13 @@ const MapView = forwardRef(function MapView(
                 <DarkSpotMarkers
                   darkSpots={state.darkSpots}
                   selectedDarkSpot={state.selectedDarkSpot}
+                  favoriteSpotsByKey={derived.favoriteSpotsByKey}
                   favoriteSpotKeys={derived.favoriteSpotKeys}
                   enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
                   isExiting={areZoomMarkersExiting}
                   isAuthenticated={isAuthenticated}
                   centerOnCoords={handlers.centerOnCoords}
+                  handleRenameFavoriteSpot={handleRenameFavoriteSpot}
                   handleToggleDarkSpotFavorite={handlers.handleToggleDarkSpotFavorite}
                   handleToggleDarkSpotTarget={handlers.handleToggleDarkSpotTarget}
                   flashShareToggle={handlers.flashShareToggle}
@@ -578,6 +594,7 @@ const MapView = forwardRef(function MapView(
                   selectedDarkSpot={state.selectedDarkSpot}
                   isAuthenticated={isAuthenticated}
                   centerOnCoords={handlers.centerOnCoords}
+                  handleRenameFavoriteSpot={handleRenameFavoriteSpot}
                   handleRemoveFavoriteSpotAnimated={
                     handlers.handleRemoveFavoriteSpotAnimated
                   }

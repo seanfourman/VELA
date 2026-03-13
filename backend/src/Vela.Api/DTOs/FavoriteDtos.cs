@@ -15,6 +15,9 @@ public class FavoriteSpotDto
 
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
+
+    [JsonPropertyName("customName")]
+    public string? CustomName { get; set; }
 }
 
 public class CreateFavoriteRequestDto
@@ -27,4 +30,13 @@ public class CreateFavoriteRequestDto
 
     [JsonPropertyName("lon")]
     public double Lon { get; set; }
+
+    [JsonPropertyName("customName")]
+    public string? CustomName { get; set; }
+}
+
+public class UpdateFavoriteRequestDto
+{
+    [JsonPropertyName("customName")]
+    public string? CustomName { get; set; }
 }

@@ -5,6 +5,7 @@ export default function FavoritePopupContent({
   isAuthenticated,
   isSelected,
   onGetDirections,
+  onRenameFavoriteName,
   onRemoveFavorite,
   onToggleTarget,
   onShareLocation,
@@ -20,6 +21,10 @@ export default function FavoritePopupContent({
       isAuthenticated={Boolean(isAuthenticated)}
       isFavorite={true}
       onToggleFavorite={isAuthenticated ? onRemoveFavorite : null}
+      favoriteName={spot.customName}
+      onRenameFavoriteName={
+        isAuthenticated ? (nextName) => onRenameFavoriteName?.(spot, nextName) : null
+      }
       coordsLabel="Favorited spot"
       removeLabel="Remove Favorite"
       isTarget={Boolean(isSelected)}

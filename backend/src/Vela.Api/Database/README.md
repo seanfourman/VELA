@@ -23,6 +23,11 @@ If your `Users` table already exists from an older version, rerun:
 - `SP/User SPs.sql`
 to add profile columns, profile procedures, and admin user-management procedures.
 
+If your `Favorites` table already exists from an older version, rerun:
+- `Tables/Favorites.sql`
+- `SP/Favorite SPs.sql`
+to add the custom favorite name column and update procedures.
+
 ## Notes
 
 - DAL methods call stored procedures only.

@@ -56,6 +56,40 @@ namespace Vela.Api.Controllers
             return Ok(saved);
         }
 
+        [HttpPut("{spotId}")]
+        public IActionResult UpdateFavorite(string spotId, [FromBody] UpdateFavoriteRequestDto request)
+        {
+            if (string.IsNullOrWhiteSpace(spotId))
+            {
+                return BadRequest("spotId is required.");
+            }
+
+            if (request is null)
+            {
+                return BadRequest("Request body is required.");
+            }
+
+            var userId = ReadUserId();
+            if (!userId.HasValue)
+            {
+                return Unauthorized();
+            }
+
+            List<string> validationErrors = RequestValidator.ValidateFavoriteUpdateRequest(request);
+            if (validationErrors.Any())
+            {
+                return BadRequest(new { errors = validationErrors });
+            }
+
+            var updated = _favoriteService.Update(userId.Value, spotId, request);
+            if (updated is null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updated);
+        }
+
         [HttpDelete("{spotId}")]
         public IActionResult DeleteFavorite(string spotId)
         {

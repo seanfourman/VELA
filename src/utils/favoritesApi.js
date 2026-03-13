@@ -15,6 +15,12 @@ const normalizeFavoriteSpot = (value, fallback = {}) => {
   const safe = value && typeof value === "object" ? value : {};
   const lat = parseCoord(safe.lat ?? fallback.lat);
   const lon = parseCoord(safe.lon ?? fallback.lon);
+  const customName =
+    typeof safe.customName === "string" && safe.customName.trim()
+      ? safe.customName.trim()
+      : typeof fallback.customName === "string" && fallback.customName.trim()
+        ? fallback.customName.trim()
+        : null;
 
   return {
     spotId:
@@ -27,6 +33,7 @@ const normalizeFavoriteSpot = (value, fallback = {}) => {
       typeof safe.createdAt === "string" && safe.createdAt.trim()
         ? safe.createdAt
         : fallback.createdAt ?? null,
+    customName,
   };
 };
 
@@ -74,6 +81,44 @@ export async function saveFavoriteSpot({ lat, lon }) {
       spotId: fallback.spotId,
       lat: parsedLat,
       lon: parsedLon,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getResponseError(response));
+  }
+
+  const data = await response.json().catch(() => null);
+  return normalizeFavoriteSpot(data, fallback);
+}
+
+export async function updateFavoriteSpotName({ lat, lon, spotId, customName }) {
+  const parsedLat = parseCoord(lat);
+  const parsedLon = parseCoord(lon);
+  const resolvedSpotId =
+    (typeof spotId === "string" && spotId.trim()) ||
+    buildSpotId(parsedLat, parsedLon);
+  if (!resolvedSpotId) return null;
+
+  const fallback = {
+    spotId: resolvedSpotId,
+    lat: parsedLat,
+    lon: parsedLon,
+    createdAt: null,
+    customName:
+      typeof customName === "string" && customName.trim()
+        ? customName.trim()
+        : null,
+  };
+
+  const response = await fetch(buildFavoritesUrl(resolvedSpotId), {
+    method: "PUT",
+    headers: {
+      ...authHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      customName,
     }),
   });
 

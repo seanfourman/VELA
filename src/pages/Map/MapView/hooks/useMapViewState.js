@@ -161,6 +161,11 @@ const useMapViewState = ({
     getSpotKey,
   });
 
+  const favoriteSpotsByKey = useMemo(
+    () => new Map(favorites.favoriteSpots.map((spot) => [spot.key, spot])),
+    [favorites.favoriteSpots],
+  );
+
   return {
     refs: {
       mapRef,
@@ -192,6 +197,7 @@ const useMapViewState = ({
       visibleStargazeLocations: stargaze.visibleStargazeLocations,
       activeStargazeSpot: stargaze.activeStargazeSpot,
       favoriteSpotKeys: favorites.favoriteSpotKeys,
+      favoriteSpotsByKey,
       enteringFavoriteKeySet: favorites.enteringFavoriteKeySet,
       exitingFavoriteKeySet: favorites.exitingFavoriteKeySet,
       reducedMotion,
@@ -242,6 +248,7 @@ const useMapViewState = ({
       handleToggleDarkSpotFavorite: favorites.handleToggleDarkSpotFavorite,
       handleToggleDarkSpotTarget: targetHandlers.handleToggleDarkSpotTarget,
       handleTogglePinnedFavorite: favorites.handleTogglePinnedFavorite,
+      handleRenameFavoriteSpot: favorites.handleRenameFavoriteSpot,
       handleTogglePinnedTarget: targetHandlers.handleTogglePinnedTarget,
       handleToggleStargazeTarget: targetHandlers.handleToggleStargazeTarget,
       handleRemoveFavoriteSpotAnimated:
