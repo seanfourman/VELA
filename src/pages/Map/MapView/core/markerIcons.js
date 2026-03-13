@@ -73,11 +73,36 @@ const darkSpotIcon = new L.DivIcon({
   iconAnchor: [15, 15],
 });
 
+const darkSpotIconRemoving = new L.DivIcon({
+  className: "custom-marker dark-spot-marker removing",
+  html: `
+    <div class="marker-pin dark-spot removing">
+      <div class="marker-pulse"></div>
+      <div class="marker-dot dark-spot removing"></div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
 const stargazeIcon = new L.DivIcon({
   className: "custom-marker stargaze-marker",
   html: `
     <div class="marker-pin stargaze-pin">
       <div class="marker-dot stargaze-dot">
+        <img class="stargaze-star" src="${starFullIcon}" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  `,
+  iconSize: [30, 30],
+  iconAnchor: [15, 15],
+});
+
+const stargazeIconRemoving = new L.DivIcon({
+  className: "custom-marker stargaze-marker removing",
+  html: `
+    <div class="marker-pin stargaze-pin removing">
+      <div class="marker-dot stargaze-dot removing">
         <img class="stargaze-star" src="${starFullIcon}" alt="" aria-hidden="true" />
       </div>
     </div>
@@ -125,11 +150,37 @@ const starPartyEventIcon = new L.DivIcon({
   iconAnchor: [17, 17],
 });
 
+const starPartyEventIconRemoving = new L.DivIcon({
+  className: "custom-marker party-event-marker removing",
+  html: `
+    <div class="marker-pin party-event-pin removing">
+      <div class="marker-dot party-event-dot removing">
+        <img class="party-event-symbol" src="${partyHornIcon}" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  `,
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+});
+
 const specialEventIcon = new L.DivIcon({
   className: "custom-marker special-event-marker",
   html: `
     <div class="marker-pin special-event-pin">
       <div class="marker-dot special-event-dot">
+        <img class="special-event-symbol" src="${eventIcon}" alt="" aria-hidden="true" />
+      </div>
+    </div>
+  `,
+  iconSize: [34, 34],
+  iconAnchor: [17, 17],
+});
+
+const specialEventIconRemoving = new L.DivIcon({
+  className: "custom-marker special-event-marker removing",
+  html: `
+    <div class="marker-pin special-event-pin removing">
+      <div class="marker-dot special-event-dot removing">
         <img class="special-event-symbol" src="${eventIcon}" alt="" aria-hidden="true" />
       </div>
     </div>
@@ -144,9 +195,13 @@ export {
   pinIconRemoving,
   favoritePinIconRemoving,
   darkSpotIcon,
+  darkSpotIconRemoving,
   stargazeIcon,
+  stargazeIconRemoving,
   favoriteSpotIcon,
   favoriteSpotIconTransition,
   starPartyEventIcon,
+  starPartyEventIconRemoving,
   specialEventIcon,
+  specialEventIconRemoving,
 };

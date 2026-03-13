@@ -1,6 +1,8 @@
 import { Marker, Popup } from "react-leaflet";
 import {
   darkSpotIcon,
+  darkSpotIconRemoving,
+  favoritePinIconRemoving,
   favoriteSpotIcon,
   favoriteSpotIconTransition,
 } from "@/pages/Map/MapView/core/markerIcons";
@@ -18,9 +20,15 @@ const resolveFavoriteMarkerIcon = ({
   baseIcon,
   isFavorite = false,
   isEntering = false,
+  isExiting = false,
   favoriteIcon,
   favoriteTransitionIcon,
+  removingIcon,
 }) => {
+  if (isExiting && removingIcon) {
+    return removingIcon;
+  }
+
   if (!isFavorite) {
     return baseIcon;
   }
@@ -33,6 +41,7 @@ export default function DarkSpotMarkers({
   selectedDarkSpot,
   favoriteSpotKeys,
   enteringFavoriteKeySet,
+  isExiting = false,
   isAuthenticated,
   centerOnCoords,
   handleToggleDarkSpotFavorite,
@@ -60,14 +69,18 @@ export default function DarkSpotMarkers({
           baseIcon: darkSpotIcon,
           isFavorite: isFavoriteSpot,
           isEntering: isFavoriteEntering,
+          isExiting,
           favoriteIcon: favoriteSpotIcon,
           favoriteTransitionIcon: favoriteSpotIconTransition,
+          removingIcon: isFavoriteSpot
+            ? favoritePinIconRemoving
+            : darkSpotIconRemoving,
         })}
         eventHandlers={{
           popupopen: () => centerOnCoords(spot.lat, spot.lon),
         }}
       >
-        <Popup>
+        <Popup className={isExiting ? "popup-exiting" : undefined}>
           <DarkSpotPopupContent
             spot={spot}
             isAuthenticated={isAuthenticated}

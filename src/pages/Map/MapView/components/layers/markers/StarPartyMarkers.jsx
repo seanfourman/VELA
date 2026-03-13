@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 import { Marker, Popup } from "react-leaflet";
 import {
+  specialEventIconRemoving,
   specialEventIcon,
+  starPartyEventIconRemoving,
   starPartyEventIcon,
 } from "@/pages/Map/MapView/core/markerIcons";
 import StarPartyPopupContent from "@/pages/Map/MapView/components/popups/content/StarPartyPopupContent";
@@ -18,6 +20,7 @@ function StarPartyMarkerItem({
   buildDirectionsUrl,
   getDirectionsOrigin,
   onToggleRsvp,
+  isExiting = false,
 }) {
   const markerRef = useRef(null);
   const prevJoinedRef = useRef(isJoined);
@@ -64,14 +67,20 @@ function StarPartyMarkerItem({
       key={`event-${event.id}`}
       position={[event.lat, event.lng]}
       icon={
-        event.eventType === "special_event" ? specialEventIcon : starPartyEventIcon
+        event.eventType === "special_event"
+          ? isExiting
+            ? specialEventIconRemoving
+            : specialEventIcon
+          : isExiting
+            ? starPartyEventIconRemoving
+            : starPartyEventIcon
       }
       ref={markerRef}
       eventHandlers={{
         popupopen: () => centerOnCoords?.(event.lat, event.lng),
       }}
     >
-      <Popup>
+      <Popup className={isExiting ? "popup-exiting" : undefined}>
         <StarPartyPopupContent
           event={event}
           isAuthenticated={isAuthenticated}
@@ -106,6 +115,7 @@ export default function StarPartyMarkers({
   buildDirectionsUrl,
   getDirectionsOrigin,
   onToggleRsvp,
+  isExiting = false,
 }) {
   if (!Array.isArray(events) || events.length === 0) return null;
 
@@ -129,6 +139,7 @@ export default function StarPartyMarkers({
         buildDirectionsUrl={buildDirectionsUrl}
         getDirectionsOrigin={getDirectionsOrigin}
         onToggleRsvp={onToggleRsvp}
+        isExiting={isExiting}
       />
     );
   });

@@ -34,6 +34,7 @@ import {
   LOCATION_ZOOM,
   LONG_PRESS_MS,
   MAP_TILES,
+  MARKER_EXIT_MS,
   MARKER_VISIBILITY_ZOOM,
   MAX_ZOOM,
   MIN_ZOOM,
@@ -83,8 +84,14 @@ const MapView = forwardRef(function MapView(
   const [isThreeDMode, setIsThreeDMode] = useState(false);
   const [isSpaceWeatherOpen, setIsSpaceWeatherOpen] = useState(false);
   const [spaceWeatherFocus, setSpaceWeatherFocus] = useState(null);
-  const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
+  const [areZoomMarkersVisible, setAreZoomMarkersVisible] = useState(
+    DEFAULT_ZOOM >= MARKER_VISIBILITY_ZOOM,
+  );
+  const [areZoomMarkersExiting, setAreZoomMarkersExiting] = useState(false);
   const handledMapSelectionRef = useRef(null);
+  const zoomMarkerExitTimerRef = useRef(0);
+  const zoomMarkersVisibleRef = useRef(DEFAULT_ZOOM >= MARKER_VISIBILITY_ZOOM);
+  const zoomMarkersExitingRef = useRef(false);
   const spaceWeather = useSpaceWeather();
 
   const { refs, ui, state, derived, handlers, planets } = useMapViewState({
@@ -117,7 +124,6 @@ const MapView = forwardRef(function MapView(
     !isThreeDMode &&
     mapType === "satellite" &&
     satelliteReadableShadowsEnabled;
-  const showZoomedMapMarkers = mapZoom >= MARKER_VISIBILITY_ZOOM;
   const visibleStarPartyEvents = useMemo(() => {
     if (!Array.isArray(starPartyEvents)) return [];
     return starPartyEvents.filter((event) => {
@@ -131,6 +137,47 @@ const MapView = forwardRef(function MapView(
     setIsThreeDMode((prev) => !prev);
   }, []);
 
+  const handleMapZoomChange = useCallback(
+    (nextZoom) => {
+      if (nextZoom >= MARKER_VISIBILITY_ZOOM) {
+        if (zoomMarkerExitTimerRef.current) {
+          window.clearTimeout(zoomMarkerExitTimerRef.current);
+          zoomMarkerExitTimerRef.current = 0;
+        }
+        if (zoomMarkersExitingRef.current) {
+          zoomMarkersExitingRef.current = false;
+          setAreZoomMarkersExiting(false);
+        }
+        if (!zoomMarkersVisibleRef.current) {
+          zoomMarkersVisibleRef.current = true;
+          setAreZoomMarkersVisible(true);
+        }
+        return;
+      }
+
+      if (!zoomMarkersVisibleRef.current || zoomMarkersExitingRef.current) {
+        return;
+      }
+
+      mapRef.current?.closePopup?.();
+      zoomMarkersExitingRef.current = true;
+      setAreZoomMarkersExiting(true);
+
+      if (zoomMarkerExitTimerRef.current) {
+        window.clearTimeout(zoomMarkerExitTimerRef.current);
+      }
+
+      zoomMarkerExitTimerRef.current = window.setTimeout(() => {
+        zoomMarkerExitTimerRef.current = 0;
+        zoomMarkersVisibleRef.current = false;
+        zoomMarkersExitingRef.current = false;
+        setAreZoomMarkersVisible(false);
+        setAreZoomMarkersExiting(false);
+      }, MARKER_EXIT_MS);
+    },
+    [mapRef],
+  );
+
   useEffect(() => {
     onThreeDModeChange?.(isThreeDMode);
   }, [isThreeDMode, onThreeDModeChange]);
@@ -140,6 +187,14 @@ const MapView = forwardRef(function MapView(
       onThreeDModeChange?.(false);
     };
   }, [onThreeDModeChange]);
+
+  useEffect(() => {
+    return () => {
+      if (zoomMarkerExitTimerRef.current) {
+        window.clearTimeout(zoomMarkerExitTimerRef.current);
+      }
+    };
+  }, []);
 
   const handleOpenSpaceWeatherAt = useCallback(
     (coords, label) => {
@@ -392,7 +447,7 @@ const MapView = forwardRef(function MapView(
         )}
 
         <MapController mapRef={mapRef} />
-        <MapZoomTracker onZoomChange={setMapZoom} />
+        <MapZoomTracker onZoomChange={handleMapZoomChange} />
         {!isThreeDMode && (
           <>
             <DoubleClickHandler onDoubleClick={handlers.handleDoubleClick} />
@@ -475,7 +530,7 @@ const MapView = forwardRef(function MapView(
               }
               centerOnCoords={handlers.centerOnCoords}
             />
-            {showZoomedMapMarkers ? (
+            {areZoomMarkersVisible ? (
               <>
                 <StargazeMarkers
                   spots={derived.visibleStargazeLocations}
@@ -483,6 +538,7 @@ const MapView = forwardRef(function MapView(
                   isMobileView={ui.isMobileView}
                   favoriteSpotKeys={derived.favoriteSpotKeys}
                   enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
+                  isExiting={areZoomMarkersExiting}
                   selectedDarkSpot={state.selectedDarkSpot}
                   stargazeMarkerRefs={stargazeMarkerRefs}
                   mapRef={mapRef}
@@ -502,6 +558,7 @@ const MapView = forwardRef(function MapView(
                   selectedDarkSpot={state.selectedDarkSpot}
                   favoriteSpotKeys={derived.favoriteSpotKeys}
                   enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
+                  isExiting={areZoomMarkersExiting}
                   isAuthenticated={isAuthenticated}
                   centerOnCoords={handlers.centerOnCoords}
                   handleToggleDarkSpotFavorite={handlers.handleToggleDarkSpotFavorite}
@@ -517,6 +574,7 @@ const MapView = forwardRef(function MapView(
                   favoriteOnlySpots={derived.favoriteOnlySpots}
                   enteringFavoriteKeySet={derived.enteringFavoriteKeySet}
                   exitingFavoriteKeySet={derived.exitingFavoriteKeySet}
+                  isExiting={areZoomMarkersExiting}
                   selectedDarkSpot={state.selectedDarkSpot}
                   isAuthenticated={isAuthenticated}
                   centerOnCoords={handlers.centerOnCoords}
@@ -533,6 +591,7 @@ const MapView = forwardRef(function MapView(
                   events={visibleStarPartyEvents}
                   isAuthenticated={isAuthenticated}
                   activeUserRsvpId={activeUserRsvpId}
+                  isExiting={areZoomMarkersExiting}
                   centerOnCoords={handlers.centerOnCoords}
                   handleShareLocation={handlers.handleShareLocation}
                   buildDirectionsUrl={handlers.buildDirectionsUrl}

@@ -1,8 +1,10 @@
 import { Marker, Popup } from "react-leaflet";
 import {
+  favoritePinIconRemoving,
   favoriteSpotIcon,
   favoriteSpotIconTransition,
   stargazeIcon,
+  stargazeIconRemoving,
 } from "@/pages/Map/MapView/core/markerIcons";
 import StargazePopupContent from "@/pages/Map/MapView/components/popups/content/StargazePopupContent";
 
@@ -37,9 +39,15 @@ const resolveFavoriteMarkerIcon = ({
   baseIcon,
   isFavorite = false,
   isEntering = false,
+  isExiting = false,
   favoriteIcon,
   favoriteTransitionIcon,
+  removingIcon,
 }) => {
+  if (isExiting && removingIcon) {
+    return removingIcon;
+  }
+
   if (!isFavorite) {
     return baseIcon;
   }
@@ -53,6 +61,7 @@ export default function StargazeMarkers({
   isMobileView,
   favoriteSpotKeys,
   enteringFavoriteKeySet,
+  isExiting = false,
   selectedDarkSpot,
   stargazeMarkerRefs,
   mapRef,
@@ -89,8 +98,12 @@ export default function StargazeMarkers({
           baseIcon: stargazeIcon,
           isFavorite: isFavoriteSpot,
           isEntering: isFavoriteEntering,
+          isExiting,
           favoriteIcon: favoriteSpotIcon,
           favoriteTransitionIcon: favoriteSpotIconTransition,
+          removingIcon: isFavoriteSpot
+            ? favoritePinIconRemoving
+            : stargazeIconRemoving,
         })}
         ref={(marker) => {
           if (marker) {
@@ -115,7 +128,7 @@ export default function StargazeMarkers({
           },
         }}
       >
-        <Popup>
+        <Popup className={isExiting ? "popup-exiting" : undefined}>
           <StargazePopupContent
             spot={spot}
             isMobileView={isMobileView}

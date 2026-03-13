@@ -57,6 +57,7 @@ export default function FavoriteOnlyMarkers({
   favoriteOnlySpots,
   enteringFavoriteKeySet,
   exitingFavoriteKeySet,
+  isExiting = false,
   selectedDarkSpot,
   isAuthenticated,
   centerOnCoords,
@@ -72,7 +73,7 @@ export default function FavoriteOnlyMarkers({
 
   return favoriteOnlySpots.map((spot) => {
     const isEntering = enteringFavoriteKeySet.has(spot.key);
-    const isExiting = exitingFavoriteKeySet.has(spot.key);
+    const isRemoving = isExiting || exitingFavoriteKeySet.has(spot.key);
     const isSelected = coordinatesMatch(selectedDarkSpot, spot);
     const handleDirections = buildMarkerDirectionsHandler({
       buildDirectionsUrl,
@@ -101,7 +102,7 @@ export default function FavoriteOnlyMarkers({
           baseIcon: favoriteSpotIcon,
           isFavorite: true,
           isEntering,
-          isExiting,
+          isExiting: isRemoving,
           favoriteIcon: favoriteSpotIcon,
           favoriteTransitionIcon: favoriteSpotIconTransition,
           favoriteRemovingIcon: favoritePinIconRemoving,
@@ -110,7 +111,7 @@ export default function FavoriteOnlyMarkers({
           popupopen: () => centerOnCoords(spot.lat, spot.lng),
         }}
       >
-        <Popup className={isExiting ? "popup-exiting" : undefined}>
+        <Popup className={isRemoving ? "popup-exiting" : undefined}>
           <FavoritePopupContent
             spot={spot}
             isAuthenticated={isAuthenticated}
