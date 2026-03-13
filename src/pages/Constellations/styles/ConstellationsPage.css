@@ -88,27 +88,23 @@
 }
 
 .constellations-hero,
-.constellations-toolbar,
 .constellations-detail,
 .constellations-rail {
   z-index: var(--panel-z);
 }
 
 .constellations-hero,
-.constellations-toolbar,
 .constellations-detail {
   position: absolute;
 }
 
 .constellations-hero,
-.constellations-toolbar,
 .constellations-detail,
 .constellations-rail {
   isolation: isolate;
 }
 
 .constellations-hero > *,
-.constellations-toolbar > *,
 .constellations-detail > * {
   position: relative;
   z-index: 2;
@@ -122,8 +118,7 @@
 }
 
 .constellations-hero__eyebrow,
-.constellations-detail__eyebrow,
-.constellations-toolbar__label {
+.constellations-detail__eyebrow {
   margin: 0;
   color: rgba(238, 244, 255, 0.62);
   font-size: 0.72rem;
@@ -160,57 +155,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-}
-
-.constellations-toolbar {
-  top: 98px;
-  right: 24px;
-  width: min(310px, calc(100vw - 48px));
-  padding: 16px;
-}
-
-.constellations-toolbar__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-}
-
-.constellations-toolbar__controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.constellations-toolbar__button {
-  width: 42px;
-  height: 42px;
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-.constellations-toolbar__value {
-  min-width: 74px;
-  text-align: center;
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-
-.constellations-toolbar__actions {
-  margin-top: 16px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.constellations-toolbar__action {
-  flex: 1 1 120px;
-  min-height: 42px;
-}
-
-.constellations-toolbar__action--ghost {
-  background: rgba(255, 255, 255, 0.04);
 }
 
 .constellations-detail {
@@ -550,7 +494,6 @@
 
 @media (max-width: 860px) {
   .constellations-hero,
-  .constellations-toolbar,
   .constellations-detail {
     left: 16px;
     right: 16px;
@@ -562,14 +505,9 @@
     padding-right: 18px;
   }
 
-  .constellations-toolbar {
-    top: auto;
-    bottom: 164px;
-  }
-
   .constellations-detail {
     top: auto;
-    bottom: 232px;
+    bottom: 164px;
   }
 
   .constellations-rail {
@@ -593,18 +531,9 @@
     font-size: clamp(2.4rem, 10vw, 3.3rem);
   }
 
-  .constellations-toolbar {
-    padding: 14px;
-    bottom: 154px;
-  }
-
-  .constellations-toolbar__actions {
-    flex-direction: column;
-  }
-
   .constellations-detail {
     padding: 15px;
-    bottom: 244px;
+    bottom: 174px;
   }
 
   .constellations-detail__stats {

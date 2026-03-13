@@ -135,12 +135,6 @@ function ConstellationsPage() {
     setTargetPan(getConstellationFocusPan(nextConstellation, FIXED_VIEW_SCALE));
   };
 
-  const handleResetView = () => {
-    setTargetPan(getCenteredPan(FIXED_VIEW_SCALE));
-    setSelectedId(DEFAULT_SELECTED_ID);
-    setHoveredId("");
-  };
-
   const handleViewportPointerDown = (event) => {
     if (event.button !== 0) return;
     const clickedConstellation = event.target.closest?.("[data-constellation-id]");
@@ -247,26 +241,6 @@ function ConstellationsPage() {
           <span className="glass-pill">Mouse-reactive parallax</span>
         </div>
       </header>
-
-      <div className="constellations-toolbar glass-panel glass-panel-elevated">
-        <div className="constellations-toolbar__label">Camera</div>
-        <div className="constellations-toolbar__actions">
-          <button
-            type="button"
-            className="glass-btn constellations-toolbar__action"
-            onClick={() => selectConstellation(DEFAULT_SELECTED_ID)}
-          >
-            Focus Vela
-          </button>
-          <button
-            type="button"
-            className="glass-btn constellations-toolbar__action constellations-toolbar__action--ghost"
-            onClick={handleResetView}
-          >
-            Reset sky
-          </button>
-        </div>
-      </div>
 
       <div className="constellations-detail glass-panel glass-panel-elevated">
         <div className="constellations-detail__eyebrow">Selected constellation</div>
