@@ -18,21 +18,79 @@ const VIEW_CENTER = {
   x: VIEWBOX_WIDTH / 2,
   y: VIEWBOX_HEIGHT / 2,
 };
+const FULL_VISIBLE_WINDOW = {
+  x: 0,
+  y: 0,
+  width: VIEWBOX_WIDTH,
+  height: VIEWBOX_HEIGHT,
+};
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
-const clampPan = (pan, zoom) => ({
-  x: clamp(pan.x, VIEWBOX_WIDTH - VIEWBOX_WIDTH * zoom, 0),
-  y: clamp(pan.y, VIEWBOX_HEIGHT - VIEWBOX_HEIGHT * zoom, 0),
+const getViewportSize = () => {
+  if (typeof window === "undefined") {
+    return { width: 1440, height: 900 };
+  }
+
+  return {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  };
+};
+
+const getVisibleWindow = (isMobile, viewportSize) => {
+  if (!isMobile) {
+    return FULL_VISIBLE_WINDOW;
+  }
+
+  const { width, height } = viewportSize;
+  if (!width || !height) {
+    return FULL_VISIBLE_WINDOW;
+  }
+
+  const viewportAspect = width / height;
+  const viewBoxAspect = VIEWBOX_WIDTH / VIEWBOX_HEIGHT;
+
+  if (viewportAspect < viewBoxAspect) {
+    const visibleWidth = VIEWBOX_HEIGHT * viewportAspect;
+    return {
+      x: (VIEWBOX_WIDTH - visibleWidth) / 2,
+      y: 0,
+      width: visibleWidth,
+      height: VIEWBOX_HEIGHT,
+    };
+  }
+
+  const visibleHeight = VIEWBOX_WIDTH / viewportAspect;
+  return {
+    x: 0,
+    y: (VIEWBOX_HEIGHT - visibleHeight) / 2,
+    width: VIEWBOX_WIDTH,
+    height: visibleHeight,
+  };
+};
+
+const clampPan = (pan, zoom, visibleWindow = FULL_VISIBLE_WINDOW) => ({
+  x: clamp(
+    pan.x,
+    visibleWindow.x + visibleWindow.width - VIEWBOX_WIDTH * zoom,
+    visibleWindow.x,
+  ),
+  y: clamp(
+    pan.y,
+    visibleWindow.y + visibleWindow.height - VIEWBOX_HEIGHT * zoom,
+    visibleWindow.y,
+  ),
 });
 
-const getCenteredPan = (zoom) =>
+const getCenteredPan = (zoom, visibleWindow = FULL_VISIBLE_WINDOW) =>
   clampPan(
     {
       x: VIEW_CENTER.x - VIEW_CENTER.x * zoom,
       y: VIEW_CENTER.y - VIEW_CENTER.y * zoom,
     },
     zoom,
+    visibleWindow,
   );
 
 const getLabelTextAnchor = (align) => {
@@ -41,7 +99,11 @@ const getLabelTextAnchor = (align) => {
   return "start";
 };
 
-const getConstellationFocusPan = (constellation, zoom) => {
+const getConstellationFocusPan = (
+  constellation,
+  zoom,
+  visibleWindow = FULL_VISIBLE_WINDOW,
+) => {
   const centroid = getConstellationCentroid(constellation);
   return clampPan(
     {
@@ -49,6 +111,7 @@ const getConstellationFocusPan = (constellation, zoom) => {
       y: VIEW_CENTER.y - centroid.y * zoom,
     },
     zoom,
+    visibleWindow,
   );
 };
 
@@ -166,21 +229,28 @@ function ConstellationsPanel({
 }
 
 function ConstellationsPage() {
+  const initialViewportSize = getViewportSize();
   const initialIsMobile =
     typeof window !== "undefined" &&
     typeof window.matchMedia === "function" &&
     window.matchMedia("(max-width: 768px)").matches;
+  const initialVisibleWindow = getVisibleWindow(initialIsMobile, initialViewportSize);
   const stageRef = useRef(null);
   const dragRef = useRef(null);
   const suppressClickRef = useRef(false);
   const mobilePanelNudgeTimeoutRef = useRef(null);
   const [selectedId, setSelectedId] = useState(DEFAULT_SELECTED_ID);
   const [hoveredId, setHoveredId] = useState("");
-  const [pan, setPan] = useState(() => getCenteredPan(FIXED_VIEW_SCALE));
-  const [targetPan, setTargetPan] = useState(() => getCenteredPan(FIXED_VIEW_SCALE));
+  const [pan, setPan] = useState(() =>
+    getCenteredPan(FIXED_VIEW_SCALE, initialVisibleWindow),
+  );
+  const [targetPan, setTargetPan] = useState(() =>
+    getCenteredPan(FIXED_VIEW_SCALE, initialVisibleWindow),
+  );
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(initialIsMobile);
+  const [viewportSize, setViewportSize] = useState(initialViewportSize);
   const [focusPanelOpen, setFocusPanelOpen] = useState(false);
   const [mobilePanelNudge, setMobilePanelNudge] = useState(false);
 
@@ -188,6 +258,7 @@ function ConstellationsPage() {
   const deepFieldStars = useMemo(() => buildAmbientStars(140, 71), []);
   const selectedConstellation =
     CONSTELLATIONS_BY_ID[selectedId] ?? CONSTELLATIONS_BY_ID[DEFAULT_SELECTED_ID];
+  const visibleWindow = getVisibleWindow(isMobile, viewportSize);
   const leadingStars = useMemo(
     () =>
       [...selectedConstellation.stars]
@@ -207,14 +278,25 @@ function ConstellationsPage() {
         ? window.matchMedia("(max-width: 768px)")
         : null;
 
-    const handleChange = (event) => {
-      setIsMobile(event.matches);
+    const syncViewport = () => {
+      const nextViewportSize = getViewportSize();
+      const nextIsMobile = mediaQuery ? mediaQuery.matches : window.innerWidth <= 768;
+      const nextVisibleWindow = getVisibleWindow(nextIsMobile, nextViewportSize);
+
+      setViewportSize(nextViewportSize);
+      setIsMobile(nextIsMobile);
+      setPan((current) => clampPan(current, FIXED_VIEW_SCALE, nextVisibleWindow));
+      setTargetPan((current) =>
+        clampPan(current, FIXED_VIEW_SCALE, nextVisibleWindow),
+      );
     };
 
-    mediaQuery?.addEventListener("change", handleChange);
+    window.addEventListener("resize", syncViewport);
+    mediaQuery?.addEventListener("change", syncViewport);
 
     return () => {
-      mediaQuery?.removeEventListener("change", handleChange);
+      window.removeEventListener("resize", syncViewport);
+      mediaQuery?.removeEventListener("change", syncViewport);
     };
   }, []);
 
@@ -301,7 +383,9 @@ function ConstellationsPage() {
 
     if (!focus) return;
 
-    setTargetPan(getConstellationFocusPan(nextConstellation, FIXED_VIEW_SCALE));
+    setTargetPan(
+      getConstellationFocusPan(nextConstellation, FIXED_VIEW_SCALE, visibleWindow),
+    );
   };
 
   const handleTogglePanel = () => {
@@ -362,6 +446,7 @@ function ConstellationsPage() {
         y: dragState.pan.y + worldDeltaY,
       },
       FIXED_VIEW_SCALE,
+      visibleWindow,
     );
 
     setPan(nextPan);
