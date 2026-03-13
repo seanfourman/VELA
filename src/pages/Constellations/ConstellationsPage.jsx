@@ -141,6 +141,12 @@ function ConstellationsPage() {
 
   const handleViewportPointerDown = (event) => {
     if (event.button !== 0) return;
+    const clickedConstellation = event.target.closest?.("[data-constellation-id]");
+    if (clickedConstellation) {
+      dragRef.current = null;
+      setIsDragging(false);
+      return;
+    }
 
     const stage = stageRef.current;
     if (!stage) return;
@@ -408,6 +414,7 @@ function ConstellationsPage() {
                   return (
                     <g
                       key={constellation.id}
+                      data-constellation-id={constellation.id}
                       className={`constellation-group${isSelected ? " is-selected" : ""}${
                         isHovered ? " is-hovered" : ""
                       }`}
