@@ -15,7 +15,7 @@
 }
 
 @media (max-width: 768px) {
-  .profile-page {
+  .profile-page__scroll-surface {
     padding: 96px 18px 32px;
   }
 
