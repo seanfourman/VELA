@@ -196,19 +196,6 @@ function ConstellationsPanelToggle({ open, mobile = false, onClick }) {
 }
 
 function ConstellationsPanelContent({ constellation, leadingStars }) {
-  if (!constellation) {
-    return (
-      <div className="constellations-detail">
-        <div className="constellations-detail__eyebrow">Star archive</div>
-        <h2 className="constellations-detail__title">Select a constellation</h2>
-        <p className="constellations-detail__headline">Nothing is focused yet.</p>
-        <p className="constellations-detail__description">
-          Tap or click any constellation on the map to inspect it here.
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="constellations-detail">
       <div className="constellations-detail__eyebrow">Selected constellation</div>
@@ -302,6 +289,7 @@ function ConstellationsPage() {
   const stageRef = useRef(null);
   const dragRef = useRef(null);
   const suppressClickRef = useRef(false);
+  const panelOpenFrameRef = useRef(0);
   const mobilePanelNudgeTimeoutRef = useRef(null);
   const [selectedId, setSelectedId] = useState("");
   const [hoveredId, setHoveredId] = useState("");
@@ -315,6 +303,7 @@ function ConstellationsPage() {
   const [isDragging, setIsDragging] = useState(false);
   const [isMobile, setIsMobile] = useState(initialIsMobile);
   const [viewportSize, setViewportSize] = useState(initialViewportSize);
+  const [isPanelVisible, setIsPanelVisible] = useState(false);
   const [focusPanelOpen, setFocusPanelOpen] = useState(false);
   const [mobilePanelNudge, setMobilePanelNudge] = useState(false);
 
@@ -369,6 +358,9 @@ function ConstellationsPage() {
 
   useEffect(() => {
     return () => {
+      if (panelOpenFrameRef.current) {
+        window.cancelAnimationFrame(panelOpenFrameRef.current);
+      }
       if (mobilePanelNudgeTimeoutRef.current) {
         clearTimeout(mobilePanelNudgeTimeoutRef.current);
       }
@@ -424,6 +416,11 @@ function ConstellationsPage() {
   const triggerMobilePanelNudge = () => {
     if (!isMobile || focusPanelOpen) return;
 
+    if (panelOpenFrameRef.current) {
+      window.cancelAnimationFrame(panelOpenFrameRef.current);
+      panelOpenFrameRef.current = 0;
+    }
+
     if (mobilePanelNudgeTimeoutRef.current) {
       clearTimeout(mobilePanelNudgeTimeoutRef.current);
     }
@@ -438,10 +435,31 @@ function ConstellationsPage() {
     });
   };
 
+  const openDesktopPanelWithAnimation = () => {
+    if (panelOpenFrameRef.current) {
+      window.cancelAnimationFrame(panelOpenFrameRef.current);
+    }
+
+    if (!isPanelVisible) {
+      setIsPanelVisible(true);
+      setFocusPanelOpen(false);
+      panelOpenFrameRef.current = window.requestAnimationFrame(() => {
+        setFocusPanelOpen(true);
+        panelOpenFrameRef.current = 0;
+      });
+      return;
+    }
+
+    setFocusPanelOpen(true);
+  };
+
   const selectConstellation = (id, { focus = true } = {}) => {
     const nextConstellation = CONSTELLATIONS_BY_ID[id];
     if (!nextConstellation) {
       setSelectedId("");
+      setMobilePanelNudge(false);
+      setFocusPanelOpen(false);
+      setIsPanelVisible(false);
       if (focus) {
         setTargetPan(getCenteredPan(FIXED_VIEW_SCALE, visibleWindow, isMobile));
       }
@@ -449,11 +467,14 @@ function ConstellationsPage() {
     }
 
     setSelectedId(nextConstellation.id);
-
     if (isMobile) {
+      setIsPanelVisible(true);
+      if (!isPanelVisible) {
+        setFocusPanelOpen(false);
+      }
       triggerMobilePanelNudge();
     } else {
-      setFocusPanelOpen(true);
+      openDesktopPanelWithAnimation();
     }
 
     if (!focus) return;
@@ -566,14 +587,16 @@ function ConstellationsPage() {
         <div className="constellations-grid-glow" />
       </div>
 
-      <ConstellationsPanel
-        isMobile={isMobile}
-        open={focusPanelOpen}
-        nudgeMobileToggle={mobilePanelNudge}
-        constellation={selectedConstellation}
-        leadingStars={leadingStars}
-        onToggleOpen={handleTogglePanel}
-      />
+      {isPanelVisible && selectedConstellation ? (
+        <ConstellationsPanel
+          isMobile={isMobile}
+          open={focusPanelOpen}
+          nudgeMobileToggle={mobilePanelNudge}
+          constellation={selectedConstellation}
+          leadingStars={leadingStars}
+          onToggleOpen={handleTogglePanel}
+        />
+      ) : null}
 
       <div
         ref={stageRef}
