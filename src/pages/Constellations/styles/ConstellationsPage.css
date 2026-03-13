@@ -4,9 +4,21 @@
   height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(circle at 20% 18%, rgba(98, 185, 255, 0.12), transparent 36%),
-    radial-gradient(circle at 80% 16%, rgba(193, 126, 255, 0.16), transparent 28%),
-    radial-gradient(circle at 72% 72%, rgba(25, 123, 182, 0.18), transparent 34%),
+    radial-gradient(
+      circle at 20% 18%,
+      rgba(98, 185, 255, 0.12),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 80% 16%,
+      rgba(193, 126, 255, 0.16),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 72% 72%,
+      rgba(25, 123, 182, 0.18),
+      transparent 34%
+    ),
     linear-gradient(180deg, #010814 0%, #04111f 46%, #020710 100%);
   color: #f5f8ff;
   isolation: isolate;
@@ -38,9 +50,15 @@
   left: 4%;
   width: 34vw;
   height: 24vw;
-  background: radial-gradient(circle, rgba(96, 189, 255, 0.22), transparent 68%);
-  transform:
-    translate(calc(var(--pointer-x) * 18px), calc(var(--pointer-y) * 12px))
+  background: radial-gradient(
+    circle,
+    rgba(96, 189, 255, 0.22),
+    transparent 68%
+  );
+  transform: translate(
+      calc(var(--pointer-x) * 18px),
+      calc(var(--pointer-y) * 12px)
+    )
     rotate(-8deg);
   animation: constellations-drift-a 14s ease-in-out infinite alternate;
 }
@@ -50,9 +68,15 @@
   right: -6%;
   width: 36vw;
   height: 28vw;
-  background: radial-gradient(circle, rgba(196, 118, 255, 0.18), transparent 70%);
-  transform:
-    translate(calc(var(--pointer-x) * -20px), calc(var(--pointer-y) * 14px))
+  background: radial-gradient(
+    circle,
+    rgba(196, 118, 255, 0.18),
+    transparent 70%
+  );
+  transform: translate(
+      calc(var(--pointer-x) * -20px),
+      calc(var(--pointer-y) * 14px)
+    )
     rotate(18deg);
   animation: constellations-drift-b 16s ease-in-out infinite alternate;
 }
@@ -62,9 +86,15 @@
   left: 22%;
   width: 46vw;
   height: 26vw;
-  background: radial-gradient(circle, rgba(99, 222, 195, 0.14), transparent 74%);
-  transform:
-    translate(calc(var(--pointer-x) * 10px), calc(var(--pointer-y) * -18px))
+  background: radial-gradient(
+    circle,
+    rgba(99, 222, 195, 0.14),
+    transparent 74%
+  );
+  transform: translate(
+      calc(var(--pointer-x) * 10px),
+      calc(var(--pointer-y) * -18px)
+    )
     rotate(-12deg);
   animation: constellations-drift-c 19s ease-in-out infinite alternate;
 }
@@ -82,8 +112,10 @@
   background-size: 44px 44px;
   mask-image: radial-gradient(circle at center, black 30%, transparent 74%);
   opacity: 0.28;
-  transform:
-    translate(calc(var(--pointer-x) * -8px), calc(var(--pointer-y) * -8px));
+  transform: translate(
+    calc(var(--pointer-x) * -8px),
+    calc(var(--pointer-y) * -8px)
+  );
 }
 
 .constellations-detail > * {
@@ -103,8 +135,8 @@
 .constellations-detail__title {
   margin: 10px 0 8px;
   font-family:
-    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Cormorant Garamond",
-    serif;
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua",
+    "Cormorant Garamond", serif;
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 0.95;
@@ -191,8 +223,13 @@
   min-height: 34px;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--constellation-accent), transparent 64%);
-  background: color-mix(in srgb, var(--constellation-accent) 14%, rgba(255, 255, 255, 0.03));
+  border: 1px solid
+    color-mix(in srgb, var(--constellation-accent), transparent 64%);
+  background: color-mix(
+    in srgb,
+    var(--constellation-accent) 14%,
+    rgba(255, 255, 255, 0.03)
+  );
   color: #f8fbff;
   font-size: 0.78rem;
   font-weight: 600;
@@ -228,7 +265,8 @@
 .constellations-ambient-star {
   fill: rgba(226, 236, 255, 0.82);
   opacity: var(--twinkle-opacity, 0.5);
-  animation: constellations-twinkle var(--twinkle-duration, 4s) ease-in-out infinite;
+  animation: constellations-twinkle var(--twinkle-duration, 4s) ease-in-out
+    infinite;
   animation-delay: var(--twinkle-delay, 0s);
   transform-origin: center;
 }
@@ -239,7 +277,9 @@
 
 .constellation-group {
   cursor: pointer;
-  transition: opacity 180ms ease, filter 180ms ease;
+  transition:
+    opacity 180ms ease,
+    filter 180ms ease;
   filter: saturate(0.96);
 }
 
@@ -249,17 +289,22 @@
 
 .constellation-group.is-selected,
 .constellation-group.is-hovered {
-  filter:
-    saturate(1.22)
-    drop-shadow(0 0 1px color-mix(in srgb, var(--constellation-color), transparent 10%))
-    drop-shadow(0 0 2.2px color-mix(in srgb, var(--constellation-color), transparent 30%));
+  filter: saturate(1.22)
+    drop-shadow(
+      0 0 1px color-mix(in srgb, var(--constellation-color), transparent 10%)
+    )
+    drop-shadow(
+      0 0 2.2px color-mix(in srgb, var(--constellation-color), transparent 30%)
+    );
   opacity: 1;
 }
 
 .constellation-aura {
   fill: color-mix(in srgb, var(--constellation-color), transparent 74%);
   opacity: 0.62;
-  transition: opacity 180ms ease, r 180ms ease;
+  transition:
+    opacity 180ms ease,
+    r 180ms ease;
 }
 
 .constellation-group:not(.is-selected):not(.is-hovered) .constellation-aura {
@@ -277,11 +322,15 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.96;
-  transition: stroke-width 180ms ease, opacity 180ms ease;
+  transition:
+    stroke-width 180ms ease,
+    opacity 180ms ease;
   vector-effect: non-scaling-stroke;
 }
 
-.constellation-group:not(.is-selected):not(.is-hovered) .constellation-lines line {
+.constellation-group:not(.is-selected):not(.is-hovered)
+  .constellation-lines
+  line {
   opacity: 0.7;
 }
 
@@ -289,10 +338,11 @@
   fill: #ffffff;
   stroke: color-mix(in srgb, var(--constellation-color) 82%, #f2fbff);
   stroke-width: 0.11;
-  filter:
-    drop-shadow(0 0 0.32px rgba(255, 255, 255, 0.92))
-    drop-shadow(0 0 0.8px color-mix(in srgb, var(--constellation-color), transparent 32%));
-  animation: constellations-pulse 4.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 0.32px rgba(255, 255, 255, 0.92))
+    drop-shadow(
+      0 0 0.8px color-mix(in srgb, var(--constellation-color), transparent 32%)
+    );
+  animation: constellations-pulse 5.5s ease-in-out infinite;
   animation-delay: var(--star-delay, 0s);
   transform-origin: center;
 }
@@ -310,7 +360,9 @@
   paint-order: stroke;
   stroke: rgba(2, 8, 18, 0.94);
   stroke-width: 0.34px;
-  transition: fill 180ms ease, opacity 180ms ease;
+  transition:
+    fill 180ms ease,
+    opacity 180ms ease;
   user-select: none;
   pointer-events: none;
 }
@@ -335,55 +387,61 @@
     transform: scale(1);
   }
   45% {
-    transform: scale(1.16);
+    transform: scale(1.08);
   }
   70% {
-    transform: scale(0.94);
+    transform: scale(0.98);
   }
 }
 
 @keyframes constellations-drift-a {
   from {
-    transform:
-      translate(calc(var(--pointer-x) * 18px), calc(var(--pointer-y) * 12px))
-      rotate(-8deg)
-      scale(1);
+    transform: translate(
+        calc(var(--pointer-x) * 18px),
+        calc(var(--pointer-y) * 12px)
+      )
+      rotate(-8deg) scale(1);
   }
   to {
-    transform:
-      translate(calc(var(--pointer-x) * 22px), calc(var(--pointer-y) * 16px))
-      rotate(-4deg)
-      scale(1.06);
+    transform: translate(
+        calc(var(--pointer-x) * 22px),
+        calc(var(--pointer-y) * 16px)
+      )
+      rotate(-4deg) scale(1.06);
   }
 }
 
 @keyframes constellations-drift-b {
   from {
-    transform:
-      translate(calc(var(--pointer-x) * -20px), calc(var(--pointer-y) * 14px))
-      rotate(18deg)
-      scale(1);
+    transform: translate(
+        calc(var(--pointer-x) * -20px),
+        calc(var(--pointer-y) * 14px)
+      )
+      rotate(18deg) scale(1);
   }
   to {
-    transform:
-      translate(calc(var(--pointer-x) * -26px), calc(var(--pointer-y) * 8px))
-      rotate(12deg)
-      scale(1.08);
+    transform: translate(
+        calc(var(--pointer-x) * -26px),
+        calc(var(--pointer-y) * 8px)
+      )
+      rotate(12deg) scale(1.08);
   }
 }
 
 @keyframes constellations-drift-c {
   from {
-    transform:
-      translate(calc(var(--pointer-x) * 10px), calc(var(--pointer-y) * -18px))
-      rotate(-12deg)
-      scale(1);
+    transform: translate(
+        calc(var(--pointer-x) * 10px),
+        calc(var(--pointer-y) * -18px)
+      )
+      rotate(-12deg) scale(1);
   }
   to {
-    transform:
-      translate(calc(var(--pointer-x) * 14px), calc(var(--pointer-y) * -24px))
-      rotate(-6deg)
-      scale(1.05);
+    transform: translate(
+        calc(var(--pointer-x) * 14px),
+        calc(var(--pointer-y) * -24px)
+      )
+      rotate(-6deg) scale(1.05);
   }
 }
 
