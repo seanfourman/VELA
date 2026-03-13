@@ -6,8 +6,8 @@ import velaLogoBlack from "@/assets/vela-black.svg";
 import ProfileMenu from "./ProfileMenu";
 
 const NAV_LINKS = [
-  { id: "moon-phase", label: "Moon Phase", path: "/moon-phase" },
   { id: "constellations", label: "Constellations", path: "/constellations" },
+  { id: "moon-phase", label: "Moon Phase", path: "/moon-phase" },
   { id: "solar-system", label: "Solar System", path: "/solar-system" },
 ];
 
