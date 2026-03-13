@@ -588,7 +588,7 @@ function ConstellationsPage() {
                   style={{
                     "--twinkle-duration": `${star.duration + 2.2}s`,
                     "--twinkle-delay": `${star.delay}s`,
-                    "--twinkle-opacity": star.opacity * 0.72,
+                    "--twinkle-opacity": star.opacity * 0.44,
                   }}
                 />
               ))}
@@ -610,7 +610,7 @@ function ConstellationsPage() {
                   style={{
                     "--twinkle-duration": `${star.duration}s`,
                     "--twinkle-delay": `${star.delay}s`,
-                    "--twinkle-opacity": star.opacity,
+                    "--twinkle-opacity": star.opacity * 0.68,
                   }}
                 />
               ))}
@@ -704,7 +704,7 @@ function ConstellationsPage() {
                             key={star.id}
                             cx={star.x}
                             cy={star.y}
-                            r={0.16 + star.size * 0.16}
+                            r={0.22 + star.size * 0.2}
                             className="constellation-star"
                             style={{
                               "--star-delay": `${(index * 0.22).toFixed(2)}s`,

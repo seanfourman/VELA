@@ -226,7 +226,7 @@
 }
 
 .constellations-ambient-star {
-  fill: rgba(238, 245, 255, 0.9);
+  fill: rgba(226, 236, 255, 0.82);
   opacity: var(--twinkle-opacity, 0.5);
   animation: constellations-twinkle var(--twinkle-duration, 4s) ease-in-out infinite;
   animation-delay: var(--twinkle-delay, 0s);
@@ -234,36 +234,36 @@
 }
 
 .constellations-ambient-star--deep {
-  fill: rgba(130, 188, 255, 0.78);
+  fill: rgba(110, 168, 242, 0.6);
 }
 
 .constellation-group {
   cursor: pointer;
   transition: opacity 180ms ease, filter 180ms ease;
-  filter: saturate(0.88);
+  filter: saturate(0.96);
 }
 
 .constellation-group:not(.is-selected):not(.is-hovered) {
-  opacity: 0.72;
+  opacity: 0.86;
 }
 
 .constellation-group.is-selected,
 .constellation-group.is-hovered {
   filter:
-    saturate(1.18)
-    drop-shadow(0 0 0.8px color-mix(in srgb, var(--constellation-color), transparent 15%))
-    drop-shadow(0 0 1.6px color-mix(in srgb, var(--constellation-color), transparent 40%));
+    saturate(1.22)
+    drop-shadow(0 0 1px color-mix(in srgb, var(--constellation-color), transparent 10%))
+    drop-shadow(0 0 2.2px color-mix(in srgb, var(--constellation-color), transparent 30%));
   opacity: 1;
 }
 
 .constellation-aura {
-  fill: color-mix(in srgb, var(--constellation-color), transparent 78%);
-  opacity: 0.55;
+  fill: color-mix(in srgb, var(--constellation-color), transparent 74%);
+  opacity: 0.62;
   transition: opacity 180ms ease, r 180ms ease;
 }
 
 .constellation-group:not(.is-selected):not(.is-hovered) .constellation-aura {
-  opacity: 0.18;
+  opacity: 0.26;
 }
 
 .constellation-hit-lines line {
@@ -273,47 +273,50 @@
 
 .constellation-lines line {
   fill: none;
-  stroke: color-mix(in srgb, var(--constellation-color) 72%, #e8f4ff);
+  stroke: color-mix(in srgb, var(--constellation-color) 82%, #f4fbff);
   stroke-linecap: round;
   stroke-linejoin: round;
-  opacity: 0.88;
+  opacity: 0.96;
   transition: stroke-width 180ms ease, opacity 180ms ease;
   vector-effect: non-scaling-stroke;
 }
 
 .constellation-group:not(.is-selected):not(.is-hovered) .constellation-lines line {
-  opacity: 0.45;
+  opacity: 0.7;
 }
 
 .constellation-star {
   fill: #ffffff;
-  stroke: color-mix(in srgb, var(--constellation-color) 65%, #dff6ff);
-  stroke-width: 0.08;
+  stroke: color-mix(in srgb, var(--constellation-color) 82%, #f2fbff);
+  stroke-width: 0.11;
+  filter:
+    drop-shadow(0 0 0.32px rgba(255, 255, 255, 0.92))
+    drop-shadow(0 0 0.8px color-mix(in srgb, var(--constellation-color), transparent 32%));
   animation: constellations-pulse 4.5s ease-in-out infinite;
   animation-delay: var(--star-delay, 0s);
   transform-origin: center;
 }
 
 .constellation-group:not(.is-selected):not(.is-hovered) .constellation-star {
-  opacity: 0.84;
+  opacity: 0.96;
 }
 
 .constellation-label {
-  fill: rgba(240, 246, 255, 0.94);
-  font-size: 1.28px;
+  fill: rgba(246, 250, 255, 0.98);
+  font-size: 1.42px;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
   paint-order: stroke;
-  stroke: rgba(3, 10, 20, 0.85);
-  stroke-width: 0.28px;
+  stroke: rgba(2, 8, 18, 0.94);
+  stroke-width: 0.34px;
   transition: fill 180ms ease, opacity 180ms ease;
   user-select: none;
   pointer-events: none;
 }
 
 .constellation-group:not(.is-selected):not(.is-hovered) .constellation-label {
-  fill: rgba(223, 232, 245, 0.62);
+  fill: rgba(233, 241, 252, 0.82);
 }
 
 @keyframes constellations-twinkle {
@@ -391,7 +394,7 @@
   }
 
   .constellation-label {
-    font-size: 1.05px;
+    font-size: 1.16px;
     letter-spacing: 0.14em;
   }
 }
