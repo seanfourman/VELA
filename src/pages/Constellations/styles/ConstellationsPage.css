@@ -10,7 +10,6 @@
     linear-gradient(180deg, #010814 0%, #04111f 46%, #020710 100%);
   color: #f5f8ff;
   isolation: isolate;
-  --panel-z: 4;
 }
 
 .constellations-stage__backdrop,
@@ -87,20 +86,6 @@
     translate(calc(var(--pointer-x) * -8px), calc(var(--pointer-y) * -8px));
 }
 
-.constellations-detail,
-.constellations-rail {
-  z-index: var(--panel-z);
-}
-
-.constellations-detail {
-  position: absolute;
-}
-
-.constellations-detail,
-.constellations-rail {
-  isolation: isolate;
-}
-
 .constellations-detail > * {
   position: relative;
   z-index: 2;
@@ -133,11 +118,7 @@
 }
 
 .constellations-detail {
-  top: 50%;
-  right: 24px;
-  width: min(360px, calc(100vw - 48px));
-  transform: translateY(-12%);
-  padding: 18px;
+  min-width: 0;
 }
 
 .constellations-detail__title {
@@ -335,61 +316,6 @@
   fill: rgba(223, 232, 245, 0.62);
 }
 
-.constellations-rail {
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 18px;
-  display: flex;
-  gap: 10px;
-  padding: 8px 4px 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.constellations-rail::-webkit-scrollbar {
-  display: none;
-}
-
-.constellations-rail__item {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 42px;
-  padding: 10px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  background: rgba(5, 16, 30, 0.56);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  color: rgba(245, 249, 255, 0.76);
-  font: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    border-color 180ms ease,
-    background 180ms ease,
-    color 180ms ease,
-    transform 180ms ease;
-  white-space: nowrap;
-}
-
-.constellations-rail__item:hover {
-  color: #ffffff;
-  border-color: color-mix(in srgb, var(--constellation-color), transparent 38%);
-  transform: translateY(-2px);
-}
-
-.constellations-rail__item.is-active {
-  color: #ffffff;
-  border-color: color-mix(in srgb, var(--constellation-color), transparent 22%);
-  background: color-mix(in srgb, var(--constellation-color) 18%, rgba(5, 16, 30, 0.64));
-}
-
 @keyframes constellations-twinkle {
   0%,
   100% {
@@ -458,47 +384,10 @@
   }
 }
 
-@media (max-width: 1120px) {
-  .constellations-detail {
-    top: auto;
-    bottom: 94px;
-    transform: none;
-    width: min(380px, calc(100vw - 48px));
-  }
-}
-
-@media (max-width: 860px) {
-  .constellations-detail {
-    left: 16px;
-    right: 16px;
-    width: auto;
-  }
-
-  .constellations-detail {
-    top: auto;
-    bottom: 164px;
-  }
-
-  .constellations-rail {
-    left: 16px;
-    right: 16px;
-    bottom: 14px;
-  }
-}
-
 @media (max-width: 680px) {
   .constellations-stage {
     min-height: 100svh;
     height: 100svh;
-  }
-
-  .constellations-detail {
-    padding: 15px;
-    bottom: 174px;
-  }
-
-  .constellations-detail__stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .constellation-label {

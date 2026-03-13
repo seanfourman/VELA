@@ -7,6 +7,7 @@ import {
   VIEWBOX_HEIGHT,
   VIEWBOX_WIDTH,
 } from "./constellationData";
+import "../SolarSystem/styles/SolarSystemPage.css";
 import "./styles/ConstellationsPage.css";
 
 const DEFAULT_SELECTED_ID = "vela";
@@ -55,16 +56,133 @@ const isPanSettled = (left, right) =>
   Math.abs(left.x - right.x) < PAN_EPSILON &&
   Math.abs(left.y - right.y) < PAN_EPSILON;
 
+function ConstellationsPanelToggle({ open, mobile = false, onClick }) {
+  const rotation = mobile ? (open ? 90 : -90) : open ? 0 : 180;
+
+  return (
+    <button
+      type="button"
+      className={`solar-system-panel-toggle ${open ? "active" : ""}`}
+      onClick={onClick}
+      aria-label={open ? "Hide constellation panel" : "Show constellation panel"}
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        style={{ transform: `rotate(${rotation}deg)` }}
+      >
+        <path d="M9 6l6 6-6 6" />
+      </svg>
+    </button>
+  );
+}
+
+function ConstellationsPanelContent({ constellation, leadingStars }) {
+  return (
+    <div className="constellations-detail">
+      <div className="constellations-detail__eyebrow">Selected constellation</div>
+      <h2 className="constellations-detail__title">{constellation.name}</h2>
+      <p className="constellations-detail__headline">{constellation.headline}</p>
+      <div className="constellations-detail__stats">
+        <div className="constellations-stat">
+          <span>Region</span>
+          <strong>{constellation.region}</strong>
+        </div>
+        <div className="constellations-stat">
+          <span>Best seen</span>
+          <strong>{constellation.bestSeen}</strong>
+        </div>
+        <div className="constellations-stat">
+          <span>Stars</span>
+          <strong>{constellation.stars.length}</strong>
+        </div>
+        <div className="constellations-stat">
+          <span>Links</span>
+          <strong>{constellation.connections.length}</strong>
+        </div>
+      </div>
+      <p className="constellations-detail__description">{constellation.description}</p>
+      <div className="constellations-detail__known-for">
+        <span>Known for</span>
+        <strong>{constellation.knownFor}</strong>
+      </div>
+      <div className="constellations-detail__stars">
+        {leadingStars.map((starName) => (
+          <span key={starName} className="constellations-star-chip">
+            {starName}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ConstellationsPanel({
+  isMobile,
+  open,
+  nudgeMobileToggle = false,
+  constellation,
+  leadingStars,
+  onToggleOpen,
+}) {
+  const content = (
+    <ConstellationsPanelContent
+      constellation={constellation}
+      leadingStars={leadingStars}
+    />
+  );
+
+  if (isMobile) {
+    return (
+      <div
+        className={`solar-system-panel-mobile ${open ? "open" : "collapsed"} ${
+          nudgeMobileToggle ? "nudge" : ""
+        }`.trim()}
+      >
+        <div
+          className={`solar-system-panel-mobile__toggle-slot ${open ? "open" : "ready"}`}
+        >
+          <ConstellationsPanelToggle open={open} mobile onClick={onToggleOpen} />
+        </div>
+        <aside className="solar-system-panel-mobile__sheet">
+          <div className="solar-system-panel-mobile__scroll">{content}</div>
+        </aside>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}>
+      <ConstellationsPanelToggle open={open} onClick={onToggleOpen} />
+      <aside className="solar-system-panel">
+        <div className="solar-system-panel__scroll">{content}</div>
+      </aside>
+    </div>
+  );
+}
+
 function ConstellationsPage() {
+  const initialIsMobile =
+    typeof window !== "undefined" &&
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(max-width: 768px)").matches;
   const stageRef = useRef(null);
   const dragRef = useRef(null);
   const suppressClickRef = useRef(false);
+  const mobilePanelNudgeTimeoutRef = useRef(null);
   const [selectedId, setSelectedId] = useState(DEFAULT_SELECTED_ID);
   const [hoveredId, setHoveredId] = useState("");
   const [pan, setPan] = useState(() => getCenteredPan(FIXED_VIEW_SCALE));
   const [targetPan, setTargetPan] = useState(() => getCenteredPan(FIXED_VIEW_SCALE));
   const [pointer, setPointer] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
+  const [focusPanelOpen, setFocusPanelOpen] = useState(false);
+  const [mobilePanelNudge, setMobilePanelNudge] = useState(false);
 
   const backgroundStars = useMemo(() => buildAmbientStars(220, 23), []);
   const deepFieldStars = useMemo(() => buildAmbientStars(140, 71), []);
@@ -78,6 +196,31 @@ function ConstellationsPage() {
         .map((star) => star.name),
     [selectedConstellation],
   );
+
+  useEffect(() => {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const handleChange = (event) => {
+      setIsMobile(event.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (mobilePanelNudgeTimeoutRef.current) {
+        clearTimeout(mobilePanelNudgeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isDragging || isPanSettled(pan, targetPan)) {
@@ -123,14 +266,43 @@ function ConstellationsPage() {
     });
   };
 
+  const triggerMobilePanelNudge = () => {
+    if (!isMobile || focusPanelOpen) return;
+
+    if (mobilePanelNudgeTimeoutRef.current) {
+      clearTimeout(mobilePanelNudgeTimeoutRef.current);
+    }
+
+    setMobilePanelNudge(false);
+
+    window.requestAnimationFrame(() => {
+      setMobilePanelNudge(true);
+      mobilePanelNudgeTimeoutRef.current = window.setTimeout(() => {
+        setMobilePanelNudge(false);
+      }, 5000);
+    });
+  };
+
   const selectConstellation = (id, { focus = true } = {}) => {
     const nextConstellation =
       CONSTELLATIONS_BY_ID[id] ?? CONSTELLATIONS_BY_ID[DEFAULT_SELECTED_ID];
 
     setSelectedId(nextConstellation.id);
+
+    if (isMobile) {
+      triggerMobilePanelNudge();
+    } else {
+      setFocusPanelOpen(true);
+    }
+
     if (!focus) return;
 
     setTargetPan(getConstellationFocusPan(nextConstellation, FIXED_VIEW_SCALE));
+  };
+
+  const handleTogglePanel = () => {
+    setMobilePanelNudge(false);
+    setFocusPanelOpen((value) => !value);
   };
 
   const handleViewportPointerDown = (event) => {
@@ -224,45 +396,14 @@ function ConstellationsPage() {
         <div className="constellations-grid-glow" />
       </div>
 
-      <div className="constellations-detail glass-panel glass-panel-elevated">
-        <div className="constellations-detail__eyebrow">Selected constellation</div>
-        <h2 className="constellations-detail__title">{selectedConstellation.name}</h2>
-        <p className="constellations-detail__headline">
-          {selectedConstellation.headline}
-        </p>
-        <div className="constellations-detail__stats">
-          <div className="constellations-stat">
-            <span>Region</span>
-            <strong>{selectedConstellation.region}</strong>
-          </div>
-          <div className="constellations-stat">
-            <span>Best seen</span>
-            <strong>{selectedConstellation.bestSeen}</strong>
-          </div>
-          <div className="constellations-stat">
-            <span>Stars</span>
-            <strong>{selectedConstellation.stars.length}</strong>
-          </div>
-          <div className="constellations-stat">
-            <span>Links</span>
-            <strong>{selectedConstellation.connections.length}</strong>
-          </div>
-        </div>
-        <p className="constellations-detail__description">
-          {selectedConstellation.description}
-        </p>
-        <div className="constellations-detail__known-for">
-          <span>Known for</span>
-          <strong>{selectedConstellation.knownFor}</strong>
-        </div>
-        <div className="constellations-detail__stars">
-          {leadingStars.map((starName) => (
-            <span key={starName} className="constellations-star-chip">
-              {starName}
-            </span>
-          ))}
-        </div>
-      </div>
+      <ConstellationsPanel
+        isMobile={isMobile}
+        open={focusPanelOpen}
+        nudgeMobileToggle={mobilePanelNudge}
+        constellation={selectedConstellation}
+        leadingStars={leadingStars}
+        onToggleOpen={handleTogglePanel}
+      />
 
       <div
         ref={stageRef}
@@ -438,23 +579,6 @@ function ConstellationsPage() {
             </g>
           </svg>
         </div>
-      </div>
-
-      <div className="constellations-rail">
-        {CONSTELLATIONS.map((constellation) => {
-          const isActive = constellation.id === selectedConstellation.id;
-          return (
-            <button
-              key={constellation.id}
-              type="button"
-              className={`constellations-rail__item${isActive ? " is-active" : ""}`}
-              style={{ "--constellation-color": constellation.accent }}
-              onClick={() => selectConstellation(constellation.id)}
-            >
-              {constellation.name}
-            </button>
-          );
-        })}
       </div>
     </section>
   );
