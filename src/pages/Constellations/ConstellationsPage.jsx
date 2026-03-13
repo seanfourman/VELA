@@ -521,8 +521,6 @@ function ConstellationsPage() {
   };
 
   const handleViewportPointerMove = (event) => {
-    updatePointerFromEvent(event);
-
     const dragState = dragRef.current;
     const stage = stageRef.current;
     if (!dragState || dragState.pointerId !== event.pointerId || !stage) return;
@@ -569,6 +567,13 @@ function ConstellationsPage() {
   const handleViewportPointerLeave = () => {
     dragRef.current = null;
     setIsDragging(false);
+  };
+
+  const handleStagePointerMove = (event) => {
+    updatePointerFromEvent(event);
+  };
+
+  const handleStagePointerLeave = () => {
     setPointer({ x: 0, y: 0 });
     setHoveredId("");
   };
@@ -579,7 +584,12 @@ function ConstellationsPage() {
   };
 
   return (
-    <section className="constellations-stage" style={stageStyle}>
+    <section
+      className="constellations-stage"
+      style={stageStyle}
+      onPointerMove={handleStagePointerMove}
+      onPointerLeave={handleStagePointerLeave}
+    >
       <div className="constellations-stage__backdrop" aria-hidden="true">
         <div className="constellations-nebula constellations-nebula--one" />
         <div className="constellations-nebula constellations-nebula--two" />
