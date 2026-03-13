@@ -90,6 +90,14 @@ const buildDestinationHref = ({ origin, destination, provider }) =>
     lng: destination?.lng,
   });
 
+const buildDiscoveryMapSelection = ({ type, id = null, lat, lng }) => ({
+  type,
+  id,
+  lat,
+  lng,
+  requestId: `${type}-${id || getCoordinateKey(lat, lng)}-${Date.now()}`,
+});
+
 function DiscoveryMetricCard({ label, value, subtext }) {
   return (
     <Card sx={SECTION_CARD_SX}>
@@ -139,17 +147,13 @@ function SpotCard({
   title,
   body,
   chips = [],
+  onOpenOnMap,
   secondaryActionLabel = "Open on map",
 }) {
   const directionsHref = buildDestinationHref({
     origin: location,
     destination: item,
     provider: directionsProvider,
-  });
-  const searchHref = buildExternalMapSearchUrl({
-    provider: directionsProvider,
-    lat: item?.lat,
-    lng: item?.lng,
   });
 
   return (
@@ -209,14 +213,8 @@ function SpotCard({
             Directions
           </Button>
         ) : null}
-        {searchHref ? (
-          <Button
-            component="a"
-            href={searchHref}
-            target="_blank"
-            rel="noreferrer"
-            variant="outlined"
-          >
+        {onOpenOnMap ? (
+          <Button onClick={onOpenOnMap} variant="outlined">
             {secondaryActionLabel}
           </Button>
         ) : null}
@@ -338,6 +336,11 @@ export default function DiscoveryPage({
     <EarthGlobe variant="night" className="profile-page__earth-canvas" />
   ) : null;
   const [referenceNow] = useState(() => Date.now());
+
+  const openMapSelection = (selection) => {
+    if (!selection) return;
+    onNavigate?.("/", { state: { mapSelection: selection } });
+  };
 
   useEffect(() => {
     setRadiusKm(resolveInitialRadius(defaultRadiusKm));
@@ -707,6 +710,16 @@ export default function DiscoveryPage({
                     item={spot}
                     location={location}
                     directionsProvider={directionsProvider}
+                    onOpenOnMap={() =>
+                      openMapSelection(
+                        buildDiscoveryMapSelection({
+                          type: "stargaze",
+                          id: spot.id,
+                          lat: spot.lat,
+                          lng: spot.lng,
+                        }),
+                      )
+                    }
                     title={spot.name}
                     body={spot.description || "Curated stargazing recommendation."}
                     chips={[
@@ -765,6 +778,16 @@ export default function DiscoveryPage({
                     item={spot}
                     location={location}
                     directionsProvider={directionsProvider}
+                    onOpenOnMap={() =>
+                      openMapSelection(
+                        buildDiscoveryMapSelection({
+                          type: "pin",
+                          id: spot.key,
+                          lat: spot.lat,
+                          lng: spot.lng,
+                        }),
+                      )
+                    }
                     title={spot.name}
                     body={spot.description}
                     secondaryActionLabel="View pin"

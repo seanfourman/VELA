@@ -46,7 +46,7 @@ const useMapCameraHandlers = ({
   const handleCoordinateSearch = useCallback(
     ({ lat, lng }) => {
       const isFavorite = favoriteSpotKeys.has(getSpotKey(lat, lng));
-      setContextMenu(null);
+      setContextMenu({ lat, lng });
       setSelectedDarkSpot(null);
       setActiveStargazeId(null);
       setPlacedMarker({ lat, lng, id: Date.now(), isFavorite });

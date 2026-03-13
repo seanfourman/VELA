@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { STARGAZE_PANEL_EXIT_MS } from "../core/mapConfig";
+import { LOCATION_ZOOM, STARGAZE_PANEL_EXIT_MS } from "../core/mapConfig";
 
 const useMapStargaze = ({
   stargazeLocations = [],
@@ -89,10 +89,37 @@ const useMapStargaze = ({
   useEffect(() => {
     if (!activeStargazeSpot) return;
     const marker = stargazeMarkerRefs.current.get(activeStargazeSpot.id);
-    if (marker?.openPopup) {
+    if (!marker?.openPopup) return;
+
+    const map = mapRef.current;
+    const openPopup = () => {
       marker.openPopup();
+    };
+
+    if (!map) {
+      const openTimer = setTimeout(openPopup, 0);
+      return () => {
+        clearTimeout(openTimer);
+      };
     }
-  }, [activeStargazeSpot]);
+
+    const alreadyFocused =
+      map.distance(map.getCenter(), [activeStargazeSpot.lat, activeStargazeSpot.lng]) < 10 &&
+      map.getZoom() >= LOCATION_ZOOM - 0.1;
+
+    if (alreadyFocused) {
+      const openTimer = setTimeout(openPopup, 0);
+      return () => {
+        clearTimeout(openTimer);
+      };
+    }
+
+    map.once("moveend", openPopup);
+
+    return () => {
+      map.off("moveend", openPopup);
+    };
+  }, [activeStargazeSpot, mapRef]);
 
   useEffect(() => {
     if (isMobileView) return;

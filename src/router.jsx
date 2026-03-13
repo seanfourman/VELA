@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useEffect } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, useLocation as useRouterLocation } from "react-router-dom";
 import brokenWebLinkIcon from "@/assets/icons/broken-web-link-svgrepo-com.svg";
 import PageShell from "@/components/layout/PageShell";
 import AppLayout, { useAppLayoutContext } from "@/layouts/AppLayout";
@@ -23,6 +23,7 @@ const useDisableThreeDMode = () => {
 };
 
 function MapRoute() {
+  const routeLocation = useRouterLocation();
   const {
     mapViewRef,
     location,
@@ -38,10 +39,12 @@ function MapRoute() {
     handleToggleStarPartyRsvp,
     setIsThreeDModeActive,
   } = useAppLayoutContext();
+  const mapSelection = routeLocation.state?.mapSelection ?? null;
 
   return (
     <MapView
       ref={mapViewRef}
+      mapSelection={mapSelection}
       onThreeDModeChange={setIsThreeDModeActive}
       location={location}
       locationStatus={locationStatus}

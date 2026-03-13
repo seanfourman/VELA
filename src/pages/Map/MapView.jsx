@@ -4,6 +4,7 @@
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { MapContainer, Marker, TileLayer } from "react-leaflet";
@@ -30,6 +31,7 @@ import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
   LIGHT_TILE_URL,
+  LOCATION_ZOOM,
   LONG_PRESS_MS,
   MAP_TILES,
   MAX_ZOOM,
@@ -53,6 +55,7 @@ import { getRsvpUserId } from "@/features/starParty/starPartyUtils";
 
 const MapView = forwardRef(function MapView(
   {
+    mapSelection,
     location,
     locationStatus,
     mapType,
@@ -76,6 +79,7 @@ const MapView = forwardRef(function MapView(
   const [isThreeDMode, setIsThreeDMode] = useState(false);
   const [isSpaceWeatherOpen, setIsSpaceWeatherOpen] = useState(false);
   const [spaceWeatherFocus, setSpaceWeatherFocus] = useState(null);
+  const handledMapSelectionRef = useRef(null);
   const spaceWeather = useSpaceWeather();
 
   const { refs, ui, state, derived, handlers, planets } = useMapViewState({
@@ -92,8 +96,17 @@ const MapView = forwardRef(function MapView(
   const { mapRef, planetPanelRef, stargazeMarkerRefs, placedMarkerRef } = refs;
   const mapTypeClass = isThreeDMode ? "light three-d" : mapType;
   const closeStargazePanel = handlers.handleCloseStargazePanel;
+  const handleCoordinateSearch = handlers.handleCoordinateSearch;
+  const handleStargazeSearch = handlers.handleStargazeSearch;
   const ensureSpaceWeatherLoaded = spaceWeather.ensureLoaded;
   const activeUserRsvpId = getRsvpUserId(authUser);
+  const placedMarkerId = state.placedMarker?.id ?? null;
+  const contextMenuLat = state.contextMenu?.lat ?? null;
+  const contextMenuLng = state.contextMenu?.lng ?? null;
+  const hasPinnedPopupTarget =
+    placedMarkerId !== null &&
+    Number.isFinite(contextMenuLat) &&
+    Number.isFinite(contextMenuLng);
   const visibleStarPartyEvents = useMemo(() => {
     if (!Array.isArray(starPartyEvents)) return [];
     return starPartyEvents.filter((event) => {
@@ -180,6 +193,97 @@ const MapView = forwardRef(function MapView(
     }),
     [handlers.zoomOutToMin]
   );
+
+  useEffect(() => {
+    if (!hasPinnedPopupTarget) return undefined;
+
+    const map = mapRef.current;
+    const openPopup = () => {
+      placedMarkerRef.current?.openPopup?.();
+    };
+
+    if (!map) {
+      const popupTimer = window.setTimeout(openPopup, 0);
+      return () => {
+        window.clearTimeout(popupTimer);
+      };
+    }
+
+    const alreadyFocused =
+      map.distance(map.getCenter(), [state.placedMarker.lat, state.placedMarker.lng]) < 10 &&
+      map.getZoom() >= LOCATION_ZOOM - 0.1;
+
+    if (alreadyFocused) {
+      const popupTimer = window.setTimeout(openPopup, 0);
+      return () => {
+        window.clearTimeout(popupTimer);
+      };
+    }
+
+    map.once("moveend", openPopup);
+
+    return () => {
+      map.off("moveend", openPopup);
+    };
+  }, [
+    hasPinnedPopupTarget,
+    mapRef,
+    placedMarkerRef,
+    contextMenuLat,
+    contextMenuLng,
+    placedMarkerId,
+    state.placedMarker?.lat,
+    state.placedMarker?.lng,
+  ]);
+
+  useEffect(() => {
+    if (!mapSelection?.requestId) return undefined;
+    if (handledMapSelectionRef.current === mapSelection.requestId) return undefined;
+
+    const selectionTimer = window.setTimeout(() => {
+      if (mapSelection.type === "stargaze") {
+        const matchedSpot =
+          stargazeLocations.find(
+            (spot) => String(spot?.id) === String(mapSelection.id),
+          ) || null;
+
+        if (matchedSpot) {
+          handleStargazeSearch(matchedSpot);
+        } else if (
+          Number.isFinite(mapSelection.lat) &&
+          Number.isFinite(mapSelection.lng)
+        ) {
+          handleCoordinateSearch({
+            lat: mapSelection.lat,
+            lng: mapSelection.lng,
+          });
+        } else {
+          return;
+        }
+      } else if (
+        Number.isFinite(mapSelection.lat) &&
+        Number.isFinite(mapSelection.lng)
+      ) {
+        handleCoordinateSearch({
+          lat: mapSelection.lat,
+          lng: mapSelection.lng,
+        });
+      } else {
+        return;
+      }
+
+      handledMapSelectionRef.current = mapSelection.requestId;
+    }, 0);
+
+    return () => {
+      window.clearTimeout(selectionTimer);
+    };
+  }, [
+    handleCoordinateSearch,
+    handleStargazeSearch,
+    mapSelection,
+    stargazeLocations,
+  ]);
 
   return (
     <div
@@ -530,6 +634,3 @@ const MapView = forwardRef(function MapView(
 MapView.displayName = "MapView";
 
 export default MapView;
-
-
-

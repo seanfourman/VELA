@@ -96,9 +96,10 @@ function AppLayout() {
   }, []);
 
   const navigate = useCallback(
-    (path) => {
+    (path, options = {}) => {
       const nextPath = normalizePath(path);
-      if (nextPath === currentRoute) return;
+      const hasRouteState = options && Object.prototype.hasOwnProperty.call(options, "state");
+      if (nextPath === currentRoute && !hasRouteState && !options.replace) return;
 
       if (transitionTimeoutRef.current) {
         clearTimeout(transitionTimeoutRef.current);
@@ -112,13 +113,13 @@ function AppLayout() {
         }
 
         transitionTimeoutRef.current = setTimeout(() => {
-          routerNavigate(nextPath);
+          routerNavigate(nextPath, options);
           transitionTimeoutRef.current = null;
         }, 700);
         return;
       }
 
-      routerNavigate(nextPath);
+      routerNavigate(nextPath, options);
     },
     [currentRoute, routerNavigate],
   );
