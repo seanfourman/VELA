@@ -157,13 +157,21 @@
 
 .navbar-link-group .nav-link-button.is-disabled,
 .navbar-mobile-link.is-disabled {
-  opacity: 0.34;
+  opacity: 1;
   cursor: not-allowed;
 }
 
 .navbar-link-group .nav-link-button.is-disabled:hover,
 .navbar-mobile-link.is-disabled:hover {
-  opacity: 0.34;
+  opacity: 1;
+}
+
+.navbar-link-group .nav-link-button.is-disabled {
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.navbar-mobile-link.is-disabled {
+  color: rgba(255, 255, 255, 0.46);
 }
 
 .navbar.light .navbar-link-group .nav-link-button {
@@ -177,6 +185,11 @@
 
 .navbar.light .navbar-link-group .nav-link-button.is-disabled:hover {
   color: #111111;
+}
+
+.navbar.light .navbar-link-group .nav-link-button.is-disabled,
+.navbar.light .navbar-link-group .nav-link-button.is-disabled:hover {
+  color: rgba(17, 17, 17, 0.4);
 }
 
 .nav-link-button.is-disabled::after,

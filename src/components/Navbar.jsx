@@ -135,7 +135,7 @@ function Navbar({
       item.requiresHardwareAcceleration && !hardwareAccelerationEnabled;
     const isActive = !isDisabled && item.path && currentPath === item.path;
     const disabledTooltip = isDisabled
-      ? "Disabled without hardware acceleration"
+      ? `${item.label} requires hardware acceleration`
       : undefined;
 
     return (
