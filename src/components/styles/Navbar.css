@@ -152,6 +152,15 @@
   opacity: 1;
 }
 
+.navbar.light .navbar-link-group .nav-link-button {
+  color: #111111;
+}
+
+.navbar.light .navbar-link-group .nav-link-button:hover,
+.navbar.light .navbar-link-group .nav-link-button.is-active {
+  color: #111111;
+}
+
 .navbar-menu-toggle {
   display: none;
   align-items: center;
