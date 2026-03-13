@@ -299,16 +299,29 @@
   opacity: 1;
 }
 
-.constellation-aura {
-  fill: color-mix(in srgb, var(--constellation-color), transparent 74%);
-  opacity: 0.62;
-  transition:
-    opacity 180ms ease,
-    r 180ms ease;
+.constellation-aura-trail line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--constellation-color), transparent 60%);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.44;
+  transition: opacity 180ms ease, stroke-width 180ms ease;
+  vector-effect: non-scaling-stroke;
 }
 
-.constellation-group:not(.is-selected):not(.is-hovered) .constellation-aura {
-  opacity: 0.26;
+.constellations-aura-trail--outer line {
+  stroke: color-mix(in srgb, var(--constellation-color), transparent 78%);
+  opacity: 0.24;
+}
+
+.constellation-group:not(.is-selected):not(.is-hovered) .constellation-aura-trail line {
+  opacity: 0.18;
+}
+
+.constellation-group:not(.is-selected):not(.is-hovered)
+  .constellations-aura-trail--outer
+  line {
+  opacity: 0.08;
 }
 
 .constellation-hit-lines line {
@@ -322,10 +335,6 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   opacity: 0.98;
-  filter: drop-shadow(0 0 0.55px rgba(255, 255, 255, 0.5))
-    drop-shadow(
-      0 0 1.3px color-mix(in srgb, var(--constellation-color), transparent 56%)
-    );
   transition:
     stroke-width 180ms ease,
     opacity 180ms ease;

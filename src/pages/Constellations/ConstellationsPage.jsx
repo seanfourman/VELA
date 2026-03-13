@@ -685,7 +685,6 @@ function ConstellationsPage() {
                   const isSelected = constellation.id === selectedId;
                   const isHovered = constellation.id === hoveredId;
                   const isActive = isSelected || isHovered;
-                  const centroid = getConstellationCentroid(constellation);
 
                   return (
                     <g
@@ -707,12 +706,46 @@ function ConstellationsPage() {
                         "--constellation-glow": isActive ? 1 : 0.55,
                       }}
                     >
-                      <circle
-                        className="constellation-aura"
-                        cx={centroid.x}
-                        cy={centroid.y}
-                        r={isSelected ? 6.5 : 4.5}
-                      />
+                      <g
+                        className="constellation-aura-trail constellations-aura-trail--outer"
+                        aria-hidden="true"
+                      >
+                        {constellation.connections.map(([fromId, toId]) => {
+                          const fromStar = starLookup[fromId];
+                          const toStar = starLookup[toId];
+                          if (!fromStar || !toStar) return null;
+
+                          return (
+                            <line
+                              key={`${fromId}-${toId}-aura-outer`}
+                              x1={fromStar.x}
+                              y1={fromStar.y}
+                              x2={toStar.x}
+                              y2={toStar.y}
+                              strokeWidth={isSelected ? 7.2 : 5.4}
+                            />
+                          );
+                        })}
+                      </g>
+
+                      <g className="constellation-aura-trail" aria-hidden="true">
+                        {constellation.connections.map(([fromId, toId]) => {
+                          const fromStar = starLookup[fromId];
+                          const toStar = starLookup[toId];
+                          if (!fromStar || !toStar) return null;
+
+                          return (
+                            <line
+                              key={`${fromId}-${toId}-aura`}
+                              x1={fromStar.x}
+                              y1={fromStar.y}
+                              x2={toStar.x}
+                              y2={toStar.y}
+                              strokeWidth={isSelected ? 4.6 : 3.4}
+                            />
+                          );
+                        })}
+                      </g>
 
                       <g className="constellation-hit-lines" aria-hidden="true">
                         {constellation.connections.map(([fromId, toId]) => {
