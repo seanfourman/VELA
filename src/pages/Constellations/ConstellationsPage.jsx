@@ -437,8 +437,8 @@ function ConstellationsPage() {
       setIsDragging(true);
     }
 
-    const worldDeltaX = (deltaX / bounds.width) * VIEWBOX_WIDTH;
-    const worldDeltaY = (deltaY / bounds.height) * VIEWBOX_HEIGHT;
+    const worldDeltaX = (deltaX / bounds.width) * visibleWindow.width;
+    const worldDeltaY = (deltaY / bounds.height) * visibleWindow.height;
 
     const nextPan = clampPan(
       {
