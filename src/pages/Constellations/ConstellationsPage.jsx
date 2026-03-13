@@ -345,13 +345,6 @@ function ConstellationsPage() {
             shapeRendering="geometricPrecision"
             textRendering="geometricPrecision"
           >
-            <defs>
-              <radialGradient id="constellations-vignette" cx="50%" cy="50%" r="75%">
-                <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-                <stop offset="100%" stopColor="rgba(1,7,15,0.96)" />
-              </radialGradient>
-            </defs>
-
             <g
               className="constellations-star-layer constellations-star-layer--deep"
               transform={`translate(${(pan.x * 0.18 + pointer.x * 1.6).toFixed(
@@ -505,15 +498,6 @@ function ConstellationsPage() {
                 })}
               </g>
             </g>
-
-            <rect
-              x="0"
-              y="0"
-              width={VIEWBOX_WIDTH}
-              height={VIEWBOX_HEIGHT}
-              fill="url(#constellations-vignette)"
-              pointerEvents="none"
-            />
           </svg>
         </div>
       </div>
