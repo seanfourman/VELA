@@ -87,7 +87,7 @@ function AppLayout() {
   useEffect(() => {
     if (!hardwareAccelerationEnabled) {
       showNotification(
-        "Hardware acceleration appears to be disabled. Moon Phase, Constellations, and Solar System are unavailable.",
+        "Hardware acceleration appears to be disabled. Performance and visuals may be affected",
         "failure",
         { duration: 6000 },
       );
