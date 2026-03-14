@@ -68,7 +68,9 @@ function AuthPage({ auth, isLight, onNavigate }) {
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!isValidEmail(trimmedEmail)) {
-      showNotification("Enter a valid email address", "failure", { duration: 2800 });
+      showNotification("Enter a valid email address", "failure", {
+        duration: 2800,
+      });
       return;
     }
     if (!password) {
@@ -139,7 +141,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
                 className="glass-btn profile-action-btn profile-secondary"
                 onClick={() => onNavigate?.("/")}
               >
-                Open map
+                Open Map
               </button>
               <button
                 type="button"
@@ -291,6 +293,3 @@ function AuthPage({ auth, isLight, onNavigate }) {
 }
 
 export default AuthPage;
-
-
-

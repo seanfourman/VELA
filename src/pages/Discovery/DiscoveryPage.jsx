@@ -75,9 +75,7 @@ const getRelativeDateLabel = (value, now) => {
 const resolveInitialRadius = (value) => {
   const numeric = Number(value);
   if (!Number.isFinite(numeric) || numeric <= 0) return 250;
-  return (
-    DISCOVERY_RADIUS_OPTIONS.find((option) => option >= numeric) || 250
-  );
+  return DISCOVERY_RADIUS_OPTIONS.find((option) => option >= numeric) || 250;
 };
 
 const formatMetricNumber = (value, digits = 1) => {
@@ -107,8 +105,10 @@ const describeBortleSky = (value) => {
   if (score <= 3) {
     return {
       label: "Dark rural sky",
-      summary: "Excellent darkness for Milky Way detail, faint nebulae, and long observing sessions.",
-      bestFor: "Galaxies, nebulae, wide-field Milky Way shots, meteor watching.",
+      summary:
+        "Excellent darkness for Milky Way detail, faint nebulae, and long observing sessions.",
+      bestFor:
+        "Galaxies, nebulae, wide-field Milky Way shots, meteor watching.",
       struggle: "Only local haze or moonlight should significantly interfere.",
     };
   }
@@ -116,8 +116,10 @@ const describeBortleSky = (value) => {
   if (score <= 5) {
     return {
       label: "Rural to suburban transition",
-      summary: "A strong all-around sky with visible Milky Way structure and solid deep-sky contrast.",
-      bestFor: "Clusters, brighter galaxies, nebulae, binocular sweeps, astrophotography.",
+      summary:
+        "A strong all-around sky with visible Milky Way structure and solid deep-sky contrast.",
+      bestFor:
+        "Clusters, brighter galaxies, nebulae, binocular sweeps, astrophotography.",
       struggle: "The faintest deep-sky targets may still need darker horizons.",
     };
   }
@@ -125,17 +127,23 @@ const describeBortleSky = (value) => {
   if (score <= 7) {
     return {
       label: "Bright suburban sky",
-      summary: "Good for casual observing, but urban glow will reduce faint detail and background contrast.",
-      bestFor: "Moon, planets, double stars, bright clusters, outreach sessions.",
-      struggle: "Most faint nebulae and subtle Milky Way detail will be washed out.",
+      summary:
+        "Good for casual observing, but urban glow will reduce faint detail and background contrast.",
+      bestFor:
+        "Moon, planets, double stars, bright clusters, outreach sessions.",
+      struggle:
+        "Most faint nebulae and subtle Milky Way detail will be washed out.",
     };
   }
 
   return {
     label: "Urban sky",
-    summary: "Heavy skyglow will dominate the view, so brighter targets will be the most rewarding tonight.",
-    bestFor: "Moon, planets, bright constellations, ISS passes, quick setup sessions.",
-    struggle: "Faint galaxies, nebulae, and Milky Way structure will be difficult to see.",
+    summary:
+      "Heavy skyglow will dominate the view, so brighter targets will be the most rewarding tonight.",
+    bestFor:
+      "Moon, planets, bright constellations, ISS passes, quick setup sessions.",
+    struggle:
+      "Faint galaxies, nebulae, and Milky Way structure will be difficult to see.",
   };
 };
 
@@ -189,7 +197,10 @@ function DiscoverySection({ title, subtitle, action, children }) {
         <Box>
           <Typography variant="h5">{title}</Typography>
           {subtitle ? (
-            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.75 }}>
+            <Typography
+              variant="body2"
+              sx={{ color: "text.secondary", mt: 0.75 }}
+            >
               {subtitle}
             </Typography>
           ) : null}
@@ -235,7 +246,7 @@ function SpotCard({
   body,
   chips = [],
   onOpenOnMap,
-  secondaryActionLabel = "Open on map",
+  secondaryActionLabel = "Open Map",
 }) {
   const directionsHref = buildDestinationHref({
     origin: location,
@@ -243,11 +254,14 @@ function SpotCard({
     provider: directionsProvider,
   });
   const hasSourceLink = Boolean(item?.sourceLinks?.length);
-  const actionCount = Number(Boolean(directionsHref)) + Number(Boolean(onOpenOnMap));
+  const actionCount =
+    Number(Boolean(directionsHref)) + Number(Boolean(onOpenOnMap));
 
   return (
     <Card sx={SECTION_CARD_SX}>
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.25, flex: 1 }}>
+      <CardContent
+        sx={{ display: "flex", flexDirection: "column", gap: 1.25, flex: 1 }}
+      >
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -284,7 +298,14 @@ function SpotCard({
           </Typography>
         </Stack>
 
-        <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 1.25 }}>
+        <Box
+          sx={{
+            mt: "auto",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1.25,
+          }}
+        >
           <Typography variant="body2" sx={{ color: "text.secondary" }}>
             {body}
           </Typography>
@@ -376,7 +397,9 @@ function EventCard({
 
   return (
     <Card sx={SECTION_CARD_SX}>
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.25, flex: 1 }}>
+      <CardContent
+        sx={{ display: "flex", flexDirection: "column", gap: 1.25, flex: 1 }}
+      >
         <Stack direction="row" justifyContent="space-between" spacing={1.5}>
           <Typography variant="h6">{event.title}</Typography>
           <Typography variant="body2" sx={{ color: "secondary.main" }}>
@@ -386,9 +409,16 @@ function EventCard({
 
         <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
           <Chip label={formatEventType(event.eventType)} size="small" />
-          <Chip label={getRelativeDateLabel(event.startsAt, referenceNow)} size="small" />
           <Chip
-            label={Array.isArray(event.rsvps) ? `${event.rsvps.length} RSVPs` : "0 RSVPs"}
+            label={getRelativeDateLabel(event.startsAt, referenceNow)}
+            size="small"
+          />
+          <Chip
+            label={
+              Array.isArray(event.rsvps)
+                ? `${event.rsvps.length} RSVPs`
+                : "0 RSVPs"
+            }
             size="small"
             variant="outlined"
           />
@@ -396,7 +426,9 @@ function EventCard({
 
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {formatDateTime(event.startsAt, { includeYear: true })}
-          {event.endsAt ? ` to ${formatDateTime(event.endsAt, { includeYear: true })}` : ""}
+          {event.endsAt
+            ? ` to ${formatDateTime(event.endsAt, { includeYear: true })}`
+            : ""}
         </Typography>
 
         {event.meetupDetails ? (
@@ -446,7 +478,7 @@ function EventCard({
         ) : null}
         {onOpenOnMap ? (
           <Button onClick={onOpenOnMap} variant="outlined" fullWidth>
-            Open on Map
+            Open Map
           </Button>
         ) : null}
         {onRsvpAction ? (
@@ -558,9 +590,9 @@ export default function DiscoveryPage({
     const currentRsvps = Array.isArray(event.rsvps) ? event.rsvps : [];
     const isAlreadyJoined = Boolean(
       activeUserRsvpId &&
-        currentRsvps.some(
-          (entry) => String(entry.userId) === String(activeUserRsvpId),
-        ),
+      currentRsvps.some(
+        (entry) => String(entry.userId) === String(activeUserRsvpId),
+      ),
     );
 
     setPendingRsvpEventId(event.id);
@@ -579,7 +611,9 @@ export default function DiscoveryPage({
       );
     } catch (error) {
       showNotification(
-        error instanceof Error ? error.message : "Could not update RSVP right now",
+        error instanceof Error
+          ? error.message
+          : "Could not update RSVP right now",
         "failure",
         { duration: 2600 },
       );
@@ -717,7 +751,12 @@ export default function DiscoveryPage({
       .map((event) => ({
         ...event,
         distanceKm: hasLocation
-          ? haversineDistanceKm(location.lat, location.lng, event.lat, event.lng)
+          ? haversineDistanceKm(
+              location.lat,
+              location.lng,
+              event.lat,
+              event.lng,
+            )
           : null,
       }))
       .sort((left, right) => {
@@ -733,14 +772,23 @@ export default function DiscoveryPage({
           }
         }
 
-        return normalizeTimestamp(left.startsAt) - normalizeTimestamp(right.startsAt);
+        return (
+          normalizeTimestamp(left.startsAt) - normalizeTimestamp(right.startsAt)
+        );
       });
-  }, [hasLocation, location?.lat, location?.lng, referenceNow, starPartyEvents]);
+  }, [
+    hasLocation,
+    location?.lat,
+    location?.lng,
+    referenceNow,
+    starPartyEvents,
+  ]);
 
   const nearbyEvents = useMemo(() => {
     if (!hasLocation) return upcomingEvents;
     return upcomingEvents.filter(
-      (event) => Number.isFinite(event.distanceKm) && event.distanceKm <= radiusKm,
+      (event) =>
+        Number.isFinite(event.distanceKm) && event.distanceKm <= radiusKm,
     );
   }, [hasLocation, radiusKm, upcomingEvents]);
 
@@ -762,7 +810,8 @@ export default function DiscoveryPage({
     [skyQuality?.Bortle],
   );
   const nearestDarkSpotSummary = useMemo(() => {
-    const nearestSpot = Array.isArray(darkSpots) && darkSpots.length ? darkSpots[0] : null;
+    const nearestSpot =
+      Array.isArray(darkSpots) && darkSpots.length ? darkSpots[0] : null;
     if (!nearestSpot) {
       return {
         title: "No nearby escape yet",
@@ -826,9 +875,18 @@ export default function DiscoveryPage({
             return leftDistance - rightDistance;
           }
         }
-        return normalizeTimestamp(right.createdAt) - normalizeTimestamp(left.createdAt);
+        return (
+          normalizeTimestamp(right.createdAt) -
+          normalizeTimestamp(left.createdAt)
+        );
       });
-  }, [favoriteSpots, hasLocation, location?.lat, location?.lng, rankedRecommendations]);
+  }, [
+    favoriteSpots,
+    hasLocation,
+    location?.lat,
+    location?.lng,
+    rankedRecommendations,
+  ]);
 
   const nearbyFavoriteCount = useMemo(() => {
     if (!hasLocation) return favoriteDiscoveryItems.length;
@@ -841,7 +899,9 @@ export default function DiscoveryPage({
     () => [
       {
         label: "Curated Spots",
-        value: hasLocation ? nearbyRecommendations.length : rankedRecommendations.length,
+        value: hasLocation
+          ? nearbyRecommendations.length
+          : rankedRecommendations.length,
         subtext: hasLocation
           ? `Within ${radiusKm} km of your location`
           : "Waiting for location to rank by distance",
@@ -864,7 +924,8 @@ export default function DiscoveryPage({
       },
       {
         label: "Local Sky Class",
-        value: skyQuality?.Bortle || (skyQualityLoading ? "Loading..." : "Unknown"),
+        value:
+          skyQuality?.Bortle || (skyQualityLoading ? "Loading..." : "Unknown"),
         subtext: skyQuality?.SQM
           ? `SQM ${Number(skyQuality.SQM).toFixed(2)} at your current position`
           : "Sky quality and dark spot hints",
@@ -896,7 +957,9 @@ export default function DiscoveryPage({
       >
         <Stack spacing={3}>
           <Card>
-            <CardContent sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
+            <CardContent
+              sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}
+            >
               <Stack
                 direction={{ xs: "column", lg: "row" }}
                 spacing={2}
@@ -905,8 +968,12 @@ export default function DiscoveryPage({
               >
                 <Box>
                   <Typography variant="h5">Discovery Radius</Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.75 }}>
-                    Tune how wide the page searches around your current location.
+                  <Typography
+                    variant="body2"
+                    sx={{ color: "text.secondary", mt: 0.75 }}
+                  >
+                    Tune how wide the page searches around your current
+                    location.
                   </Typography>
                 </Box>
                 <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
@@ -923,13 +990,19 @@ export default function DiscoveryPage({
               </Stack>
 
               {locationStatus !== "active" ? (
-                <Alert severity={locationStatus === "searching" ? "info" : "warning"}>
+                <Alert
+                  severity={locationStatus === "searching" ? "info" : "warning"}
+                >
                   {getEmptyLocationMessage(locationStatus)}
                 </Alert>
               ) : null}
 
-              {favoritesError ? <Alert severity="warning">{favoritesError}</Alert> : null}
-              {skyQualityError ? <Alert severity="warning">{skyQualityError}</Alert> : null}
+              {favoritesError ? (
+                <Alert severity="warning">{favoritesError}</Alert>
+              ) : null}
+              {skyQualityError ? (
+                <Alert severity="warning">{skyQualityError}</Alert>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -958,9 +1031,12 @@ export default function DiscoveryPage({
             title="Recommended Locations"
             subtitle="Curated spots ranked by how close they are to you, with quick access to directions."
           >
-            {hasLocation && !nearbyRecommendations.length && rankedRecommendations.length ? (
+            {hasLocation &&
+            !nearbyRecommendations.length &&
+            rankedRecommendations.length ? (
               <Alert severity="info">
-                No curated spots were found inside {radiusKm} km. Showing the closest recommendations instead.
+                No curated spots were found inside {radiusKm} km. Showing the
+                closest recommendations instead.
               </Alert>
             ) : null}
 
@@ -993,12 +1069,16 @@ export default function DiscoveryPage({
                       )
                     }
                     title={spot.name}
-                    body={spot.description || "Curated stargazing recommendation."}
+                    body={
+                      spot.description || "Curated stargazing recommendation."
+                    }
                     chips={[
                       spot.type ? { label: spot.type } : null,
                       spot.region ? { label: spot.region } : null,
                       spot.country ? { label: spot.country } : null,
-                      spot.bestTime ? { label: `Best: ${spot.bestTime}` } : null,
+                      spot.bestTime
+                        ? { label: `Best: ${spot.bestTime}` }
+                        : null,
                     ].filter(Boolean)}
                   />
                 ))}
@@ -1020,16 +1100,24 @@ export default function DiscoveryPage({
                 title="Sign In to See Favorites"
                 body="Favorites are tied to your account, so this section unlocks after login."
                 action={
-                  <Button variant="contained" color="secondary" onClick={() => onNavigate?.("/auth")}>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={() => onNavigate?.("/auth")}
+                  >
                     Sign in
                   </Button>
                 }
               />
             ) : favoritesLoading ? (
               <Card>
-                <CardContent sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <CardContent
+                  sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                >
                   <CircularProgress size={22} />
-                  <Typography variant="body2">Loading your saved locations...</Typography>
+                  <Typography variant="body2">
+                    Loading your saved locations...
+                  </Typography>
                 </CardContent>
               </Card>
             ) : favoriteDiscoveryItems.length ? (
@@ -1068,7 +1156,9 @@ export default function DiscoveryPage({
                       spot.type ? { label: spot.type } : null,
                       spot.region ? { label: spot.region } : null,
                       spot.country ? { label: spot.country } : null,
-                      spot.bestTime ? { label: `Best: ${spot.bestTime}` } : null,
+                      spot.bestTime
+                        ? { label: `Best: ${spot.bestTime}` }
+                        : null,
                     ].filter(Boolean)}
                   />
                 ))}
@@ -1092,7 +1182,8 @@ export default function DiscoveryPage({
           >
             {hasLocation && !nearbyEvents.length && upcomingEvents.length ? (
               <Alert severity="info">
-                No published events were found inside {radiusKm} km. Showing the closest upcoming events instead.
+                No published events were found inside {radiusKm} km. Showing the
+                closest upcoming events instead.
               </Alert>
             ) : null}
 
@@ -1140,7 +1231,8 @@ export default function DiscoveryPage({
                                   Array.isArray(event.rsvps) &&
                                   event.rsvps.some(
                                     (entry) =>
-                                      String(entry.userId) === String(activeUserRsvpId),
+                                      String(entry.userId) ===
+                                      String(activeUserRsvpId),
                                   )
                                 ? "Leave RSVP"
                                 : "RSVP"
@@ -1148,11 +1240,12 @@ export default function DiscoveryPage({
                           isRsvpPending={pendingRsvpEventId === event.id}
                           isJoined={Boolean(
                             activeUserRsvpId &&
-                              Array.isArray(event.rsvps) &&
-                              event.rsvps.some(
-                                (entry) =>
-                                  String(entry.userId) === String(activeUserRsvpId),
-                              ),
+                            Array.isArray(event.rsvps) &&
+                            event.rsvps.some(
+                              (entry) =>
+                                String(entry.userId) ===
+                                String(activeUserRsvpId),
+                            ),
                           )}
                         />
                       ))}
@@ -1204,7 +1297,8 @@ export default function DiscoveryPage({
                                   Array.isArray(event.rsvps) &&
                                   event.rsvps.some(
                                     (entry) =>
-                                      String(entry.userId) === String(activeUserRsvpId),
+                                      String(entry.userId) ===
+                                      String(activeUserRsvpId),
                                   )
                                 ? "Leave RSVP"
                                 : "RSVP"
@@ -1212,11 +1306,12 @@ export default function DiscoveryPage({
                           isRsvpPending={pendingRsvpEventId === event.id}
                           isJoined={Boolean(
                             activeUserRsvpId &&
-                              Array.isArray(event.rsvps) &&
-                              event.rsvps.some(
-                                (entry) =>
-                                  String(entry.userId) === String(activeUserRsvpId),
-                              ),
+                            Array.isArray(event.rsvps) &&
+                            event.rsvps.some(
+                              (entry) =>
+                                String(entry.userId) ===
+                                String(activeUserRsvpId),
+                            ),
                           )}
                         />
                       ))}
@@ -1247,12 +1342,18 @@ export default function DiscoveryPage({
               }}
             >
               <Card sx={SECTION_CARD_SX}>
-                <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                  <Typography variant="h6">Sky Quality at Your Position</Typography>
+                <CardContent
+                  sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+                >
+                  <Typography variant="h6">
+                    Sky Quality at Your Position
+                  </Typography>
                   {skyQualityLoading ? (
                     <Stack spacing={1.5}>
                       <CircularProgress size={22} />
-                      <Typography variant="body2">Reading local sky quality...</Typography>
+                      <Typography variant="body2">
+                        Reading local sky quality...
+                      </Typography>
                     </Stack>
                   ) : skyQuality ? (
                     <Stack spacing={2}>
@@ -1271,17 +1372,30 @@ export default function DiscoveryPage({
                           justifyContent="space-between"
                           alignItems="flex-start"
                         >
-                          <Box sx={{ display: "grid", gap: 0.75, flex: 1, minWidth: 0 }}>
+                          <Box
+                            sx={{
+                              display: "grid",
+                              gap: 0.75,
+                              flex: 1,
+                              minWidth: 0,
+                            }}
+                          >
                             <Typography
                               variant="overline"
-                              sx={{ color: "secondary.main", letterSpacing: "0.1em" }}
+                              sx={{
+                                color: "secondary.main",
+                                letterSpacing: "0.1em",
+                              }}
                             >
                               Current Class
                             </Typography>
                             <Typography variant="h4">
                               {skyQuality.Bortle || "Unknown"}
                             </Typography>
-                            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                            <Typography
+                              variant="body1"
+                              sx={{ fontWeight: 600 }}
+                            >
                               {skyConditionSummary.label}
                             </Typography>
                           </Box>
@@ -1296,7 +1410,10 @@ export default function DiscoveryPage({
                               flexShrink: 0,
                             }}
                           >
-                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary" }}
+                            >
                               SQM
                             </Typography>
                             <Typography variant="h5">
@@ -1304,7 +1421,10 @@ export default function DiscoveryPage({
                             </Typography>
                           </Box>
                         </Stack>
-                        <Typography variant="body2" sx={{ color: "text.secondary", mt: 2 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "text.secondary", mt: 2 }}
+                        >
                           {skyConditionSummary.summary}
                         </Typography>
                       </Box>
@@ -1319,9 +1439,15 @@ export default function DiscoveryPage({
                           },
                         }}
                       >
-                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                        <Card
+                          variant="outlined"
+                          sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+                        >
                           <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary" }}
+                            >
                               Glow Ratio
                             </Typography>
                             <Typography variant="h6">
@@ -1329,28 +1455,52 @@ export default function DiscoveryPage({
                             </Typography>
                           </CardContent>
                         </Card>
-                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                        <Card
+                          variant="outlined"
+                          sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+                        >
                           <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary" }}
+                            >
                               Artificial Brightness
                             </Typography>
                             <Typography variant="h6">
-                              {formatMetricNumber(skyQuality.Artif_bright_uccd_m2, 0)}
+                              {formatMetricNumber(
+                                skyQuality.Artif_bright_uccd_m2,
+                                0,
+                              )}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary" }}
+                            >
                               ucd/m^2
                             </Typography>
                           </CardContent>
                         </Card>
-                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                        <Card
+                          variant="outlined"
+                          sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+                        >
                           <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary" }}
+                            >
                               Total Brightness
                             </Typography>
                             <Typography variant="h6">
-                              {formatMetricNumber(skyQuality.Brightness_mcd_m2, 1)}
+                              {formatMetricNumber(
+                                skyQuality.Brightness_mcd_m2,
+                                1,
+                              )}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "text.secondary" }}
+                            >
                               mcd/m^2
                             </Typography>
                           </CardContent>
@@ -1367,25 +1517,43 @@ export default function DiscoveryPage({
                           },
                         }}
                       >
-                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                        <Card
+                          variant="outlined"
+                          sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+                        >
                           <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                            <Typography variant="overline" sx={{ color: "secondary.main" }}>
+                            <Typography
+                              variant="overline"
+                              sx={{ color: "secondary.main" }}
+                            >
                               Best Tonight For
                             </Typography>
-                            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.75 }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "text.secondary", mt: 0.75 }}
+                            >
                               {skyConditionSummary.bestFor}
                             </Typography>
                           </CardContent>
                         </Card>
-                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                        <Card
+                          variant="outlined"
+                          sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}
+                        >
                           <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                            <Typography variant="overline" sx={{ color: "secondary.main" }}>
+                            <Typography
+                              variant="overline"
+                              sx={{ color: "secondary.main" }}
+                            >
                               Nearest Improvement
                             </Typography>
                             <Typography variant="body2" sx={{ mt: 0.75 }}>
                               {nearestDarkSpotSummary.title}
                             </Typography>
-                            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                            <Typography
+                              variant="body2"
+                              sx={{ color: "text.secondary", mt: 0.5 }}
+                            >
                               {nearestDarkSpotSummary.copy}
                             </Typography>
                           </CardContent>
@@ -1397,20 +1565,28 @@ export default function DiscoveryPage({
                       </Alert>
                     </Stack>
                   ) : (
-                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                      Turn on location to estimate the local Bortle class and sky quality.
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      Turn on location to estimate the local Bortle class and
+                      sky quality.
                     </Typography>
                   )}
                 </CardContent>
               </Card>
 
               <Card sx={SECTION_CARD_SX}>
-                <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <CardContent
+                  sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
+                >
                   <Typography variant="h6">Darker Escapes Nearby</Typography>
                   {darkSpotsLoading ? (
                     <Stack spacing={1.5}>
                       <CircularProgress size={22} />
-                      <Typography variant="body2">Scanning for dark spots...</Typography>
+                      <Typography variant="body2">
+                        Scanning for dark spots...
+                      </Typography>
                     </Stack>
                   ) : darkSpots.length ? (
                     <Stack spacing={1.25}>
@@ -1420,18 +1596,31 @@ export default function DiscoveryPage({
                           variant="outlined"
                           sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}
                         >
-                          <CardContent sx={{ p: 2.25, "&:last-child": { pb: 2.25 } }}>
+                          <CardContent
+                            sx={{ p: 2.25, "&:last-child": { pb: 2.25 } }}
+                          >
                             <Stack spacing={1.25}>
-                              <Stack direction="row" justifyContent="space-between" spacing={1.5}>
+                              <Stack
+                                direction="row"
+                                justifyContent="space-between"
+                                spacing={1.5}
+                              >
                                 <Typography variant="body1">
                                   Bortle {spot.level}
                                 </Typography>
-                                <Typography variant="body2" sx={{ color: "secondary.main" }}>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ color: "secondary.main" }}
+                                >
                                   {formatDistanceKm(spot.distance_km)}
                                 </Typography>
                               </Stack>
-                              <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                                SQM {formatMetricNumber(spot.sqm, 2)} at {spot.lat.toFixed(3)},{` `}
+                              <Typography
+                                variant="body2"
+                                sx={{ color: "text.secondary" }}
+                              >
+                                SQM {formatMetricNumber(spot.sqm, 2)} at{" "}
+                                {spot.lat.toFixed(3)},{` `}
                                 {spot.lon.toFixed(3)}
                               </Typography>
                               <Button
@@ -1440,7 +1629,7 @@ export default function DiscoveryPage({
                                 onClick={() => handleOpenDarkSpotOnMap(spot)}
                                 sx={{ alignSelf: "flex-start" }}
                               >
-                                Open on Map
+                                Open Map
                               </Button>
                             </Stack>
                           </CardContent>
@@ -1448,8 +1637,12 @@ export default function DiscoveryPage({
                       ))}
                     </Stack>
                   ) : (
-                    <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                      No nearby dark-spot candidates were returned for this radius yet.
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary" }}
+                    >
+                      No nearby dark-spot candidates were returned for this
+                      radius yet.
                     </Typography>
                   )}
                 </CardContent>
