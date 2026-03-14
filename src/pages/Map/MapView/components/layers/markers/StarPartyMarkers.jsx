@@ -20,6 +20,7 @@ function StarPartyMarkerItem({
   buildDirectionsUrl,
   getDirectionsOrigin,
   onToggleRsvp,
+  eventMarkerRefs,
   isExiting = false,
 }) {
   const markerRef = useRef(null);
@@ -75,7 +76,17 @@ function StarPartyMarkerItem({
             ? starPartyEventIconRemoving
             : starPartyEventIcon
       }
-      ref={markerRef}
+      ref={(marker) => {
+        markerRef.current = marker;
+        if (!eventMarkerRefs?.current) {
+          return;
+        }
+        if (marker) {
+          eventMarkerRefs.current.set(String(event.id), marker);
+          return;
+        }
+        eventMarkerRefs.current.delete(String(event.id));
+      }}
       eventHandlers={{
         popupopen: () => centerOnCoords?.(event.lat, event.lng),
       }}
@@ -110,6 +121,7 @@ export default function StarPartyMarkers({
   events,
   isAuthenticated,
   activeUserRsvpId,
+  eventMarkerRefs,
   centerOnCoords,
   handleShareLocation,
   buildDirectionsUrl,
@@ -134,6 +146,7 @@ export default function StarPartyMarkers({
         isAuthenticated={isAuthenticated}
         isJoined={isJoined}
         rsvpCount={rsvpCount}
+        eventMarkerRefs={eventMarkerRefs}
         centerOnCoords={centerOnCoords}
         handleShareLocation={handleShareLocation}
         buildDirectionsUrl={buildDirectionsUrl}

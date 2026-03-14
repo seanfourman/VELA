@@ -89,6 +89,7 @@ const MapView = forwardRef(function MapView(
   );
   const [areZoomMarkersExiting, setAreZoomMarkersExiting] = useState(false);
   const handledMapSelectionRef = useRef(null);
+  const eventMarkerRefs = useRef(new Map());
   const zoomMarkerExitTimerRef = useRef(0);
   const zoomMarkersVisibleRef = useRef(DEFAULT_ZOOM >= MARKER_VISIBILITY_ZOOM);
   const zoomMarkersExitingRef = useRef(false);
@@ -110,6 +111,7 @@ const MapView = forwardRef(function MapView(
   const closeStargazePanel = handlers.handleCloseStargazePanel;
   const handleCoordinateSearch = handlers.handleCoordinateSearch;
   const handleStargazeSearch = handlers.handleStargazeSearch;
+  const handleStarPartySearch = handlers.handleStarPartySearch;
   const handleGetVisiblePlanets = handlers.handleGetVisiblePlanets;
   const handleRenameFavoriteSpot = handlers.handleRenameFavoriteSpot;
   const ensureSpaceWeatherLoaded = spaceWeather.ensureLoaded;
@@ -319,6 +321,8 @@ const MapView = forwardRef(function MapView(
     handledMapSelectionRef.current = mapSelection.requestId;
     onConsumeMapSelection?.();
 
+    let cleanupSelectionFocus = null;
+
     const selectionTimer = window.setTimeout(() => {
       if (mapSelection.type === "stargaze") {
         const matchedSpot =
@@ -356,6 +360,60 @@ const MapView = forwardRef(function MapView(
         } else {
           return;
         }
+      } else if (mapSelection.type === "event") {
+        const matchedEvent =
+          visibleStarPartyEvents.find(
+            (event) => String(event?.id) === String(mapSelection.id),
+          ) || null;
+
+        if (matchedEvent) {
+          handleStarPartySearch(matchedEvent);
+
+          const marker = eventMarkerRefs.current.get(String(matchedEvent.id));
+          if (marker?.openPopup) {
+            const map = mapRef.current;
+            const openPopup = () => {
+              marker.openPopup();
+            };
+
+            if (!map) {
+              const popupTimer = window.setTimeout(openPopup, 0);
+              cleanupSelectionFocus = () => {
+                window.clearTimeout(popupTimer);
+              };
+              return;
+            }
+
+            const alreadyFocused =
+              map.distance(map.getCenter(), [matchedEvent.lat, matchedEvent.lng]) < 10 &&
+              map.getZoom() >= LOCATION_ZOOM - 0.1;
+
+            if (alreadyFocused) {
+              const popupTimer = window.setTimeout(openPopup, 0);
+              cleanupSelectionFocus = () => {
+                window.clearTimeout(popupTimer);
+              };
+              return;
+            }
+
+            map.once("moveend", openPopup);
+            cleanupSelectionFocus = () => {
+              map.off("moveend", openPopup);
+            };
+          }
+          return;
+        }
+
+        if (
+          Number.isFinite(mapSelection.lat) &&
+          Number.isFinite(mapSelection.lng)
+        ) {
+          handleCoordinateSearch({
+            lat: mapSelection.lat,
+            lng: mapSelection.lng,
+          });
+        }
+        return;
       } else if (
         Number.isFinite(mapSelection.lat) &&
         Number.isFinite(mapSelection.lng)
@@ -381,14 +439,18 @@ const MapView = forwardRef(function MapView(
 
     return () => {
       window.clearTimeout(selectionTimer);
+      cleanupSelectionFocus?.();
     };
   }, [
     handleCoordinateSearch,
     handleGetVisiblePlanets,
+    handleStarPartySearch,
     handleStargazeSearch,
     mapSelection,
+    mapRef,
     onConsumeMapSelection,
     stargazeLocations,
+    visibleStarPartyEvents,
   ]);
 
   return (
@@ -608,6 +670,7 @@ const MapView = forwardRef(function MapView(
                   events={visibleStarPartyEvents}
                   isAuthenticated={isAuthenticated}
                   activeUserRsvpId={activeUserRsvpId}
+                  eventMarkerRefs={eventMarkerRefs}
                   isExiting={areZoomMarkersExiting}
                   centerOnCoords={handlers.centerOnCoords}
                   handleShareLocation={handlers.handleShareLocation}

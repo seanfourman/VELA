@@ -15,6 +15,7 @@ import Typography from "@mui/material/Typography";
 import PageShell from "@/components/layout/PageShell";
 import EarthGlobe from "@/components/planets/EarthGlobe";
 import { loadFavoriteSpots } from "@/features/map/favoritesStorage";
+import { getRsvpUserId } from "@/features/starParty/starPartyUtils";
 import { fetchDarkSpots } from "@/utils/darkSpots";
 import { formatDateTime } from "@/utils/dateTime";
 import {
@@ -29,6 +30,7 @@ import {
   buildExternalMapSearchUrl,
 } from "@/utils/mapLinks";
 import velaTheme from "@/utils/muiTheme";
+import showNotification from "@/utils/notifications";
 import { fetchSkyQualityMetrics } from "@/utils/skyQuality";
 
 const DISCOVERY_RADIUS_OPTIONS = [100, 250, 500, 1000];
@@ -262,8 +264,7 @@ function SpotCard({
           pt: 0,
           mt: "auto",
           display: "grid",
-          gridTemplateColumns:
-            actionCount > 1 ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)",
+          gridTemplateColumns: `repeat(${Math.max(actionCount, 1)}, minmax(0, 1fr))`,
           gap: 1.25,
           "& > :not(style) ~ :not(style)": {
             marginLeft: 0,
@@ -293,16 +294,30 @@ function SpotCard({
   );
 }
 
-function EventCard({ event, location, directionsProvider, referenceNow }) {
+function EventCard({
+  event,
+  location,
+  directionsProvider,
+  referenceNow,
+  onOpenOnMap,
+  onRsvpAction,
+  rsvpActionLabel = "RSVP",
+  isRsvpPending = false,
+  isJoined = false,
+}) {
   const directionsHref = buildDestinationHref({
     origin: location,
     destination: event,
     provider: directionsProvider,
   });
+  const actionCount =
+    Number(Boolean(directionsHref)) +
+    Number(Boolean(onOpenOnMap)) +
+    Number(Boolean(onRsvpAction));
 
   return (
     <Card sx={SECTION_CARD_SX}>
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.25, flex: 1 }}>
         <Stack direction="row" justifyContent="space-between" spacing={1.5}>
           <Typography variant="h6">{event.title}</Typography>
           <Typography variant="body2" sx={{ color: "secondary.main" }}>
@@ -343,7 +358,20 @@ function EventCard({ event, location, directionsProvider, referenceNow }) {
           </Stack>
         ) : null}
       </CardContent>
-      <CardActions sx={{ px: 2, pb: 2, pt: 0, mt: "auto" }}>
+      <CardActions
+        sx={{
+          px: 2,
+          pb: 2,
+          pt: 0,
+          mt: "auto",
+          display: "grid",
+          gridTemplateColumns: `repeat(${Math.max(actionCount, 1)}, minmax(0, 1fr))`,
+          gap: 1.25,
+          "& > :not(style) ~ :not(style)": {
+            marginLeft: 0,
+          },
+        }}
+      >
         {directionsHref ? (
           <Button
             component="a"
@@ -352,8 +380,25 @@ function EventCard({ event, location, directionsProvider, referenceNow }) {
             rel="noreferrer"
             variant="contained"
             color="secondary"
+            fullWidth
           >
             Directions
+          </Button>
+        ) : null}
+        {onOpenOnMap ? (
+          <Button onClick={onOpenOnMap} variant="outlined" fullWidth>
+            Open on Map
+          </Button>
+        ) : null}
+        {onRsvpAction ? (
+          <Button
+            onClick={onRsvpAction}
+            variant={isJoined ? "contained" : "outlined"}
+            color={isJoined ? "success" : "inherit"}
+            disabled={isRsvpPending}
+            fullWidth
+          >
+            {isRsvpPending ? "Saving..." : rsvpActionLabel}
           </Button>
         ) : null}
       </CardActions>
@@ -385,6 +430,7 @@ export default function DiscoveryPage({
   starPartyEvents = [],
   directionsProvider = "google",
   defaultRadiusKm = 250,
+  onToggleStarPartyRsvp,
 }) {
   const [radiusKm, setRadiusKm] = useState(() =>
     resolveInitialRadius(defaultRadiusKm),
@@ -397,8 +443,10 @@ export default function DiscoveryPage({
   const [skyQuality, setSkyQuality] = useState(null);
   const [skyQualityLoading, setSkyQualityLoading] = useState(false);
   const [skyQualityError, setSkyQualityError] = useState("");
+  const [pendingRsvpEventId, setPendingRsvpEventId] = useState("");
 
   const isAuthenticated = Boolean(auth?.isAuthenticated);
+  const activeUserRsvpId = getRsvpUserId(auth?.user);
   const hasLocation =
     Number.isFinite(location?.lat) && Number.isFinite(location?.lng);
   const showHero = useMemo(() => isProbablyHardwareAccelerated(), []);
@@ -410,6 +458,58 @@ export default function DiscoveryPage({
   const openMapSelection = (selection) => {
     if (!selection) return;
     onNavigate?.("/", { state: { mapSelection: selection } });
+  };
+
+  const handleOpenEventOnMap = (event) => {
+    if (!event) return;
+    openMapSelection(
+      buildDiscoveryMapSelection({
+        type: "event",
+        id: event.id,
+        lat: event.lat,
+        lng: event.lng,
+      }),
+    );
+  };
+
+  const handleEventRsvpAction = async (event) => {
+    if (!event?.id) return;
+
+    if (!isAuthenticated) {
+      onNavigate?.("/auth");
+      return;
+    }
+
+    if (!onToggleStarPartyRsvp || pendingRsvpEventId === event.id) {
+      return;
+    }
+
+    const currentRsvps = Array.isArray(event.rsvps) ? event.rsvps : [];
+    const isAlreadyJoined = Boolean(
+      activeUserRsvpId &&
+        currentRsvps.some(
+          (entry) => String(entry.userId) === String(activeUserRsvpId),
+        ),
+    );
+
+    setPendingRsvpEventId(event.id);
+
+    try {
+      const result = await onToggleStarPartyRsvp({ eventId: event.id });
+      const joinedNow =
+        typeof result?.joined === "boolean" ? result.joined : !isAlreadyJoined;
+      showNotification(joinedNow ? "RSVP confirmed" : "RSVP removed", "success", {
+        duration: 1800,
+      });
+    } catch (error) {
+      showNotification(
+        error instanceof Error ? error.message : "Could not update RSVP right now",
+        "failure",
+        { duration: 2600 },
+      );
+    } finally {
+      setPendingRsvpEventId((current) => (current === event.id ? "" : current));
+    }
   };
 
   useEffect(() => {
@@ -927,6 +1027,29 @@ export default function DiscoveryPage({
                           location={location}
                           directionsProvider={directionsProvider}
                           referenceNow={referenceNow}
+                          onOpenOnMap={() => handleOpenEventOnMap(event)}
+                          onRsvpAction={() => handleEventRsvpAction(event)}
+                          rsvpActionLabel={
+                            !isAuthenticated
+                              ? "Sign In to RSVP"
+                              : activeUserRsvpId &&
+                                  Array.isArray(event.rsvps) &&
+                                  event.rsvps.some(
+                                    (entry) =>
+                                      String(entry.userId) === String(activeUserRsvpId),
+                                  )
+                                ? "Leave RSVP"
+                                : "RSVP"
+                          }
+                          isRsvpPending={pendingRsvpEventId === event.id}
+                          isJoined={Boolean(
+                            activeUserRsvpId &&
+                              Array.isArray(event.rsvps) &&
+                              event.rsvps.some(
+                                (entry) =>
+                                  String(entry.userId) === String(activeUserRsvpId),
+                              ),
+                          )}
                         />
                       ))}
                     </Box>
@@ -968,6 +1091,29 @@ export default function DiscoveryPage({
                           location={location}
                           directionsProvider={directionsProvider}
                           referenceNow={referenceNow}
+                          onOpenOnMap={() => handleOpenEventOnMap(event)}
+                          onRsvpAction={() => handleEventRsvpAction(event)}
+                          rsvpActionLabel={
+                            !isAuthenticated
+                              ? "Sign In to RSVP"
+                              : activeUserRsvpId &&
+                                  Array.isArray(event.rsvps) &&
+                                  event.rsvps.some(
+                                    (entry) =>
+                                      String(entry.userId) === String(activeUserRsvpId),
+                                  )
+                                ? "Leave RSVP"
+                                : "RSVP"
+                          }
+                          isRsvpPending={pendingRsvpEventId === event.id}
+                          isJoined={Boolean(
+                            activeUserRsvpId &&
+                              Array.isArray(event.rsvps) &&
+                              event.rsvps.some(
+                                (entry) =>
+                                  String(entry.userId) === String(activeUserRsvpId),
+                              ),
+                          )}
                         />
                       ))}
                     </Box>

@@ -120,6 +120,7 @@ function DiscoveryRoute() {
     stargazeLocations,
     starPartyEvents,
     settings,
+    handleToggleStarPartyRsvp,
   } = useAppLayoutContext();
 
   return (
@@ -133,6 +134,7 @@ function DiscoveryRoute() {
       starPartyEvents={starPartyEvents}
       directionsProvider={settings.directionsProvider}
       defaultRadiusKm={settings.searchDistance}
+      onToggleStarPartyRsvp={handleToggleStarPartyRsvp}
     />
   );
 }
