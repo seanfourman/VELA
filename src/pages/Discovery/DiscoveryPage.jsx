@@ -155,52 +155,81 @@ function SpotCard({
     destination: item,
     provider: directionsProvider,
   });
+  const hasSourceLink = Boolean(item?.sourceLinks?.length);
+  const actionCount = Number(Boolean(directionsHref)) + Number(Boolean(onOpenOnMap));
 
   return (
     <Card sx={SECTION_CARD_SX}>
-      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        <Stack direction="row" justifyContent="space-between" spacing={1.5}>
-          <Box>
-            <Typography variant="h6">{title}</Typography>
-            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
-              {body}
-            </Typography>
-          </Box>
+      <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.25, flex: 1 }}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          spacing={1.5}
+          alignItems="flex-start"
+        >
+          <Typography variant="h6" sx={{ flex: 1, minWidth: 0, pr: 1.5 }}>
+            {title}
+          </Typography>
           <Typography
             variant="body2"
-            sx={{ color: "secondary.main", whiteSpace: "nowrap" }}
+            sx={{
+              color: "secondary.main",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+              pt: 0.25,
+            }}
           >
             {formatDistanceKm(item?.distanceKm)}
           </Typography>
         </Stack>
 
-        {chips.length ? (
-          <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-            {chips.map((chip) => (
-              <Chip
-                key={chip.label}
-                label={chip.label}
-                color={chip.color || "default"}
-                variant={chip.variant || "filled"}
-                size="small"
-              />
-            ))}
-          </Stack>
-        ) : null}
+        <Typography variant="body2" sx={{ color: "text.secondary", flex: 1 }}>
+          {body}
+        </Typography>
 
-        {item?.sourceLinks?.length ? (
-          <Link
-            href={item.sourceLinks[0]}
-            target="_blank"
-            rel="noreferrer"
-            underline="hover"
-            sx={{ color: "secondary.main", alignSelf: "flex-start" }}
-          >
-            Source
-          </Link>
-        ) : null}
+        <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 1.25 }}>
+          {chips.length ? (
+            <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
+              {chips.map((chip) => (
+                <Chip
+                  key={chip.label}
+                  label={chip.label}
+                  color={chip.color || "default"}
+                  variant={chip.variant || "filled"}
+                  size="small"
+                />
+              ))}
+            </Stack>
+          ) : null}
+
+          {hasSourceLink ? (
+            <Link
+              href={item.sourceLinks[0]}
+              target="_blank"
+              rel="noreferrer"
+              underline="hover"
+              sx={{ color: "secondary.main", alignSelf: "flex-start" }}
+            >
+              Source
+            </Link>
+          ) : null}
+        </Box>
       </CardContent>
-      <CardActions sx={{ px: 2, pb: 2, pt: 0, mt: "auto" }}>
+      <CardActions
+        sx={{
+          px: 2,
+          pb: 2,
+          pt: 0,
+          mt: "auto",
+          display: "grid",
+          gridTemplateColumns:
+            actionCount > 1 ? "repeat(2, minmax(0, 1fr))" : "minmax(0, 1fr)",
+          gap: 1.25,
+          "& > :not(style) ~ :not(style)": {
+            marginLeft: 0,
+          },
+        }}
+      >
         {directionsHref ? (
           <Button
             component="a"
@@ -209,12 +238,13 @@ function SpotCard({
             rel="noreferrer"
             variant="contained"
             color="secondary"
+            fullWidth
           >
             Directions
           </Button>
         ) : null}
         {onOpenOnMap ? (
-          <Button onClick={onOpenOnMap} variant="outlined">
+          <Button onClick={onOpenOnMap} variant="outlined" fullWidth>
             {secondaryActionLabel}
           </Button>
         ) : null}
