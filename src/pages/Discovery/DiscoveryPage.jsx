@@ -683,11 +683,6 @@ export default function DiscoveryPage({
           <DiscoverySection
             title="Recommended locations"
             subtitle="Curated spots ranked by how close they are to you, with quick access to directions."
-            action={
-              <Button variant="outlined" onClick={() => onNavigate?.("/")}>
-                Open map
-              </Button>
-            }
           >
             {hasLocation && !nearbyRecommendations.length && rankedRecommendations.length ? (
               <Alert severity="info">
