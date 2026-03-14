@@ -1,6 +1,6 @@
 .search-distance-selector {
   position: absolute;
-  top: 80px;
+  top: calc(80px + var(--app-safe-area-top));
   left: 14px;
   z-index: 1000;
   display: flex;
@@ -110,7 +110,7 @@
 @media (max-width: 768px) {
   .search-distance-selector {
     left: 16px;
-    top: 150px;
+    top: calc(150px + var(--app-safe-area-top));
   }
 
   body.map-ui-shifted-stargaze .search-distance-selector,

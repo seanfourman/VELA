@@ -1,6 +1,6 @@
 .map-quick-actions {
   position: absolute;
-  bottom: 14px;
+  bottom: calc(14px + var(--app-safe-area-bottom));
   left: 14px;
   display: flex;
   flex-direction: row-reverse;
@@ -234,7 +234,7 @@ body.map-ui-shifted-stargaze .map-quick-actions {
 @media (max-width: 768px) {
   .map-quick-actions {
     left: 14px;
-    bottom: 16px;
+    bottom: calc(16px + var(--app-safe-area-bottom));
     gap: 16px;
     flex-direction: column;
     align-items: flex-start;

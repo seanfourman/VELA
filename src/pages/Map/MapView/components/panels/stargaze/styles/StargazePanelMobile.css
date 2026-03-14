@@ -9,13 +9,15 @@
 }
 
 .stargaze-panel-mobile__sheet {
-  margin: 0 12px 12px;
+  margin: 0 12px calc(12px + var(--app-safe-area-bottom));
   padding: 16px;
   transform: translateY(calc(100% + 24px));
   opacity: 0;
   pointer-events: none;
   transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
-  max-height: calc(100vh - 160px);
+  max-height: calc(
+    var(--app-dvh) - 160px - var(--app-safe-area-top) - var(--app-safe-area-bottom)
+  );
   display: flex;
   flex-direction: column;
   gap: 12px;

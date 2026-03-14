@@ -1,6 +1,6 @@
 ﻿@media (max-width: 768px) {
   .location-search {
-    top: 80px;
+    top: calc(80px + var(--app-safe-area-top));
     bottom: auto;
     width: min(92vw, 400px);
   }

@@ -1,7 +1,7 @@
 ﻿.location-search {
   position: absolute;
   left: 50%;
-  bottom: 14px;
+  bottom: calc(14px + var(--app-safe-area-bottom));
   transform: translateX(-50%);
   width: min(360px, calc(100vw - 32px));
   display: flex;

@@ -30,6 +30,37 @@ function MapController({ mapRef }) {
     mapRef.current = map;
   }, [map, mapRef]);
 
+  useEffect(() => {
+    const invalidateMapSize = () => {
+      map.invalidateSize({
+        pan: false,
+        debounceMoveend: true,
+      });
+    };
+
+    const invalidateSoon = () => {
+      requestAnimationFrame(invalidateMapSize);
+    };
+
+    invalidateSoon();
+    const readyTimer = window.setTimeout(invalidateSoon, 0);
+
+    window.addEventListener("resize", invalidateSoon);
+    window.addEventListener("orientationchange", invalidateSoon);
+
+    const viewport = window.visualViewport;
+    viewport?.addEventListener("resize", invalidateSoon);
+    viewport?.addEventListener("scroll", invalidateSoon);
+
+    return () => {
+      window.clearTimeout(readyTimer);
+      window.removeEventListener("resize", invalidateSoon);
+      window.removeEventListener("orientationchange", invalidateSoon);
+      viewport?.removeEventListener("resize", invalidateSoon);
+      viewport?.removeEventListener("scroll", invalidateSoon);
+    };
+  }, [map]);
+
   return null;
 }
 

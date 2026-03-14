@@ -1,6 +1,6 @@
 .app {
   width: 100vw;
-  height: 100vh;
+  height: var(--app-dvh);
   overflow: hidden;
-  background: #575757;
+  background: #1e1e24;
 }

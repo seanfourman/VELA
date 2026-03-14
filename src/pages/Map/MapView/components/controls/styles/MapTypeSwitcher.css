@@ -1,7 +1,7 @@
 /* Map type switcher tray */
 .map-type-switcher {
   position: absolute;
-  bottom: 10px;
+  bottom: calc(10px + var(--app-safe-area-bottom));
   right: 14px;
   display: inline-flex;
   align-items: center;
@@ -258,7 +258,7 @@ body.map-ui-shifted-stargaze .map-type-switcher {
 
 @media (max-width: 768px) {
   .map-type-switcher {
-    bottom: 14px;
+    bottom: calc(14px + var(--app-safe-area-bottom));
     right: 14px;
     padding: 2px;
   }

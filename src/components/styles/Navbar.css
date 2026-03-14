@@ -9,7 +9,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 100px;
+  height: calc(100px + var(--app-safe-area-top));
   background: transparent;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -25,11 +25,11 @@
   top: 0;
   left: 0;
   right: 0;
-  height: 70px;
+  height: calc(70px + var(--app-safe-area-top));
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: var(--app-safe-area-top) 14px 0;
   background: none;
   z-index: 1000;
   --navbar-readable-text-shadow: none;
@@ -314,7 +314,7 @@
 
 .navbar-mobile-menu {
   position: absolute;
-  top: 68px;
+  top: calc(68px + var(--app-safe-area-top));
   left: 4px;
   right: auto;
   width: min(92vw, 400px);
@@ -469,7 +469,7 @@
 
 @media (max-width: 768px) {
   .navbar {
-    padding: 0 14px;
+    padding: var(--app-safe-area-top) 14px 0;
   }
 
   .navbar-center-band {

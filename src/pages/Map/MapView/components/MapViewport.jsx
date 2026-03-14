@@ -52,11 +52,18 @@ export default function MapViewport({
   handleToggleEventRsvp,
   visibleStarPartyEvents,
 }) {
+  const mapViewportStyle = {
+    width: "100%",
+    height: "calc(100% + var(--app-safe-area-top) + var(--app-safe-area-bottom))",
+    marginTop: "calc(-1 * var(--app-safe-area-top))",
+  };
+
   return (
     <MapContainer
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
-      style={{ height: "100%", width: "100%" }}
+      className="map-viewport"
+      style={mapViewportStyle}
       zoomControl={false}
       attributionControl={false}
       tapHold={false}
