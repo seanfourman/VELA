@@ -4,17 +4,38 @@
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(214, 224, 255, 0.75) rgba(255, 255, 255, 0.08);
   -webkit-overflow-scrolling: touch;
   padding: 110px 32px 40px;
   isolation: isolate;
   --profile-stars-opacity: 0.72;
   --profile-earth-opacity: 0.92;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       120% 120% at 20% 0%,
       rgba(255, 255, 255, 0.08),
       rgba(18, 18, 24, 0.92)
     ),
     linear-gradient(160deg, rgba(8, 10, 22, 0.88), rgba(18, 18, 24, 0.96));
+}
+
+.profile-page::-webkit-scrollbar {
+  width: 10px;
+}
+
+.profile-page::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-page::-webkit-scrollbar-thumb {
+  background: rgba(214, 224, 255, 0.46);
+  border-radius: 999px;
+  border: 2px solid rgba(8, 10, 22, 0.28);
+}
+
+.profile-page::-webkit-scrollbar-thumb:hover {
+  background: rgba(228, 236, 255, 0.62);
 }
 
 .profile-page::before {
@@ -26,7 +47,8 @@
   background-position: 50% 40%;
   opacity: 0;
   transform: scale(1.04);
-  animation: profile-stars-fade 1.2s ease forwards,
+  animation:
+    profile-stars-fade 1.2s ease forwards,
     profile-stars-drift 80s linear infinite;
   pointer-events: none;
   z-index: 0;
@@ -36,7 +58,8 @@
   content: "";
   position: fixed;
   inset: 0;
-  background: radial-gradient(
+  background:
+    radial-gradient(
       110% 90% at 50% 20%,
       rgba(18, 18, 24, 0.08),
       rgba(8, 10, 22, 0.82)
