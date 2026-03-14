@@ -250,9 +250,14 @@ const MapView = forwardRef(function MapView(
         const result = await onToggleStarPartyRsvp?.({ eventId: event.id });
         const joinedNow =
           typeof result?.joined === "boolean" ? result.joined : !isAlreadyJoined;
-        showNotification(joinedNow ? "RSVP confirmed" : "RSVP removed", "success", {
-          duration: 1800,
-        });
+        const eventLabel = event.title || "this event";
+        showNotification(
+          joinedNow
+            ? `RSVP confirmed for ${eventLabel}`
+            : `RSVP removed from ${eventLabel}`,
+          joinedNow ? "success" : "failure",
+          { duration: 1800 },
+        );
       } catch (error) {
         showNotification(
           error instanceof Error ? error.message : "Could not update RSVP right now",
