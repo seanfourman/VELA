@@ -21,14 +21,6 @@ import {
   requiresHardwareAccelerationRoute,
 } from "@/utils/hardwareUtils";
 import { isAdminUser, normalizePath } from "@/utils/appState";
-
-const ZOOM_OUT_ROUTES = new Set([
-  "/auth",
-  "/profile",
-  "/settings",
-  "/admin",
-  "/moon-phase",
-]);
 export const AppLayoutContext = createContext(null);
 
 export const useAppLayoutContext = () => {
@@ -134,7 +126,7 @@ function AppLayout() {
         transitionTimeoutRef.current = null;
       }
 
-      const shouldZoomOut = currentRoute === "/" && ZOOM_OUT_ROUTES.has(nextPath);
+      const shouldZoomOut = currentRoute === "/" && nextPath !== "/";
       if (shouldZoomOut) {
         if (mapViewRef.current?.zoomOutToMin) {
           mapViewRef.current.zoomOutToMin();
