@@ -2,11 +2,7 @@ import { Marker, Popup } from "react-leaflet";
 import { customIcon } from "@/pages/Map/MapView/core/markerIcons";
 import LocationPopupContent from "@/pages/Map/MapView/components/popups/content/LocationPopupContent";
 
-export default function LocationMarker({
-  location,
-  centerOnCoords,
-  onOpenSpaceWeatherAt,
-}) {
+export default function LocationMarker({ location, centerOnCoords }) {
   if (!location) return null;
 
   return (
@@ -18,15 +14,7 @@ export default function LocationMarker({
       }}
     >
       <Popup>
-        <LocationPopupContent
-          location={location}
-          onOpenSpaceWeather={() =>
-            onOpenSpaceWeatherAt?.(
-              { lat: location?.lat, lng: location?.lng },
-              "Your location",
-            )
-          }
-        />
+        <LocationPopupContent location={location} />
       </Popup>
     </Marker>
   );

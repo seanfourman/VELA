@@ -49,7 +49,6 @@ export default function MapViewport({
   areZoomMarkersExiting,
   handleMapZoomChange,
   handleRenameFavoriteSpot,
-  handleOpenSpaceWeatherAt,
   handleToggleEventRsvp,
   visibleStarPartyEvents,
 }) {
@@ -124,7 +123,6 @@ export default function MapViewport({
           <LocationMarker
             location={location}
             centerOnCoords={handlers.centerOnCoords}
-            onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
           />
           {state.exitingMarker ? (
             <Marker
@@ -155,15 +153,6 @@ export default function MapViewport({
             onShareLocation={() =>
               handlers.handleShareLocation(
                 state.placedMarker,
-                state.placedMarker?.isFavorite ? "Favorite spot" : "Pinned location",
-              )
-            }
-            onOpenSpaceWeather={() =>
-              handleOpenSpaceWeatherAt?.(
-                {
-                  lat: state.placedMarker?.lat,
-                  lng: state.placedMarker?.lng,
-                },
                 state.placedMarker?.isFavorite ? "Favorite spot" : "Pinned location",
               )
             }
@@ -202,7 +191,6 @@ export default function MapViewport({
                 buildDirectionsUrl={handlers.buildDirectionsUrl}
                 getDirectionsOrigin={handlers.getDirectionsOrigin}
                 getSpotKey={handlers.getSpotKey}
-                onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
               />
               <DarkSpotMarkers
                 darkSpots={state.darkSpots}
@@ -221,7 +209,6 @@ export default function MapViewport({
                 buildDirectionsUrl={handlers.buildDirectionsUrl}
                 getDirectionsOrigin={handlers.getDirectionsOrigin}
                 getSpotKey={handlers.getSpotKey}
-                onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
               />
               <FavoriteOnlyMarkers
                 favoriteOnlySpots={derived.favoriteOnlySpots}
@@ -239,7 +226,6 @@ export default function MapViewport({
                 buildDirectionsUrl={handlers.buildDirectionsUrl}
                 getDirectionsOrigin={handlers.getDirectionsOrigin}
                 setSelectedDarkSpot={handlers.setSelectedDarkSpot}
-                onOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
               />
               <StarPartyMarkers
                 events={visibleStarPartyEvents}

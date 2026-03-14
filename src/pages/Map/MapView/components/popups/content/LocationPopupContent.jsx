@@ -1,7 +1,7 @@
 import SkyQualityInfo from "../SkyQualityInfo";
 import { copyCoordinates, formatCoordinatesLabel } from "./copyCoordinates";
 
-export default function LocationPopupContent({ location, onOpenSpaceWeather }) {
+export default function LocationPopupContent({ location }) {
   if (!location) return null;
   const coordinatesLabel = formatCoordinatesLabel({
     lat: location.lat,
@@ -38,14 +38,6 @@ export default function LocationPopupContent({ location, onOpenSpaceWeather }) {
         </div>
 
         <SkyQualityInfo lat={location.lat} lng={location.lng} variant="compact" />
-
-        {onOpenSpaceWeather ? (
-          <div className="popup-actions">
-            <button className="popup-btn" onClick={onOpenSpaceWeather}>
-              Get Space Weather
-            </button>
-          </div>
-        ) : null}
       </div>
     </div>
   );

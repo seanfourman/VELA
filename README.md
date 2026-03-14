@@ -56,7 +56,6 @@ Required:
 
 Recommended:
 - `Cors:AllowedOrigins`
-- `Nasa:ApiKey` (optional; defaults to `DEMO_KEY` if missing)
 - `WorldAtlas:Path` / `WorldAtlas:LandMaskPath` (optional overrides)
 
 ## Database setup (manual)

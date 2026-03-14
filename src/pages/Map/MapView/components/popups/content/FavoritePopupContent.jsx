@@ -9,7 +9,6 @@ export default function FavoritePopupContent({
   onRemoveFavorite,
   onToggleTarget,
   onShareLocation,
-  onOpenSpaceWeather,
 }) {
   if (!spot) return null;
 
@@ -30,7 +29,6 @@ export default function FavoritePopupContent({
       isTarget={Boolean(isSelected)}
       onToggleTarget={onToggleTarget}
       onShareLocation={onShareLocation}
-      onOpenSpaceWeather={onOpenSpaceWeather}
     />
   );
 }

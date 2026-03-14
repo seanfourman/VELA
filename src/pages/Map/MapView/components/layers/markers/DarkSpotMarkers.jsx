@@ -53,7 +53,6 @@ export default function DarkSpotMarkers({
   buildDirectionsUrl,
   getDirectionsOrigin,
   getSpotKey,
-  onOpenSpaceWeatherAt,
 }) {
   if (!Array.isArray(darkSpots)) return null;
 
@@ -95,12 +94,6 @@ export default function DarkSpotMarkers({
             onToggleFavorite={() => handleToggleDarkSpotFavorite(spot)}
             onShareLocation={() =>
               handleShareLocation(
-                { lat: spot.lat, lng: spot.lon },
-                "Stargazing spot",
-              )
-            }
-            onOpenSpaceWeather={() =>
-              onOpenSpaceWeatherAt?.(
                 { lat: spot.lat, lng: spot.lon },
                 "Stargazing spot",
               )

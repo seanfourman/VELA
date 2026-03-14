@@ -16,7 +16,6 @@ export default function DarkSpotPopupContent({
   onToggleTarget,
   onToggleFavorite,
   onShareLocation,
-  onOpenSpaceWeather,
   flashShareToggle,
   buildDirectionsUrl,
   getDirectionsOrigin,
@@ -317,11 +316,6 @@ export default function DarkSpotPopupContent({
               </button>
             );
           })()}
-          {onOpenSpaceWeather ? (
-            <button className="popup-btn" onClick={onOpenSpaceWeather}>
-              Get Space Weather
-            </button>
-          ) : null}
         </div>
       </div>
     </div>

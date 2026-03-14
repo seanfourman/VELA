@@ -71,9 +71,6 @@ export const buildMapTilerRasterUrl = (mapId, z, x, y, format) =>
 export const buildMapTilerStyleUrl = (mapId = "streets-v2") =>
   buildMapTilerResourceUrl(`maps/${mapId}/style.json`);
 
-export const buildSpaceWeatherSnapshotUrl = ({ force = false } = {}) =>
-  joinQuery(buildApiUrl("space-weather/snapshot"), force ? { force: true } : {});
-
 export const buildSkyQualityUrl = (lat, lon) =>
   joinQuery(buildApiUrl("skyquality"), { lat, lon });
 

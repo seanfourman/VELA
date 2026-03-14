@@ -38,7 +38,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStarPartyEventService, StarPartyEventService>();
         services.AddScoped<ITokenService, JwtTokenService>();
         services.AddSingleton<IWorldAtlasService, WorldAtlasService>();
-        services.AddHttpClient<ISpaceWeatherService, SpaceWeatherService>();
         services.AddHttpClient<IMapTilerProxyService, MapTilerProxyService>();
         services.AddHttpClient<IVisiblePlanetsService, VisiblePlanetsService>();
 

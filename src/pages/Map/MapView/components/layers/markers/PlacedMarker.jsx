@@ -32,7 +32,6 @@ export default function PlacedMarker({
   onRenameFavoriteName,
   onToggleTarget,
   onShareLocation,
-  onOpenSpaceWeather,
   isFavoriteEntering,
   centerOnCoords,
 }) {
@@ -68,7 +67,6 @@ export default function PlacedMarker({
           onRenameFavoriteName={onRenameFavoriteName}
           onToggleTarget={onToggleTarget}
           onShareLocation={onShareLocation}
-          onOpenSpaceWeather={onOpenSpaceWeather}
         />
       </Popup>
     </Marker>

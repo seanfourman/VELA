@@ -13,7 +13,6 @@ export default function StargazePopupContent({
   onToggleFavorite,
   onToggleTarget,
   onShareLocation,
-  onOpenSpaceWeather,
 }) {
   if (!spot) return null;
 
@@ -36,7 +35,6 @@ export default function StargazePopupContent({
       isTarget={Boolean(isTarget)}
       onToggleTarget={onToggleTarget}
       onShareLocation={onShareLocation}
-      onOpenSpaceWeather={onOpenSpaceWeather}
     />
   );
 }

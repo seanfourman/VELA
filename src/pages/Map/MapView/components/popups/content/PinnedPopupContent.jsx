@@ -13,7 +13,6 @@ export default function PinnedPopupContent({
   onRenameFavoriteName,
   onToggleTarget,
   onShareLocation,
-  onOpenSpaceWeather,
 }) {
   if (!placedMarker) return null;
 
@@ -61,7 +60,6 @@ export default function PinnedPopupContent({
       isTarget={Boolean(isPinnedTarget)}
       onToggleTarget={isFavoritedPin ? onToggleTarget : null}
       onShareLocation={onShareLocation}
-      onOpenSpaceWeather={onOpenSpaceWeather}
     />
   );
 }

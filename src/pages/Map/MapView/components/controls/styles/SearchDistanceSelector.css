@@ -114,7 +114,6 @@
   }
 
   body.map-ui-shifted-stargaze .search-distance-selector,
-  body.map-ui-shifted-space-weather .search-distance-selector,
   .map-container.search-focused .search-distance-selector,
   .map-container.popup-open .search-distance-selector {
     transform: translateX(calc(-100% - 32px));

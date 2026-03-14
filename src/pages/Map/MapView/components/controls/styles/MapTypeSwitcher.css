@@ -240,8 +240,7 @@
 }
 
 body.map-ui-shifted .map-type-switcher,
-body.map-ui-shifted-stargaze .map-type-switcher,
-body.map-ui-shifted-space-weather .map-type-switcher {
+body.map-ui-shifted-stargaze .map-type-switcher {
   transform: translateX(140%);
   pointer-events: none;
 }

@@ -16,8 +16,7 @@
 }
 
 body.map-ui-shifted .map-quick-actions,
-body.map-ui-shifted-stargaze .map-quick-actions,
-body.map-ui-shifted-space-weather .map-quick-actions {
+body.map-ui-shifted-stargaze .map-quick-actions {
   transform: translateX(-140%);
   pointer-events: none;
 }

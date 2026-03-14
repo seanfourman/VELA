@@ -19,10 +19,8 @@ import LocationSearchBar from "./MapView/components/search/LocationSearchBar";
 import SearchDistanceSelector from "./MapView/components/controls/SearchDistanceSelector";
 import useMapEventRsvp from "./MapView/hooks/useMapEventRsvp";
 import useMapSelectionEffects from "./MapView/hooks/useMapSelectionEffects";
-import useMapSpaceWeatherPanel from "./MapView/hooks/useMapSpaceWeatherPanel";
 import useMapViewState from "./MapView/hooks/useMapViewState";
 import useZoomMarkerVisibility from "./MapView/hooks/useZoomMarkerVisibility";
-import useSpaceWeather from "@/features/spaceWeather/useSpaceWeather";
 import { getRsvpUserId } from "@/features/starParty/starPartyUtils";
 
 const MapView = forwardRef(function MapView(
@@ -52,7 +50,6 @@ const MapView = forwardRef(function MapView(
 ) {
   const [isThreeDMode, setIsThreeDMode] = useState(false);
   const eventMarkerRefs = useRef(new Map());
-  const spaceWeather = useSpaceWeather();
 
   const { refs, ui, state, derived, handlers, planets } = useMapViewState({
     location,
@@ -67,13 +64,11 @@ const MapView = forwardRef(function MapView(
   });
   const { mapRef, planetPanelRef, stargazeMarkerRefs, placedMarkerRef } = refs;
   const mapTypeClass = isThreeDMode ? "light three-d" : mapType;
-  const closeStargazePanel = handlers.handleCloseStargazePanel;
   const handleCoordinateSearch = handlers.handleCoordinateSearch;
   const handleStargazeSearch = handlers.handleStargazeSearch;
   const handleStarPartySearch = handlers.handleStarPartySearch;
   const handleGetVisiblePlanets = handlers.handleGetVisiblePlanets;
   const handleRenameFavoriteSpot = handlers.handleRenameFavoriteSpot;
-  const ensureSpaceWeatherLoaded = spaceWeather.ensureLoaded;
   const activeUserRsvpId = getRsvpUserId(authUser);
   const placedMarkerId = state.placedMarker?.id ?? null;
   const contextMenuLat = state.contextMenu?.lat ?? null;
@@ -105,15 +100,6 @@ const MapView = forwardRef(function MapView(
   }, [starPartyEvents]);
   const { areZoomMarkersVisible, areZoomMarkersExiting, handleMapZoomChange } =
     useZoomMarkerVisibility(mapRef);
-  const {
-    isSpaceWeatherOpen,
-    spaceWeatherFocus,
-    handleOpenSpaceWeatherAt,
-    handleCloseSpaceWeather,
-  } = useMapSpaceWeatherPanel({
-    ensureSpaceWeatherLoaded,
-    closeStargazePanel,
-  });
   const { handleToggleEventRsvp } = useMapEventRsvp({
     isAuthenticated,
     activeUserRsvpId,
@@ -201,7 +187,6 @@ const MapView = forwardRef(function MapView(
         areZoomMarkersExiting={areZoomMarkersExiting}
         handleMapZoomChange={handleMapZoomChange}
         handleRenameFavoriteSpot={handleRenameFavoriteSpot}
-        handleOpenSpaceWeatherAt={handleOpenSpaceWeatherAt}
         handleToggleEventRsvp={handleToggleEventRsvp}
         visibleStarPartyEvents={visibleStarPartyEvents}
       />
@@ -211,11 +196,6 @@ const MapView = forwardRef(function MapView(
         ui={ui}
         directionsProvider={directionsProvider}
         handlers={handlers}
-        isSpaceWeatherOpen={isSpaceWeatherOpen}
-        handleCloseSpaceWeather={handleCloseSpaceWeather}
-        spaceWeather={spaceWeather}
-        spaceWeatherFocus={spaceWeatherFocus}
-        location={location}
       />
 
       <MapQuickActions

@@ -76,7 +76,6 @@ export default function StargazeMarkers({
   buildDirectionsUrl,
   getDirectionsOrigin,
   getSpotKey,
-  onOpenSpaceWeatherAt,
 }) {
   if (!Array.isArray(spots)) return null;
   const directionsOrigin = getDirectionsOrigin();
@@ -149,12 +148,6 @@ export default function StargazeMarkers({
             onToggleTarget={() => handleToggleStargazeTarget(spot)}
             onShareLocation={() =>
               handleShareLocation(
-                { lat: spot.lat, lng: spot.lng },
-                spot.name || "Recommended spot",
-              )
-            }
-            onOpenSpaceWeather={() =>
-              onOpenSpaceWeatherAt?.(
                 { lat: spot.lat, lng: spot.lng },
                 spot.name || "Recommended spot",
               )
