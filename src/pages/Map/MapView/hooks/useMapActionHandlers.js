@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import L from "leaflet";
 import { fetchDarkSpots } from "@/utils/darkSpots";
-import { isCoarsePointerEnv } from "../core/mapUtils";
 import { LOCATION_ZOOM, MARKER_EXIT_MS } from "../core/mapConfig";
 import {
   buildPlanetRequestMeta,
@@ -61,10 +60,10 @@ const useMapActionHandlers = ({
       if (!target) return;
 
       if (openPanel) {
-        if (isCoarsePointerEnv()) {
-          planetPanelRef.current?.nudgeToggle?.();
-        } else {
+        if (planetPanelRef.current?.openPanel) {
           planetPanelRef.current?.openPanel("manual");
+        } else {
+          planetPanelRef.current?.nudgeToggle?.();
         }
       }
 
@@ -132,8 +131,14 @@ const useMapActionHandlers = ({
 
   const handleGetVisiblePlanets = useCallback(
     (override = null) => {
+      const overrideTargetCandidate = override?.target;
+      const overrideTarget =
+        Number.isFinite(overrideTargetCandidate?.lat) &&
+        Number.isFinite(overrideTargetCandidate?.lng)
+          ? overrideTargetCandidate
+          : null;
       const target =
-        override?.target ||
+        overrideTarget ||
         getPrimaryTarget({
           selectedDarkSpot,
           placedMarker,

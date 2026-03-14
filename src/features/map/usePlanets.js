@@ -31,7 +31,9 @@ function usePlanets() {
       setPlanetsError(null);
 
       try {
-        const data = await fetchVisiblePlanets(lat, lng);
+        const data = await fetchVisiblePlanets(lat, lng, {
+          forceRefresh: force,
+        });
         if (!data) throw new Error("No visible planets data returned");
 
         setVisiblePlanets(getPlanetList(data));

@@ -17,7 +17,7 @@ function QuickActionButton({
 
   const handleClick = (event) => {
     if (disabled) return;
-    onClick?.(event);
+    onClick?.();
     event.currentTarget.blur();
   };
 
@@ -61,7 +61,7 @@ function LocationStatusButton({ status, onClick, disabled = false }) {
 
   const handleClick = (event) => {
     if (!isActive || disabled) return;
-    onClick?.(event);
+    onClick?.();
     event.currentTarget.blur();
   };
 

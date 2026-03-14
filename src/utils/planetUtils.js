@@ -81,22 +81,28 @@ export function preloadAllPlanetTextures() {
   ).catch(() => undefined);
 }
 
-export async function fetchVisiblePlanets(lat, lng) {
+export async function fetchVisiblePlanets(
+  lat,
+  lng,
+  { forceRefresh = false } = {},
+) {
   const key = cacheKey(lat, lng);
-  const cachedRaw = (() => {
-    try {
-      return localStorage.getItem(key);
-    } catch {
-      return null;
-    }
-  })();
+  if (!forceRefresh) {
+    const cachedRaw = (() => {
+      try {
+        return localStorage.getItem(key);
+      } catch {
+        return null;
+      }
+    })();
 
-  if (cachedRaw) {
-    try {
-      const cached = JSON.parse(cachedRaw);
-      if (Date.now() - cached?.timestamp < CACHE_DURATION) return cached.data;
-    } catch {
-      // Ignore invalid cache payload.
+    if (cachedRaw) {
+      try {
+        const cached = JSON.parse(cachedRaw);
+        if (Date.now() - cached?.timestamp < CACHE_DURATION) return cached.data;
+      } catch {
+        // Ignore invalid cache payload.
+      }
     }
   }
 
