@@ -183,11 +183,11 @@ function SpotCard({
           </Typography>
         </Stack>
 
-        <Typography variant="body2" sx={{ color: "text.secondary", flex: 1 }}>
-          {body}
-        </Typography>
-
         <Box sx={{ mt: "auto", display: "flex", flexDirection: "column", gap: 1.25 }}>
+          <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            {body}
+          </Typography>
+
           {chips.length ? (
             <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
               {chips.map((chip) => (
