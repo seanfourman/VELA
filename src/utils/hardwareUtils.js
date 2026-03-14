@@ -3,7 +3,6 @@ let cachedHwAcceleration = null;
 export const HARDWARE_ACCELERATION_REQUIRED_ROUTES = new Set([
   "/constellations",
   "/moon-phase",
-  "/night-planner",
   "/solar-system",
 ]);
 

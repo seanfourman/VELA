@@ -351,17 +351,6 @@ function ConstellationsRoute() {
   return <ConstellationsPage />;
 }
 
-function NightPlannerRoute() {
-  useDisableThreeDMode();
-  const { hardwareAccelerationEnabled } = useAppLayoutContext();
-
-  if (!hardwareAccelerationEnabled) {
-    return <HardwareAccelerationUnavailableRoute pageName="Night Planner" />;
-  }
-
-  return <Navigate to="/moon-phase" replace />;
-}
-
 function NotFoundRoute() {
   const { isLight, navigate } = useAppLayoutContext();
 
@@ -396,10 +385,8 @@ export const router = createHashRouter([
       { index: true, element: <MapRoute /> },
       { path: "auth", action: authAction, element: <AuthRoute /> },
       { path: "discover", element: <DiscoveryRoute /> },
-      { path: "gear-lab", element: <Navigate to="/" replace /> },
       { path: "moon-phase", element: <MoonPhaseRoute /> },
       { path: "constellations", element: <ConstellationsRoute /> },
-      { path: "night-planner", element: <NightPlannerRoute /> },
       { path: "profile", element: <ProfileRoute /> },
       { path: "admin", element: <AdminRoute /> },
       { path: "settings", element: <SettingsRoute /> },

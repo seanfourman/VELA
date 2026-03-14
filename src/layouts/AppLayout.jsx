@@ -28,7 +28,6 @@ const ZOOM_OUT_ROUTES = new Set([
   "/settings",
   "/admin",
   "/moon-phase",
-  "/night-planner",
 ]);
 export const AppLayoutContext = createContext(null);
 
