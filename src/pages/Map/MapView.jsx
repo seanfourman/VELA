@@ -37,7 +37,7 @@ const MapView = forwardRef(function MapView(
     authUser,
     directionsProvider = "google",
     showRecommendedSpots = true,
-    satelliteReadableShadowsEnabled = true,
+    satelliteReadableShadowsEnabled = false,
     lightOverlayEnabled = false,
     onToggleLightOverlay,
     searchDistance = 10,

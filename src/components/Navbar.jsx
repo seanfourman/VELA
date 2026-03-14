@@ -30,7 +30,7 @@ const NAV_LINKS = [
 function Navbar({
   mapType,
   forceLight = false,
-  satelliteReadableShadowsEnabled = true,
+  satelliteReadableShadowsEnabled = false,
   hardwareAccelerationEnabled = true,
   auth,
   profile,

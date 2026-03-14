@@ -68,7 +68,7 @@ function SettingsPage({
     highAccuracyLocation = true,
     searchDistance = SEARCH_DISTANCE_OPTIONS[0],
     accessibilityMode = false,
-    satelliteReadableShadows = true,
+    satelliteReadableShadows = false,
   } = settings || {};
   const directionsSwitcherStyle = {
     "--switch-index": directionsProvider === "waze" ? 1 : 0,

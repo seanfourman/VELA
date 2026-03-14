@@ -9,7 +9,7 @@ export const DEFAULT_SETTINGS = {
   highAccuracyLocation: true,
   searchDistance: SEARCH_DISTANCE_OPTIONS[0],
   accessibilityMode: false,
-  satelliteReadableShadows: true,
+  satelliteReadableShadows: false,
 };
 export const DEFAULT_PROFILE = {
   displayName: "",
