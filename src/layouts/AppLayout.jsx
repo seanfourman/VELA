@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLoaderData, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/features/auth/useAuth";
 import { useLocationTracking } from "@/features/app/hooks/useLocationTracking";
@@ -42,8 +42,15 @@ export const useAppLayoutContext = () => {
 
 function AppLayout() {
   const [isThreeDModeActive, setIsThreeDModeActive] = useState(false);
+  const bootstrapData = useLoaderData();
   const auth = useAuth();
   const mapViewRef = useRef(null);
+  const initialStargazeLocations = Array.isArray(bootstrapData?.stargazeLocations)
+    ? bootstrapData.stargazeLocations
+    : undefined;
+  const initialStarPartyEvents = Array.isArray(bootstrapData?.starPartyEvents)
+    ? bootstrapData.starPartyEvents
+    : undefined;
   const {
     mapType,
     setMapType,
@@ -61,14 +68,17 @@ function AppLayout() {
     stargazeLocations,
     handleSaveStargazeLocation,
     handleDeleteStargazeLocation,
-  } = useStargazeLocations();
+  } = useStargazeLocations({ initialLocations: initialStargazeLocations });
   const {
     starPartyEvents,
     handleSaveStarPartyEvent,
     handleDeleteStarPartyEvent,
     handleSetStarPartyEventStatus,
     handleToggleStarPartyRsvp,
-  } = useStarPartyEvents({ activeUser: auth?.user });
+  } = useStarPartyEvents({
+    activeUser: auth?.user,
+    initialEvents: initialStarPartyEvents,
+  });
   const routerNavigate = useNavigate();
   const routeLocation = useLocation();
   const transitionTimeoutRef = useRef(null);

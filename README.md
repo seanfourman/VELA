@@ -1,7 +1,7 @@
 # VELA
 
 VELA is a React + ASP.NET Core stargazing app with:
-- React Router nested routing (`createBrowserRouter`, `RouterProvider`, `Outlet`)
+- React Router Data API routing (`createBrowserRouter`, route `loader`, `RouterProvider`, `Outlet`)
 - SQL-backed Web API (SQL Server via ADO.NET)
 - JWT authentication/authorization
 - 3-layer architecture (Controllers -> BL -> DAL)

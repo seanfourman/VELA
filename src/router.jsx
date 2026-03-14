@@ -18,6 +18,22 @@ import MoonPhasePage from "@/pages/MoonPhase/MoonPhasePage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import SettingsPage from "@/pages/Settings/SettingsPage";
 import SolarSystemPage from "@/pages/SolarSystem/SolarSystemPage";
+import { fetchRecommendations } from "@/utils/recommendationsApi";
+import { fetchStarPartyEvents } from "@/utils/starPartyEventsApi";
+
+const appBootstrapLoader = async () => {
+  const [locationsResult, eventsResult] = await Promise.allSettled([
+    fetchRecommendations(),
+    fetchStarPartyEvents(),
+  ]);
+
+  return {
+    stargazeLocations:
+      locationsResult.status === "fulfilled" ? locationsResult.value : null,
+    starPartyEvents:
+      eventsResult.status === "fulfilled" ? eventsResult.value : null,
+  };
+};
 
 const useDisableThreeDMode = () => {
   const { setIsThreeDModeActive } = useAppLayoutContext();
@@ -329,6 +345,8 @@ function NotFoundRoute() {
 export const router = createBrowserRouter([
   {
     path: "/",
+    loader: appBootstrapLoader,
+    shouldRevalidate: () => false,
     element: <AppLayout />,
     children: [
       { index: true, element: <MapRoute /> },

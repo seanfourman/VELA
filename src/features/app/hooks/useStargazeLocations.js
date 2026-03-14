@@ -6,10 +6,15 @@ import {
   normalizeStargazePayload,
 } from "@/utils/appState";
 
-export const useStargazeLocations = () => {
-  const [stargazeLocations, setStargazeLocations] = useState([]);
+export const useStargazeLocations = ({ initialLocations } = {}) => {
+  const hasBootstrapLocations = Array.isArray(initialLocations);
+  const [stargazeLocations, setStargazeLocations] = useState(() =>
+    hasBootstrapLocations ? normalizeStargazePayload(initialLocations) : [],
+  );
 
   useEffect(() => {
+    if (hasBootstrapLocations) return undefined;
+
     let cancelled = false;
 
     (async () => {
@@ -33,7 +38,7 @@ export const useStargazeLocations = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hasBootstrapLocations]);
 
   const handleSaveStargazeLocation = useCallback((location) => {
     const normalized = normalizeStargazeLocation(location);

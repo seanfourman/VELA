@@ -14,10 +14,15 @@ import {
   toggleStarPartyRsvp,
 } from "@/utils/starPartyEventsApi";
 
-export const useStarPartyEvents = ({ activeUser }) => {
-  const [starPartyEvents, setStarPartyEvents] = useState([]);
+export const useStarPartyEvents = ({ activeUser, initialEvents }) => {
+  const hasBootstrapEvents = Array.isArray(initialEvents);
+  const [starPartyEvents, setStarPartyEvents] = useState(() =>
+    hasBootstrapEvents ? normalizeEventList(initialEvents) : [],
+  );
 
   useEffect(() => {
+    if (hasBootstrapEvents) return undefined;
+
     let cancelled = false;
     (async () => {
       try {
@@ -37,7 +42,7 @@ export const useStarPartyEvents = ({ activeUser }) => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hasBootstrapEvents]);
 
   const handleSaveStarPartyEvent = useCallback(
     async (draft) => {
