@@ -167,7 +167,21 @@ function SpotCard({
           spacing={1.5}
           alignItems="flex-start"
         >
-          <Typography variant="h6" sx={{ flex: 1, minWidth: 0, pr: 1.5 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              pr: 1.5,
+              lineHeight: 1.35,
+              minHeight: "2.7em",
+              display: "-webkit-box",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 2,
+            }}
+          >
             {title}
           </Typography>
           <Typography
