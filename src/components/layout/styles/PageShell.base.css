@@ -71,11 +71,6 @@
   z-index: 2;
 }
 
-.profile-page__earth,
-.profile-page__earth * {
-  pointer-events: none;
-}
-
 .profile-page__earth-canvas {
   width: min(100vmin, 1000px);
   height: min(100vmin, 1000px);
