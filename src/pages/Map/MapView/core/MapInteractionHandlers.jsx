@@ -1,8 +1,26 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useMap, useMapEvents } from "react-leaflet";
 import L from "leaflet";
 import { isCoarsePointerEnv } from "./mapUtils";
 import { LOCATION_ZOOM, LONG_PRESS_MS } from "./mapConfig";
+
+const LONG_PRESS_MOVE_TOLERANCE_PX = 10;
+
+const getClientPoint = (event) => {
+  if (!Number.isFinite(event?.clientX) || !Number.isFinite(event?.clientY)) {
+    return null;
+  }
+  return { x: event.clientX, y: event.clientY };
+};
+
+const isInteractiveTarget = (target) => {
+  if (!(target instanceof Element)) return false;
+  return Boolean(
+    target.closest(
+      ".leaflet-control, .leaflet-popup, .leaflet-marker-icon, .leaflet-marker-shadow, .leaflet-interactive"
+    ),
+  );
+};
 
 function MapAnimator({ location, shouldAutoCenter }) {
   const map = useMap();
@@ -68,71 +86,192 @@ function LongPressHandler({ onLongPress, delayMs = LONG_PRESS_MS }) {
   const map = useMap();
   const timerRef = useRef(null);
   const startPointRef = useRef(null);
-  const lastEventRef = useRef(null);
+  const startLatLngRef = useRef(null);
+  const trackedPointerIdRef = useRef(null);
+  const lastLongPressAtRef = useRef(0);
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
+  const mapContainerToLatLng = useCallback(
+    (point) => {
+      const bounds = map.getContainer().getBoundingClientRect();
+      return map.containerPointToLatLng([point.x - bounds.left, point.y - bounds.top]);
+    },
+    [map],
+  );
+
+  const clearTracking = useCallback(() => {
+    startPointRef.current = null;
+    startLatLngRef.current = null;
+    trackedPointerIdRef.current = null;
   }, []);
 
-  const cancelTimer = () => {
+  const cancelTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-  };
+    clearTracking();
+  }, [clearTracking]);
 
-  const startTimer = (e) => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    startPointRef.current = map.latLngToContainerPoint(e.latlng);
-    lastEventRef.current = e;
+  const emitLongPress = useCallback(
+    (latlng) => {
+      const now = Date.now();
+      if (now - lastLongPressAtRef.current < 400) return;
+      lastLongPressAtRef.current = now;
+      onLongPress(latlng);
+    },
+    [onLongPress],
+  );
 
-    timerRef.current = setTimeout(() => {
-      timerRef.current = null;
-      if (lastEventRef.current?.originalEvent) {
-        L.DomEvent.stop(lastEventRef.current.originalEvent);
+  const startTimer = useCallback(
+    (point, latlng) => {
+      cancelTimer();
+      startPointRef.current = L.point(point.x, point.y);
+      startLatLngRef.current = latlng;
+
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null;
+        const nextLatLng = startLatLngRef.current;
+        clearTracking();
+        if (!nextLatLng) return;
+        emitLongPress(nextLatLng);
+      }, delayMs);
+    },
+    [cancelTimer, clearTracking, delayMs, emitLongPress],
+  );
+
+  const handleMove = useCallback(
+    (point) => {
+      if (!timerRef.current || !startPointRef.current) return;
+      const currentPoint = L.point(point.x, point.y);
+      if (
+        startPointRef.current.distanceTo(currentPoint) >
+        LONG_PRESS_MOVE_TOLERANCE_PX
+      ) {
+        cancelTimer();
       }
-      onLongPress(lastEventRef.current?.latlng ?? e.latlng);
-    }, delayMs);
-  };
+    },
+    [cancelTimer],
+  );
 
-  const handleMove = (e) => {
-    if (!timerRef.current || !startPointRef.current) return;
-    const currentPoint = map.latLngToContainerPoint(e.latlng);
-    if (startPointRef.current.distanceTo(currentPoint) > 10) {
+  useEffect(() => {
+    const container = map.getContainer();
+    const hasPointerEvents =
+      typeof window !== "undefined" && "PointerEvent" in window;
+
+    const handlePointerDown = (event) => {
+      if (event.pointerType === "mouse") return;
+      if (event.button !== undefined && event.button !== 0) return;
+      if (event.isPrimary === false) return;
+      if (isInteractiveTarget(event.target)) return;
+
+      const point = getClientPoint(event);
+      if (!point) return;
+
+      startTimer(point, mapContainerToLatLng(point));
+      trackedPointerIdRef.current = event.pointerId;
+    };
+
+    const handlePointerMove = (event) => {
+      if (
+        trackedPointerIdRef.current !== null &&
+        event.pointerId !== trackedPointerIdRef.current
+      ) {
+        return;
+      }
+
+      const point = getClientPoint(event);
+      if (!point) return;
+      handleMove(point);
+    };
+
+    const handlePointerEnd = (event) => {
+      if (
+        trackedPointerIdRef.current !== null &&
+        event.pointerId !== trackedPointerIdRef.current
+      ) {
+        return;
+      }
       cancelTimer();
+    };
+
+    const handleTouchStart = (event) => {
+      if (event.touches?.length !== 1) {
+        cancelTimer();
+        return;
+      }
+      if (isInteractiveTarget(event.target)) return;
+
+      const point = getClientPoint(event.touches[0]);
+      if (!point) return;
+      startTimer(point, mapContainerToLatLng(point));
+    };
+
+    const handleTouchMove = (event) => {
+      if (event.touches?.length !== 1) {
+        cancelTimer();
+        return;
+      }
+
+      const point = getClientPoint(event.touches[0]);
+      if (!point) return;
+      handleMove(point);
+    };
+
+    const handleContextMenu = (event) => {
+      if (event.button === 2 || event.pointerType === "mouse") return;
+      if (isInteractiveTarget(event.target)) return;
+
+      const point = getClientPoint(event) ?? getClientPoint(event.changedTouches?.[0]);
+      if (!point) return;
+
+      cancelTimer();
+      L.DomEvent.stop(event);
+      emitLongPress(mapContainerToLatLng(point));
+    };
+
+    if (hasPointerEvents) {
+      container.addEventListener("pointerdown", handlePointerDown, true);
+      container.addEventListener("pointermove", handlePointerMove, true);
+      container.addEventListener("pointerup", handlePointerEnd, true);
+      container.addEventListener("pointercancel", handlePointerEnd, true);
+    } else {
+      container.addEventListener("touchstart", handleTouchStart, {
+        capture: true,
+        passive: true,
+      });
+      container.addEventListener("touchmove", handleTouchMove, {
+        capture: true,
+        passive: true,
+      });
+      container.addEventListener("touchend", cancelTimer, true);
+      container.addEventListener("touchcancel", cancelTimer, true);
     }
-  };
 
-  useMapEvents({
-    // Pointer events (Leaflet uses these when available)
-    pointerdown: (e) => {
-      startTimer(e);
-    },
-    pointermove: handleMove,
-    pointerup: cancelTimer,
-    pointercancel: cancelTimer,
+    container.addEventListener("contextmenu", handleContextMenu, true);
+    map.on("movestart", cancelTimer);
+    map.on("zoomstart", cancelTimer);
+    map.on("dragstart", cancelTimer);
 
-    // Fallback for older mobile browsers without Pointer Events
-    touchstart: (e) => {
-      if (e.originalEvent?.touches?.length !== 1) return;
-      startTimer(e);
-    },
-    touchmove: handleMove,
-    touchend: cancelTimer,
-    touchcancel: cancelTimer,
+    return () => {
+      if (hasPointerEvents) {
+        container.removeEventListener("pointerdown", handlePointerDown, true);
+        container.removeEventListener("pointermove", handlePointerMove, true);
+        container.removeEventListener("pointerup", handlePointerEnd, true);
+        container.removeEventListener("pointercancel", handlePointerEnd, true);
+      } else {
+        container.removeEventListener("touchstart", handleTouchStart, true);
+        container.removeEventListener("touchmove", handleTouchMove, true);
+        container.removeEventListener("touchend", cancelTimer, true);
+        container.removeEventListener("touchcancel", cancelTimer, true);
+      }
 
-    // Fallback: Leaflet fires contextmenu on long-press/right-click
-    contextmenu: (e) => {
-      const btn = e.originalEvent?.button;
-      const pointerType = e.originalEvent?.pointerType;
-      if (btn === 2 || pointerType === "mouse") return;
+      container.removeEventListener("contextmenu", handleContextMenu, true);
+      map.off("movestart", cancelTimer);
+      map.off("zoomstart", cancelTimer);
+      map.off("dragstart", cancelTimer);
       cancelTimer();
-      if (e.originalEvent) L.DomEvent.stop(e.originalEvent);
-      onLongPress(e.latlng);
-    },
-  });
+    };
+  }, [cancelTimer, emitLongPress, handleMove, map, mapContainerToLatLng, startTimer]);
 
   return null;
 }
