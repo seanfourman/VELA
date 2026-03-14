@@ -43,9 +43,8 @@ These are required but not committed (because `.gitignore` excludes them):
 
 ### Frontend (`.env`)
 
-```env
-VITE_API_BASE=http://localhost:5152/api
-```
+No frontend API env variable is required.
+Frontend always uses `/api`.
 
 ### Backend (`appsettings.json`)
 
@@ -80,7 +79,7 @@ See also: `backend/src/Vela.Api/Database/README.md`
 
 1. Install frontend dependencies:
    - `npm install`
-2. Create frontend env:
+2. Create frontend env (optional):
    - Windows: `copy .env.example .env`
 3. Create backend config files:
    - `copy backend\src\Vela.Api\appsettings.example.json backend\src\Vela.Api\appsettings.json`

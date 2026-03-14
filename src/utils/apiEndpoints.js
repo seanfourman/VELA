@@ -1,9 +1,4 @@
-const normalizeBaseUrl = (value) => {
-  if (!value) return "";
-  return String(value).replace(/\/+$/, "");
-};
-
-const API_BASE = normalizeBaseUrl(import.meta.env.VITE_API_BASE);
+const API_BASE = "/api";
 
 const joinResourceUrl = (base, resource) =>
   `${base.replace(/\/+$/, "")}/${String(resource || "").replace(/^\/+/, "")}`;
@@ -23,18 +18,11 @@ const joinQuery = (baseUrl, params) => {
 
 const buildApiUrl = (resourcePath) => {
   const normalizedResource = String(resourcePath || "").replace(/^\/+/, "");
-  if (!normalizedResource) {
-    return API_BASE || "/api";
-  }
-
-  return API_BASE
-    ? joinResourceUrl(API_BASE, normalizedResource)
-    : joinResourceUrl("/api", normalizedResource);
+  if (!normalizedResource) return API_BASE;
+  return joinResourceUrl(API_BASE, normalizedResource);
 };
 
-const MAPTILER_PROXY_BASE = API_BASE
-  ? joinResourceUrl(API_BASE, "maptiler")
-  : "/api/maptiler";
+const MAPTILER_PROXY_BASE = joinResourceUrl(API_BASE, "maptiler");
 
 export const buildAuthUrl = (path = "") => {
   const normalizedPath = String(path || "").replace(/^\/+/, "");
