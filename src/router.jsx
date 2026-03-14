@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { useCallback, useEffect } from "react";
 import {
-  createBrowserRouter,
+  createHashRouter,
   Navigate,
   useLocation as useRouterLocation,
   useNavigate as useRouterNavigate,
@@ -386,7 +386,7 @@ function NotFoundRoute() {
   );
 }
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: "/",
     loader: appBootstrapLoader,
