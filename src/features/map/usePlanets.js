@@ -37,9 +37,13 @@ function usePlanets() {
         setVisiblePlanets(getPlanetList(data));
         setPlanetQuery({ lat, lng, label, source });
         lastPlanetKey.current = roundedKey;
-      } catch {
+      } catch (error) {
         setVisiblePlanets([]);
-        setPlanetsError("Could not load visible planets right now.");
+        setPlanetsError(
+          error instanceof Error
+            ? error.message
+            : "Could not load visible planets right now.",
+        );
       } finally {
         setPlanetsLoading(false);
       }

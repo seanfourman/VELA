@@ -1,7 +1,7 @@
 # VELA
 
 VELA is a React + ASP.NET Core stargazing app with:
-- React Router Data API routing (`createBrowserRouter`, `RouterProvider`, `Outlet`)
+- React Router nested routing (`createBrowserRouter`, `RouterProvider`, `Outlet`)
 - SQL-backed Web API (SQL Server via ADO.NET)
 - JWT authentication/authorization
 - 3-layer architecture (Controllers -> BL -> DAL)
@@ -31,13 +31,19 @@ VELA is a React + ASP.NET Core stargazing app with:
 Frontend default API base is:
 - `VITE_API_BASE=http://localhost:5152/api`
 
-## Default admin (seeded)
+## Admin account
 
-Configured in `backend/src/Vela.Api/appsettings.json`:
-- Email: `admin@vela.local`
-- Password: `Admin123!`
+This project does not seed an admin account at runtime.
 
-Change these values before final submission/demo.
+Create one by:
+1. Registering a normal user via `POST /api/users/register`
+2. Promoting that user in SQL:
+
+```sql
+UPDATE Users
+SET IsAdmin = 1, Role = 'admin'
+WHERE Email = 'your-admin-email@example.com';
+```
 
 ## API endpoints
 
@@ -48,6 +54,7 @@ Change these values before final submission/demo.
 - Favorites (JWT):
   - `GET /api/favorites`
   - `POST /api/favorites`
+  - `PUT /api/favorites/{spotId}`
   - `DELETE /api/favorites/{spotId}`
 - Recommendations:
   - `GET /api/recommendations` (public)

@@ -49,6 +49,11 @@ public sealed class UserService : IUserService
         var insertedId = _userRepository.InsertUser(user);
         if (insertedId == Guid.Empty)
         {
+            if (_userRepository.GetUserByEmail(normalizedEmail) != null)
+            {
+                return new RegisterUserResult { Status = RegisterUserStatus.UserExists };
+            }
+
             return new RegisterUserResult { Status = RegisterUserStatus.Failure };
         }
 

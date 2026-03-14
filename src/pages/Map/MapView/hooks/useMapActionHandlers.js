@@ -178,20 +178,24 @@ const useMapActionHandlers = ({
     if (!target) return;
 
     mapRef.current?.closePopup();
-    const spots = await fetchDarkSpots(target.lat, target.lng, searchDistance);
-    const visibleSpots = Array.isArray(spots)
-      ? spots.slice(0, MAP_DARK_SPOT_LIMIT)
-      : [];
-    setDarkSpots(visibleSpots);
+    try {
+      const spots = await fetchDarkSpots(target.lat, target.lng, searchDistance);
+      const visibleSpots = Array.isArray(spots)
+        ? spots.slice(0, MAP_DARK_SPOT_LIMIT)
+        : [];
+      setDarkSpots(visibleSpots);
 
-    if (visibleSpots.length > 0 && mapRef.current) {
-      const bounds = L.latLngBounds([[target.lat, target.lng]]);
-      visibleSpots.forEach((spot) => bounds.extend([spot.lat, spot.lon]));
-      mapRef.current.flyToBounds(bounds, {
-        padding: [50, 50],
-        duration: 2.5,
-        easeLinearity: 0.25,
-      });
+      if (visibleSpots.length > 0 && mapRef.current) {
+        const bounds = L.latLngBounds([[target.lat, target.lng]]);
+        visibleSpots.forEach((spot) => bounds.extend([spot.lat, spot.lon]));
+        mapRef.current.flyToBounds(bounds, {
+          padding: [50, 50],
+          duration: 2.5,
+          easeLinearity: 0.25,
+        });
+      }
+    } catch {
+      setDarkSpots([]);
     }
   }, [
     contextMenu,

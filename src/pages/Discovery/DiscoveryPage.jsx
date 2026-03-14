@@ -61,6 +61,7 @@ export default function DiscoveryPage({
   const [favoritesError, setFavoritesError] = useState("");
   const [darkSpots, setDarkSpots] = useState([]);
   const [darkSpotsLoading, setDarkSpotsLoading] = useState(false);
+  const [darkSpotsError, setDarkSpotsError] = useState("");
   const [skyQuality, setSkyQuality] = useState(null);
   const [skyQualityLoading, setSkyQualityLoading] = useState(false);
   const [skyQualityError, setSkyQualityError] = useState("");
@@ -219,6 +220,7 @@ export default function DiscoveryPage({
     if (!hasLocation) {
       setDarkSpots([]);
       setDarkSpotsLoading(false);
+      setDarkSpotsError("");
       setSkyQuality(null);
       setSkyQualityLoading(false);
       setSkyQualityError("");
@@ -226,6 +228,7 @@ export default function DiscoveryPage({
     }
 
     setDarkSpotsLoading(true);
+    setDarkSpotsError("");
     setSkyQualityLoading(true);
     setSkyQualityError("");
 
@@ -233,6 +236,13 @@ export default function DiscoveryPage({
       .then((items) => {
         if (cancelled) return;
         setDarkSpots(Array.isArray(items) ? items : []);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setDarkSpots([]);
+        setDarkSpotsError(
+          error instanceof Error ? error.message : "Could not load dark spots",
+        );
       })
       .finally(() => {
         if (cancelled) return;
@@ -553,6 +563,9 @@ export default function DiscoveryPage({
 
               {favoritesError ? (
                 <Alert severity="warning">{favoritesError}</Alert>
+              ) : null}
+              {darkSpotsError ? (
+                <Alert severity="warning">{darkSpotsError}</Alert>
               ) : null}
               {skyQualityError ? (
                 <Alert severity="warning">{skyQualityError}</Alert>

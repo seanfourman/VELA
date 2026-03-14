@@ -1,5 +1,6 @@
 using System.Data;
 using System.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using Vela.Api.DTOs;
 using Vela.Api.Models;
 
@@ -8,10 +9,15 @@ namespace Vela.Api.DAL;
 public sealed class SqlUserRepository : IUserRepository
 {
     private readonly ISqlConnectionFactory _connectionFactory;
+    private readonly ILogger<SqlUserRepository> _logger;
 
-    public SqlUserRepository(ISqlConnectionFactory connectionFactory)
+    public SqlUserRepository(
+        ISqlConnectionFactory connectionFactory,
+        ILogger<SqlUserRepository> logger
+    )
     {
         _connectionFactory = connectionFactory;
+        _logger = logger;
     }
 
     public User? GetUserByEmail(string email)
@@ -86,9 +92,23 @@ public sealed class SqlUserRepository : IUserRepository
             command.ExecuteNonQuery();
             return id;
         }
-        catch
+        catch (SqlException exception) when (exception.Number is 2601 or 2627)
         {
+            _logger.LogWarning(
+                exception,
+                "Duplicate user insert prevented for {Email}",
+                user.Email
+            );
             return Guid.Empty;
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "Unexpected database error while inserting user {Email}",
+                user.Email
+            );
+            throw;
         }
     }
 

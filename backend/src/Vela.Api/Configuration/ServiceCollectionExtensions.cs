@@ -88,8 +88,19 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration
     )
     {
-        var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-        var hasAllowedOrigins = allowedOrigins is { Length: > 0 };
+        var configuredOrigins =
+            configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+            ?? Array.Empty<string>();
+        var allowedOrigins = configuredOrigins
+            .Where(origin => !string.IsNullOrWhiteSpace(origin))
+            .Select(origin => origin.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (allowedOrigins.Length == 0)
+        {
+            allowedOrigins = ["http://localhost:5173", "http://127.0.0.1:5173"];
+        }
 
         services.AddCors(options =>
         {
@@ -97,13 +108,7 @@ public static class ServiceCollectionExtensions
                 ClientCorsPolicyName,
                 policy =>
                 {
-                    if (hasAllowedOrigins)
-                    {
-                        policy.WithOrigins(allowedOrigins!).AllowAnyHeader().AllowAnyMethod();
-                        return;
-                    }
-
-                    policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+                    policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
                 }
             );
         });

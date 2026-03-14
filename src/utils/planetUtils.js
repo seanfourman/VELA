@@ -42,6 +42,25 @@ const texturePreloadCache = new Map();
 const cacheKey = (lat, lng) =>
   `${PLANETS_API_CACHE_KEY}_${lat.toFixed(2)}_${lng.toFixed(2)}`;
 
+const readErrorMessage = async (response) => {
+  const contentType = String(response.headers.get("content-type") || "");
+  if (contentType.includes("application/json")) {
+    const payload = await response.json().catch(() => null);
+    if (typeof payload?.error === "string" && payload.error.trim()) {
+      return payload.error.trim();
+    }
+    if (typeof payload?.message === "string" && payload.message.trim()) {
+      return payload.message.trim();
+    }
+    if (typeof payload?.detail === "string" && payload.detail.trim()) {
+      return payload.detail.trim();
+    }
+  }
+
+  const text = (await response.text().catch(() => "")).trim();
+  return text || `Visible planets API failed: ${response.status}`;
+};
+
 function preloadPlanetTexture(url) {
   if (!url) return Promise.resolve();
   if (texturePreloadCache.has(url)) return texturePreloadCache.get(url);
@@ -81,18 +100,27 @@ export async function fetchVisiblePlanets(lat, lng) {
     }
   }
 
-  try {
-    const response = await fetch(buildVisiblePlanetsUrl(lat, lng));
-    if (!response.ok) throw new Error(`Visible planets API failed: ${response.status}`);
-    const data = await response.json();
+  const response = await fetch(buildVisiblePlanetsUrl(lat, lng)).catch((error) => {
+    const message =
+      error instanceof Error && error.message
+        ? error.message
+        : "Could not reach visible planets service";
+    throw new Error(message);
+  });
 
-    try {
-      localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
-    } catch {
-      // Storage unavailable; continue without cache
-    }
-    return data;
-  } catch {
-    return null;
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response));
   }
+
+  const data = await response.json().catch(() => {
+    throw new Error("Visible planets service returned invalid JSON.");
+  });
+
+  try {
+    localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+  } catch {
+    // Storage unavailable; continue without cache
+  }
+
+  return data;
 }

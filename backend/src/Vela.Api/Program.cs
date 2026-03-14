@@ -11,7 +11,7 @@ builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
-if (true)
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
