@@ -38,93 +38,98 @@ export default function PageShell({
     navigateToMapHome({ navigate: onNavigate });
   };
 
-  const animateScrollToTarget = () => {
+  useEffect(() => {
     const pageNode = pageRef.current;
-
     if (!pageNode) {
-      scrollAnimationFrameRef.current = 0;
-      return;
+      return undefined;
     }
 
-    const distance = targetScrollTopRef.current - pageNode.scrollTop;
+    const animateScrollToTarget = () => {
+      const activePageNode = pageRef.current;
 
-    if (Math.abs(distance) <= MIN_SCROLL_DELTA) {
-      pageNode.scrollTop = targetScrollTopRef.current;
-      scrollAnimationFrameRef.current = 0;
-      return;
-    }
+      if (!activePageNode) {
+        scrollAnimationFrameRef.current = 0;
+        return;
+      }
 
-    pageNode.scrollTop += distance * SCROLL_EASING;
-    scrollAnimationFrameRef.current =
-      requestAnimationFrame(animateScrollToTarget);
-  };
+      const distance = targetScrollTopRef.current - activePageNode.scrollTop;
 
-  const queueSmoothScroll = (delta) => {
-    const pageNode = pageRef.current;
-    if (!pageNode || !Number.isFinite(delta) || delta === 0) {
-      return;
-    }
+      if (Math.abs(distance) <= MIN_SCROLL_DELTA) {
+        activePageNode.scrollTop = targetScrollTopRef.current;
+        scrollAnimationFrameRef.current = 0;
+        return;
+      }
 
-    const maxScrollTop = Math.max(
-      0,
-      pageNode.scrollHeight - pageNode.clientHeight,
-    );
-
-    if (!scrollAnimationFrameRef.current) {
-      targetScrollTopRef.current = pageNode.scrollTop;
-    }
-
-    targetScrollTopRef.current = Math.min(
-      maxScrollTop,
-      Math.max(0, targetScrollTopRef.current + delta),
-    );
-
-    if (!scrollAnimationFrameRef.current) {
+      activePageNode.scrollTop += distance * SCROLL_EASING;
       scrollAnimationFrameRef.current =
         requestAnimationFrame(animateScrollToTarget);
-    }
-  };
+    };
 
-  const handleBackgroundWheel = (event) => {
-    const pageNode = pageRef.current;
-    const contentNode = contentRef.current;
-    const targetNode = event.target;
+    const queueSmoothScroll = (delta) => {
+      if (!Number.isFinite(delta) || delta === 0) {
+        return;
+      }
 
-    if (
-      !pageNode ||
-      !contentNode ||
-      !(targetNode instanceof Node) ||
-      event.ctrlKey
-    ) {
-      return;
-    }
+      const maxScrollTop = Math.max(
+        0,
+        pageNode.scrollHeight - pageNode.clientHeight,
+      );
 
-    if (
-      contentNode.contains(targetNode) ||
-      pageNode.scrollHeight <= pageNode.clientHeight
-    ) {
-      return;
-    }
+      if (!scrollAnimationFrameRef.current) {
+        targetScrollTopRef.current = pageNode.scrollTop;
+      }
 
-    const computedLineHeight = Number.parseFloat(
-      window.getComputedStyle(pageNode).lineHeight,
-    );
-    const lineHeight = Number.isFinite(computedLineHeight)
-      ? computedLineHeight
-      : 16;
-    const deltaMultiplier =
-      event.deltaMode === 1
-        ? lineHeight
-        : event.deltaMode === 2
-          ? pageNode.clientHeight
-          : 1;
+      targetScrollTopRef.current = Math.min(
+        maxScrollTop,
+        Math.max(0, targetScrollTopRef.current + delta),
+      );
 
-    event.preventDefault();
-    queueSmoothScroll(event.deltaY * deltaMultiplier);
-  };
+      if (!scrollAnimationFrameRef.current) {
+        scrollAnimationFrameRef.current =
+          requestAnimationFrame(animateScrollToTarget);
+      }
+    };
 
-  useEffect(() => {
+    const handleNativeWheel = (event) => {
+      const contentNode = contentRef.current;
+      const targetNode = event.target;
+
+      if (
+        !contentNode ||
+        !(targetNode instanceof Node) ||
+        event.ctrlKey
+      ) {
+        return;
+      }
+
+      if (
+        contentNode.contains(targetNode) ||
+        pageNode.scrollHeight <= pageNode.clientHeight
+      ) {
+        return;
+      }
+
+      const computedLineHeight = Number.parseFloat(
+        window.getComputedStyle(pageNode).lineHeight,
+      );
+      const lineHeight = Number.isFinite(computedLineHeight)
+        ? computedLineHeight
+        : 16;
+      const deltaMultiplier =
+        event.deltaMode === 1
+          ? lineHeight
+          : event.deltaMode === 2
+            ? pageNode.clientHeight
+            : 1;
+
+      event.preventDefault();
+      queueSmoothScroll(event.deltaY * deltaMultiplier);
+    };
+
+    pageNode.addEventListener("wheel", handleNativeWheel, { passive: false });
+
     return () => {
+      pageNode.removeEventListener("wheel", handleNativeWheel);
       if (scrollAnimationFrameRef.current) {
         cancelAnimationFrame(scrollAnimationFrameRef.current);
       }
@@ -132,11 +137,7 @@ export default function PageShell({
   }, []);
 
   return (
-    <div
-      ref={pageRef}
-      className={rootClassName}
-      onWheel={handleBackgroundWheel}
-    >
+    <div ref={pageRef} className={rootClassName}>
       {hero ? (
         <div className="profile-page__earth" aria-hidden="true">
           {hero}
