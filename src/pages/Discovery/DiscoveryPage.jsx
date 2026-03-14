@@ -40,6 +40,16 @@ const SECTION_CARD_SX = {
   flexDirection: "column",
 };
 
+const DISCOVERY_ACTION_BUTTON_SX = {
+  minWidth: 0,
+  minHeight: { xs: 50, sm: 52 },
+  px: { xs: 1, sm: 2 },
+  py: { xs: 1.15, sm: 1.25 },
+  fontSize: { xs: "0.875rem", sm: "0.95rem" },
+  lineHeight: 1.2,
+  whiteSpace: "nowrap",
+};
+
 const normalizeTimestamp = (value) => {
   if (!value) return Number.POSITIVE_INFINITY;
   const parsed = new Date(value).getTime();
@@ -345,7 +355,8 @@ function SpotCard({
           mt: "auto",
           display: "grid",
           gridTemplateColumns: `repeat(${Math.max(actionCount, 1)}, minmax(0, 1fr))`,
-          gap: 1.25,
+          gap: { xs: 1, sm: 1.25 },
+          gridAutoRows: "1fr",
           "& > :not(style) ~ :not(style)": {
             marginLeft: 0,
           },
@@ -472,12 +483,18 @@ function EventCard({
             variant="contained"
             color="secondary"
             fullWidth
+            sx={DISCOVERY_ACTION_BUTTON_SX}
           >
             Directions
           </Button>
         ) : null}
         {onOpenOnMap ? (
-          <Button onClick={onOpenOnMap} variant="outlined" fullWidth>
+          <Button
+            onClick={onOpenOnMap}
+            variant="outlined"
+            fullWidth
+            sx={DISCOVERY_ACTION_BUTTON_SX}
+          >
             Open Map
           </Button>
         ) : null}
@@ -488,6 +505,7 @@ function EventCard({
             color={isJoined ? "success" : "inherit"}
             disabled={isRsvpPending}
             fullWidth
+            sx={DISCOVERY_ACTION_BUTTON_SX}
           >
             {isRsvpPending ? "Saving..." : rsvpActionLabel}
           </Button>
