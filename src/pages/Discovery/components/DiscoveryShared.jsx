@@ -341,7 +341,7 @@ export function EventCard({
           <Button
             onClick={onRsvpAction}
             variant={isJoined ? "contained" : "outlined"}
-            color={isJoined ? "success" : "inherit"}
+            color={isJoined ? "error" : "inherit"}
             disabled={isRsvpPending}
             fullWidth
             sx={DISCOVERY_ACTION_BUTTON_SX}
