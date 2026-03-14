@@ -13,6 +13,12 @@ export default defineConfig({
       ".ngrok.io",
       "localhost",
     ],
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:5152",
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     alias: {
