@@ -1,6 +1,9 @@
-import { useCallback, useRef } from "react";
+import { useEffect, useRef } from "react";
 import "./styles/PageShell.css";
 import { navigateToMapHome } from "@/utils/navigation";
+
+const SCROLL_EASING = 0.18;
+const MIN_SCROLL_DELTA = 0.5;
 
 export default function PageShell({
   title,
@@ -17,6 +20,8 @@ export default function PageShell({
 }) {
   const pageRef = useRef(null);
   const contentRef = useRef(null);
+  const scrollAnimationFrameRef = useRef(0);
+  const targetScrollTopRef = useRef(0);
   const rootClassName = [
     "profile-page",
     className,
@@ -33,40 +38,105 @@ export default function PageShell({
     navigateToMapHome({ navigate: onNavigate });
   };
 
-  const handleBackgroundWheel = useCallback((event) => {
+  const animateScrollToTarget = () => {
+    const pageNode = pageRef.current;
+
+    if (!pageNode) {
+      scrollAnimationFrameRef.current = 0;
+      return;
+    }
+
+    const distance = targetScrollTopRef.current - pageNode.scrollTop;
+
+    if (Math.abs(distance) <= MIN_SCROLL_DELTA) {
+      pageNode.scrollTop = targetScrollTopRef.current;
+      scrollAnimationFrameRef.current = 0;
+      return;
+    }
+
+    pageNode.scrollTop += distance * SCROLL_EASING;
+    scrollAnimationFrameRef.current =
+      requestAnimationFrame(animateScrollToTarget);
+  };
+
+  const queueSmoothScroll = (delta) => {
+    const pageNode = pageRef.current;
+    if (!pageNode || !Number.isFinite(delta) || delta === 0) {
+      return;
+    }
+
+    const maxScrollTop = Math.max(
+      0,
+      pageNode.scrollHeight - pageNode.clientHeight,
+    );
+
+    if (!scrollAnimationFrameRef.current) {
+      targetScrollTopRef.current = pageNode.scrollTop;
+    }
+
+    targetScrollTopRef.current = Math.min(
+      maxScrollTop,
+      Math.max(0, targetScrollTopRef.current + delta),
+    );
+
+    if (!scrollAnimationFrameRef.current) {
+      scrollAnimationFrameRef.current =
+        requestAnimationFrame(animateScrollToTarget);
+    }
+  };
+
+  const handleBackgroundWheel = (event) => {
     const pageNode = pageRef.current;
     const contentNode = contentRef.current;
     const targetNode = event.target;
 
-    if (!pageNode || !contentNode || !(targetNode instanceof Node)) {
+    if (
+      !pageNode ||
+      !contentNode ||
+      !(targetNode instanceof Node) ||
+      event.ctrlKey
+    ) {
       return;
     }
 
-    if (contentNode.contains(targetNode)) {
+    if (
+      contentNode.contains(targetNode) ||
+      pageNode.scrollHeight <= pageNode.clientHeight
+    ) {
       return;
     }
 
-    if (pageNode.scrollHeight <= pageNode.clientHeight) {
-      return;
-    }
-
+    const computedLineHeight = Number.parseFloat(
+      window.getComputedStyle(pageNode).lineHeight,
+    );
+    const lineHeight = Number.isFinite(computedLineHeight)
+      ? computedLineHeight
+      : 16;
     const deltaMultiplier =
       event.deltaMode === 1
-        ? 16
+        ? lineHeight
         : event.deltaMode === 2
           ? pageNode.clientHeight
           : 1;
 
     event.preventDefault();
-    pageNode.scrollBy({
-      top: event.deltaY * deltaMultiplier,
-      left: event.deltaX * deltaMultiplier,
-      behavior: "auto",
-    });
+    queueSmoothScroll(event.deltaY * deltaMultiplier);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (scrollAnimationFrameRef.current) {
+        cancelAnimationFrame(scrollAnimationFrameRef.current);
+      }
+    };
   }, []);
 
   return (
-    <div ref={pageRef} className={rootClassName} onWheel={handleBackgroundWheel}>
+    <div
+      ref={pageRef}
+      className={rootClassName}
+      onWheel={handleBackgroundWheel}
+    >
       {hero ? (
         <div className="profile-page__earth" aria-hidden="true">
           {hero}
