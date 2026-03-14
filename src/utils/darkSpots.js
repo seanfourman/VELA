@@ -1,5 +1,7 @@
 import { buildDarkSpotsUrl } from "./apiEndpoints";
 
+const MAX_DARK_SPOT_RESULTS = 4;
+
 /**
  * Fetches stargazing locations (darkest spots) within a search radius.
  *
@@ -20,7 +22,7 @@ export async function fetchDarkSpots(lat, lon, searchDistance) {
 
     // The API returns an object { origin, radius_km, spots: [...] }
     if (data && Array.isArray(data.spots)) {
-      return data.spots.slice(0, 3);
+      return data.spots.slice(0, MAX_DARK_SPOT_RESULTS);
     }
     return [];
   } catch {
