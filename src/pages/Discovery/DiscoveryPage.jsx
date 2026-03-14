@@ -140,6 +140,32 @@ function DiscoverySection({ title, subtitle, action, children }) {
   );
 }
 
+function SectionCountBadge({ value }) {
+  return (
+    <Box
+      component="span"
+      sx={{
+        width: 28,
+        height: 28,
+        borderRadius: "50%",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        bgcolor: "rgba(96, 165, 250, 0.16)",
+        border: "1px solid rgba(96, 165, 250, 0.3)",
+        color: "secondary.main",
+        fontSize: "0.85rem",
+        fontWeight: 700,
+        lineHeight: 1,
+        fontVariantNumeric: "tabular-nums",
+        boxShadow: "0 8px 20px rgba(8, 10, 22, 0.24)",
+      }}
+    >
+      {value}
+    </Box>
+  );
+}
+
 function SpotCard({
   item,
   location,
@@ -610,14 +636,14 @@ export default function DiscoveryPage({
   const summaryCards = useMemo(
     () => [
       {
-        label: "Curated spots",
+        label: "Curated Spots",
         value: hasLocation ? nearbyRecommendations.length : rankedRecommendations.length,
         subtext: hasLocation
           ? `Within ${radiusKm} km of your location`
           : "Waiting for location to rank by distance",
       },
       {
-        label: "Saved favorites",
+        label: "Saved Favorites",
         value: favoriteDiscoveryItems.length,
         subtext: hasLocation
           ? `${nearbyFavoriteCount} of them sit inside your discovery radius`
@@ -626,14 +652,14 @@ export default function DiscoveryPage({
             : "Sign in to sync your saved locations",
       },
       {
-        label: "Upcoming events",
+        label: "Upcoming Events",
         value: hasLocation ? nearbyEvents.length : upcomingEvents.length,
         subtext: hasLocation
           ? `Published star parties and special events within ${radiusKm} km`
           : "Location unlocks nearby event ranking",
       },
       {
-        label: "Local sky class",
+        label: "Local Sky Class",
         value: skyQuality?.Bortle || (skyQualityLoading ? "Loading..." : "Unknown"),
         subtext: skyQuality?.SQM
           ? `SQM ${Number(skyQuality.SQM).toFixed(2)} at your current position`
@@ -674,7 +700,7 @@ export default function DiscoveryPage({
                 alignItems={{ xs: "flex-start", lg: "center" }}
               >
                 <Box>
-                  <Typography variant="h5">Discovery radius</Typography>
+                  <Typography variant="h5">Discovery Radius</Typography>
                   <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.75 }}>
                     Tune how wide the page searches around your current location.
                   </Typography>
@@ -725,7 +751,7 @@ export default function DiscoveryPage({
           </Box>
 
           <DiscoverySection
-            title="Recommended locations"
+            title="Recommended Locations"
             subtitle="Curated spots ranked by how close they are to you, with quick access to directions."
           >
             {hasLocation && !nearbyRecommendations.length && rankedRecommendations.length ? (
@@ -775,19 +801,19 @@ export default function DiscoveryPage({
               </Box>
             ) : (
               <EmptyStateCard
-                title="No curated locations yet"
+                title="No Curated Locations Yet"
                 body="Recommendations will appear here once the curated dataset is available."
               />
             )}
           </DiscoverySection>
 
           <DiscoverySection
-            title="Favorite locations"
+            title="Favorite Locations"
             subtitle="Your saved coordinates, enriched with curated spot metadata when VELA can match them."
           >
             {!isAuthenticated ? (
               <EmptyStateCard
-                title="Sign in to see favorites"
+                title="Sign In to See Favorites"
                 body="Favorites are tied to your account, so this section unlocks after login."
                 action={
                   <Button variant="contained" color="secondary" onClick={() => onNavigate?.("/auth")}>
@@ -845,7 +871,7 @@ export default function DiscoveryPage({
               </Box>
             ) : (
               <EmptyStateCard
-                title="No favorites saved"
+                title="No Favorites Saved"
                 body="Save places from the map and they will appear here with distance and direction shortcuts."
                 action={
                   <Button variant="outlined" onClick={() => onNavigate?.("/")}>
@@ -857,7 +883,7 @@ export default function DiscoveryPage({
           </DiscoverySection>
 
           <DiscoverySection
-            title="Nearby events"
+            title="Nearby Events"
             subtitle="Published star parties and special events ordered by distance and time."
           >
             {hasLocation && !nearbyEvents.length && upcomingEvents.length ? (
@@ -868,7 +894,7 @@ export default function DiscoveryPage({
 
             {!visibleEvents.length ? (
               <EmptyStateCard
-                title="No upcoming events"
+                title="No Upcoming Events"
                 body="When star parties or special events are published, they will appear here."
               />
             ) : (
@@ -880,8 +906,8 @@ export default function DiscoveryPage({
                     alignItems="center"
                     sx={{ mb: 1.5 }}
                   >
-                    <Typography variant="h6">Star parties</Typography>
-                    <Chip label={`${visibleStarParties.length}`} size="small" variant="outlined" />
+                    <Typography variant="h6">Star Parties</Typography>
+                    <SectionCountBadge value={visibleStarParties.length} />
                   </Stack>
                   {visibleStarParties.length ? (
                     <Box
@@ -906,7 +932,7 @@ export default function DiscoveryPage({
                     </Box>
                   ) : (
                     <EmptyStateCard
-                      title="No nearby star parties"
+                      title="No Nearby Star Parties"
                       body="Try a larger radius or check back after admins publish new gatherings."
                     />
                   )}
@@ -921,8 +947,8 @@ export default function DiscoveryPage({
                     alignItems="center"
                     sx={{ mb: 1.5 }}
                   >
-                    <Typography variant="h6">Special events</Typography>
-                    <Chip label={`${visibleSpecialEvents.length}`} size="small" variant="outlined" />
+                    <Typography variant="h6">Special Events</Typography>
+                    <SectionCountBadge value={visibleSpecialEvents.length} />
                   </Stack>
                   {visibleSpecialEvents.length ? (
                     <Box
@@ -947,7 +973,7 @@ export default function DiscoveryPage({
                     </Box>
                   ) : (
                     <EmptyStateCard
-                      title="No nearby special events"
+                      title="No Nearby Special Events"
                       body="Special observing nights and larger astronomy meetups will appear here."
                     />
                   )}
@@ -957,7 +983,7 @@ export default function DiscoveryPage({
           </DiscoverySection>
 
           <DiscoverySection
-            title="Tonight's local sky"
+            title="Tonight's Local Sky"
             subtitle="A quick look at your current sky class and a few darker escapes nearby."
           >
             <Box
@@ -972,7 +998,7 @@ export default function DiscoveryPage({
             >
               <Card sx={SECTION_CARD_SX}>
                 <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                  <Typography variant="h6">Sky quality at your position</Typography>
+                  <Typography variant="h6">Sky Quality at Your Position</Typography>
                   {skyQualityLoading ? (
                     <Stack spacing={1.5}>
                       <CircularProgress size={22} />
@@ -1006,7 +1032,7 @@ export default function DiscoveryPage({
 
               <Card sx={SECTION_CARD_SX}>
                 <CardContent sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-                  <Typography variant="h6">Darker escapes nearby</Typography>
+                  <Typography variant="h6">Darker Escapes Nearby</Typography>
                   {darkSpotsLoading ? (
                     <Stack spacing={1.5}>
                       <CircularProgress size={22} />
