@@ -80,6 +80,65 @@ const resolveInitialRadius = (value) => {
   );
 };
 
+const formatMetricNumber = (value, digits = 1) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric.toFixed(digits) : "N/A";
+};
+
+const parseBortleScore = (value) => {
+  const match = String(value || "").match(/\d+/);
+  if (!match) return null;
+  const numeric = Number(match[0]);
+  return Number.isFinite(numeric) ? numeric : null;
+};
+
+const describeBortleSky = (value) => {
+  const score = parseBortleScore(value);
+
+  if (!Number.isFinite(score)) {
+    return {
+      label: "Sky conditions unavailable",
+      summary: "Turn on location to estimate how bright your current sky is.",
+      bestFor: "Moon, planets, and bright star patterns.",
+      struggle: "Faint nebulae and Milky Way contrast will be hard to judge.",
+    };
+  }
+
+  if (score <= 3) {
+    return {
+      label: "Dark rural sky",
+      summary: "Excellent darkness for Milky Way detail, faint nebulae, and long observing sessions.",
+      bestFor: "Galaxies, nebulae, wide-field Milky Way shots, meteor watching.",
+      struggle: "Only local haze or moonlight should significantly interfere.",
+    };
+  }
+
+  if (score <= 5) {
+    return {
+      label: "Rural to suburban transition",
+      summary: "A strong all-around sky with visible Milky Way structure and solid deep-sky contrast.",
+      bestFor: "Clusters, brighter galaxies, nebulae, binocular sweeps, astrophotography.",
+      struggle: "The faintest deep-sky targets may still need darker horizons.",
+    };
+  }
+
+  if (score <= 7) {
+    return {
+      label: "Bright suburban sky",
+      summary: "Good for casual observing, but urban glow will reduce faint detail and background contrast.",
+      bestFor: "Moon, planets, double stars, bright clusters, outreach sessions.",
+      struggle: "Most faint nebulae and subtle Milky Way detail will be washed out.",
+    };
+  }
+
+  return {
+    label: "Urban sky",
+    summary: "Heavy skyglow will dominate the view, so brighter targets will be the most rewarding tonight.",
+    bestFor: "Moon, planets, bright constellations, ISS passes, quick setup sessions.",
+    struggle: "Faint galaxies, nebulae, and Milky Way structure will be difficult to see.",
+  };
+};
+
 const buildDestinationHref = ({ origin, destination, provider }) =>
   buildExternalMapDirectionsUrl({
     provider,
@@ -460,6 +519,18 @@ export default function DiscoveryPage({
     onNavigate?.("/", { state: { mapSelection: selection } });
   };
 
+  const handleOpenDarkSpotOnMap = (spot) => {
+    if (!spot) return;
+    openMapSelection(
+      buildDiscoveryMapSelection({
+        type: "pin",
+        id: `dark-${spot.lat}-${spot.lon}`,
+        lat: spot.lat,
+        lng: spot.lon,
+      }),
+    );
+  };
+
   const handleOpenEventOnMap = (event) => {
     if (!event) return;
     openMapSelection(
@@ -686,6 +757,34 @@ export default function DiscoveryPage({
     () => visibleEvents.filter((event) => event.eventType === "special_event"),
     [visibleEvents],
   );
+  const skyConditionSummary = useMemo(
+    () => describeBortleSky(skyQuality?.Bortle),
+    [skyQuality?.Bortle],
+  );
+  const nearestDarkSpotSummary = useMemo(() => {
+    const nearestSpot = Array.isArray(darkSpots) && darkSpots.length ? darkSpots[0] : null;
+    if (!nearestSpot) {
+      return {
+        title: "No nearby escape yet",
+        copy: "Increase the discovery radius or move the map to search for darker alternatives.",
+      };
+    }
+
+    const currentScore = parseBortleScore(skyQuality?.Bortle);
+    const nextScore = Number(nearestSpot.level);
+    const improvement =
+      Number.isFinite(currentScore) && Number.isFinite(nextScore)
+        ? Math.max(0, currentScore - nextScore)
+        : null;
+
+    return {
+      title: `Nearest darker option: Bortle ${nearestSpot.level}`,
+      copy:
+        improvement && improvement > 0
+          ? `${formatDistanceKm(nearestSpot.distance_km)} away and about ${improvement} Bortle class${improvement === 1 ? "" : "es"} darker.`
+          : `${formatDistanceKm(nearestSpot.distance_km)} away with SQM ${formatMetricNumber(nearestSpot.sqm, 2)}.`,
+    };
+  }, [darkSpots, skyQuality?.Bortle]);
 
   const favoriteDiscoveryItems = useMemo(() => {
     return favoriteSpots
@@ -1156,23 +1255,146 @@ export default function DiscoveryPage({
                       <Typography variant="body2">Reading local sky quality...</Typography>
                     </Stack>
                   ) : skyQuality ? (
-                    <>
-                      <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                        <Chip label={skyQuality.Bortle || "Unknown class"} color="secondary" />
-                        {skyQuality.SQM ? (
-                          <Chip label={`SQM ${Number(skyQuality.SQM).toFixed(2)}`} />
-                        ) : null}
-                        {skyQuality.Ratio ? (
-                          <Chip label={`Glow ratio ${Number(skyQuality.Ratio).toFixed(1)}x`} />
-                        ) : null}
-                      </Stack>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                        Artificial brightness: {skyQuality.Artif_bright_uccd_m2 ?? "N/A"} ucd/m²
-                      </Typography>
-                      <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                        Total brightness: {skyQuality.Brightness_mcd_m2 ?? "N/A"} mcd/m²
-                      </Typography>
-                    </>
+                    <Stack spacing={2}>
+                      <Box
+                        sx={{
+                          p: 2.25,
+                          borderRadius: "20px",
+                          border: "1px solid rgba(96, 165, 250, 0.2)",
+                          background:
+                            "linear-gradient(180deg, rgba(96, 165, 250, 0.12) 0%, rgba(15, 23, 42, 0.2) 100%)",
+                        }}
+                      >
+                        <Stack
+                          direction={{ xs: "column", sm: "row" }}
+                          spacing={2}
+                          justifyContent="space-between"
+                          alignItems={{ xs: "flex-start", sm: "center" }}
+                        >
+                          <Box sx={{ display: "grid", gap: 0.75 }}>
+                            <Typography
+                              variant="overline"
+                              sx={{ color: "secondary.main", letterSpacing: "0.1em" }}
+                            >
+                              Current Class
+                            </Typography>
+                            <Typography variant="h4">
+                              {skyQuality.Bortle || "Unknown"}
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                              {skyConditionSummary.label}
+                            </Typography>
+                          </Box>
+                          <Box
+                            sx={{
+                              minWidth: 132,
+                              px: 2,
+                              py: 1.25,
+                              borderRadius: "18px",
+                              background: "rgba(15, 23, 42, 0.36)",
+                              border: "1px solid rgba(148, 163, 184, 0.14)",
+                            }}
+                          >
+                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                              SQM
+                            </Typography>
+                            <Typography variant="h5">
+                              {formatMetricNumber(skyQuality.SQM, 2)}
+                            </Typography>
+                          </Box>
+                        </Stack>
+                        <Typography variant="body2" sx={{ color: "text.secondary", mt: 2 }}>
+                          {skyConditionSummary.summary}
+                        </Typography>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gap: 1.25,
+                          gridTemplateColumns: {
+                            xs: "1fr",
+                            sm: "repeat(3, minmax(0, 1fr))",
+                          },
+                        }}
+                      >
+                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                          <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                              Glow Ratio
+                            </Typography>
+                            <Typography variant="h6">
+                              {formatMetricNumber(skyQuality.Ratio, 1)}x
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                          <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                              Artificial Brightness
+                            </Typography>
+                            <Typography variant="h6">
+                              {formatMetricNumber(skyQuality.Artif_bright_uccd_m2, 0)}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                              ucd/m^2
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                          <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                              Total Brightness
+                            </Typography>
+                            <Typography variant="h6">
+                              {formatMetricNumber(skyQuality.Brightness_mcd_m2, 1)}
+                            </Typography>
+                            <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                              mcd/m^2
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gap: 1.25,
+                          gridTemplateColumns: {
+                            xs: "1fr",
+                            md: "repeat(2, minmax(0, 1fr))",
+                          },
+                        }}
+                      >
+                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                          <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                            <Typography variant="overline" sx={{ color: "secondary.main" }}>
+                              Best Tonight For
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.75 }}>
+                              {skyConditionSummary.bestFor}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                        <Card variant="outlined" sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}>
+                          <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+                            <Typography variant="overline" sx={{ color: "secondary.main" }}>
+                              Nearest Improvement
+                            </Typography>
+                            <Typography variant="body2" sx={{ mt: 0.75 }}>
+                              {nearestDarkSpotSummary.title}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                              {nearestDarkSpotSummary.copy}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      </Box>
+
+                      <Alert severity="info" sx={{ alignItems: "flex-start" }}>
+                        {skyConditionSummary.struggle}
+                      </Alert>
+                    </Stack>
                   ) : (
                     <Typography variant="body2" sx={{ color: "text.secondary" }}>
                       Turn on location to estimate the local Bortle class and sky quality.
@@ -1198,18 +1420,28 @@ export default function DiscoveryPage({
                           sx={{ backgroundColor: "rgba(255,255,255,0.03)" }}
                         >
                           <CardContent sx={{ p: 2.25, "&:last-child": { pb: 2.25 } }}>
-                            <Stack direction="row" justifyContent="space-between" spacing={1.5}>
-                              <Typography variant="body1">
-                                Bortle {spot.level}
+                            <Stack spacing={1.25}>
+                              <Stack direction="row" justifyContent="space-between" spacing={1.5}>
+                                <Typography variant="body1">
+                                  Bortle {spot.level}
+                                </Typography>
+                                <Typography variant="body2" sx={{ color: "secondary.main" }}>
+                                  {formatDistanceKm(spot.distance_km)}
+                                </Typography>
+                              </Stack>
+                              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                                SQM {formatMetricNumber(spot.sqm, 2)} at {spot.lat.toFixed(3)},{` `}
+                                {spot.lon.toFixed(3)}
                               </Typography>
-                              <Typography variant="body2" sx={{ color: "secondary.main" }}>
-                                {formatDistanceKm(spot.distance_km)}
-                              </Typography>
+                              <Button
+                                variant="outlined"
+                                size="small"
+                                onClick={() => handleOpenDarkSpotOnMap(spot)}
+                                sx={{ alignSelf: "flex-start" }}
+                              >
+                                Open on Map
+                              </Button>
                             </Stack>
-                            <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.75 }}>
-                              SQM {Number(spot.sqm).toFixed(2)} at {spot.lat.toFixed(3)},{` `}
-                              {spot.lon.toFixed(3)}
-                            </Typography>
                           </CardContent>
                         </Card>
                       ))}
