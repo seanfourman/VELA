@@ -1,3 +1,19 @@
+.location-popup {
+  --context-menu-gap: 8px;
+  max-width: 250px;
+}
+
+.location-popup__title-block {
+  gap: 5px;
+  padding-bottom: 8px;
+  margin-bottom: 2px;
+}
+
+.location-popup__title-block .popup-coords-label-row {
+  min-height: auto;
+  letter-spacing: 0.1em;
+}
+
 .darkspot-popup {
   --context-menu-gap: 10px;
   max-width: 260px;

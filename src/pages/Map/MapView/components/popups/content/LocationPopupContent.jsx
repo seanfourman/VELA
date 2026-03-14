@@ -19,10 +19,12 @@ export default function LocationPopupContent({ location, onOpenSpaceWeather }) {
   };
 
   return (
-    <div className="context-menu-popup">
+    <div className="context-menu-popup location-popup">
       <div className="context-menu-popup__scroll">
-        <div className="popup-coords">
-          <span className="popup-coords-label">Your location</span>
+        <div className="popup-coords location-popup__title-block">
+          <span className="popup-coords-label-row">
+            <span className="popup-coords-label">Your location</span>
+          </span>
           <span
             className="popup-coords-value popup-coords-value--copyable"
             role="button"
