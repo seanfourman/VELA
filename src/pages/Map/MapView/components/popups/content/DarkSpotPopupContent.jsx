@@ -227,23 +227,25 @@ export default function DarkSpotPopupContent({
                   {displayHeaderLabel}
                 </span>
               )}
-              {canRenameFavorite ? (
-                <span
-                  className="popup-coords-edit-trigger"
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Rename favorite"
-                  style={{ "--popup-edit-icon": `url("${editIcon}")` }}
-                  onClick={beginFavoriteNameEdit}
-                  onKeyDown={(event) => {
-                    if (event.key !== "Enter" && event.key !== " ") return;
-                    event.preventDefault();
-                    beginFavoriteNameEdit(event);
-                  }}
-                >
-                  <span aria-hidden="true" className="popup-coords-edit-icon" />
-                </span>
-              ) : null}
+              <span
+                className={`popup-coords-edit-trigger${
+                  canRenameFavorite ? " is-visible" : ""
+                }`}
+                role={canRenameFavorite ? "button" : undefined}
+                tabIndex={canRenameFavorite ? 0 : -1}
+                aria-hidden={!canRenameFavorite}
+                aria-label={canRenameFavorite ? "Rename favorite" : undefined}
+                style={{ "--popup-edit-icon": `url("${editIcon}")` }}
+                onClick={beginFavoriteNameEdit}
+                onKeyDown={(event) => {
+                  if (!canRenameFavorite) return;
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  beginFavoriteNameEdit(event);
+                }}
+              >
+                <span aria-hidden="true" className="popup-coords-edit-icon" />
+              </span>
             </span>
           </span>
           <span

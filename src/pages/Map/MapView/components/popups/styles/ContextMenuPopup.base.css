@@ -131,14 +131,58 @@
   padding: 0;
   color: inherit;
   cursor: pointer;
-  transform: translateY(-50%);
-  transition: opacity 0.18s ease;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform-origin: center;
+  filter: blur(3px) saturate(1.1);
+  transform: translate(0, -50%) rotate(-95deg) scale(0.2);
+  transition:
+    opacity 0.18s ease-in,
+    transform 0.26s cubic-bezier(0.4, 0, 1, 1),
+    filter 0.18s ease-in,
+    visibility 0s linear 0.26s;
+}
+
+.popup-coords-edit-trigger.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  filter: blur(0);
+  transform: translate(0, -50%) rotate(0deg) scale(1);
+  animation: popup-edit-trigger-spin-in 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+  transition:
+    opacity 0.2s ease-out,
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.2s ease-out,
+    visibility 0s linear 0s;
 }
 
 .popup-coords-edit-trigger:hover,
 .popup-coords-edit-trigger:focus-visible {
   opacity: 0.78;
   outline: none;
+}
+
+@keyframes popup-edit-trigger-spin-in {
+  0% {
+    transform: translate(0, -50%) rotate(-115deg) scale(0.18);
+    opacity: 0;
+    filter: blur(3px) saturate(1.1);
+  }
+  55% {
+    transform: translate(0, -50%) rotate(14deg) scale(1.12);
+    opacity: 1;
+    filter: blur(0);
+  }
+  78% {
+    transform: translate(0, -50%) rotate(-7deg) scale(0.96);
+  }
+  100% {
+    transform: translate(0, -50%) rotate(0deg) scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
 }
 
 .popup-coords-edit-icon {
