@@ -1266,12 +1266,12 @@ export default function DiscoveryPage({
                         }}
                       >
                         <Stack
-                          direction={{ xs: "column", sm: "row" }}
+                          direction="row"
                           spacing={2}
                           justifyContent="space-between"
-                          alignItems={{ xs: "flex-start", sm: "center" }}
+                          alignItems="flex-start"
                         >
-                          <Box sx={{ display: "grid", gap: 0.75 }}>
+                          <Box sx={{ display: "grid", gap: 0.75, flex: 1, minWidth: 0 }}>
                             <Typography
                               variant="overline"
                               sx={{ color: "secondary.main", letterSpacing: "0.1em" }}
@@ -1287,12 +1287,13 @@ export default function DiscoveryPage({
                           </Box>
                           <Box
                             sx={{
-                              minWidth: 132,
+                              minWidth: { xs: 100, sm: 132 },
                               px: 2,
                               py: 1.25,
                               borderRadius: "18px",
                               background: "rgba(15, 23, 42, 0.36)",
                               border: "1px solid rgba(148, 163, 184, 0.14)",
+                              flexShrink: 0,
                             }}
                           >
                             <Typography variant="caption" sx={{ color: "text.secondary" }}>
