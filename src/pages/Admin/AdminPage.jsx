@@ -32,214 +32,22 @@ import {
   validateLocationDraft,
 } from "./adminSubmission";
 import useAdminUsers from "./useAdminUsers";
-
-const compareAlphabetical = (left, right) =>
-  String(left || "").trim().localeCompare(String(right || "").trim(), undefined, {
-    sensitivity: "base",
-    numeric: true,
-  });
-
-const ADMIN_VIEWS = ["locations", "events", "users"];
-const ADMIN_PAGE_SIZE = 8;
-
-const createEmptyAdminViewState = (value = "") =>
-  Object.fromEntries(ADMIN_VIEWS.map((view) => [view, value]));
-
-const normalizeSearchValue = (value) => String(value || "").trim().toLowerCase();
-
-const buildSearchBlob = (values) =>
-  values
-    .flatMap((value) => (Array.isArray(value) ? value : [value]))
-    .map((value) => String(value || "").trim().toLowerCase())
-    .filter(Boolean)
-    .join(" ");
-
-const filterAdminItems = (view, items, query) => {
-  const safeItems = Array.isArray(items) ? items : [];
-  if (!query) return safeItems;
-
-  return safeItems.filter((item) => {
-    if (view === "events") {
-      return buildSearchBlob([
-        item?.title,
-        item?.id,
-        item?.eventType,
-        item?.status,
-        item?.description,
-        item?.meetupDetails,
-        item?.lat,
-        item?.lng,
-        item?.host?.name,
-        item?.host?.email,
-        item?.hostChecklist,
-      ]).includes(query);
-    }
-
-    if (view === "users") {
-      return buildSearchBlob([
-        item?.name,
-        item?.displayName,
-        item?.email,
-        item?.role,
-        item?.isAdmin ? "admin" : "user",
-        item?.createdAtUtc,
-        item?.bio,
-      ]).includes(query);
-    }
-
-    return buildSearchBlob([
-      item?.name,
-      item?.id,
-      item?.region,
-      item?.country,
-      item?.type,
-      item?.bestTime,
-      item?.description,
-      item?.lat,
-      item?.lng,
-    ]).includes(query);
-  });
-};
-
-const paginateItems = (items, page, pageSize = ADMIN_PAGE_SIZE) => {
-  const startIndex = (page - 1) * pageSize;
-  return items.slice(startIndex, startIndex + pageSize);
-};
-
-const getAdminViewContent = ({ activeView, isEditingLocation, isEditingEvent }) => {
-  if (activeView === "events") {
-    return {
-      searchLabel: "Search events",
-      searchPlaceholder: "Search events",
-      formTitle: isEditingEvent ? "Edit event" : "Create event",
-      formCopy: "Create and update star party events.",
-      collectionTitle: "Existing events",
-      collectionCopy: "Search, review, and manage created events.",
-    };
-  }
-
-  if (activeView === "users") {
-    return {
-      searchLabel: "Search users",
-      searchPlaceholder: "Search users",
-      formTitle: "User access",
-      formCopy: "Grant or remove admin access for other accounts.",
-      collectionTitle: "Existing users",
-      collectionCopy: "Search, review, and manage user access.",
-    };
-  }
-
-  return {
-    searchLabel: "Search locations",
-    searchPlaceholder: "Search locations",
-    formTitle: isEditingLocation ? "Edit location" : "Add location",
-    formCopy: "Create and update curated stargazing spots.",
-    collectionTitle: "Existing locations",
-    collectionCopy: "Search, review, and manage curated map spots.",
-  };
-};
-
-function AdminAccessNotice({ title, message, buttonLabel, onAction }) {
-  return (
-    <section className="profile-card glass-panel glass-panel-elevated">
-      <h2 className="profile-section-title">{title}</h2>
-      <p className="profile-section-copy">{message}</p>
-      <button
-        type="button"
-        className="glass-btn profile-action-btn"
-        onClick={onAction}
-      >
-        {buttonLabel}
-      </button>
-    </section>
-  );
-}
-
-const PaginationChevron = ({ direction }) => (
-  <svg
-    viewBox="0 0 20 20"
-    width="18"
-    height="18"
-    aria-hidden="true"
-    focusable="false"
-  >
-    <path
-      d={direction === "left" ? "M12.5 4.5L7 10l5.5 5.5" : "M7.5 4.5L13 10l-5.5 5.5"}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-function AdminCollectionSection({
-  title,
-  copy,
-  searchLabel,
-  searchValue,
-  onSearchChange,
-  searchPlaceholder,
-  children,
-  paginationRef,
-  resultSummary,
-  page,
-  totalPages,
-  onPreviousPage,
-  onNextPage,
-}) {
-  return (
-    <div className="admin-panel-section admin-panel-section--collection">
-      <div className="admin-panel-section__header">
-        <div className="admin-panel-section__intro">
-          <h3 className="admin-panel-section__title">{title}</h3>
-          <p className="admin-panel-section__copy">{copy}</p>
-        </div>
-        <div className="admin-collection-tools">
-          <label className="profile-field admin-search-field">
-            <input
-              className="profile-input"
-              type="search"
-              aria-label={searchLabel}
-              value={searchValue}
-              onChange={onSearchChange}
-              placeholder={searchPlaceholder}
-            />
-          </label>
-        </div>
-      </div>
-
-      {children}
-
-      <div className="admin-pagination" ref={paginationRef}>
-        <div className="admin-pagination-status">{resultSummary}</div>
-        {totalPages > 1 ? (
-          <>
-            <button
-              type="button"
-              className="glass-btn profile-action-btn admin-pagination-btn"
-              onClick={onPreviousPage}
-              disabled={page <= 1}
-              aria-label="Previous page"
-            >
-              <PaginationChevron direction="left" />
-            </button>
-            <button
-              type="button"
-              className="glass-btn profile-action-btn admin-pagination-btn"
-              onClick={onNextPage}
-              disabled={page >= totalPages}
-              aria-label="Next page"
-            >
-              <PaginationChevron direction="right" />
-            </button>
-          </>
-        ) : null}
-      </div>
-    </div>
-  );
-}
+import AdminAccessNotice from "./components/AdminAccessNotice";
+import {
+  AdminEventsSection,
+  AdminLocationsSection,
+  AdminUsersSection,
+} from "./components/AdminWorkspaceSections";
+import {
+  ADMIN_PAGE_SIZE,
+  ADMIN_VIEWS,
+  compareAlphabetical,
+  createEmptyAdminViewState,
+  filterAdminItems,
+  getAdminViewContent,
+  normalizeSearchValue,
+  paginateItems,
+} from "./adminViewUtils";
 
 function AdminPage({
   auth,
@@ -860,145 +668,70 @@ function AdminPage({
           </div>
 
           {activeView === "locations" ? (
-            <>
-              <div className="admin-panel-section">
-                <div className="admin-panel-section__header">
-                  <div className="admin-panel-section__intro">
-                    <h3 className="admin-panel-section__title">{activeViewContent.formTitle}</h3>
-                    <p className="admin-panel-section__copy">{activeViewContent.formCopy}</p>
-                  </div>
-                </div>
-
-                <AdminLocationForm
-                  draft={locationDraft}
-                  onFieldChange={handleLocationFieldChange}
-                  onReset={resetLocationForm}
-                  onCancelEdit={resetLocationForm}
-                  onSubmit={handleSubmitLocation}
-                  isEditing={isEditingLocation}
-                />
-              </div>
-
-              <div className="admin-section-separator" aria-hidden="true" />
-
-              <AdminCollectionSection
-                title={activeViewContent.collectionTitle}
-                copy={activeViewContent.collectionCopy}
-                searchLabel={activeViewContent.searchLabel}
-                searchValue={activeSearchValue}
-                onSearchChange={handleSearchChange}
-                searchPlaceholder={activeViewContent.searchPlaceholder}
-                paginationRef={locationPaginationRef}
-                resultSummary={activeResultSummary}
-                page={activePage}
-                totalPages={activeTotalPages}
-                onPreviousPage={handlePreviousPage}
-                onNextPage={handleNextPage}
-              >
-                <AdminLocationList
-                  locations={paginatedLocations}
-                  onDeleteLocation={handleRequestDeleteLocation}
-                  onEditLocation={handleEditLocation}
-                  activeLocationId={editingLocationId || null}
-                  emptyMessage={
-                    normalizedSearchByView.locations
-                      ? "No curated locations match this search"
-                      : "No curated locations yet"
-                  }
-                />
-              </AdminCollectionSection>
-            </>
+            <AdminLocationsSection
+              activeViewContent={activeViewContent}
+              locationDraft={locationDraft}
+              onLocationFieldChange={handleLocationFieldChange}
+              onResetLocationForm={resetLocationForm}
+              onSubmitLocation={handleSubmitLocation}
+              isEditingLocation={isEditingLocation}
+              activeSearchValue={activeSearchValue}
+              onSearchChange={handleSearchChange}
+              locationPaginationRef={locationPaginationRef}
+              activeResultSummary={activeResultSummary}
+              activePage={activePage}
+              activeTotalPages={activeTotalPages}
+              onPreviousPage={handlePreviousPage}
+              onNextPage={handleNextPage}
+              paginatedLocations={paginatedLocations}
+              onRequestDeleteLocation={handleRequestDeleteLocation}
+              onEditLocation={handleEditLocation}
+              editingLocationId={editingLocationId}
+              normalizedSearchByView={normalizedSearchByView}
+            />
           ) : activeView === "events" ? (
-            <>
-              <div className="admin-panel-section">
-                <div className="admin-panel-section__header">
-                  <div className="admin-panel-section__intro">
-                    <h3 className="admin-panel-section__title">{activeViewContent.formTitle}</h3>
-                    <p className="admin-panel-section__copy">{activeViewContent.formCopy}</p>
-                  </div>
-                </div>
-
-                <AdminEventForm
-                  draft={eventDraft}
-                  onFieldChange={handleEventFieldChange}
-                  onSubmit={handleSubmitEvent}
-                  onReset={resetEventForm}
-                  onCancelEdit={resetEventForm}
-                  isEditing={isEditingEvent}
-                />
-              </div>
-
-              <div className="admin-section-separator" aria-hidden="true" />
-
-              <AdminCollectionSection
-                title={activeViewContent.collectionTitle}
-                copy={activeViewContent.collectionCopy}
-                searchLabel={activeViewContent.searchLabel}
-                searchValue={activeSearchValue}
-                onSearchChange={handleSearchChange}
-                searchPlaceholder={activeViewContent.searchPlaceholder}
-                paginationRef={eventPaginationRef}
-                resultSummary={activeResultSummary}
-                page={activePage}
-                totalPages={activeTotalPages}
-                onPreviousPage={handlePreviousPage}
-                onNextPage={handleNextPage}
-              >
-                <AdminEventList
-                  events={paginatedEvents}
-                  onEditEvent={handleEditEvent}
-                  onDeleteEvent={handleRequestDeleteEvent}
-                  onSetStatus={handleSetEventStatus}
-                  activeEventId={editingEventId || null}
-                  emptyMessage={
-                    normalizedSearchByView.events
-                      ? "No events match this search"
-                      : "No events created yet"
-                  }
-                />
-              </AdminCollectionSection>
-            </>
+            <AdminEventsSection
+              activeViewContent={activeViewContent}
+              eventDraft={eventDraft}
+              onEventFieldChange={handleEventFieldChange}
+              onSubmitEvent={handleSubmitEvent}
+              onResetEventForm={resetEventForm}
+              isEditingEvent={isEditingEvent}
+              activeSearchValue={activeSearchValue}
+              onSearchChange={handleSearchChange}
+              eventPaginationRef={eventPaginationRef}
+              activeResultSummary={activeResultSummary}
+              activePage={activePage}
+              activeTotalPages={activeTotalPages}
+              onPreviousPage={handlePreviousPage}
+              onNextPage={handleNextPage}
+              paginatedEvents={paginatedEvents}
+              onEditEvent={handleEditEvent}
+              onRequestDeleteEvent={handleRequestDeleteEvent}
+              onSetEventStatus={handleSetEventStatus}
+              editingEventId={editingEventId}
+              normalizedSearchByView={normalizedSearchByView}
+            />
           ) : (
-            <>
-              <AdminCollectionSection
-                title={activeViewContent.collectionTitle}
-                copy={activeViewContent.collectionCopy}
-                searchLabel={activeViewContent.searchLabel}
-                searchValue={activeSearchValue}
-                onSearchChange={handleSearchChange}
-                searchPlaceholder={activeViewContent.searchPlaceholder}
-                paginationRef={userPaginationRef}
-                resultSummary={activeResultSummary}
-                page={activePage}
-                totalPages={activeTotalPages}
-                onPreviousPage={handlePreviousPage}
-                onNextPage={handleNextPage}
-              >
-                {usersLoadError ? (
-                  <div className="admin-inline-feedback">
-                    <div className="profile-readonly admin-inline-feedback__message">
-                      {usersLoadError}
-                    </div>
-                  </div>
-                ) : null}
-
-                {areUsersLoading && !userList.length ? (
-                  <div className="profile-readonly">Loading users...</div>
-                ) : (
-                  <AdminUserList
-                    users={paginatedUsers}
-                    currentUserId={currentUserId || null}
-                    pendingUserId={pendingUserId || null}
-                    onToggleAdmin={handleToggleUserAdmin}
-                    emptyMessage={
-                      normalizedSearchByView.users
-                        ? "No users match this search"
-                        : "No users available yet"
-                    }
-                  />
-                )}
-              </AdminCollectionSection>
-            </>
+            <AdminUsersSection
+              activeViewContent={activeViewContent}
+              activeSearchValue={activeSearchValue}
+              onSearchChange={handleSearchChange}
+              userPaginationRef={userPaginationRef}
+              activeResultSummary={activeResultSummary}
+              activePage={activePage}
+              activeTotalPages={activeTotalPages}
+              onPreviousPage={handlePreviousPage}
+              onNextPage={handleNextPage}
+              usersLoadError={usersLoadError}
+              areUsersLoading={areUsersLoading}
+              userList={userList}
+              paginatedUsers={paginatedUsers}
+              currentUserId={currentUserId}
+              pendingUserId={pendingUserId}
+              onToggleUserAdmin={handleToggleUserAdmin}
+              normalizedSearchByView={normalizedSearchByView}
+            />
           )}
         </section>
       )}
