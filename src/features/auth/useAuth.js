@@ -47,6 +47,10 @@ export function useAuth() {
     },
     [commitSession],
   );
+  const applySession = useCallback(
+    (nextSession) => commitSession(nextSession),
+    [commitSession],
+  );
 
   useEffect(() => {
     if (!session?.token) return;
@@ -82,7 +86,8 @@ export function useAuth() {
       signOut,
       login,
       register,
+      applySession,
     }),
-    [isAuthenticated, login, register, session, signOut, token, user],
+    [applySession, isAuthenticated, login, register, session, signOut, token, user],
   );
 }

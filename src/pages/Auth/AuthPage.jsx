@@ -1,4 +1,5 @@
-﻿import { useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState } from "react";
+import { Form, useActionData, useNavigation } from "react-router-dom";
 import showNotification from "@/utils/notifications";
 import PageShell from "@/components/layout/PageShell";
 import { getPasswordChecks, isStrongPassword } from "@/utils/passwordRules";
@@ -29,11 +30,14 @@ function AuthPage({ auth, isLight, onNavigate }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const actionData = useActionData();
+  const navigation = useNavigation();
+  const handledActionIdRef = useRef(0);
 
   const isAuthenticated = Boolean(auth?.isAuthenticated);
   const isRegisterMode = mode === AUTH_MODE_REGISTER;
+  const isSubmitting = navigation.state === "submitting";
   const showHero = useMemo(() => isProbablyHardwareAccelerated(), []);
   const passwordChecks = useMemo(() => getPasswordChecks(password), [password]);
   const showPasswordPopover = isRegisterMode && isPasswordFocused;
@@ -56,28 +60,69 @@ function AuthPage({ auth, isLight, onNavigate }) {
     setConfirmPassword("");
   };
 
+  useEffect(() => {
+    if (!actionData || typeof actionData !== "object") return;
+
+    const requestId = Number(actionData.requestId);
+    if (!Number.isFinite(requestId)) return;
+    if (handledActionIdRef.current === requestId) return;
+    handledActionIdRef.current = requestId;
+
+    if (!actionData.ok) {
+      showNotification(
+        typeof actionData.error === "string" && actionData.error.trim()
+          ? actionData.error.trim()
+          : "Authentication failed",
+        "failure",
+        { duration: 3600 },
+      );
+      return;
+    }
+
+    if (actionData.session) {
+      auth?.applySession?.(actionData.session);
+    }
+
+    if (actionData.mode === AUTH_MODE_REGISTER) {
+      showNotification("Account created. You are now logged in", "success", {
+        duration: 2600,
+      });
+    } else {
+      showNotification("Welcome back!", "success", { duration: 2200 });
+    }
+
+    onNavigate?.("/");
+  }, [actionData, auth, onNavigate]);
+
   const handleModeChange = (nextMode) => {
     setMode(nextMode);
     resetPasswords();
     setIsPasswordFocused(false);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (isSubmitting) return;
+  const handleSubmit = (event) => {
+    if (isSubmitting) {
+      event.preventDefault();
+      return;
+    }
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!isValidEmail(trimmedEmail)) {
+      event.preventDefault();
       showNotification("Enter a valid email address", "failure", {
         duration: 2800,
       });
       return;
     }
+
     if (!password) {
+      event.preventDefault();
       showNotification("Enter your password", "failure", { duration: 2600 });
       return;
     }
+
     if (isRegisterMode && !isStrongPassword(password)) {
+      event.preventDefault();
       showNotification(
         "Use a stronger password: 8+ chars with upper, lower, number, and symbol",
         "failure",
@@ -85,36 +130,10 @@ function AuthPage({ auth, isLight, onNavigate }) {
       );
       return;
     }
-    if (isRegisterMode && password !== confirmPassword) {
-      showNotification("Passwords do not match", "failure", { duration: 2800 });
-      return;
-    }
 
-    setIsSubmitting(true);
-    try {
-      if (isRegisterMode) {
-        await auth?.register?.({
-          name: displayName.trim(),
-          email: trimmedEmail,
-          password,
-        });
-        showNotification("Account created. You are now logged in", "success", {
-          duration: 2600,
-        });
-      } else {
-        await auth?.login?.({ email: trimmedEmail, password });
-        showNotification("Welcome back!", "success", { duration: 2200 });
-      }
-      resetPasswords();
-      onNavigate?.("/");
-    } catch (error) {
-      showNotification(
-        error instanceof Error ? error.message : "Authentication failed",
-        "failure",
-        { duration: 3600 },
-      );
-    } finally {
-      setIsSubmitting(false);
+    if (isRegisterMode && password !== confirmPassword) {
+      event.preventDefault();
+      showNotification("Passwords do not match", "failure", { duration: 2800 });
     }
   };
 
@@ -153,7 +172,8 @@ function AuthPage({ auth, isLight, onNavigate }) {
             </div>
           </>
         ) : (
-          <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          <Form method="post" className="auth-form" onSubmit={handleSubmit} noValidate>
+            <input type="hidden" name="mode" value={mode} />
             <div className="auth-headline">
               <h2 className="profile-section-title auth-title">
                 {headingText}
@@ -191,6 +211,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
                     <input
                       className="profile-input"
                       type="text"
+                      name="name"
                       value={displayName}
                       onChange={(event) => setDisplayName(event.target.value)}
                       placeholder="Your name"
@@ -203,6 +224,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
                   <input
                     className="profile-input"
                     type="email"
+                    name="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@example.com"
@@ -215,6 +237,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
                   <input
                     className="profile-input"
                     type="password"
+                    name="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                     onFocus={() => setIsPasswordFocused(true)}
@@ -262,6 +285,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
                     <input
                       className="profile-input"
                       type="password"
+                      name="confirmPassword"
                       value={confirmPassword}
                       onChange={(event) =>
                         setConfirmPassword(event.target.value)
@@ -285,7 +309,7 @@ function AuthPage({ auth, isLight, onNavigate }) {
                 {isSubmitting ? "Please wait..." : submitText}
               </button>
             </div>
-          </form>
+          </Form>
         )}
       </section>
     </PageShell>

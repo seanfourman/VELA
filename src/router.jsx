@@ -18,6 +18,7 @@ import MoonPhasePage from "@/pages/MoonPhase/MoonPhasePage";
 import ProfilePage from "@/pages/Profile/ProfilePage";
 import SettingsPage from "@/pages/Settings/SettingsPage";
 import SolarSystemPage from "@/pages/SolarSystem/SolarSystemPage";
+import { loginUser, registerUser } from "@/features/auth/auth";
 import { fetchRecommendations } from "@/utils/recommendationsApi";
 import { fetchStarPartyEvents } from "@/utils/starPartyEventsApi";
 
@@ -33,6 +34,49 @@ const appBootstrapLoader = async () => {
     starPartyEvents:
       eventsResult.status === "fulfilled" ? eventsResult.value : null,
   };
+};
+
+const authAction = async ({ request }) => {
+  const form = await request.formData();
+  const mode = String(form.get("mode") || "login")
+    .trim()
+    .toLowerCase();
+  const email = String(form.get("email") || "")
+    .trim()
+    .toLowerCase();
+  const password = String(form.get("password") || "");
+  const name = String(form.get("name") || "").trim();
+
+  if (!email || !password) {
+    return {
+      ok: false,
+      error: "Email and password are required.",
+      requestId: Date.now(),
+    };
+  }
+
+  try {
+    const session =
+      mode === "register"
+        ? await registerUser({ name, email, password })
+        : await loginUser({ email, password });
+
+    return {
+      ok: true,
+      mode,
+      session,
+      requestId: Date.now(),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        error instanceof Error && error.message
+          ? error.message
+          : "Authentication failed",
+      requestId: Date.now(),
+    };
+  }
 };
 
 const useDisableThreeDMode = () => {
@@ -350,7 +394,7 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { index: true, element: <MapRoute /> },
-      { path: "auth", element: <AuthRoute /> },
+      { path: "auth", action: authAction, element: <AuthRoute /> },
       { path: "discover", element: <DiscoveryRoute /> },
       { path: "gear-lab", element: <Navigate to="/" replace /> },
       { path: "moon-phase", element: <MoonPhaseRoute /> },
