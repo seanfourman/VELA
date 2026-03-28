@@ -462,6 +462,125 @@
   }
 }
 
+.constellations-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vela-sail-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(102, 230, 255, 0.3);
+  border-radius: 50%;
+  background: rgba(102, 230, 255, 0.08);
+  color: #66e6ff;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 120ms ease;
+  flex-shrink: 0;
+}
+
+.vela-sail-button:hover {
+  background: rgba(102, 230, 255, 0.2);
+  border-color: rgba(102, 230, 255, 0.55);
+}
+
+.vela-sail-button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 12, 20, 0.92);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(10px);
+  color: #f0f4ff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.vela-sail-button:hover::after,
+.vela-sail-button:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ship overlay */
+.vela-ship-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.vela-ship-runner {
+  position: absolute;
+  top: 45%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: vela-sail-across 8s linear forwards;
+}
+
+.vela-ship-sprite {
+  filter: drop-shadow(0 0 12px rgba(102, 230, 255, 0.5));
+  animation: vela-ship-bob 1.2s ease-in-out infinite;
+}
+
+.vela-ship-message {
+  margin: 0;
+  padding: 6px 14px;
+  border-radius: 10px;
+  background: rgba(6, 16, 30, 0.82);
+  border: 1px solid rgba(102, 230, 255, 0.25);
+  color: rgba(240, 250, 255, 0.9);
+  font-size: 0.78rem;
+  font-style: italic;
+  white-space: nowrap;
+  backdrop-filter: blur(6px);
+}
+
+@keyframes vela-sail-across {
+  0% {
+    left: -180px;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% + 180px);
+    opacity: 0;
+  }
+}
+
+@keyframes vela-ship-bob {
+  0%, 100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+}
+
 @media (max-width: 680px) {
   .constellations-stage {
     min-height: 100svh;
