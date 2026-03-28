@@ -10,7 +10,7 @@ using static Vela.Api.Application.WorldAtlasMath;
 
 namespace Vela.Api.Application;
 
-public sealed class WorldAtlasService : IWorldAtlasService
+public sealed class WorldAtlasService
 {
     private readonly IMemoryCache _memoryCache;
     private readonly WorldAtlasDataLoader _dataLoader;

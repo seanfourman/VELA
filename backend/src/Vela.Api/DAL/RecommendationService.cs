@@ -5,52 +5,42 @@ using Vela.Api.DTOs;
 
 namespace Vela.Api.DAL;
 
-public sealed class SqlRecommendationRepository : IRecommendationRepository
+public class RecommendationService : DBService
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true,
-    };
-
-    private readonly ISqlConnectionFactory _connectionFactory;
-
-    public SqlRecommendationRepository(ISqlConnectionFactory connectionFactory)
-    {
-        _connectionFactory = connectionFactory;
-    }
+    private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
 
     public List<RecommendationDto> GetAll()
     {
         var recommendations = new List<RecommendationDto>();
-
-        using var connection = _connectionFactory.CreateOpenConnection();
-        using var command = SqlStoredProcedureCommandBuilder.Create(
-            "SP_GetAllRecommendations",
-            connection,
-            new Dictionary<string, object>()
-        );
-        using var reader = command.ExecuteReader();
-
-        while (reader.Read())
+        SqlConnection con = null;
+        try
         {
-            recommendations.Add(MapReaderToRecommendation(reader));
+            con = Connect();
+            SqlCommand cmd = CreateCommand("SP_GetAllRecommendations", con, new Dictionary<string, object>());
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    recommendations.Add(MapReaderToRecommendation(reader));
+                }
+            }
+            return recommendations;
         }
-
-        return recommendations;
+        finally { con?.Close(); }
     }
 
     public RecommendationDto SaveRecommendation(string id, UpsertRecommendationRequestDto request)
     {
-        using var connection = _connectionFactory.CreateOpenConnection();
-        using var command = SqlStoredProcedureCommandBuilder.Create(
-            "SP_UpsertRecommendation",
-            connection,
-            BuildUpsertParameters(id, request)
-        );
-        using var reader = command.ExecuteReader();
-        return reader.Read()
-            ? MapReaderToRecommendation(reader)
-            : new RecommendationDto
+        SqlConnection con = null;
+        try
+        {
+            con = Connect();
+            SqlCommand cmd = CreateCommand("SP_UpsertRecommendation", con, BuildUpsertParameters(id, request));
+            using (var reader = cmd.ExecuteReader())
+            {
+                if (reader.Read()) return MapReaderToRecommendation(reader);
+            }
+            return new RecommendationDto
             {
                 Id = id,
                 Name = request.Name.Trim(),
@@ -59,32 +49,28 @@ public sealed class SqlRecommendationRepository : IRecommendationRepository
                 Type = request.Type?.Trim(),
                 Description = request.Description?.Trim(),
                 BestTime = request.BestTime?.Trim(),
-                Coordinates = new CoordinatesDto
-                {
-                    Lat = request.Coordinates.Lat,
-                    Lon = request.Coordinates.Lon,
-                },
+                Coordinates = new CoordinatesDto { Lat = request.Coordinates.Lat, Lon = request.Coordinates.Lon },
                 PhotoUrls = NormalizeUrlList(request.PhotoUrls),
                 SourceUrls = NormalizeUrlList(request.SourceUrls),
             };
+        }
+        finally { con?.Close(); }
     }
 
     public bool DeleteRecommendation(string id)
     {
-        using var connection = _connectionFactory.CreateOpenConnection();
-        using var command = SqlStoredProcedureCommandBuilder.Create(
-            "SP_DeleteRecommendation",
-            connection,
-            new Dictionary<string, object> { { "@Id", id.Trim() } }
-        );
-        var affectedRowsParam = new SqlParameter("@AffectedRows", SqlDbType.Int)
+        SqlConnection con = null;
+        try
         {
-            Direction = ParameterDirection.Output,
-        };
-        command.Parameters.Add(affectedRowsParam);
-
-        command.ExecuteNonQuery();
-        return Convert.ToInt32(affectedRowsParam.Value) > 0;
+            con = Connect();
+            SqlCommand cmd = CreateCommand("SP_DeleteRecommendation", con,
+                new Dictionary<string, object> { { "@Id", id.Trim() } });
+            var affectedRowsParam = new SqlParameter("@AffectedRows", SqlDbType.Int) { Direction = ParameterDirection.Output };
+            cmd.Parameters.Add(affectedRowsParam);
+            cmd.ExecuteNonQuery();
+            return Convert.ToInt32(affectedRowsParam.Value) > 0;
+        }
+        finally { con?.Close(); }
     }
 
     private static RecommendationDto MapReaderToRecommendation(SqlDataReader reader)
@@ -96,28 +82,19 @@ public sealed class SqlRecommendationRepository : IRecommendationRepository
             Country = reader["Country"] == DBNull.Value ? null : reader["Country"].ToString(),
             Region = reader["Region"] == DBNull.Value ? null : reader["Region"].ToString(),
             Type = reader["Type"] == DBNull.Value ? null : reader["Type"].ToString(),
-            Description = reader["Description"] == DBNull.Value
-                ? null
-                : reader["Description"].ToString(),
+            Description = reader["Description"] == DBNull.Value ? null : reader["Description"].ToString(),
             BestTime = reader["BestTime"] == DBNull.Value ? null : reader["BestTime"].ToString(),
             Coordinates = new CoordinatesDto
             {
                 Lat = Convert.ToDouble(reader["Lat"]),
                 Lon = Convert.ToDouble(reader["Lon"]),
             },
-            PhotoUrls = DeserializeUrlList(
-                reader["PhotoUrlsJson"] == DBNull.Value ? null : reader["PhotoUrlsJson"].ToString()
-            ),
-            SourceUrls = DeserializeUrlList(
-                reader["SourceUrlsJson"] == DBNull.Value ? null : reader["SourceUrlsJson"].ToString()
-            ),
+            PhotoUrls = DeserializeUrlList(reader["PhotoUrlsJson"] == DBNull.Value ? null : reader["PhotoUrlsJson"].ToString()),
+            SourceUrls = DeserializeUrlList(reader["SourceUrlsJson"] == DBNull.Value ? null : reader["SourceUrlsJson"].ToString()),
         };
     }
 
-    private static Dictionary<string, object> BuildUpsertParameters(
-        string id,
-        UpsertRecommendationRequestDto request
-    )
+    private static Dictionary<string, object> BuildUpsertParameters(string id, UpsertRecommendationRequestDto request)
     {
         return new Dictionary<string, object>
         {
@@ -138,8 +115,7 @@ public sealed class SqlRecommendationRepository : IRecommendationRepository
 
     private static string SerializeUrlList(IEnumerable<string>? urls)
     {
-        var normalized = NormalizeUrlList(urls);
-        return JsonSerializer.Serialize(normalized, JsonOptions);
+        return JsonSerializer.Serialize(NormalizeUrlList(urls), JsonOptions);
     }
 
     private static List<string> NormalizeUrlList(IEnumerable<string>? urls)
@@ -154,20 +130,13 @@ public sealed class SqlRecommendationRepository : IRecommendationRepository
 
     private static List<string> DeserializeUrlList(string? json)
     {
-        if (string.IsNullOrWhiteSpace(json))
-        {
-            return [];
-        }
-
+        if (string.IsNullOrWhiteSpace(json)) return [];
         try
         {
             var list = JsonSerializer.Deserialize<List<string>>(json, JsonOptions);
             return NormalizeUrlList(list);
         }
-        catch
-        {
-            return [];
-        }
+        catch { return []; }
     }
 
     private static object EmptyAsNull(string? value)

@@ -7,15 +7,12 @@ namespace Vela.Api.Controllers;
 
 [ApiController]
 [Route("api")]
-public sealed class SkyMapController : ControllerBase
+public class SkyMapController : ControllerBase
 {
-    private readonly IWorldAtlasService _worldAtlasService;
-    private readonly IVisiblePlanetsService _visiblePlanetsService;
+    private readonly WorldAtlasService _worldAtlasService;
+    private readonly VisiblePlanetsService _visiblePlanetsService;
 
-    public SkyMapController(
-        IWorldAtlasService worldAtlasService,
-        IVisiblePlanetsService visiblePlanetsService
-    )
+    public SkyMapController(WorldAtlasService worldAtlasService, VisiblePlanetsService visiblePlanetsService)
     {
         _worldAtlasService = worldAtlasService;
         _visiblePlanetsService = visiblePlanetsService;
@@ -26,30 +23,29 @@ public sealed class SkyMapController : ControllerBase
     public async Task<IActionResult> GetVisiblePlanets(
         [FromQuery] double lat,
         [FromQuery(Name = "lon")] double lon,
-        CancellationToken cancellationToken = default
-    )
+        CancellationToken cancellationToken = default)
     {
         if (!double.IsFinite(lat) || !double.IsFinite(lon))
-        {
             return BadRequest(new { error = "Invalid lat/lon query params" });
-        }
 
-        var response = await _visiblePlanetsService.GetAsync(lat, lon, cancellationToken);
-        Response.Headers["Cache-Control"] = response.CacheControl;
-        return File(response.Content, response.ContentType);
+        try
+        {
+            var response = await _visiblePlanetsService.GetAsync(lat, lon, cancellationToken);
+            Response.Headers["Cache-Control"] = response.CacheControl;
+            return File(response.Content, response.ContentType);
+        }
+        catch (Exception)
+        {
+            return StatusCode(500, new { error = "Failed to fetch visible planets" });
+        }
     }
 
     [AllowAnonymous]
     [HttpGet("skyquality")]
-    public ActionResult<SkyQualityResponseDto> GetSkyQuality(
-        [FromQuery] double lat,
-        [FromQuery] double lon
-    )
+    public ActionResult<SkyQualityResponseDto> GetSkyQuality([FromQuery] double lat, [FromQuery] double lon)
     {
         if (!double.IsFinite(lat) || !double.IsFinite(lon))
-        {
             return BadRequest(new { error = "Invalid lat/lon query params" });
-        }
 
         try
         {
@@ -69,15 +65,10 @@ public sealed class SkyMapController : ControllerBase
     [AllowAnonymous]
     [HttpGet("darkspots")]
     public ActionResult<DarkSpotsResponseDto> GetDarkSpots(
-        [FromQuery] double lat,
-        [FromQuery] double lon,
-        [FromQuery] double? searchDistance
-    )
+        [FromQuery] double lat, [FromQuery] double lon, [FromQuery] double? searchDistance)
     {
         if (!double.IsFinite(lat) || !double.IsFinite(lon))
-        {
             return BadRequest(new { error = "Invalid lat/lon query params" });
-        }
 
         try
         {
@@ -92,21 +83,11 @@ public sealed class SkyMapController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("lightmap/{z:int}/{x:int}/{y:int}.png")]
-    public async Task<IActionResult> GetLightmapTile(
-        int z,
-        int x,
-        int y,
-        CancellationToken cancellationToken = default
-    )
+    public async Task<IActionResult> GetLightmapTile(int z, int x, int y, CancellationToken cancellationToken = default)
     {
         try
         {
-            var response = await _worldAtlasService.GetLightTileAsync(
-                z,
-                x,
-                y,
-                cancellationToken
-            );
+            var response = await _worldAtlasService.GetLightTileAsync(z, x, y, cancellationToken);
             Response.Headers["Cache-Control"] = response.CacheControl;
             return File(response.Content, response.ContentType);
         }

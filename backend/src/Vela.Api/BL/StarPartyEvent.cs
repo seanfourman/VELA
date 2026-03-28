@@ -1,35 +1,23 @@
 using Vela.Api.DAL;
 using Vela.Api.DTOs;
-using Vela.Api.Models;
+using UserModel = Vela.Api.Models.User;
 
-namespace Vela.Api.Application;
+namespace Vela.Api.BL;
 
-public sealed class StarPartyEventService : IStarPartyEventService
+public class StarPartyEvent
 {
-    private static readonly HashSet<string> AllowedEventTypes = new(
-        ["party", "special_event"],
-        StringComparer.OrdinalIgnoreCase
-    );
+    private static readonly HashSet<string> AllowedEventTypes = new(["party", "special_event"], StringComparer.OrdinalIgnoreCase);
+    private static readonly HashSet<string> AllowedStatuses = new(["draft", "published", "archived"], StringComparer.OrdinalIgnoreCase);
 
-    private static readonly HashSet<string> AllowedStatuses = new(
-        ["draft", "published", "archived"],
-        StringComparer.OrdinalIgnoreCase
-    );
-
-    private readonly IStarPartyEventRepository _starPartyEventRepository;
-
-    public StarPartyEventService(IStarPartyEventRepository starPartyEventRepository)
+    public static List<StarPartyEventDto> GetAll()
     {
-        _starPartyEventRepository = starPartyEventRepository;
+        var starPartyEventService = new StarPartyEventService();
+        return starPartyEventService.GetAllEvents();
     }
 
-    public List<StarPartyEventDto> GetAll()
+    public static StarPartyEventDto Save(UpsertStarPartyEventRequestDto request, UserModel hostUser)
     {
-        return _starPartyEventRepository.GetAllEvents();
-    }
-
-    public StarPartyEventDto Save(UpsertStarPartyEventRequestDto request, User hostUser)
-    {
+        var starPartyEventService = new StarPartyEventService();
         var normalizedStartsAt = request.StartsAt.ToUniversalTime();
         var normalizedEndsAt = request.EndsAt?.ToUniversalTime();
         var normalizedTitle = request.Title.Trim();
@@ -52,22 +40,25 @@ public sealed class StarPartyEventService : IStarPartyEventService
             HostChecklist = NormalizeChecklist(request.HostChecklist),
         };
 
-        return _starPartyEventRepository.UpsertEvent(payload, hostUser);
+        return starPartyEventService.UpsertEvent(payload, hostUser);
     }
 
-    public StarPartyEventDto? SetStatus(string id, string status)
+    public static StarPartyEventDto? SetStatus(string id, string status)
     {
-        return _starPartyEventRepository.SetStatus(id.Trim(), NormalizeStatus(status));
+        var starPartyEventService = new StarPartyEventService();
+        return starPartyEventService.SetStatus(id.Trim(), NormalizeStatus(status));
     }
 
-    public bool Delete(string id)
+    public static bool Delete(string id)
     {
-        return _starPartyEventRepository.DeleteEvent(id.Trim());
+        var starPartyEventService = new StarPartyEventService();
+        return starPartyEventService.DeleteEvent(id.Trim());
     }
 
-    public (StarPartyEventDto? Event, bool Joined) ToggleRsvp(string id, User user)
+    public static (StarPartyEventDto? Event, bool Joined) ToggleRsvp(string id, UserModel user)
     {
-        return _starPartyEventRepository.ToggleRsvp(id.Trim(), user);
+        var starPartyEventService = new StarPartyEventService();
+        return starPartyEventService.ToggleRsvp(id.Trim(), user);
     }
 
     private static string NormalizeEventType(string? value)
@@ -91,8 +82,8 @@ public sealed class StarPartyEventService : IStarPartyEventService
     private static List<string> NormalizeChecklist(IEnumerable<string>? values)
     {
         return (values ?? [])
-            .Select(value => (value ?? string.Empty).Trim())
-            .Where(value => !string.IsNullOrWhiteSpace(value))
+            .Select(v => (v ?? string.Empty).Trim())
+            .Where(v => !string.IsNullOrWhiteSpace(v))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .Take(24)
             .ToList();
@@ -109,18 +100,11 @@ public sealed class StarPartyEventService : IStarPartyEventService
     private static string Slugify(string value)
     {
         var lower = (value ?? string.Empty).Trim().ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(lower))
-        {
-            return string.Empty;
-        }
-
+        if (string.IsNullOrWhiteSpace(lower)) return string.Empty;
         var safeChars = lower.Select(ch => char.IsLetterOrDigit(ch) ? ch : '_').ToArray();
         var slug = new string(safeChars);
         while (slug.Contains("__", StringComparison.Ordinal))
-        {
             slug = slug.Replace("__", "_", StringComparison.Ordinal);
-        }
-
         return slug.Trim('_');
     }
 }

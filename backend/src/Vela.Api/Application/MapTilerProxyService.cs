@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace Vela.Api.Application;
 
-public sealed class MapTilerProxyService : IMapTilerProxyService
+public sealed class MapTilerProxyService
 {
     private const string MapTilerHost = "api.maptiler.com";
 

@@ -1,13 +1,48 @@
-using Vela.Api.Configuration;
+using System.Text;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Vela.Api.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApiPresentation();
-builder.Services.AddApplicationServices();
-builder.Services.AddJwtAuthentication(builder.Configuration);
-builder.Services.AddConfiguredCors(builder.Configuration);
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-builder.Services.AddProblemDetails();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// JWT authentication (needed for [Authorize] on controllers)
+var jwtKey = builder.Configuration["Jwt:Key"] ?? "dev-only-jwt-key-change-before-production-1234567890";
+var issuer = builder.Configuration["Jwt:Issuer"] ?? "Vela.Api";
+var audience = builder.Configuration["Jwt:Audience"] ?? "Vela.Client";
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = issuer,
+            ValidAudience = audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ClockSkew = TimeSpan.FromMinutes(1),
+        };
+    });
+builder.Services.AddAuthorization();
+
+// Infrastructure services (proxy services that need HttpClient/cache)
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<WorldAtlasService>();
+builder.Services.AddHttpClient<MapTilerProxyService>();
+builder.Services.AddHttpClient<VisiblePlanetsService>();
 
 var app = builder.Build();
 
@@ -17,11 +52,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseExceptionHandler();
 app.UseHttpsRedirection();
-app.UseCors(ServiceCollectionExtensions.ClientCorsPolicyName);
+
+app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 
 app.Run();

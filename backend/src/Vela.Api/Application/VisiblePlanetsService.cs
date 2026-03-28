@@ -4,7 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace Vela.Api.Application;
 
-public sealed class VisiblePlanetsService : IVisiblePlanetsService
+public sealed class VisiblePlanetsService
 {
     private static readonly TimeSpan CacheDuration = TimeSpan.FromMinutes(10);
 
