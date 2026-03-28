@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 
+const VELA_MORSE_DURATION_MS = 2600;
 const SAIL_MESSAGES = [
   "Gamma Velorum says hi.",
   "Argo Navis didn't break up... it evolved.",
@@ -135,6 +136,54 @@ function VelaSailButton() {
   );
 }
 
+function VelaMorseSignal({ enabled }) {
+  const [visible, setVisible] = useState(enabled);
+
+  useEffect(() => {
+    setVisible(Boolean(enabled));
+  }, [enabled]);
+
+  useEffect(() => {
+    if (!enabled || !visible || typeof window === "undefined") {
+      return undefined;
+    }
+
+    const dismiss = () => setVisible(false);
+    const timer = window.setTimeout(dismiss, VELA_MORSE_DURATION_MS);
+
+    window.addEventListener("pointerdown", dismiss, { passive: true });
+    window.addEventListener("keydown", dismiss);
+    window.addEventListener("wheel", dismiss, { passive: true });
+    window.addEventListener("touchstart", dismiss, { passive: true });
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener("pointerdown", dismiss);
+      window.removeEventListener("keydown", dismiss);
+      window.removeEventListener("wheel", dismiss);
+      window.removeEventListener("touchstart", dismiss);
+    };
+  }, [enabled, visible]);
+
+  if (!visible) return null;
+
+  return (
+    <div className="vela-morse-signal" aria-label="Morse signal for V">
+      <div className="vela-morse-signal__header">
+        <span className="vela-morse-signal__eyebrow">Signal</span>
+        <span className="vela-morse-signal__code">V</span>
+      </div>
+      <div className="vela-morse-signal__pulses" aria-hidden="true">
+        <span className="vela-morse-signal__pulse vela-morse-signal__pulse--short" />
+        <span className="vela-morse-signal__pulse vela-morse-signal__pulse--short" />
+        <span className="vela-morse-signal__pulse vela-morse-signal__pulse--short" />
+        <span className="vela-morse-signal__pulse vela-morse-signal__pulse--long" />
+      </div>
+      <div className="vela-morse-signal__legend">...-</div>
+    </div>
+  );
+}
+
 function ConstellationsPanelToggle({ open, mobile = false, onClick }) {
   const rotation = mobile ? (open ? 90 : -90) : open ? 0 : 180;
 
@@ -162,7 +211,11 @@ function ConstellationsPanelToggle({ open, mobile = false, onClick }) {
   );
 }
 
-function ConstellationsPanelContent({ constellation, leadingStars }) {
+function ConstellationsPanelContent({
+  constellation,
+  leadingStars,
+  isPanelOpen,
+}) {
   return (
     <div className="constellations-detail">
       <div className="constellations-detail__header">
@@ -175,6 +228,9 @@ function ConstellationsPanelContent({ constellation, leadingStars }) {
       <p className="constellations-detail__headline">
         {constellation.headline}
       </p>
+      <VelaMorseSignal
+        enabled={constellation.id === "vela" && isPanelOpen}
+      />
       <div className="constellations-detail__stats">
         <div className="constellations-stat">
           <span>Region</span>
@@ -223,6 +279,7 @@ function ConstellationsPanel({
     <ConstellationsPanelContent
       constellation={constellation}
       leadingStars={leadingStars}
+      isPanelOpen={open}
     />
   );
 
