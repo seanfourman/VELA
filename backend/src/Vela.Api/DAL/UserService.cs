@@ -9,7 +9,7 @@ public class UserService : DBService
 {
     public User? GetUserByEmail(string email)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -26,7 +26,7 @@ public class UserService : DBService
 
     public User? GetUserById(Guid id)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -43,7 +43,7 @@ public class UserService : DBService
 
     public Guid InsertUser(User user)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -79,7 +79,7 @@ public class UserService : DBService
 
     public UserProfileDto? GetUserProfile(Guid userId)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -101,7 +101,7 @@ public class UserService : DBService
 
     public UserProfileDto? UpdateUserProfile(Guid userId, UpdateUserProfileRequestDto request)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -130,7 +130,7 @@ public class UserService : DBService
     public List<AdminManagedUserDto> GetManagedUsers()
     {
         var users = new List<AdminManagedUserDto>();
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -149,7 +149,7 @@ public class UserService : DBService
 
     public User? UpdateUserAccess(Guid userId, bool isAdmin, string role)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -171,7 +171,7 @@ public class UserService : DBService
 
     public int GetAdminCount()
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();

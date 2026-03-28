@@ -12,7 +12,7 @@ public class RecommendationService : DBService
     public List<RecommendationDto> GetAll()
     {
         var recommendations = new List<RecommendationDto>();
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -31,7 +31,7 @@ public class RecommendationService : DBService
 
     public RecommendationDto SaveRecommendation(string id, UpsertRecommendationRequestDto request)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -59,7 +59,7 @@ public class RecommendationService : DBService
 
     public bool DeleteRecommendation(string id)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();

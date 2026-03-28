@@ -13,7 +13,7 @@ public class StarPartyEventService : DBService
     public List<StarPartyEventDto> GetAllEvents()
     {
         var events = new List<StarPartyEventDto>();
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -32,7 +32,7 @@ public class StarPartyEventService : DBService
 
     public StarPartyEventDto UpsertEvent(UpsertStarPartyEventRequestDto request, User hostUser)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -81,7 +81,7 @@ public class StarPartyEventService : DBService
 
     public StarPartyEventDto? SetStatus(string eventId, string status)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -103,7 +103,7 @@ public class StarPartyEventService : DBService
 
     public bool DeleteEvent(string eventId)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -119,7 +119,7 @@ public class StarPartyEventService : DBService
 
     public (StarPartyEventDto? Event, bool Joined) ToggleRsvp(string eventId, User user)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
