@@ -208,6 +208,10 @@
   transform: none;
 }
 
+.settings-page .distance-toggle {
+  box-shadow: none;
+}
+
 .settings-page .distance-menu {
   min-width: 100%;
   top: auto;
@@ -218,6 +222,7 @@
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   background: var(--glass-bg);
+  box-shadow: none;
 }
 
 .settings-actions {
