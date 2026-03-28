@@ -65,8 +65,6 @@ function SailingShip({ onDone }) {
               stroke="rgba(160,130,90,0.5)"
               strokeWidth="1"
             />
-            {/* bowsprit */}
-            <line x1="120" y1="78" x2="145" y2="68" stroke="rgba(190,170,140,0.8)" strokeWidth="2" strokeLinecap="round" />
             {/* flag */}
             <path
               d="M80 10 Q88 6 80 2"
