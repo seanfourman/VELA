@@ -44,25 +44,19 @@ const useMapDirections = ({
       }
 
       const resolvedLabel = label || "Location";
-      window.setTimeout(() => {
-        const opened = window.open(url, "_blank");
-        if (!opened) {
-          showNotification(
-            "Pop-up blocked. Allow pop-ups to open Google Maps",
-            "warning",
-            { duration: 2600 },
-          );
-          return;
-        }
-        try {
-          opened.opener = null;
-        } catch {
-          // Ignore if the browser prevents access to the new window handle.
-        }
-        showNotification(`Opened ${resolvedLabel} in Google Maps`, "info", {
-          duration: 2000,
-        });
-      }, 1500);
+      const opened = window.open(url, "_blank", "noopener,noreferrer");
+      if (!opened) {
+        showNotification(
+          "Pop-up blocked. Allow pop-ups to open Google Maps",
+          "warning",
+          { duration: 2600 },
+        );
+        return;
+      }
+
+      showNotification(`Opened ${resolvedLabel} in Google Maps`, "info", {
+        duration: 2000,
+      });
     },
     [buildShareUrl],
   );
