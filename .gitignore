@@ -41,3 +41,5 @@ backend/**/appsettings.Development.json
 backend/.build-check/
 backend/.test-build/
 backend/.test-obj/
+
+.claude
