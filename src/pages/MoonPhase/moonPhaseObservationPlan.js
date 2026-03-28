@@ -130,9 +130,7 @@ function formatDuration(durationMs) {
 }
 
 function getObservationScore(moonlessRatio, moonIllumination) {
-  const score = Math.round(
-    moonlessRatio * 60 + (100 - moonIllumination) * 0.4,
-  );
+  const score = Math.round(moonlessRatio * 60 + (100 - moonIllumination) * 0.4);
 
   return Math.max(0, Math.min(100, score));
 }
@@ -161,13 +159,14 @@ function getRecommendedTargets(moonlessRatio, moonIllumination) {
     return {
       label: "Clusters & Nebulae",
       subtext:
-        "Partial moon-free windows favor brighter deep-sky targets with more contrast.",
+        "Partial moon-free windows improve contrast for bright deep-sky targets.",
     };
   }
 
   return {
     label: "Planets & Stars",
-    subtext: "Moonlight dominates tonight, so high-contrast targets will hold up best.",
+    subtext:
+      "Moonlight dominates tonight, so high-contrast targets will hold up best.",
   };
 }
 
@@ -231,7 +230,11 @@ export function buildLiveObservationPlan(date, location, moonIllumination) {
   if (!location) return null;
 
   const nightBounds = getNightBounds(date, location.lat, location.lng);
-  if (!nightBounds?.start || !nightBounds?.end || nightBounds.end <= nightBounds.start) {
+  if (
+    !nightBounds?.start ||
+    !nightBounds?.end ||
+    nightBounds.end <= nightBounds.start
+  ) {
     return null;
   }
 
@@ -312,8 +315,7 @@ export function buildSimulatedObservationPlan(moonIllumination) {
         : moonIllumination > 40
           ? "Later tonight"
           : "All night",
-    bestWindowSubtext:
-      "Moonrise and moonset windows only apply to the actual current moon.",
+    bestWindowSubtext: "Only applies to the current moon.",
     recommendedTarget: recommendedTargets.label,
     recommendedTargetSubtext: recommendedTargets.subtext,
   };
