@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 const SAIL_MESSAGES = [
-  "You found me! I AM the app.",
   "Gamma Velorum says hi.",
   "Argo Navis didn't break up... it evolved.",
   "Fun fact: Vela was once part of a mega-constellation shaped like a ship.",
@@ -28,18 +27,70 @@ function SailingShip({ onDone }) {
     <div className="vela-ship-overlay" aria-hidden="true">
       <div className="vela-ship-runner">
         <div className="vela-ship-sprite">
-          <svg viewBox="0 0 120 100" width="120" height="100" fill="none">
-            {/* hull */}
-            <path d="M10 68 Q20 82 60 82 Q100 82 110 68 L100 68 Q90 76 60 76 Q30 76 20 68 Z" fill="rgba(180,140,90,0.9)" />
+          <svg viewBox="0 0 160 120" width="160" height="120" fill="none">
+            {/* main sail */}
+            <path
+              d="M80 12 C80 12 112 38 108 78 L80 78 Z"
+              fill="rgba(230,240,255,0.85)"
+              stroke="rgba(180,210,255,0.4)"
+              strokeWidth="0.8"
+            />
+            {/* secondary sail */}
+            <path
+              d="M78 20 C78 20 52 42 56 78 L78 78 Z"
+              fill="rgba(200,220,245,0.65)"
+              stroke="rgba(160,195,240,0.3)"
+              strokeWidth="0.8"
+            />
+            {/* front jib sail */}
+            <path
+              d="M82 18 C82 18 120 40 118 62 L108 70 Z"
+              fill="rgba(210,230,255,0.5)"
+              stroke="rgba(170,205,245,0.3)"
+              strokeWidth="0.6"
+            />
             {/* mast */}
-            <line x1="60" y1="18" x2="60" y2="76" stroke="rgba(200,170,120,0.85)" strokeWidth="3" />
-            {/* sail */}
-            <path d="M62 22 Q85 40 62 62 Z" fill="rgba(240,240,255,0.88)" />
-            <path d="M58 26 Q38 42 58 58 Z" fill="rgba(220,230,255,0.72)" />
+            <line x1="80" y1="10" x2="80" y2="82" stroke="rgba(190,170,140,0.9)" strokeWidth="2.5" strokeLinecap="round" />
+            {/* hull */}
+            <path
+              d="M30 82 C30 82 38 100 80 100 C122 100 130 82 130 82 Z"
+              fill="rgba(90,65,40,0.9)"
+              stroke="rgba(120,90,60,0.6)"
+              strokeWidth="1"
+            />
+            {/* hull trim */}
+            <path
+              d="M36 86 C36 86 45 98 80 98 C115 98 124 86 124 86"
+              fill="none"
+              stroke="rgba(160,130,90,0.5)"
+              strokeWidth="1"
+            />
+            {/* bowsprit */}
+            <line x1="120" y1="78" x2="145" y2="68" stroke="rgba(190,170,140,0.8)" strokeWidth="2" strokeLinecap="round" />
             {/* flag */}
-            <path d="M60 18 Q70 14 60 10" stroke="#66e6ff" strokeWidth="2" fill="none" />
-            {/* waves */}
-            <path d="M0 74 Q15 70 30 74 Q45 78 60 74 Q75 70 90 74 Q105 78 120 74" stroke="rgba(102,230,255,0.5)" strokeWidth="2" fill="none" />
+            <path
+              d="M80 10 Q88 6 80 2"
+              stroke="#66e6ff"
+              strokeWidth="1.8"
+              fill="none"
+              strokeLinecap="round"
+            />
+            {/* water line */}
+            <path
+              d="M10 102 Q25 96 40 102 Q55 108 70 102 Q85 96 100 102 Q115 108 130 102 Q145 96 155 102"
+              stroke="rgba(102,230,255,0.35)"
+              strokeWidth="1.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+            {/* second wave */}
+            <path
+              d="M5 110 Q20 104 35 110 Q50 116 65 110 Q80 104 95 110 Q110 116 125 110 Q140 104 155 110"
+              stroke="rgba(102,230,255,0.2)"
+              strokeWidth="1"
+              fill="none"
+              strokeLinecap="round"
+            />
           </svg>
         </div>
         <p className="vela-ship-message">{message}</p>
@@ -66,7 +117,16 @@ function VelaSailButton() {
         onClick={handleClick}
         data-tooltip="Set Sail!"
       >
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M2 20 Q6 18 12 18 Q18 18 22 20" />
           <path d="M12 4 L12 18" />
           <path d="M12 4 Q18 10 12 16" />
@@ -85,7 +145,9 @@ function ConstellationsPanelToggle({ open, mobile = false, onClick }) {
       type="button"
       className={`solar-system-panel-toggle ${open ? "active" : ""}`}
       onClick={onClick}
-      aria-label={open ? "Hide constellation panel" : "Show constellation panel"}
+      aria-label={
+        open ? "Hide constellation panel" : "Show constellation panel"
+      }
     >
       <svg
         width="20"
@@ -106,11 +168,15 @@ function ConstellationsPanelContent({ constellation, leadingStars }) {
   return (
     <div className="constellations-detail">
       <div className="constellations-detail__header">
-        <div className="constellations-detail__eyebrow">Selected constellation</div>
+        <div className="constellations-detail__eyebrow">
+          Selected constellation
+        </div>
         {constellation.id === "vela" && <VelaSailButton />}
       </div>
       <h2 className="constellations-detail__title">{constellation.name}</h2>
-      <p className="constellations-detail__headline">{constellation.headline}</p>
+      <p className="constellations-detail__headline">
+        {constellation.headline}
+      </p>
       <div className="constellations-detail__stats">
         <div className="constellations-stat">
           <span>Region</span>
@@ -129,7 +195,9 @@ function ConstellationsPanelContent({ constellation, leadingStars }) {
           <strong>{constellation.connections.length}</strong>
         </div>
       </div>
-      <p className="constellations-detail__description">{constellation.description}</p>
+      <p className="constellations-detail__description">
+        {constellation.description}
+      </p>
       <div className="constellations-detail__known-for">
         <span>Known for</span>
         <strong>{constellation.knownFor}</strong>
@@ -170,7 +238,11 @@ function ConstellationsPanel({
         <div
           className={`solar-system-panel-mobile__toggle-slot ${open ? "open" : "ready"}`}
         >
-          <ConstellationsPanelToggle open={open} mobile onClick={onToggleOpen} />
+          <ConstellationsPanelToggle
+            open={open}
+            mobile
+            onClick={onToggleOpen}
+          />
         </div>
         <aside className="solar-system-panel-mobile__sheet">
           <div className="solar-system-panel-mobile__scroll">{content}</div>
@@ -180,7 +252,9 @@ function ConstellationsPanel({
   }
 
   return (
-    <div className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}>
+    <div
+      className={`solar-system-panel-wrapper ${open ? "open" : "collapsed"}`}
+    >
       <ConstellationsPanelToggle open={open} onClick={onToggleOpen} />
       <aside className="solar-system-panel">
         <div className="solar-system-panel__scroll">{content}</div>

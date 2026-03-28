@@ -538,7 +538,7 @@
 }
 
 .vela-ship-sprite {
-  filter: drop-shadow(0 0 12px rgba(102, 230, 255, 0.5));
+  filter: drop-shadow(0 0 14px rgba(102, 230, 255, 0.4));
   animation: vela-ship-bob 1.2s ease-in-out infinite;
 }
 
