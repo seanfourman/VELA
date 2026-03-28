@@ -9,7 +9,7 @@ public abstract class DBService
     {
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json").Build();
-        string cStr = configuration.GetConnectionString("myProjDB");
+        string cStr = configuration.GetConnectionString("myProjDB")!;
         var con = new SqlConnection(cStr);
         con.Open();
         return con;

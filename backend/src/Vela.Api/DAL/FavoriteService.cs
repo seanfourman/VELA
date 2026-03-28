@@ -9,7 +9,7 @@ public class FavoriteService : DBService
     public List<FavoriteSpotDto> GetFavorites(Guid userId)
     {
         var favorites = new List<FavoriteSpotDto>();
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -29,7 +29,7 @@ public class FavoriteService : DBService
 
     public FavoriteSpotDto SaveFavorite(Guid userId, string spotId, double lat, double lon, string? customName)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -64,7 +64,7 @@ public class FavoriteService : DBService
 
     public FavoriteSpotDto? UpdateFavorite(Guid userId, string spotId, string? customName)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
@@ -87,7 +87,7 @@ public class FavoriteService : DBService
 
     public bool DeleteFavorite(Guid userId, string spotId)
     {
-        SqlConnection con = null;
+        SqlConnection? con = null;
         try
         {
             con = Connect();
