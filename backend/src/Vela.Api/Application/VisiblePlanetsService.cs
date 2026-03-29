@@ -29,6 +29,7 @@ public sealed class VisiblePlanetsService
         CancellationToken cancellationToken = default
     )
     {
+        // Round cache keys to ~meter-level precision so nearby duplicate requests collapse together.
         var cacheKey =
             $"visible-planets:{lat.ToString("F5", CultureInfo.InvariantCulture)}:{lon.ToString("F5", CultureInfo.InvariantCulture)}";
         if (_memoryCache.TryGetValue(cacheKey, out VisiblePlanetsProxyResponse? cached) && cached is not null)
@@ -42,6 +43,7 @@ public sealed class VisiblePlanetsService
 
         if (!response.IsSuccessStatusCode)
         {
+            // Surface upstream error text when available so controller logs and callers get something actionable.
             var message = System.Text.Encoding.UTF8.GetString(bytes);
             throw new InvalidOperationException(
                 string.IsNullOrWhiteSpace(message)
@@ -69,6 +71,7 @@ public sealed class VisiblePlanetsService
             _configuration["VisiblePlanets:BaseUrl"]?.Trim().TrimEnd('/')
             ?? "https://api.visibleplanets.dev/v3";
 
+        // "G17" preserves enough precision that the proxy does not accidentally move the requested position.
         var query = new Dictionary<string, string>
         {
             ["latitude"] = lat.ToString("G17", CultureInfo.InvariantCulture),

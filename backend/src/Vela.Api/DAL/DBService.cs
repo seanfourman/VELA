@@ -7,6 +7,7 @@ public abstract class DBService
 {
     protected SqlConnection Connect()
     {
+        // DAL services open short-lived connections per operation and rely on SQL connection pooling underneath.
         var configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json").Build();
         string cStr = configuration.GetConnectionString("myProjDB")!;
@@ -21,6 +22,7 @@ public abstract class DBService
         cmd.CommandType = CommandType.StoredProcedure;
         if (parameters != null)
         {
+            // DBNull keeps optional inputs compatible with the stored procedure signatures.
             foreach (var param in parameters)
             {
                 cmd.Parameters.AddWithValue(param.Key, param.Value ?? DBNull.Value);

@@ -22,6 +22,7 @@ public class UsersController : ControllerBase
             if (validationErrors.Any())
                 return BadRequest(new { errors = validationErrors });
 
+            // BL.User owns password hashing, persistence, and token-ready user hydration for auth responses.
             var (status, user) = BL.User.Register(request);
 
             return status switch
@@ -68,6 +69,7 @@ public class UsersController : ControllerBase
     {
         try
         {
+            // JWT middleware authenticates the request, then the BL extracts the application user id claim.
             var userId = BL.User.ReadUserId(User);
             if (!userId.HasValue) return Unauthorized();
 
@@ -155,6 +157,7 @@ public class UsersController : ControllerBase
             var actorUserId = BL.User.ReadUserId(User);
             if (!actorUserId.HasValue) return Unauthorized();
 
+            // The business layer enforces role validity and prevents removing the final admin account.
             var (status, updatedUser) = BL.User.UpdateUserAccess(actorUserId.Value, id, request);
 
             return status switch

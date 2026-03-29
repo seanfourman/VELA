@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
+    // Keep enum values stable for the JS client instead of serializing raw integers.
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
@@ -26,6 +27,7 @@ builder.Services
         options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
+            // The API issues its own compact JWTs, so validation stays strict and predictable here.
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
@@ -54,6 +56,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// The frontend can be hosted separately, so the API keeps CORS permissive for now.
 app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
 app.UseAuthentication();

@@ -50,6 +50,7 @@ public sealed class WorldAtlasService
         EnsureCoordinatesInBounds(atlas, lat, lon);
 
         var radiusKm = Clamp(searchDistanceKm, 1d, 250d);
+        // Convert the requested radius into a bounded atlas window before scanning raster samples.
         var latDelta = radiusKm / 110.574d;
         var lonDelta = radiusKm / (111.32d * Math.Max(Math.Abs(Math.Cos(ToRadians(lat))), 0.2d));
 
@@ -145,6 +146,7 @@ public sealed class WorldAtlasService
         int windowHeight
     )
     {
+        // Increase the stride for larger windows so searches remain responsive without scanning every pixel.
         var stride = Math.Max(1, (int)Math.Floor(Math.Sqrt((windowWidth * windowHeight) / (double)MaxSamples)));
         var landMask = _landMask.Value;
         var geometryFactory = GeometryFactory.Default;
@@ -165,6 +167,7 @@ public sealed class WorldAtlasService
                     continue;
                 }
 
+                // The atlas covers oceans too, but dark-spot suggestions should only point at reachable land.
                 var point = geometryFactory.CreatePoint(new Coordinate(sampleLon, sampleLat));
                 if (!landMask.Intersects(point))
                 {
@@ -209,6 +212,7 @@ public sealed class WorldAtlasService
 
     private static List<DarkSpotDto> SelectDistinctDarkSpots(List<DarkSpotDto> candidates, double radiusKm)
     {
+        // Spread results out so the client gets a shortlist of distinct destinations, not clustered neighbors.
         var minSeparationKm = Math.Max(3d, radiusKm / 8d);
         var selected = new List<DarkSpotDto>();
         foreach (var candidate in candidates)
@@ -258,6 +262,7 @@ public sealed class WorldAtlasService
         var lonSpan = tileBounds.MaxLon - tileBounds.MinLon;
         var latSpan = tileBounds.MaxLat - tileBounds.MinLat;
 
+        // Reproject each output tile pixel back into atlas coordinates and bilinearly sample brightness there.
         for (var row = 0; row < LightTileSize; row += 1)
         {
             cancellationToken.ThrowIfCancellationRequested();

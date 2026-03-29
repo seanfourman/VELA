@@ -31,6 +31,7 @@ public class SkyMapController : ControllerBase
         try
         {
             var response = await _visiblePlanetsService.GetAsync(lat, lon, cancellationToken);
+            // Forward upstream cache hints so repeat map loads can stay cheap on both client and CDN layers.
             Response.Headers["Cache-Control"] = response.CacheControl;
             return File(response.Content, response.ContentType);
         }
@@ -49,6 +50,7 @@ public class SkyMapController : ControllerBase
 
         try
         {
+            // Sky quality changes slowly, so a 24h cache window is safe for this static dataset.
             Response.Headers["Cache-Control"] = "public, max-age=86400";
             return Ok(_worldAtlasService.GetSkyQuality(lat, lon));
         }
@@ -72,6 +74,7 @@ public class SkyMapController : ControllerBase
 
         try
         {
+            // Nearby dark-spot discovery is dynamic only with respect to the query point, not live telemetry.
             Response.Headers["Cache-Control"] = "public, max-age=600";
             return Ok(_worldAtlasService.GetDarkSpots(lat, lon, searchDistance ?? 25d));
         }
