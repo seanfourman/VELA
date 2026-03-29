@@ -49,6 +49,7 @@ public sealed class WorldAtlasService
         var atlas = _metadata.Value;
         EnsureCoordinatesInBounds(atlas, lat, lon);
 
+        // Convert the radial search into a clipped raster window before scanning candidate pixels.
         var radiusKm = Clamp(searchDistanceKm, 1d, 250d);
         var latDelta = radiusKm / 110.574d;
         var lonDelta = radiusKm / (111.32d * Math.Max(Math.Abs(Math.Cos(ToRadians(lat))), 0.2d));
@@ -145,6 +146,7 @@ public sealed class WorldAtlasService
         int windowHeight
     )
     {
+        // Downsample large search windows so the endpoint stays responsive during map interaction.
         var stride = Math.Max(1, (int)Math.Floor(Math.Sqrt((windowWidth * windowHeight) / (double)MaxSamples)));
         var landMask = _landMask.Value;
         var geometryFactory = GeometryFactory.Default;
@@ -209,6 +211,7 @@ public sealed class WorldAtlasService
 
     private static List<DarkSpotDto> SelectDistinctDarkSpots(List<DarkSpotDto> candidates, double radiusKm)
     {
+        // Prefer dark candidates, but keep them spaced out so the client does not receive clustered duplicates.
         var minSeparationKm = Math.Max(3d, radiusKm / 8d);
         var selected = new List<DarkSpotDto>();
         foreach (var candidate in candidates)
@@ -253,6 +256,7 @@ public sealed class WorldAtlasService
         CancellationToken cancellationToken
     )
     {
+        // Light tiles are rendered from atlas samples so the frontend can use them as a normal raster layer.
         using var sampler = new RasterSampler(atlas);
         using var image = new Image<Rgba32>(LightTileSize, LightTileSize);
         var lonSpan = tileBounds.MaxLon - tileBounds.MinLon;

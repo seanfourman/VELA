@@ -13,6 +13,7 @@ public class User
 
     private static readonly string[] UserIdClaimTypes =
     [
+        // Support both raw JWT claim names and framework-mapped claim aliases.
         JwtRegisteredClaimNames.Sub,
         ClaimTypes.NameIdentifier,
         "sub",
@@ -99,6 +100,7 @@ public class User
     {
         var userService = new UserService();
 
+        // Prevent the active admin from removing their own access in the same session.
         if (actorUserId == targetUserId)
             return ("CannotModifyOwnAccess", null);
 
@@ -150,6 +152,7 @@ public class User
 
         var claims = new List<Claim>
         {
+            // Profile fields stay out of the token and continue to come from API reads.
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Email, user.Email),
             new(JwtRegisteredClaimNames.UniqueName, user.Name),
@@ -174,6 +177,7 @@ public class User
     public static Guid? ReadUserId(ClaimsPrincipal? principal)
     {
         if (principal is null) return null;
+        // Different hosts can surface the subject claim under different names.
         foreach (var claimType in UserIdClaimTypes)
         {
             var rawUserId = principal.FindFirst(claimType)?.Value;

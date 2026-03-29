@@ -8,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
+    // Keep API payloads readable for the frontend when enums are introduced.
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
@@ -41,6 +42,7 @@ builder.Services.AddAuthorization();
 // Infrastructure services (proxy services that need HttpClient/cache)
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<WorldAtlasService>();
+// External API callers are registered as typed clients so HttpClient lifetime stays managed by DI.
 builder.Services.AddHttpClient<MapTilerProxyService>();
 builder.Services.AddHttpClient<VisiblePlanetsService>();
 
@@ -54,6 +56,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// The frontend is hosted separately, so the API currently accepts cross-origin requests from anywhere.
 app.UseCors(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
 app.UseAuthentication();

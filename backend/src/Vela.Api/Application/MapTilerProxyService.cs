@@ -25,6 +25,7 @@ public sealed class MapTilerProxyService
     )
     {
         var normalizedPath = NormalizeResourcePath(resourcePath);
+        // The backend injects the real API key so the browser never needs direct MapTiler credentials.
         var upstreamUrl = BuildUpstreamUrl(normalizedPath, query);
 
         using var response = await _httpClient.GetAsync(upstreamUrl, cancellationToken);
@@ -49,6 +50,7 @@ public sealed class MapTilerProxyService
 
         if (ShouldRewriteJson(normalizedPath, contentType))
         {
+            // Style JSON can contain nested MapTiler URLs that must be routed back through this proxy.
             var json = Encoding.UTF8.GetString(bytes);
             var rewritten = RewriteJsonPayload(json, proxyBaseUrl);
             bytes = Encoding.UTF8.GetBytes(rewritten);
@@ -84,6 +86,7 @@ public sealed class MapTilerProxyService
         var queryValues = new List<string>();
         foreach (var entry in query)
         {
+            // Ignore user-supplied keys and internal underscore params before forwarding upstream.
             if (string.Equals(entry.Key, "key", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
@@ -176,6 +179,7 @@ public sealed class MapTilerProxyService
         switch (node)
         {
             case JsonObject jsonObject:
+                // Style documents can nest URLs deeply, so every node is traversed recursively.
                 foreach (var property in jsonObject.ToList())
                 {
                     if (property.Value is null)

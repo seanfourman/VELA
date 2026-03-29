@@ -36,6 +36,7 @@ public class StarPartyEventService : DBService
         try
         {
             con = Connect();
+            // Checklist data is persisted as JSON so the event row can stay mostly flat.
             var parameters = new Dictionary<string, object>
             {
                 { "@Id", request.Id!.Trim() },
@@ -59,6 +60,7 @@ public class StarPartyEventService : DBService
             {
                 if (reader.Read()) return MapReaderToEvent(reader);
             }
+            // Fall back to a normalized DTO if the stored procedure completes without returning a row.
             return new StarPartyEventDto
             {
                 Id = request.Id!.Trim(),
@@ -184,6 +186,7 @@ public class StarPartyEventService : DBService
 
     private static List<string> NormalizeChecklist(IEnumerable<string>? checklist)
     {
+        // Normalize before serialization so duplicates and blank items do not get stored.
         return (checklist ?? [])
             .Select(v => (v ?? string.Empty).Trim())
             .Where(v => !string.IsNullOrWhiteSpace(v))
@@ -205,6 +208,7 @@ public class StarPartyEventService : DBService
         try
         {
             var list = JsonSerializer.Deserialize<List<StarPartyRsvpDto>>(json, JsonOptions);
+            // Older rows may contain partial RSVP snapshots, so sanitize the shape on read.
             return (list ?? [])
                 .Where(item => !string.IsNullOrWhiteSpace(item.UserId))
                 .Select(item => new StarPartyRsvpDto
