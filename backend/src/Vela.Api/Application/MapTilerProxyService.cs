@@ -34,9 +34,10 @@ public sealed class MapTilerProxyService
         if (!response.IsSuccessStatusCode)
         {
             var errorMessage = Encoding.UTF8.GetString(bytes);
-            throw new InvalidOperationException(
+            throw new MapTilerProxyException(
+                (int)response.StatusCode,
                 string.IsNullOrWhiteSpace(errorMessage)
-                    ? $"MapTiler request failed ({(int)response.StatusCode})"
+                    ? $"MapTiler request failed ({(int)response.StatusCode})."
                     : errorMessage
             );
         }

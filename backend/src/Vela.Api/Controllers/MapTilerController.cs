@@ -9,10 +9,15 @@ namespace Vela.Api.Controllers;
 public class MapTilerController : ControllerBase
 {
     private readonly MapTilerProxyService _mapTilerProxyService;
+    private readonly ILogger<MapTilerController> _logger;
 
-    public MapTilerController(MapTilerProxyService mapTilerProxyService)
+    public MapTilerController(
+        MapTilerProxyService mapTilerProxyService,
+        ILogger<MapTilerController> logger
+    )
     {
         _mapTilerProxyService = mapTilerProxyService;
+        _logger = logger;
     }
 
     [AllowAnonymous]
@@ -39,8 +44,26 @@ public class MapTilerController : ControllerBase
 
             return File(response.Content, response.ContentType);
         }
-        catch (Exception)
+        catch (MapTilerProxyException exception)
         {
+            _logger.LogWarning(
+                "MapTiler proxy request for '{ResourcePath}' failed with upstream status {StatusCode}.",
+                resourcePath,
+                exception.StatusCode
+            );
+
+            return StatusCode(
+                exception.StatusCode,
+                new { error = "MapTiler request failed", details = exception.Message }
+            );
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "MapTiler proxy request for '{ResourcePath}' failed unexpectedly.",
+                resourcePath
+            );
             return StatusCode(500, new { error = "Failed to proxy MapTiler request" });
         }
     }
