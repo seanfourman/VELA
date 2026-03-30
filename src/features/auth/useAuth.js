@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   fetchSessionUser,
   loginUser,
@@ -9,6 +9,7 @@ import {
 
 export function useAuth() {
   const [authState, setAuthState] = useState(() => readAuthState());
+  const validatedTokenRef = useRef("");
   const session = authState.session;
   const user = session?.user || null;
   const token = session?.token || "";
@@ -19,6 +20,7 @@ export function useAuth() {
   }, []);
 
   const signOut = useCallback(() => {
+    validatedTokenRef.current = "";
     persistAuthSession(null);
     updateSession(null);
   }, [updateSession]);
@@ -53,14 +55,19 @@ export function useAuth() {
   );
 
   useEffect(() => {
-    if (!session?.token) return;
-    if (session?.user) return;
+    const sessionToken = String(session?.token || "").trim();
+    if (!sessionToken) {
+      validatedTokenRef.current = "";
+      return;
+    }
+    if (validatedTokenRef.current === sessionToken) return;
 
     let cancelled = false;
     (async () => {
       try {
-        const resolvedUser = await fetchSessionUser(session.token);
+        const resolvedUser = await fetchSessionUser(sessionToken);
         if (cancelled || !resolvedUser) return;
+        validatedTokenRef.current = sessionToken;
         const nextSession = {
           ...session,
           user: resolvedUser,

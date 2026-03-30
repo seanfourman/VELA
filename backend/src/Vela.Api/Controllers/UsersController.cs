@@ -9,6 +9,13 @@ namespace Vela.Api.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
+    private readonly IConfiguration _configuration;
+
+    public UsersController(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     [AllowAnonymous]
     [HttpPost("register")]
     public IActionResult Register([FromBody] RegisterRequestDto request)
@@ -26,7 +33,7 @@ public class UsersController : ControllerBase
 
             return status switch
             {
-                "Success" when user != null => Ok(BuildAuthResponse(user)),
+                "Success" when user != null => Ok(BuildAuthResponse(user, _configuration)),
                 "UserExists" => Conflict("An account with that email already exists."),
                 "InvalidEmail" => BadRequest("A valid email is required."),
                 _ => StatusCode(500, "Registration failed due to an unknown error."),
@@ -54,7 +61,7 @@ public class UsersController : ControllerBase
             if (loggedInUser == null)
                 return Unauthorized("Invalid email or password.");
 
-            return Ok(BuildAuthResponse(loggedInUser));
+            return Ok(BuildAuthResponse(loggedInUser, _configuration));
         }
         catch (Exception)
         {
@@ -173,9 +180,12 @@ public class UsersController : ControllerBase
         }
     }
 
-    private static AuthResponseDto BuildAuthResponse(Models.User user)
+    private static AuthResponseDto BuildAuthResponse(
+        Models.User user,
+        IConfiguration configuration
+    )
     {
-        var (token, expiresAt) = BL.User.CreateToken(user);
+        var (token, expiresAt) = BL.User.CreateToken(user, configuration);
         return new AuthResponseDto
         {
             Token = token,

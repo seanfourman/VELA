@@ -140,9 +140,11 @@ public class User
         return ("Success", dto);
     }
 
-    public static (string Token, DateTime ExpiresAtUtc) CreateToken(Models.User user)
+    public static (string Token, DateTime ExpiresAtUtc) CreateToken(
+        Models.User user,
+        IConfiguration configuration
+    )
     {
-        var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
         var issuer = configuration["Jwt:Issuer"] ?? "Vela.Api";
         var audience = configuration["Jwt:Audience"] ?? "Vela.Client";
         var key = configuration["Jwt:Key"]
