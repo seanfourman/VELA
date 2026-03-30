@@ -36,8 +36,6 @@ export const useAppLayoutContext = () => {
   return context;
 };
 
-// asdasdasdsadas
-
 function AppLayout() {
   const [isThreeDModeActive, setIsThreeDModeActive] = useState(false);
   const bootstrapData = useLoaderData();
