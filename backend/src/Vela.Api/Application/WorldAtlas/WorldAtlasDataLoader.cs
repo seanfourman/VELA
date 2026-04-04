@@ -1,8 +1,5 @@
 using System.Globalization;
 using BitMiracle.LibTiff.Classic;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Geometries.Prepared;
-using NetTopologySuite.IO;
 
 namespace Vela.Api.Application;
 
@@ -56,16 +53,6 @@ internal sealed class WorldAtlasDataLoader
         );
     }
 
-    public IPreparedGeometry LoadLandMask()
-    {
-        var landMaskPath = ResolveLandMaskPath();
-        var json = File.ReadAllText(landMaskPath);
-        var geometry = new GeoJsonReader().Read<Geometry>(json)
-            ?? throw new InvalidOperationException("Could not parse the land-mask geometry.");
-
-        return PreparedGeometryFactory.Prepare(geometry);
-    }
-
     private string ResolveWorldAtlasPath()
     {
         var configured = _configuration["WorldAtlas:Path"];
@@ -89,27 +76,6 @@ internal sealed class WorldAtlasDataLoader
         throw new FileNotFoundException(
             "World_Atlas_2015.tif was not found. Expected it in data/ or public/."
         );
-    }
-
-    private string ResolveLandMaskPath()
-    {
-        var configured = _configuration["WorldAtlas:LandMaskPath"];
-        if (!string.IsNullOrWhiteSpace(configured))
-        {
-            var resolved = ResolvePath(configured);
-            if (File.Exists(resolved))
-            {
-                return resolved;
-            }
-        }
-
-        var bundled = Path.Combine(_environment.ContentRootPath, "Data", "land-10m.geojson");
-        if (File.Exists(bundled))
-        {
-            return bundled;
-        }
-
-        throw new FileNotFoundException("land-10m.geojson was not found for the backend land mask.");
     }
 
     private IEnumerable<string> GetWorldAtlasCandidates()

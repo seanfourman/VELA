@@ -1,6 +1,4 @@
 using Microsoft.Extensions.Caching.Memory;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Geometries.Prepared;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
@@ -15,7 +13,6 @@ public sealed class WorldAtlasService
     private readonly IMemoryCache _memoryCache;
     private readonly WorldAtlasDataLoader _dataLoader;
     private readonly Lazy<AtlasMetadata> _metadata;
-    private readonly Lazy<IPreparedGeometry> _landMask;
 
     public WorldAtlasService(
         IConfiguration configuration,
@@ -26,7 +23,6 @@ public sealed class WorldAtlasService
         _memoryCache = memoryCache;
         _dataLoader = new WorldAtlasDataLoader(configuration, environment);
         _metadata = new Lazy<AtlasMetadata>(_dataLoader.LoadMetadata, LazyThreadSafetyMode.ExecutionAndPublication);
-        _landMask = new Lazy<IPreparedGeometry>(_dataLoader.LoadLandMask, LazyThreadSafetyMode.ExecutionAndPublication);
     }
 
     public SkyQualityResponseDto GetSkyQuality(double lat, double lon)
@@ -148,8 +144,6 @@ public sealed class WorldAtlasService
     {
         // Downsample large search windows so the endpoint stays responsive during map interaction.
         var stride = Math.Max(1, (int)Math.Floor(Math.Sqrt((windowWidth * windowHeight) / (double)MaxSamples)));
-        var landMask = _landMask.Value;
-        var geometryFactory = GeometryFactory.Default;
         var candidates = new List<DarkSpotDto>();
 
         using var sampler = new RasterSampler(atlas);
@@ -163,12 +157,6 @@ public sealed class WorldAtlasService
                 var sampleLon = atlas.MinLon + ((worldCol + 0.5d) * atlas.XResolution);
                 var distanceKm = HaversineKm(originLat, originLon, sampleLat, sampleLon);
                 if (distanceKm > radiusKm)
-                {
-                    continue;
-                }
-
-                var point = geometryFactory.CreatePoint(new Coordinate(sampleLon, sampleLat));
-                if (!landMask.Intersects(point))
                 {
                     continue;
                 }
