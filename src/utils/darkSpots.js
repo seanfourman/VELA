@@ -30,7 +30,9 @@ const readErrorMessage = async (response) => {
  * @returns {Promise<Array>} - Array of stargazing location objects.
  */
 export async function fetchDarkSpots(lat, lon, searchDistance) {
-  const response = await fetch(buildDarkSpotsUrl(lat, lon, searchDistance)).catch(
+  const response = await fetch(buildDarkSpotsUrl(lat, lon, searchDistance), {
+    cache: "no-store",
+  }).catch(
     (error) => {
       const message =
         error instanceof Error && error.message

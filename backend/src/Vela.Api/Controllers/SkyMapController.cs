@@ -72,7 +72,7 @@ public class SkyMapController : ControllerBase
 
         try
         {
-            Response.Headers["Cache-Control"] = "public, max-age=600";
+            Response.Headers["Cache-Control"] = "no-store, no-cache, max-age=0";
             return Ok(_worldAtlasService.GetDarkSpots(lat, lon, searchDistance ?? 25d));
         }
         catch (ArgumentOutOfRangeException)

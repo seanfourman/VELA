@@ -12,10 +12,35 @@ namespace Vela.Api.Application;
 
 public sealed class WorldAtlasService
 {
+    private const double IsraelPalestineExclusionBufferDegrees = 0.15d;
+    private const int MinimumDarkSpotCount = 3;
+    private const int MaximumDarkSpotCount = 12;
+    private static readonly double[] MinimumWaterBoundaryDistanceFallbackDegrees =
+    [
+        0.01d,
+        0.005d,
+        0d,
+    ];
+    private static readonly double[] IsraelPalestineExclusionFallbackBufferDegrees =
+    [
+        IsraelPalestineExclusionBufferDegrees,
+        0.05d,
+        0.04d,
+        0.035d,
+        0.03d,
+        0.02d,
+        0.01d,
+        0d,
+    ];
+
     private readonly IMemoryCache _memoryCache;
     private readonly WorldAtlasDataLoader _dataLoader;
     private readonly Lazy<AtlasMetadata> _metadata;
+    private readonly Lazy<Geometry> _landGeometry;
+    private readonly Lazy<Geometry> _landBoundary;
     private readonly Lazy<IPreparedGeometry> _landMask;
+    private readonly Lazy<IReadOnlyList<CountryBoundary>> _countryBoundaries;
+    private readonly Lazy<Geometry?> _palestineTerritoryGeometry;
 
     public WorldAtlasService(
         IConfiguration configuration,
@@ -26,7 +51,20 @@ public sealed class WorldAtlasService
         _memoryCache = memoryCache;
         _dataLoader = new WorldAtlasDataLoader(configuration, environment);
         _metadata = new Lazy<AtlasMetadata>(_dataLoader.LoadMetadata, LazyThreadSafetyMode.ExecutionAndPublication);
-        _landMask = new Lazy<IPreparedGeometry>(_dataLoader.LoadLandMask, LazyThreadSafetyMode.ExecutionAndPublication);
+        _landGeometry = new Lazy<Geometry>(_dataLoader.LoadLandGeometry, LazyThreadSafetyMode.ExecutionAndPublication);
+        _landBoundary = new Lazy<Geometry>(() => _landGeometry.Value.Boundary, LazyThreadSafetyMode.ExecutionAndPublication);
+        _landMask = new Lazy<IPreparedGeometry>(
+            () => PreparedGeometryFactory.Prepare(_landGeometry.Value),
+            LazyThreadSafetyMode.ExecutionAndPublication
+        );
+        _countryBoundaries = new Lazy<IReadOnlyList<CountryBoundary>>(
+            _dataLoader.LoadCountryBoundaries,
+            LazyThreadSafetyMode.ExecutionAndPublication
+        );
+        _palestineTerritoryGeometry = new Lazy<Geometry?>(
+            CreatePalestineTerritoryGeometry,
+            LazyThreadSafetyMode.ExecutionAndPublication
+        );
     }
 
     public SkyQualityResponseDto GetSkyQuality(double lat, double lon)
@@ -71,18 +109,25 @@ public sealed class WorldAtlasService
             return CreateDarkSpotResponse(lat, lon, radiusKm, []);
         }
 
+        var originCountry = ResolveOriginCountry(lat, lon);
+        if (originCountry is null)
+        {
+            return CreateDarkSpotResponse(lat, lon, radiusKm, []);
+        }
+
         var candidates = SampleDarkSpotCandidates(
             atlas,
             lat,
             lon,
             radiusKm,
+            originCountry,
             colStart,
             rowStart,
             windowWidth,
             windowHeight
         );
 
-        return CreateDarkSpotResponse(lat, lon, radiusKm, SelectDistinctDarkSpots(candidates, radiusKm));
+        return CreateDarkSpotResponse(lat, lon, radiusKm, SelectDistinctDarkSpots(candidates, radiusKm, originCountry));
     }
 
     public Task<LightmapTileResponse> GetLightTileAsync(
@@ -140,6 +185,7 @@ public sealed class WorldAtlasService
         double originLat,
         double originLon,
         double radiusKm,
+        CountryBoundary originCountry,
         int colStart,
         int rowStart,
         int windowWidth,
@@ -169,6 +215,11 @@ public sealed class WorldAtlasService
 
                 var point = geometryFactory.CreatePoint(new Coordinate(sampleLon, sampleLat));
                 if (!landMask.Intersects(point))
+                {
+                    continue;
+                }
+
+                if (!originCountry.PreparedShape.Intersects(point))
                 {
                     continue;
                 }
@@ -209,16 +260,227 @@ public sealed class WorldAtlasService
         return candidates;
     }
 
-    private static List<DarkSpotDto> SelectDistinctDarkSpots(List<DarkSpotDto> candidates, double radiusKm)
+    private CountryBoundary? ResolveOriginCountry(double lat, double lon)
+    {
+        var point = GeometryFactory.Default.CreatePoint(new Coordinate(lon, lat));
+        foreach (var boundary in _countryBoundaries.Value)
+        {
+            if (boundary.PreparedShape.Intersects(point))
+            {
+                return boundary;
+            }
+        }
+
+        return null;
+    }
+
+    private Geometry? CreatePalestineTerritoryGeometry()
+    {
+        var palestineShapes = _countryBoundaries.Value
+            .Where(IsPalestineBoundary)
+            .Select(static boundary => boundary.Shape)
+            .ToList();
+
+        if (palestineShapes.Count == 0)
+        {
+            return null;
+        }
+
+        return GeometryFactory.Default.BuildGeometry(palestineShapes).Union();
+    }
+
+    private List<DarkSpotDto> SelectDistinctDarkSpots(
+        List<DarkSpotDto> candidates,
+        double radiusKm,
+        CountryBoundary originCountry
+    )
+    {
+        if (!IsIsraelBoundary(originCountry))
+        {
+            return SelectDarkSpotsWithWaterBoundaryFallback(candidates, radiusKm);
+        }
+
+        List<DarkSpotDto> bestSelection = [];
+        foreach (var exclusionBufferDegrees in IsraelPalestineExclusionFallbackBufferDegrees)
+        {
+            var filtered = FilterCandidatesForOriginCountry(candidates, originCountry, exclusionBufferDegrees);
+            var selected = SelectDarkSpotsWithWaterBoundaryFallback(filtered, radiusKm);
+
+            if (selected.Count > bestSelection.Count)
+            {
+                bestSelection = selected;
+            }
+
+            if (selected.Count >= MinimumDarkSpotCount)
+            {
+                return selected;
+            }
+        }
+
+        return bestSelection;
+    }
+
+    private List<DarkSpotDto> SelectDarkSpotsWithWaterBoundaryFallback(List<DarkSpotDto> candidates, double radiusKm)
+    {
+        List<DarkSpotDto> bestSelection = [];
+        foreach (var minimumWaterBoundaryDistanceDegrees in MinimumWaterBoundaryDistanceFallbackDegrees)
+        {
+            var filtered = FilterCandidatesByWaterBoundaryDistance(candidates, minimumWaterBoundaryDistanceDegrees);
+            var selected = SelectDistinctDarkSpotsWithFallbackSeparation(filtered, radiusKm);
+
+            if (selected.Count > bestSelection.Count)
+            {
+                bestSelection = selected;
+            }
+
+            if (selected.Count >= MinimumDarkSpotCount)
+            {
+                return selected;
+            }
+        }
+
+        return bestSelection;
+    }
+
+    private List<DarkSpotDto> FilterCandidatesForOriginCountry(
+        List<DarkSpotDto> candidates,
+        CountryBoundary originCountry,
+        double exclusionBufferDegrees
+    )
+    {
+        if (!IsIsraelBoundary(originCountry))
+        {
+            return candidates;
+        }
+
+        var palestineGeometry = _palestineTerritoryGeometry.Value;
+        if (palestineGeometry is null)
+        {
+            return candidates;
+        }
+
+        var filtered = new List<DarkSpotDto>(candidates.Count);
+        foreach (var candidate in candidates)
+        {
+            if (!ShouldExcludeCandidateForOriginCountry(candidate, palestineGeometry, exclusionBufferDegrees))
+            {
+                filtered.Add(candidate);
+            }
+        }
+
+        return filtered;
+    }
+
+    private List<DarkSpotDto> FilterCandidatesByWaterBoundaryDistance(
+        List<DarkSpotDto> candidates,
+        double minimumWaterBoundaryDistanceDegrees
+    )
+    {
+        if (minimumWaterBoundaryDistanceDegrees <= 0d)
+        {
+            return candidates;
+        }
+
+        var landBoundary = _landBoundary.Value;
+        var filtered = new List<DarkSpotDto>(candidates.Count);
+        foreach (var candidate in candidates)
+        {
+            var point = GeometryFactory.Default.CreatePoint(new Coordinate(candidate.Lon, candidate.Lat));
+            if (landBoundary.Distance(point) > minimumWaterBoundaryDistanceDegrees)
+            {
+                filtered.Add(candidate);
+            }
+        }
+
+        return filtered;
+    }
+
+    private static bool ShouldExcludeCandidateForOriginCountry(
+        DarkSpotDto candidate,
+        Geometry palestineGeometry,
+        double exclusionBufferDegrees
+    )
+    {
+        var point = GeometryFactory.Default.CreatePoint(new Coordinate(candidate.Lon, candidate.Lat));
+        return exclusionBufferDegrees <= 0d
+            ? palestineGeometry.Intersects(point)
+            : palestineGeometry.Distance(point) <= exclusionBufferDegrees;
+    }
+
+    private static List<DarkSpotDto> SelectDistinctDarkSpotsWithFallbackSeparation(
+        List<DarkSpotDto> candidates,
+        double radiusKm
+    )
+    {
+        var preferredMinSeparationKm = Math.Max(3d, radiusKm / 8d);
+        List<DarkSpotDto> bestSelection = [];
+
+        foreach (var minSeparationKm in GetMinimumSeparationFallbacks(preferredMinSeparationKm))
+        {
+            var selected = SelectDistinctDarkSpotsForSeparation(candidates, minSeparationKm);
+
+            if (selected.Count > bestSelection.Count)
+            {
+                bestSelection = selected;
+            }
+
+            if (selected.Count >= MinimumDarkSpotCount)
+            {
+                return selected;
+            }
+        }
+
+        return bestSelection;
+    }
+
+    private static IEnumerable<double> GetMinimumSeparationFallbacks(double preferredMinSeparationKm)
+    {
+        var seen = new HashSet<double>();
+        foreach (var minSeparationKm in new[]
+                 {
+                     preferredMinSeparationKm,
+                     Math.Min(preferredMinSeparationKm, 2.5d),
+                     Math.Min(preferredMinSeparationKm, 2d),
+                     Math.Min(preferredMinSeparationKm, 1.5d),
+                     Math.Min(preferredMinSeparationKm, 1d),
+                     0d,
+                 })
+        {
+            if (seen.Add(minSeparationKm))
+            {
+                yield return minSeparationKm;
+            }
+        }
+    }
+
+    private static bool IsIsraelBoundary(CountryBoundary boundary)
+    {
+        return string.Equals(boundary.CountryCode, "ISR", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(boundary.CountryName, "Israel", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsPalestineBoundary(CountryBoundary boundary)
+    {
+        return string.Equals(boundary.CountryCode, "PSX", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(boundary.CountryCode, "PSE", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(boundary.CountryName, "Palestine", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(boundary.CountryName, "West Bank", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(boundary.CountryName, "Gaza", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static List<DarkSpotDto> SelectDistinctDarkSpotsForSeparation(
+        List<DarkSpotDto> candidates,
+        double minSeparationKm
+    )
     {
         // Prefer dark candidates, but keep them spaced out so the client does not receive clustered duplicates.
-        var minSeparationKm = Math.Max(3d, radiusKm / 8d);
         var selected = new List<DarkSpotDto>();
         foreach (var candidate in candidates)
         {
-            var isFarEnough = selected.TrueForAll(
-                existing => HaversineKm(existing.Lat, existing.Lon, candidate.Lat, candidate.Lon) >= minSeparationKm
-            );
+            var isFarEnough = minSeparationKm <= 0d
+                || selected.TrueForAll(
+                    existing => HaversineKm(existing.Lat, existing.Lon, candidate.Lat, candidate.Lon) >= minSeparationKm
+                );
 
             if (!isFarEnough)
             {
@@ -226,7 +488,7 @@ public sealed class WorldAtlasService
             }
 
             selected.Add(candidate);
-            if (selected.Count >= 12)
+            if (selected.Count >= MaximumDarkSpotCount)
             {
                 break;
             }

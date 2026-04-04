@@ -1,4 +1,5 @@
 using BitMiracle.LibTiff.Classic;
+using NetTopologySuite.Geometries.Prepared;
 
 namespace Vela.Api.Application;
 
@@ -31,6 +32,13 @@ internal sealed record AtlasMetadata(
 }
 
 internal sealed record PixelCoordinate(int X, int Y);
+
+internal sealed record CountryBoundary(
+    string CountryCode,
+    string CountryName,
+    NetTopologySuite.Geometries.Geometry Shape,
+    IPreparedGeometry PreparedShape
+);
 
 internal sealed class RasterSampler : IDisposable
 {
