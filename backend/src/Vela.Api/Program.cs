@@ -43,7 +43,6 @@ builder.Services.AddAuthorization();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<WorldAtlasService>();
 // External API callers are registered as typed clients so HttpClient lifetime stays managed by DI.
-builder.Services.AddHttpClient<MapTilerProxyService>();
 builder.Services.AddHttpClient<VisiblePlanetsService>();
 
 var app = builder.Build();

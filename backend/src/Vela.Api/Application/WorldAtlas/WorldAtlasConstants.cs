@@ -13,7 +13,6 @@ internal static class WorldAtlasConstants
     public const int LightTileSize = 256;
     public const int MaxSamples = 9000;
 
-    public static readonly TimeSpan LightTileCacheDuration = TimeSpan.FromMinutes(10);
     public static readonly byte[] EmptyTile = BuildEmptyTile();
     public static readonly GradientStop[] LightGradient =
     [

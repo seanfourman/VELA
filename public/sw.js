@@ -1,5 +1,5 @@
-const CACHE_NAME = "vela-map-tiles-v3";
-const META_CACHE_NAME = "vela-map-tiles-meta-v1";
+const CACHE_NAME = "vela-map-tiles-v4";
+const META_CACHE_NAME = "vela-map-tiles-meta-v2";
 const TILE_CACHE_MAX_AGE = 30 * 24 * 60 * 60 * 1000;
 const TILE_CACHE_MAX_ENTRIES = 4000;
 const TILE_PATTERNS = [
@@ -21,9 +21,9 @@ self.addEventListener("activate", (event) => {
           if (cacheName !== CACHE_NAME && cacheName !== META_CACHE_NAME) {
             return caches.delete(cacheName);
           }
-        })
+        }),
       );
-    })
+    }),
   );
   self.clients.claim();
 });
@@ -44,7 +44,7 @@ async function fetchWithRetry(request, retries = 3, delay = 1000) {
     } catch (error) {
       if (i === retries - 1) throw error;
       await new Promise((resolve) =>
-        setTimeout(resolve, delay * Math.pow(2, i))
+        setTimeout(resolve, delay * Math.pow(2, i)),
       );
     }
   }
@@ -132,14 +132,14 @@ self.addEventListener("fetch", (event) => {
             return new Response(
               Uint8Array.from(
                 atob(
-                  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+                  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=",
                 ),
-                (c) => c.charCodeAt(0)
+                (c) => c.charCodeAt(0),
               ),
               {
                 status: 200,
                 headers: { "Content-Type": "image/png" },
-              }
+              },
             );
           }
         },

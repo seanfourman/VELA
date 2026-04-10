@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Caching.Memory;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Geometries.Prepared;
 using SixLabors.ImageSharp;
@@ -33,7 +32,6 @@ public sealed class WorldAtlasService
         0d,
     ];
 
-    private readonly IMemoryCache _memoryCache;
     private readonly WorldAtlasDataLoader _dataLoader;
     private readonly Lazy<AtlasMetadata> _metadata;
     private readonly Lazy<Geometry> _landGeometry;
@@ -44,11 +42,9 @@ public sealed class WorldAtlasService
 
     public WorldAtlasService(
         IConfiguration configuration,
-        IWebHostEnvironment environment,
-        IMemoryCache memoryCache
+        IWebHostEnvironment environment
     )
     {
-        _memoryCache = memoryCache;
         _dataLoader = new WorldAtlasDataLoader(configuration, environment);
         _metadata = new Lazy<AtlasMetadata>(_dataLoader.LoadMetadata, LazyThreadSafetyMode.ExecutionAndPublication);
         _landGeometry = new Lazy<Geometry>(_dataLoader.LoadLandGeometry, LazyThreadSafetyMode.ExecutionAndPublication);
@@ -142,12 +138,6 @@ public sealed class WorldAtlasService
             throw new ArgumentOutOfRangeException(nameof(z), "Invalid tile coordinates");
         }
 
-        var cacheKey = $"lightmap:{z}:{x}:{y}";
-        if (_memoryCache.TryGetValue(cacheKey, out byte[]? cached) && cached is not null)
-        {
-            return Task.FromResult(new LightmapTileResponse { Content = cached });
-        }
-
         var atlas = _metadata.Value;
         var tileBounds = TileBounds.FromXyz(x, y, z);
         var atlasBounds = new TileBounds(atlas.MinLon, atlas.MaxLon, atlas.MinLat, atlas.MaxLat);
@@ -158,7 +148,6 @@ public sealed class WorldAtlasService
         }
 
         var content = RenderLightTile(atlas, tileBounds, cancellationToken);
-        _memoryCache.Set(cacheKey, content, LightTileCacheDuration);
 
         return Task.FromResult(new LightmapTileResponse { Content = content });
     }

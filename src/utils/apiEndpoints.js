@@ -22,7 +22,15 @@ const buildApiUrl = (resourcePath) => {
   return joinResourceUrl(API_BASE, normalizedResource);
 };
 
-const MAPTILER_PROXY_BASE = joinResourceUrl(API_BASE, "maptiler");
+const MAPTILER_BASE = "https://api.maptiler.com";
+const MAPTILER_API_KEY = "re4o7qbuIJi7iGBzGu24";
+
+const buildMapTilerUrl = (resourcePath = "") => {
+  const base = resourcePath
+    ? joinResourceUrl(MAPTILER_BASE, resourcePath)
+    : MAPTILER_BASE;
+  return joinQuery(base, { key: MAPTILER_API_KEY });
+};
 
 export const buildAuthUrl = (path = "") => {
   const normalizedPath = String(path || "").replace(/^\/+/, "");
@@ -45,19 +53,14 @@ export const buildVisiblePlanetsUrl = (lat, lng) =>
     lon: lng,
   });
 
-const buildMapTilerResourceUrl = (resourcePath = "") =>
-  resourcePath
-    ? joinResourceUrl(MAPTILER_PROXY_BASE, resourcePath)
-    : MAPTILER_PROXY_BASE;
-
 export const buildMapTilerRasterTemplateUrl = (mapId, format) =>
-  buildMapTilerResourceUrl(`maps/${mapId}/{z}/{x}/{y}.${format}`);
+  buildMapTilerUrl(`maps/${mapId}/{z}/{x}/{y}.${format}`);
 
 export const buildMapTilerRasterUrl = (mapId, z, x, y, format) =>
-  buildMapTilerResourceUrl(`maps/${mapId}/${z}/${x}/${y}.${format}`);
+  buildMapTilerUrl(`maps/${mapId}/${z}/${x}/${y}.${format}`);
 
 export const buildMapTilerStyleUrl = (mapId = "streets-v2") =>
-  buildMapTilerResourceUrl(`maps/${mapId}/style.json`);
+  buildMapTilerUrl(`maps/${mapId}/style.json`);
 
 export const buildSkyQualityUrl = (lat, lon) =>
   joinQuery(buildApiUrl("skyquality"), { lat, lon });
@@ -83,4 +86,5 @@ export const buildStarPartyEventStatusUrl = (eventId) =>
 export const buildStarPartyEventToggleRsvpUrl = (eventId) =>
   `${buildStarPartyEventsUrl(eventId)}/rsvp/toggle`;
 
-export const getLightmapTileUrlTemplate = () => buildApiUrl("lightmap/{z}/{x}/{y}.png");
+export const getLightmapTileUrlTemplate = () =>
+  buildApiUrl("lightmap/{z}/{x}/{y}.png");
