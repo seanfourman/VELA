@@ -7,14 +7,24 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "@maplibre/maplibre-gl-leaflet";
 
 const MIN_PITCH = 0;
-const MAX_PITCH = 70;
-const DEFAULT_3D_PITCH = 75;
+const MAX_PITCH = 60;
+const DEFAULT_3D_PITCH = 58;
+const LEAFLET_TO_MAPLIBRE_ZOOM_OFFSET = 1;
 const PITCH_SENSITIVITY = 0.22;
 const TOUCH_PITCH_THRESHOLD = 8;
 const RTL_TEXT_PLUGIN_URL =
   "https://cdn.jsdelivr.net/npm/@mapbox/mapbox-gl-rtl-text@0.3.0/mapbox-gl-rtl-text.js";
 const STYLE_URL_CACHE_BUSTER = "proxy-v2";
 const RTL_PLUGIN_STATE_KEY = "__velaMapLibreRtlPluginState__";
+const MAPLIBRE_DRAG_PAN_OPTIONS = { maxSpeed: 0 };
+const LEAFLET_CAMERA_HANDLER_NAMES = [
+  "dragging",
+  "scrollWheelZoom",
+  "touchZoom",
+  "doubleClickZoom",
+  "boxZoom",
+  "keyboard",
+];
 
 const getRtlPluginState = () => {
   if (typeof globalThis === "undefined") {
@@ -29,6 +39,96 @@ const getRtlPluginState = () => {
 };
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+const areNumbersClose = (first, second, tolerance = 0.000001) =>
+  Math.abs(first - second) <= tolerance;
+
+const setHandlerEnabled = (handler, shouldEnable) => {
+  if (!handler) return;
+
+  if (shouldEnable) {
+    handler.enable?.();
+  } else {
+    handler.disable?.();
+  }
+};
+
+const suspendLeafletCameraHandlers = (map) => {
+  const handlerStates = LEAFLET_CAMERA_HANDLER_NAMES.map((name) => {
+    const handler = map[name];
+    return {
+      handler,
+      wasEnabled: handler?.enabled?.() ?? false,
+    };
+  });
+  const previousOptions = {
+    inertia: map.options.inertia,
+    zoomSnap: map.options.zoomSnap,
+  };
+
+  map.stop?.();
+  map.options.inertia = false;
+  map.options.zoomSnap = 0;
+  handlerStates.forEach(({ handler }) => setHandlerEnabled(handler, false));
+
+  return () => {
+    map.options.inertia = previousOptions.inertia;
+    map.options.zoomSnap = previousOptions.zoomSnap;
+
+    handlerStates.forEach(({ handler, wasEnabled }) => {
+      setHandlerEnabled(handler, wasEnabled);
+    });
+  };
+};
+
+const syncLeafletCameraFromMapLibre = (map, glMap) => {
+  const glCenter = glMap.getCenter();
+  const nextZoom = glMap.getZoom() + LEAFLET_TO_MAPLIBRE_ZOOM_OFFSET;
+  const currentCenter = map.getCenter();
+  const currentZoom = map.getZoom();
+
+  if (
+    areNumbersClose(currentCenter.lat, glCenter.lat) &&
+    areNumbersClose(currentCenter.lng, glCenter.lng) &&
+    areNumbersClose(currentZoom, nextZoom)
+  ) {
+    return;
+  }
+
+  map.setView([glCenter.lat, glCenter.lng], nextZoom, {
+    animate: false,
+    noMoveStart: true,
+  });
+};
+
+const configureMapLibreCameraHandlers = (glMap) => {
+  glMap.setMaxPitch?.(MAX_PITCH);
+  glMap.dragPan?.enable?.(MAPLIBRE_DRAG_PAN_OPTIONS);
+  glMap.scrollZoom?.enable?.();
+  glMap.touchZoomRotate?.enable?.();
+  glMap.touchZoomRotate?.disableRotation?.();
+  glMap.boxZoom?.disable?.();
+  glMap.doubleClickZoom?.disable?.();
+  glMap.dragRotate?.disable?.();
+  glMap.keyboard?.disable?.();
+};
+
+const setMapLibreDragPanEnabled = (glMap, shouldEnable) => {
+  if (shouldEnable) {
+    glMap.dragPan?.enable?.(MAPLIBRE_DRAG_PAN_OPTIONS);
+  } else {
+    glMap.dragPan?.disable?.();
+  }
+};
+
+const setMapLibreTouchZoomEnabled = (glMap, shouldEnable) => {
+  if (shouldEnable) {
+    glMap.touchZoomRotate?.enable?.();
+    glMap.touchZoomRotate?.disableRotation?.();
+  } else {
+    glMap.touchZoomRotate?.disable?.();
+  }
+};
+
 const getTouchDistance = (touches) => {
   if (!touches || touches.length < 2) return 0;
   const dx = touches[0].clientX - touches[1].clientX;
@@ -88,8 +188,8 @@ const ensureRtlTextPlugin = () => {
 const attachAngleControls = (map, glMap) => {
   const container = map.getContainer();
   let isAdjustingAngle = false;
-  let mouseDraggingWasEnabled = false;
-  let touchDraggingWasEnabled = false;
+  let mouseDragPanWasEnabled = false;
+  let touchZoomWasEnabled = false;
   let touchGestureCandidate = false;
   let isTouchAdjustingAngle = false;
   let touchStartY = 0;
@@ -100,36 +200,27 @@ const attachAngleControls = (map, glMap) => {
   let frameId = null;
   let pendingPitch = null;
 
-  const setDraggingEnabled = (shouldEnable) => {
-    if (shouldEnable) {
-      map.dragging?.enable?.();
-      return;
-    }
-    map.dragging?.disable?.();
-  };
-
   const rememberDraggingState = (type) => {
-    const wasEnabled = map.dragging?.enabled?.() ?? false;
     if (type === "mouse") {
-      mouseDraggingWasEnabled = wasEnabled;
+      mouseDragPanWasEnabled = glMap.dragPan?.isEnabled?.() ?? false;
+      setMapLibreDragPanEnabled(glMap, false);
     } else {
-      touchDraggingWasEnabled = wasEnabled;
-    }
-    if (wasEnabled) {
-      setDraggingEnabled(false);
+      touchZoomWasEnabled = glMap.touchZoomRotate?.isEnabled?.() ?? false;
+      setMapLibreTouchZoomEnabled(glMap, false);
     }
   };
 
   const restoreDraggingState = (type) => {
-    const shouldEnable =
-      type === "mouse" ? mouseDraggingWasEnabled : touchDraggingWasEnabled;
-    if (!shouldEnable) return;
-
-    setDraggingEnabled(true);
     if (type === "mouse") {
-      mouseDraggingWasEnabled = false;
+      if (mouseDragPanWasEnabled) {
+        setMapLibreDragPanEnabled(glMap, true);
+      }
+      mouseDragPanWasEnabled = false;
     } else {
-      touchDraggingWasEnabled = false;
+      if (touchZoomWasEnabled) {
+        setMapLibreTouchZoomEnabled(glMap, true);
+      }
+      touchZoomWasEnabled = false;
     }
   };
 
@@ -316,20 +407,37 @@ export default function MapLibre3DLayer() {
     ensureRtlTextPlugin();
 
     let detachAngleControls = null;
+    let restoreLeafletCameraHandlers = null;
     let handleLoad = null;
+    let handleMoveEnd = null;
     let glMap = null;
-    const previousInertia = map.options.inertia;
-    map.options.inertia = false;
 
     try {
       const layer = L.maplibreGL({
         style: getStyleUrl(),
         pane: "tilePane",
-        interactive: false,
+        interactive: true,
         attributionControl: false,
-        // Reduce camera jitter while dragging at high pitch by syncing every frame.
+        pitch: DEFAULT_3D_PITCH,
+        minPitch: MIN_PITCH,
+        maxPitch: MAX_PITCH,
+        minZoom: Math.max(
+          0,
+          map.getMinZoom() - LEAFLET_TO_MAPLIBRE_ZOOM_OFFSET,
+        ),
+        maxZoom: map.getMaxZoom() - LEAFLET_TO_MAPLIBRE_ZOOM_OFFSET,
+        dragPan: true,
+        scrollZoom: true,
+        touchZoomRotate: true,
+        dragRotate: false,
+        doubleClickZoom: false,
+        boxZoom: false,
+        keyboard: false,
+        // Keep programmatic Leaflet camera moves tightly synced into MapLibre.
         updateInterval: 0,
       });
+
+      restoreLeafletCameraHandlers = suspendLeafletCameraHandlers(map);
 
       layer.addTo(map);
       layerRef.current = layer;
@@ -357,28 +465,29 @@ export default function MapLibre3DLayer() {
       // Apply pitch as early as possible so 3D mode enters with angle immediately.
       ensureDefaultPitch();
 
-      const lockInteractions = () => {
-        glMap.dragPan?.disable?.();
-        glMap.scrollZoom?.disable?.();
-        glMap.boxZoom?.disable?.();
-        glMap.doubleClickZoom?.disable?.();
-        glMap.dragRotate?.disable?.();
-        glMap.keyboard?.disable?.();
-        glMap.touchZoomRotate?.disable?.();
-        glMap.touchZoomRotate?.disableRotation?.();
+      const enableStableCamera = () => {
+        configureMapLibreCameraHandlers(glMap);
         ensureDefaultPitch();
       };
 
       if (glMap.isStyleLoaded?.()) {
-        lockInteractions();
+        enableStableCamera();
       } else {
-        handleLoad = () => lockInteractions();
+        handleLoad = () => enableStableCamera();
         glMap.once("load", handleLoad);
       }
 
+      handleMoveEnd = () => syncLeafletCameraFromMapLibre(map, glMap);
+      glMap.on("moveend", handleMoveEnd);
       detachAngleControls = attachAngleControls(map, glMap);
     } catch (error) {
       console.warn("Failed to load 3D style layer", error);
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+      restoreLeafletCameraHandlers?.();
+      restoreLeafletCameraHandlers = null;
     }
 
     return () => {
@@ -390,12 +499,16 @@ export default function MapLibre3DLayer() {
         glMap.off("load", handleLoad);
       }
 
+      if (glMap && handleMoveEnd) {
+        glMap.off("moveend", handleMoveEnd);
+      }
+
       if (layerRef.current) {
         map.removeLayer(layerRef.current);
         layerRef.current = null;
       }
 
-      map.options.inertia = previousInertia;
+      restoreLeafletCameraHandlers?.();
     };
   }, [map]);
 
