@@ -8,7 +8,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { Outlet, useLoaderData, useLocation, useNavigate } from "react-router-dom";
+import {
+  Outlet,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import { useAuth } from "@/features/auth/useAuth";
 import { useLocationTracking } from "@/features/app/hooks/useLocationTracking";
@@ -36,7 +41,9 @@ function AppLayout() {
   const bootstrapData = useLoaderData();
   const auth = useAuth();
   const mapViewRef = useRef(null);
-  const initialStargazeLocations = Array.isArray(bootstrapData?.stargazeLocations)
+  const initialStargazeLocations = Array.isArray(
+    bootstrapData?.stargazeLocations,
+  )
     ? bootstrapData.stargazeLocations
     : undefined;
   const initialStarPartyEvents = Array.isArray(bootstrapData?.starPartyEvents)
@@ -106,8 +113,10 @@ function AppLayout() {
   const navigate = useCallback(
     (path, options = {}) => {
       const nextPath = normalizePath(path);
-      const hasRouteState = options && Object.prototype.hasOwnProperty.call(options, "state");
-      if (nextPath === currentRoute && !hasRouteState && !options.replace) return;
+      const hasRouteState =
+        options && Object.prototype.hasOwnProperty.call(options, "state");
+      if (nextPath === currentRoute && !hasRouteState && !options.replace)
+        return;
 
       if (
         !hardwareAccelerationEnabled &&
