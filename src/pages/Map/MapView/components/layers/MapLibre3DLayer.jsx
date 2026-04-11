@@ -299,8 +299,11 @@ const attachAngleControls = (map, glMap) => {
   };
 };
 
-const getStyleUrl = () =>
-  `${buildMapTilerStyleUrl("streets-v2")}?_vela=${STYLE_URL_CACHE_BUSTER}`;
+const getStyleUrl = () => {
+  const styleUrl = new URL(buildMapTilerStyleUrl("streets-v2"));
+  styleUrl.searchParams.set("_vela", STYLE_URL_CACHE_BUSTER);
+  return styleUrl.toString();
+};
 
 export default function MapLibre3DLayer() {
   const map = useMap();
