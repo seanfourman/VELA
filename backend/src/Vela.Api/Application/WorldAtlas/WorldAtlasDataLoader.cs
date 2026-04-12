@@ -33,6 +33,7 @@ internal sealed class WorldAtlasDataLoader
         var noDataRaw = GetOptionalStringField(tiff, TiffTag.GDAL_NODATA);
         var noData = ParseNoData(noDataRaw);
 
+        // Convert image space to real world coordinates using the tie point and pixel scale:
         var minLon = tiePoint[3];
         var maxLat = tiePoint[4];
         var xResolution = pixelScale[0];
