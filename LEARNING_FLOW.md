@@ -3,7 +3,8 @@
 Start here so you know what the app is supposed to be and how it runs.
 
 Marker:
-- `[DIFFERENT]` = important file that introduces a new pattern or architecture idea compared with the API/normalizer files.
+
+- = important file that introduces a new pattern or architecture idea compared with the API/normalizer files.
 
 - [x] `README.md`
 - [x] `ARCHITECTURE.md`
@@ -108,21 +109,21 @@ These files are the bridge between the UI and backend.
 - [x] 9. `src/utils/recommendationsApi.js`
 - [x] 10. `src/utils/starPartyEventsApi.js`
 - [x] 11. `src/features/starParty/starPartyUtils.js`
-- [ ] 12. `[DIFFERENT]` `src/utils/planetUtils.js`
-- [ ] 13. `[DIFFERENT]` `src/utils/skyQuality.js`
-- [ ] 14. `src/utils/darkSpots.js`
-- [ ] 15. `src/utils/geo.js`
-- [ ] 16. `src/utils/dateTime.js`
-- [ ] 17. `src/utils/mapLinks.js`
-- [ ] 18. `src/utils/clipboard.js`
-- [ ] 19. `src/utils/muiTheme.js`
-- [ ] 20. `[DIFFERENT]` `src/features/app/hooks/useUserPreferences.js`
-- [ ] 21. `[DIFFERENT]` `src/features/app/hooks/useLocationTracking.js`
-- [ ] 22. `src/features/app/hooks/useStargazeLocations.js`
-- [ ] 23. `src/features/app/hooks/useStarPartyEvents.js`
-- [ ] 24. `src/features/map/favoritesStorage.js`
-- [ ] 25. `[DIFFERENT]` `src/features/map/usePlanets.js`
-- [ ] 26. `[DIFFERENT]` `src/features/map/useMapFavorites.js`
+- [x] 12. `src/utils/planetUtils.js`
+- [x] 13. `src/utils/skyQuality.js`
+- [x] 14. `src/utils/darkSpots.js`
+- [x] 15. `src/utils/geo.js`
+- [x] 16. `src/utils/dateTime.js`
+- [x] 17. `src/utils/mapLinks.js`
+- [x] 18. `src/utils/clipboard.js`
+- [x] 19. `src/utils/muiTheme.js`
+- [x] 20. `src/features/app/hooks/useUserPreferences.js`
+- [x] 21. `src/features/app/hooks/useLocationTracking.js`
+- [x] 22. `src/features/app/hooks/useStargazeLocations.js`
+- [x] 23. `src/features/app/hooks/useStarPartyEvents.js`
+- [x] 24. `src/features/map/favoritesStorage.js`
+- [x] 25. `src/features/map/usePlanets.js`
+- [x] 26. `src/features/map/useMapFavorites.js`
 
 ## 5. Home Map Feature
 
@@ -130,32 +131,32 @@ This is the largest feature. Read the orchestration files first, then the suppor
 
 ### 5A. Map Orchestration
 
-- [ ] 1. `[DIFFERENT]` `src/pages/Map/MapView.jsx`
-- [ ] 2. `[DIFFERENT]` `src/pages/Map/MapView/hooks/useMapViewState.js`
+- [ ] 1. `src/pages/Map/MapView.jsx`
+- [ ] 2. `src/pages/Map/MapView/hooks/useMapViewState.js`
 - [ ] 3. `src/pages/Map/MapView/core/mapConfig.js`
 - [ ] 4. `src/pages/Map/MapView/core/mapUtils.js`
-- [ ] 5. `[DIFFERENT]` `src/pages/Map/MapView/core/mapDerivedState.js`
+- [ ] 5. `src/pages/Map/MapView/core/mapDerivedState.js`
 - [ ] 6. `src/pages/Map/MapView/core/mapInteractionTargets.js`
-- [ ] 7. `[DIFFERENT]` `src/pages/Map/MapView/core/markerIcons.js`
-- [ ] 8. `[DIFFERENT]` `src/pages/Map/MapView/core/MapInteractionHandlers.jsx`
+- [ ] 7. `src/pages/Map/MapView/core/markerIcons.js`
+- [ ] 8. `src/pages/Map/MapView/core/MapInteractionHandlers.jsx`
 
 ### 5B. Map Behavior Hooks
 
 - [ ] 1. `src/pages/Map/MapView/hooks/useMapViewUiState.js`
 - [ ] 2. `src/pages/Map/MapView/hooks/useMapStargaze.js`
-- [ ] 3. `[DIFFERENT]` `src/pages/Map/MapView/hooks/useMapDirections.js`
-- [ ] 4. `[DIFFERENT]` `src/pages/Map/MapView/hooks/useMapCameraHandlers.js`
-- [ ] 5. `[DIFFERENT]` `src/pages/Map/MapView/hooks/useMapActionHandlers.js`
-- [ ] 6. `[DIFFERENT]` `src/pages/Map/MapView/hooks/useMapInteractions.js`
+- [ ] 3. `src/pages/Map/MapView/hooks/useMapDirections.js`
+- [ ] 4. `src/pages/Map/MapView/hooks/useMapCameraHandlers.js`
+- [ ] 5. `src/pages/Map/MapView/hooks/useMapActionHandlers.js`
+- [ ] 6. `src/pages/Map/MapView/hooks/useMapInteractions.js`
 - [ ] 7. `src/pages/Map/MapView/hooks/useMapTargetToggleHandlers.js`
-- [ ] 8. `[DIFFERENT]` `src/pages/Map/MapView/hooks/useMapSelectionEffects.js`
+- [ ] 8. `src/pages/Map/MapView/hooks/useMapSelectionEffects.js`
 - [ ] 9. `src/pages/Map/MapView/hooks/useMapEventRsvp.js`
 - [ ] 10. `src/pages/Map/MapView/hooks/useZoomMarkerVisibility.js`
 
 ### 5C. Map Render Tree
 
-- [ ] 1. `[DIFFERENT]` `src/pages/Map/MapView/components/MapViewport.jsx`
-- [ ] 2. `[DIFFERENT]` `src/pages/Map/MapView/components/layers/MapLibre3DLayer.jsx`
+- [ ] 1. `src/pages/Map/MapView/components/MapViewport.jsx`
+- [ ] 2. `src/pages/Map/MapView/components/layers/MapLibre3DLayer.jsx`
 - [ ] 3. `src/pages/Map/MapView/components/layers/markers/LocationMarker.jsx`
 - [ ] 4. `src/pages/Map/MapView/components/layers/markers/PlacedMarker.jsx`
 - [ ] 5. `src/pages/Map/MapView/components/layers/markers/StargazeMarkers.jsx`
@@ -163,7 +164,7 @@ This is the largest feature. Read the orchestration files first, then the suppor
 - [ ] 7. `src/pages/Map/MapView/components/layers/markers/FavoriteOnlyMarkers.jsx`
 - [ ] 8. `src/pages/Map/MapView/components/layers/markers/StarPartyMarkers.jsx`
 - [ ] 9. `src/pages/Map/MapView/components/popups/SkyQualityInfo.jsx`
-- [ ] 10. `[DIFFERENT]` `src/pages/Map/MapView/components/popups/ContextMenuPopup.jsx`
+- [ ] 10. `src/pages/Map/MapView/components/popups/ContextMenuPopup.jsx`
 - [ ] 11. `src/pages/Map/MapView/components/popups/content/copyCoordinates.js`
 - [ ] 12. `src/pages/Map/MapView/components/popups/content/LocationPopupContent.jsx`
 - [ ] 13. `src/pages/Map/MapView/components/popups/content/PinnedPopupContent.jsx`
@@ -174,7 +175,7 @@ This is the largest feature. Read the orchestration files first, then the suppor
 - [ ] 18. `src/pages/Map/MapView/components/MapPanels.jsx`
 - [ ] 19. `src/pages/Map/MapView/components/panels/stargaze/StargazePanelContent.jsx`
 - [ ] 20. `src/pages/Map/MapView/components/panels/stargaze/StargazePanelMobile.jsx`
-- [ ] 21. `[DIFFERENT]` `src/pages/Map/MapView/components/search/LocationSearchBar.jsx`
+- [ ] 21. `src/pages/Map/MapView/components/search/LocationSearchBar.jsx`
 - [ ] 22. `src/pages/Map/MapView/components/controls/MapQuickActions.jsx`
 - [ ] 23. `src/pages/Map/MapView/components/controls/SearchDistanceSelector.jsx`
 - [ ] 24. `src/pages/Map/MapView/components/controls/MapTypeSwitcher.jsx`
@@ -182,24 +183,24 @@ This is the largest feature. Read the orchestration files first, then the suppor
 ### 5D. Planet Panel
 
 - [ ] 1. `src/pages/Map/PlanetPanel/planetInfoUtils.js`
-- [ ] 2. `[DIFFERENT]` `src/pages/Map/PlanetPanel/planetArUtils.js`
-- [ ] 3. `[DIFFERENT]` `src/pages/Map/PlanetPanel/PlanetPanelContainer.jsx`
+- [ ] 2. `src/pages/Map/PlanetPanel/planetArUtils.js`
+- [ ] 3. `src/pages/Map/PlanetPanel/PlanetPanelContainer.jsx`
 - [ ] 4. `src/pages/Map/PlanetPanel/PlanetPanel.jsx`
 - [ ] 5. `src/pages/Map/PlanetPanel/PlanetPanelMobile.jsx`
 - [ ] 6. `src/pages/Map/PlanetPanel/PlanetCard.jsx`
 - [ ] 7. `src/pages/Map/PlanetPanel/PlanetInfoCard.jsx`
-- [ ] 8. `[DIFFERENT]` `src/pages/Map/PlanetPanel/PlanetArOverlay.jsx`
+- [ ] 8. `src/pages/Map/PlanetPanel/PlanetArOverlay.jsx`
 
 ## 6. Discovery Feature
 
 Read this after the map because Discovery reuses map concepts and sends the user back to map selections.
 
-- [ ] 1. `[DIFFERENT]` `src/pages/Discovery/DiscoveryPage.jsx`
+- [ ] 1. `src/pages/Discovery/DiscoveryPage.jsx`
 - [ ] 2. `src/pages/Discovery/discoveryUtils.js`
 - [ ] 3. `src/pages/Discovery/discoveryStyles.js`
 - [ ] 4. `src/pages/Discovery/hooks/useDiscoveryData.js`
-- [ ] 5. `[DIFFERENT]` `src/pages/Discovery/hooks/useDiscoveryInsights.js`
-- [ ] 6. `[DIFFERENT]` `src/pages/Discovery/hooks/useDiscoveryActions.js`
+- [ ] 5. `src/pages/Discovery/hooks/useDiscoveryInsights.js`
+- [ ] 6. `src/pages/Discovery/hooks/useDiscoveryActions.js`
 - [ ] 7. `src/pages/Discovery/components/DiscoveryShared.jsx`
 - [ ] 8. `src/pages/Discovery/components/DiscoverySections.jsx`
 
@@ -209,21 +210,21 @@ These routes sit on top of the shared auth, settings, recommendations, events, a
 
 ### Auth, Profile, Settings
 
-- [ ] 1. `[DIFFERENT]` `src/pages/Auth/AuthPage.jsx`
+- [ ] 1. `src/pages/Auth/AuthPage.jsx`
 - [ ] 3. `src/pages/Profile/ProfilePage.jsx`
 - [ ] 4. `src/pages/Settings/SettingsPage.jsx`
 
 ### Admin
 
-- [ ] 1. `[DIFFERENT]` `src/pages/Admin/AdminPage.jsx`
+- [ ] 1. `src/pages/Admin/AdminPage.jsx`
 - [ ] 2. `src/pages/Admin/adminConstants.js`
 - [ ] 3. `src/pages/Admin/adminUtils.js`
 - [ ] 4. `src/pages/Admin/adminEventUtils.js`
-- [ ] 5. `[DIFFERENT]` `src/pages/Admin/adminSubmission.js`
+- [ ] 5. `src/pages/Admin/adminSubmission.js`
 - [ ] 6. `src/pages/Admin/adminViewUtils.js`
 - [ ] 7. `src/pages/Admin/useAdminUsers.js`
 - [ ] 8. `src/pages/Admin/hooks/useAdminWorkspaceView.js`
-- [ ] 9. `[DIFFERENT]` `src/pages/Admin/hooks/useAdminWorkspaceActions.js`
+- [ ] 9. `src/pages/Admin/hooks/useAdminWorkspaceActions.js`
 - [ ] 10. `src/pages/Admin/components/AdminAccessNotice.jsx`
 - [ ] 11. `src/pages/Admin/components/AdminCollectionSection.jsx`
 - [ ] 12. `src/pages/Admin/components/AdminWorkspaceSections.jsx`
@@ -242,16 +243,16 @@ These are mostly client-side visual/astronomy features.
 ### Moon Phase
 
 - [ ] 1. `src/pages/MoonPhase/MoonPhasePage.jsx`
-- [ ] 2. `[DIFFERENT]` `src/pages/MoonPhase/useMoonPhase.js`
+- [ ] 2. `src/pages/MoonPhase/useMoonPhase.js`
 - [ ] 3. `src/pages/MoonPhase/moonPhaseCore.js`
-- [ ] 4. `[DIFFERENT]` `src/pages/MoonPhase/moonPhaseAstronomy.js`
+- [ ] 4. `src/pages/MoonPhase/moonPhaseAstronomy.js`
 - [ ] 5. `src/pages/MoonPhase/moonPhaseObservationPlan.js`
 
 ### Solar System
 
 - [ ] 1. `src/pages/SolarSystem/SolarSystemPage.jsx`
 - [ ] 2. `src/pages/SolarSystem/solarSystemData.js`
-- [ ] 3. `[DIFFERENT]` `src/pages/SolarSystem/components/SolarSystemScene.jsx`
+- [ ] 3. `src/pages/SolarSystem/components/SolarSystemScene.jsx`
 - [ ] 4. `src/pages/SolarSystem/components/SolarSystemPanel.jsx`
 
 ### Constellations
@@ -259,7 +260,7 @@ These are mostly client-side visual/astronomy features.
 - [ ] 1. `src/pages/Constellations/ConstellationsPage.jsx`
 - [ ] 2. `src/pages/Constellations/constellationData.js`
 - [ ] 3. `src/pages/Constellations/constellationViewUtils.js`
-- [ ] 4. `[DIFFERENT]` `src/pages/Constellations/components/ConstellationsMap.jsx`
+- [ ] 4. `src/pages/Constellations/components/ConstellationsMap.jsx`
 - [ ] 5. `src/pages/Constellations/components/ConstellationsPanel.jsx`
 
 ## 9. Shared 3D Components, Global Styles, And Assets
@@ -268,7 +269,7 @@ Read these after the pages that use them.
 
 ### Shared Planet Globes
 
-- [ ] 1. `[DIFFERENT]` `src/components/planets/EarthGlobe.jsx`
+- [ ] 1. `src/components/planets/EarthGlobe.jsx`
 - [ ] 2. `src/components/planets/JupiterGlobe.jsx`
 - [ ] 3. `src/components/planets/MoonGlobe.jsx`
 - [ ] 4. `src/components/planets/NeptuneGlobe.jsx`
