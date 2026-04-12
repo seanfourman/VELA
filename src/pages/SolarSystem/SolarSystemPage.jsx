@@ -99,7 +99,7 @@ function SolarSystemPage() {
         <Canvas
           className="solar-system-canvas"
           camera={{ position: CAMERA_HOME.toArray(), fov: 45 }}
-          dpr={[1, 1.8]}
+          dpr={[1, 1.8]} // Limit max DPR for performance
           gl={{
             antialias: true,
             alpha: true,

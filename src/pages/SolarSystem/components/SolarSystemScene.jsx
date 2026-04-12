@@ -17,6 +17,7 @@ import {
   TARGET_HOME,
 } from "../solarSystemData";
 
+// Applies common tuning to planet textures for better appearance in the scene.
 const tuneTexture = (baseTexture, anisotropy = 4) => {
   if (!baseTexture) return baseTexture;
   const tuned = baseTexture.clone();
@@ -30,7 +31,16 @@ const tuneTexture = (baseTexture, anisotropy = 4) => {
 
 function OrbitRing({ radius }) {
   const geometry = useMemo(() => {
-    const points = new EllipseCurve(0, 0, radius, radius, 0, Math.PI * 2, false, 0)
+    const points = new EllipseCurve(
+      0,
+      0,
+      radius,
+      radius,
+      0,
+      Math.PI * 2,
+      false,
+      0,
+    )
       .getPoints(180)
       .map((point) => new Vector3(point.x, 0, point.y));
     return new BufferGeometry().setFromPoints(points);
@@ -77,7 +87,11 @@ function PlanetMesh({ body, texture, ringTexture, registerRef, onSelect }) {
       >
         <sphereGeometry args={[body.radius, 48, 48]} />
         {body.isStar ? (
-          <meshBasicMaterial map={texture} color={body.accent} toneMapped={false} />
+          <meshBasicMaterial
+            map={texture}
+            color={body.accent}
+            toneMapped={false}
+          />
         ) : (
           <meshStandardMaterial
             map={texture}
@@ -159,7 +173,8 @@ function SolarSystemScene({ trackedBodyId, showOrbits, orbitSpeed, onSelect }) {
         target.position.set(0, 0, 0);
       } else {
         const angle =
-          state.clock.getElapsedTime() * orbitSpeed * body.orbitSpeed + body.phase;
+          state.clock.getElapsedTime() * orbitSpeed * body.orbitSpeed +
+          body.phase;
         target.position.set(
           Math.cos(angle) * body.orbitRadius,
           0,
@@ -240,15 +255,39 @@ function SolarSystemScene({ trackedBodyId, showOrbits, orbitSpeed, onSelect }) {
     <>
       <color attach="background" args={["#000000"]} />
       <ambientLight intensity={0.22} />
-      <pointLight position={[0, 0, 0]} color="#ffd08a" intensity={420} distance={220} decay={2} />
-      <directionalLight position={[12, 8, 6]} intensity={0.55} color="#d4e4ff" />
-      <directionalLight position={[-10, -6, -8]} intensity={0.15} color="#8bb7ff" />
-      <Stars radius={180} depth={90} count={5000} factor={3.2} saturation={0} fade speed={0.2} />
+      <pointLight
+        position={[0, 0, 0]}
+        color="#ffd08a"
+        intensity={420}
+        distance={220}
+        decay={2}
+      />
+      <directionalLight
+        position={[12, 8, 6]}
+        intensity={0.55}
+        color="#d4e4ff"
+      />
+      <directionalLight
+        position={[-10, -6, -8]}
+        intensity={0.15}
+        color="#8bb7ff"
+      />
+      <Stars
+        radius={180}
+        depth={90}
+        count={5000}
+        factor={3.2}
+        saturation={0}
+        fade
+        speed={0.2}
+      />
 
       {showOrbits
-        ? BODY_DEFINITIONS.filter((body) => body.orbitRadius > 0).map((body) => (
-            <OrbitRing key={`${body.id}-orbit`} radius={body.orbitRadius} />
-          ))
+        ? BODY_DEFINITIONS.filter((body) => body.orbitRadius > 0).map(
+            (body) => (
+              <OrbitRing key={`${body.id}-orbit`} radius={body.orbitRadius} />
+            ),
+          )
         : null}
 
       {BODY_DEFINITIONS.map((body) => (
