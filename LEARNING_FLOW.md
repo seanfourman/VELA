@@ -164,14 +164,14 @@ This is the largest feature. Read the orchestration files first, then the suppor
 
 Read this after the map because Discovery reuses map concepts and sends the user back to map selections.
 
-- [ ] [!] 1. `src/pages/Discovery/DiscoveryPage.jsx`
-- [ ] [!] 2. `src/pages/Discovery/discoveryUtils.js`
-- [ ] 3. `src/pages/Discovery/discoveryStyles.js`
-- [ ] [!] 4. `src/pages/Discovery/hooks/useDiscoveryData.js`
-- [ ] [!] 5. `src/pages/Discovery/hooks/useDiscoveryInsights.js`
-- [ ] [!] 6. `src/pages/Discovery/hooks/useDiscoveryActions.js`
-- [ ] 7. `src/pages/Discovery/components/DiscoveryShared.jsx`
-- [ ] 8. `src/pages/Discovery/components/DiscoverySections.jsx`
+- [x] [!] 1. `src/pages/Discovery/DiscoveryPage.jsx`
+- [x] [!] 2. `src/pages/Discovery/discoveryUtils.js`
+- [x] 3. `src/pages/Discovery/discoveryStyles.js`
+- [x] [!] 4. `src/pages/Discovery/hooks/useDiscoveryData.js`
+- [x] [!] 5. `src/pages/Discovery/hooks/useDiscoveryInsights.js`
+- [x] [!] 6. `src/pages/Discovery/hooks/useDiscoveryActions.js`
+- [x] 7. `src/pages/Discovery/components/DiscoveryShared.jsx`
+- [x] 8. `src/pages/Discovery/components/DiscoverySections.jsx`
 
 ## 7. Account, Settings, And Admin
 
@@ -179,8 +179,8 @@ These routes sit on top of the shared auth, settings, recommendations, events, a
 
 ### Auth, Profile, Settings
 
-- [ ] [!] 1. `src/pages/Auth/AuthPage.jsx`
-- [ ] 3. `src/pages/Profile/ProfilePage.jsx`
+- [x] [!] 1. `src/pages/Auth/AuthPage.jsx`
+- [x] 3. `src/pages/Profile/ProfilePage.jsx`
 - [ ] 4. `src/pages/Settings/SettingsPage.jsx`
 
 ### Admin
