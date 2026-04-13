@@ -1,67 +1,137 @@
 # VELA
 
-VELA is a React + ASP.NET Core stargazing app with:
-- React Router Data API routing (`createHashRouter`, route `loader` + `action`, `RouterProvider`, `Outlet`)
-- SQL-backed Web API (SQL Server via ADO.NET)
-- JWT authentication/authorization
-- 3-layer architecture (Controllers -> BL -> DAL)
+VELA is a stargazing web app built with a React/Vite frontend and an ASP.NET Core Web API. It centers on an interactive world map for finding dark skies, checking visible planets, saving favorite observing spots, browsing curated stargazing locations, and managing community star-party events.
+
+## What The App Includes
+
+- Interactive 2D Leaflet map with dark, light, and satellite MapTiler base layers
+- Optional 3D MapLibre map mode
+- World Atlas 2015 light-pollution overlay served as raster tiles from the API
+- Sky-quality lookup, dark-spot search, and visible-planet lookup
+- Desktop and mobile planet panels with 3D planet cards and AR camera guidance
+- Favorites with custom names for signed-in users
+- Discovery page for recommendations, events, favorites, and nearby sky insights
+- Moon phase, constellations, and solar system visual experiences
+- JWT auth, profile editing, and admin tools
+- SQL Server-backed recommendations, favorites, users, and star-party events
 
 ## Stack
 
-- Frontend: React, Vite, Leaflet, React Router, MUI
-- Backend: ASP.NET Core Web API, ADO.NET (`System.Data.SqlClient`), SQL Server, JWT Bearer auth, BCrypt
+Frontend:
 
-## Project structure
+- React 19
+- Vite 7
+- React Router 7 with `createHashRouter`
+- Leaflet and React-Leaflet
+- MapLibre GL via `@maplibre/maplibre-gl-leaflet`
+- Three.js, `@react-three/fiber`, and `@react-three/drei`
+- MUI 7
+- Plain CSS modules/files under `src/**/styles`
 
-- Frontend: `src/`
-- Backend API: `backend/src/Vela.Api/`
-- Solution: `VelaServer.sln`
+Backend:
+
+- ASP.NET Core 9 Web API
+- SQL Server through ADO.NET and stored procedures
+- JWT bearer authentication
+- BCrypt password hashing
+- BitMiracle.LibTiff.NET for World Atlas TIFF reads
+- SixLabors.ImageSharp for lightmap PNG tile rendering
+- NetTopologySuite for land/country geometry filtering
+
+## Project Structure
+
+```text
+VELA/
+|-- src/                         React frontend
+|   |-- main.jsx                 app entry and service-worker registration
+|   |-- router.jsx               hash router, loaders, route actions
+|   |-- layouts/                 shared app shell and route context
+|   |-- features/                auth, app hooks, map hooks, star-party utilities
+|   |-- pages/                   route-level features
+|   |-- utils/                   API clients, storage, hardware, formatting helpers
+|   |-- styles/                  global CSS
+|   `-- assets/                  icons and planet textures
+|
+|-- backend/src/Vela.Api/        ASP.NET Core API
+|   |-- Controllers/             HTTP endpoints
+|   |-- BL/                      business logic facades
+|   |-- DAL/                     stored-procedure data access
+|   |-- DTOs/                    request/response contracts
+|   |-- Application/             World Atlas and external API services
+|   |-- Data/                    bundled GeoJSON files
+|   `-- Database/                SQL tables, stored procedures, seed data
+|
+|-- data/                        local World Atlas TIFF location
+|-- public/sw.js                 tile service worker
+|-- vite.config.js               Vite dev server and API proxy
+|-- package.json                 frontend scripts/dependencies
+`-- VelaServer.sln              backend solution
+```
 
 ## Prerequisites
 
 - Node.js 20+
 - npm 10+
 - .NET SDK 9
-- SQL Server instance
+- SQL Server
+- World Atlas 2015 TIFF file
 
-## Files you must create on a fresh clone
+## Fresh Clone Setup
 
-These are required but not committed (because `.gitignore` excludes them):
+Install frontend dependencies:
 
-1. Frontend env file
-- Create `.env` from `.env.example`
+```powershell
+npm install
+```
 
-2. Backend appsettings files
-- Create `backend/src/Vela.Api/appsettings.json` from `backend/src/Vela.Api/appsettings.example.json`
-- Create `backend/src/Vela.Api/appsettings.Development.json` from `backend/src/Vela.Api/appsettings.Development.example.json`
+Create the optional frontend env file:
 
-3. World Atlas dataset file (required for sky quality/dark spots/lightmap)
-- Put `World_Atlas_2015.tif` in `data/World_Atlas_2015.tif`
-- Alternative: set `WorldAtlas:Path` in backend config to the absolute file path
+```powershell
+copy .env.example .env
+```
 
-## Required keys/settings
+The frontend currently uses `/api` for backend calls and does not require a frontend API base env variable.
 
-### Frontend (`.env`)
+Create backend config files:
 
-No frontend API env variable is required.
-Frontend always uses `/api`.
+```powershell
+copy backend\src\Vela.Api\appsettings.example.json backend\src\Vela.Api\appsettings.json
+copy backend\src\Vela.Api\appsettings.Development.example.json backend\src\Vela.Api\appsettings.Development.json
+```
 
-### Backend (`appsettings.json`)
+Set these backend values in `backend/src/Vela.Api/appsettings.json`:
 
-Required:
 - `ConnectionStrings:myProjDB`
-- `Jwt:Key` (must be at least 32 characters)
-- `MapTiler:ApiKey`
+- `Jwt:Issuer`
+- `Jwt:Audience`
+- `Jwt:Key`
+- `Jwt:ExpiresMinutes`
+- `VisiblePlanets:BaseUrl`
+- `WorldAtlas:Path`
+- `WorldAtlas:LandMaskPath`
+- `WorldAtlas:CountryBoundariesPath`
 
-Recommended:
-- `Cors:AllowedOrigins`
-- `WorldAtlas:Path` / `WorldAtlas:LandMaskPath` (optional overrides)
+The example config also contains `MapTiler` and `Nominatim` settings, but the current code does not use backend MapTiler/Nominatim services. MapTiler URLs are built directly in the frontend in `src/utils/apiEndpoints.js`.
 
-## Database setup (manual)
+Put the World Atlas TIFF at:
 
-The backend does not auto-create tables/stored procedures.
+```text
+data/World_Atlas_2015.tif
+```
 
-Run SQL scripts in this order against `ConnectionStrings:myProjDB`:
+Alternatively, set `WorldAtlas:Path` to an absolute TIFF path.
+
+The GeoJSON land/country files are already bundled under:
+
+```text
+backend/src/Vela.Api/Data/
+```
+
+## Database Setup
+
+The backend does not auto-create tables or stored procedures. Run the SQL scripts manually against the database from `ConnectionStrings:myProjDB`.
+
+Run order:
 
 1. `backend/src/Vela.Api/Database/Tables/Users.sql`
 2. `backend/src/Vela.Api/Database/Tables/Favorites.sql`
@@ -71,36 +141,117 @@ Run SQL scripts in this order against `ConnectionStrings:myProjDB`:
 6. `backend/src/Vela.Api/Database/SP/Favorite SPs.sql`
 7. `backend/src/Vela.Api/Database/SP/Recommendation SPs.sql`
 8. `backend/src/Vela.Api/Database/SP/StarParty SPs.sql`
-9. Optional sample data: `backend/src/Vela.Api/Database/Seed/InitialContent.sql`
+9. Optional: `backend/src/Vela.Api/Database/Seed/InitialContent.sql`
 
-See also: `backend/src/Vela.Api/Database/README.md`
+See also `backend/src/Vela.Api/Database/README.md`.
 
-## Run locally
+## Run Locally
 
-1. Install frontend dependencies:
-   - `npm install`
-2. Create frontend env (optional):
-   - Windows: `copy .env.example .env`
-3. Create backend config files:
-   - `copy backend\src\Vela.Api\appsettings.example.json backend\src\Vela.Api\appsettings.json`
-   - `copy backend\src\Vela.Api\appsettings.Development.example.json backend\src\Vela.Api\appsettings.Development.json`
-4. Fill required backend values:
-   - SQL connection string (`ConnectionStrings:myProjDB`)
-   - JWT key (`Jwt:Key`)
-   - MapTiler key (`MapTiler:ApiKey`)
-5. Ensure `World_Atlas_2015.tif` exists in `data/` (or configure `WorldAtlas:Path`)
-6. Run backend:
-   - `dotnet run --project backend/src/Vela.Api`
-7. Run frontend:
-   - `npm run dev`
+Backend:
 
-## Admin account
+```powershell
+npm run api:dev
+```
 
-This project does not seed an admin account at runtime.
+Equivalent:
 
-Create one by:
-1. Registering a normal user via `POST /api/users/register`
-2. Promoting that user in SQL:
+```powershell
+dotnet run --project backend/src/Vela.Api
+```
+
+Frontend:
+
+```powershell
+npm run dev
+```
+
+Local defaults:
+
+- Vite frontend: `http://localhost:5173`
+- API: `http://localhost:5152`
+- Vite proxies `/api` to `http://127.0.0.1:5152`
+
+## Mobile Testing With Cloudflare
+
+`vite.config.js` allows `*.trycloudflare.com`, so a quick tunnel can expose the Vite app to a phone:
+
+```powershell
+cloudflared tunnel --url http://localhost:5173 --no-autoupdate
+```
+
+Keep the backend running locally. The phone loads the Vite app through the tunnel, and Vite still proxies `/api` calls to the local API.
+
+## Scripts
+
+```powershell
+npm run dev        # Vite frontend dev server
+npm run api:dev    # ASP.NET Core API
+npm run build      # frontend production build
+npm run api:build  # backend build
+npm run preview    # preview frontend build
+npm run lint       # frontend lint
+```
+
+## Main Routes
+
+- `/` - map
+- `/auth` - login/register
+- `/discover` - recommendations, favorites, events, and local sky insights
+- `/moon-phase` - moon phase and observing windows
+- `/constellations` - interactive constellation view
+- `/solar-system` - 3D solar system
+- `/profile` - signed-in profile
+- `/settings` - user preferences
+- `/admin` - admin workspace
+
+Routes are hash-based, so URLs are served as `/#/discover`, `/#/settings`, and so on.
+
+## API Surface
+
+Authentication and profile:
+
+- `POST /api/users/register`
+- `POST /api/users/login`
+- `GET /api/users/me`
+- `GET /api/users/profile`
+- `PUT /api/users/profile`
+- `GET /api/users/admin/manage`
+- `PATCH /api/users/admin/manage/{id}`
+
+Favorites:
+
+- `GET /api/favorites`
+- `POST /api/favorites`
+- `PUT /api/favorites/{spotId}`
+- `DELETE /api/favorites/{spotId}`
+
+Recommendations:
+
+- `GET /api/recommendations`
+- `POST /api/recommendations`
+- `DELETE /api/recommendations/{id}`
+
+Star-party events:
+
+- `GET /api/star-party-events`
+- `POST /api/star-party-events`
+- `PATCH /api/star-party-events/{id}/status`
+- `DELETE /api/star-party-events/{id}`
+- `POST /api/star-party-events/{id}/rsvp/toggle`
+
+Sky/map data:
+
+- `GET /api/visible-planets?lat&lon`
+- `GET /api/skyquality?lat&lon`
+- `GET /api/darkspots?lat&lon&searchDistance`
+- `GET /api/lightmap/{z}/{x}/{y}.png`
+
+## Admin Account
+
+The app does not create an admin account automatically.
+
+1. Register a normal user through the app or `POST /api/users/register`.
+2. Promote the user in SQL:
 
 ```sql
 UPDATE Users
@@ -108,28 +259,10 @@ SET IsAdmin = 1, Role = 'admin'
 WHERE Email = 'your-admin-email@example.com';
 ```
 
-## API endpoints
+## Notes
 
-- Auth:
-  - `POST /api/users/register`
-  - `POST /api/users/login`
-  - `GET /api/users/me` (JWT)
-- Favorites (JWT):
-  - `GET /api/favorites`
-  - `POST /api/favorites`
-  - `PUT /api/favorites/{spotId}`
-  - `DELETE /api/favorites/{spotId}`
-- Recommendations:
-  - `GET /api/recommendations` (public)
-  - `POST /api/recommendations` (admin JWT)
-  - `DELETE /api/recommendations/{id}` (admin JWT)
-
-## Scripts
-
-- `npm run dev` - frontend dev server
-- `npm run build` - frontend production build
-- `npm run preview` - preview frontend build
-- `npm run lint` - frontend lint
-
-Backend build:
-- `dotnet build backend/src/Vela.Api/Vela.Api.csproj`
+- Base map tiles come directly from MapTiler using the URL templates in `src/utils/apiEndpoints.js`.
+- The light-pollution overlay is different: it is rendered by the backend from `World_Atlas_2015.tif` and returned as PNG tiles.
+- The service worker only caches explicit external tile-host patterns in `public/sw.js`; it is not a general API cache.
+- Hardware acceleration is required for the heavier visual routes: constellations, moon phase, and solar system.
+- The API currently allows any CORS origin in `Program.cs`.
