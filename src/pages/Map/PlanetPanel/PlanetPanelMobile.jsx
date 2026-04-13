@@ -179,8 +179,9 @@ export default function PlanetPanelMobile({
 
   const handleCopy = async (event) => {
     if (!currentPlanet) return;
+    const copyButton = event.currentTarget;
     await copyPlanetDetailsToClipboard(currentPlanet);
-    event.currentTarget.blur();
+    copyButton?.blur();
   };
 
   const panelClasses = `planet-panel-mobile ${
@@ -348,7 +349,6 @@ export default function PlanetPanelMobile({
     </div>
   );
 }
-
 
 
 
