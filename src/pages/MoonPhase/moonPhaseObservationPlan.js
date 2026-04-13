@@ -151,7 +151,7 @@ function getRecommendedTargets(moonlessRatio, moonIllumination) {
     return {
       label: "Deep-Sky Objects",
       subtext:
-        "Long moon-free darkness makes faint galaxies and nebulae realistic tonight.",
+        "Moon-free darkness ideal for faint galaxies and nebulae.",
     };
   }
 
@@ -159,14 +159,14 @@ function getRecommendedTargets(moonlessRatio, moonIllumination) {
     return {
       label: "Clusters & Nebulae",
       subtext:
-        "Partial moon-free windows improve contrast for bright deep-sky targets.",
+        "Partial dark windows suit bright deep-sky targets.",
     };
   }
 
   return {
     label: "Planets & Stars",
     subtext:
-      "Moonlight dominates tonight, so high-contrast targets will hold up best.",
+      "Bright moonlight favors high-contrast targets.",
   };
 }
 
@@ -187,7 +187,7 @@ function getBestWindow(intervals, nightBounds) {
   if (!longestInterval) {
     return {
       label: "Moonlit all night",
-      subtext: `The moon stays above the horizon from ${formatClock(nightBounds.start)} to ${formatClock(nightBounds.end)}.`,
+      subtext: `Moon visible ${formatClock(nightBounds.start)}\u2013${formatClock(nightBounds.end)}.`,
     };
   }
 
@@ -196,7 +196,7 @@ function getBestWindow(intervals, nightBounds) {
   if (longestDurationMs >= nightDurationMs - toleranceMs) {
     return {
       label: "All night",
-      subtext: `The moon stays below the horizon from ${formatClock(nightBounds.start)} to ${formatClock(nightBounds.end)}.`,
+      subtext: `Moon below horizon ${formatClock(nightBounds.start)}\u2013${formatClock(nightBounds.end)}.`,
     };
   }
 
@@ -206,7 +206,7 @@ function getBestWindow(intervals, nightBounds) {
   ) {
     return {
       label: `Until ${formatClock(longestInterval.end)}`,
-      subtext: "Best observing starts right at nightfall before moonrise.",
+      subtext: "Best observing starts at nightfall.",
     };
   }
 
@@ -216,13 +216,13 @@ function getBestWindow(intervals, nightBounds) {
   ) {
     return {
       label: `After ${formatClock(longestInterval.start)}`,
-      subtext: "The darkest stretch begins after moonset.",
+      subtext: "Darkest stretch begins after moonset.",
     };
   }
 
   return {
     label: `${formatClock(longestInterval.start)} - ${formatClock(longestInterval.end)}`,
-    subtext: "Moon below the horizon for the longest stretch of tonight.",
+    subtext: "Longest moon-free stretch tonight.",
   };
 }
 
@@ -286,7 +286,7 @@ export function buildFallbackObservationPlan(moonIllumination, locationStatus) {
     bestWindow:
       locationStatus === "active" ? "Calculating..." : "Enable location",
     bestWindowSubtext:
-      "This switches to a real local moonrise/moonset window once location is available.",
+      "Enable location for local moon timing.",
     recommendedTarget: recommendedTargets.label,
     recommendedTargetSubtext: recommendedTargets.subtext,
   };
@@ -300,10 +300,10 @@ export function buildSimulatedObservationPlan(moonIllumination) {
   );
   const scoreSubtext =
     moonIllumination > 65
-      ? "Bright moonlight will wash out faint targets."
+      ? "Bright moonlight washes out faint targets."
       : moonIllumination > 40
-        ? "Some moonlight will soften faint detail."
-        : "Low moonlight leaves better contrast tonight.";
+        ? "Some moonlight softens faint detail."
+        : "Low moonlight leaves better contrast.";
 
   return {
     score,

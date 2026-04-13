@@ -72,6 +72,9 @@ function StatBox({ label, value, subtext, highlightColor }) {
               fontSize: "0.8rem",
               mt: 1,
               pt: 0,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
             {subtext}
