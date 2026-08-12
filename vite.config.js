@@ -29,36 +29,22 @@ export default defineConfig({
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
+        // Only split libraries that never touch React. Anything that reads React at module
+        // scope (@react-three/fiber, react-leaflet, MUI, react-router) has to stay in
+        // Rollup's automatic chunks: forcing those into named chunks can strand the shared
+        // CommonJS interop helper in a chunk that React itself imports, which makes the two
+        // chunks circular and leaves React undefined when the dependent chunk evaluates.
         manualChunks(id) {
           if (!id.includes("node_modules")) return;
-          if (id.includes("@mui") || id.includes("@emotion")) {
-            return "mui-vendor";
+          if (id.includes("/three/")) {
+            return "three-vendor";
           }
-          if (id.includes("maplibre-gl") || id.includes("@maplibre")) {
+          if (id.includes("/maplibre-gl/")) {
             return "maplibre-vendor";
           }
-          if (id.includes("@react-three/drei")) {
-            return "drei-vendor";
-          }
-          if (id.includes("@react-three/fiber")) {
-            return "fiber-vendor";
-          }
-          if (id.includes("/three/examples/")) {
-            return "three-examples-vendor";
-          }
-          if (id.includes("/three/")) {
-            return "three-core-vendor";
-          }
-          if (id.includes("leaflet") || id.includes("react-leaflet")) {
+          if (id.includes("/leaflet/")) {
             return "leaflet-vendor";
           }
-          if (id.includes("react-router")) {
-            return "router-vendor";
-          }
-          if (id.includes("react")) {
-            return "react-vendor";
-          }
-          return "vendor";
         },
       },
     },
