@@ -17,9 +17,9 @@ the solar system in 3D.
 <img src="https://img.shields.io/badge/Leaflet%20%2B%20MapLibre-2D%20%2F%203D-199900?logo=leaflet&logoColor=white" alt="Leaflet and MapLibre">
 <img src="https://img.shields.io/badge/light%20pollution-World%20Atlas%202015-1e8a5f" alt="World Atlas 2015 light pollution data">
 
-<img src="media/vela-tour.gif" alt="VELA in motion: the light-pollution map, a pinned sky reading, visible planets, 3D Tel Aviv, a curated dark-sky site, the Moon, the constellations and the solar system" width="900">
+<img src="media/vela-reel.gif" alt="VELA in motion: flying over the light-pollution map, a 3D camera sweep over Tel Aviv, scrubbing the Moon's phases, selecting constellations, and flying to Saturn in the solar system" width="900">
 
-<i>Every frame is the running app: light map, sky reading, planets, 3D city, a curated site, Moon, constellations, solar system.</i>
+<i>Recorded straight from the running app (sped up to fit): light map, 3D city, Moon, constellations, solar system.</i>
 
 </div>
 
@@ -34,40 +34,50 @@ ASP.NET Core API reads that raster directly. It turns any coordinate into an
 land, and renders the planet's light pollution as map tiles, one pixel at a time.
 
 The React frontend adds live visible-planet data, curated dark-sky sites,
-community star parties with RSVPs, an AR planet finder for phones, and three
-WebGL experiences: the Moon, the constellations and the solar system.
+community star parties and special events, an AR planet finder for phones, and
+three WebGL experiences: the Moon, the constellations and the solar system.
+Accounts unlock favorites, RSVPs and a profile; admins get a workspace for
+curating everything on the map.
 
 The stack is React 19 + Vite on the front and ASP.NET Core 9 + SQL Server
-stored procedures on the back, with JWT auth, favorites and an admin workspace.
+stored procedures on the back, with JWT auth throughout.
 
 ## The map
 
-The home screen offers dark, light and satellite base maps, an optional 3D
-mode, and a glass UI that re-tints itself to match the map underneath it.
+<div align="center">
+<img src="media/gif-lightmap-flyover.gif" alt="Flying from Europe over the Mediterranean to Israel with the light-pollution layer on" width="860">
+<br>
+<i>The light-pollution layer, rendered by VELA's own API from the GeoTIFF as you
+fly. Green is dark sky; orange and red are city glow.</i>
+<br><br>
+<img src="media/sqm-scale.png" alt="Colour scale of the light map: SQM 22 (dark, green) to SQM 16 (bright, red), with Bortle class 1 to 8-9 marked" width="720">
+</div>
 
 <table>
 <tr>
-<td width="50%"><img src="media/lightmap-israel.jpg" alt="Light pollution overlay over Israel and Jordan"></td>
-<td width="50%"><img src="media/sky-quality.jpg" alt="Sky quality popup on a dropped pin"></td>
+<td width="50%"><img src="media/gif-pin-planets.gif" alt="Dropping a pin, reading its sky quality, and opening the visible planets"></td>
+<td width="50%"><img src="media/gif-stargaze.gif" alt="Searching for dark spots near a pin and opening the darkest result"></td>
 </tr>
 <tr>
-<td align="center"><b>Light map.</b> The backend's own light-pollution tiles
-over Israel and Jordan. Green is dark sky; red is city glow.</td>
 <td align="center"><b>Drop a pin, read the sky.</b> Double-click anywhere
-(long-press on a phone). You get the Bortle class, SQM, total and artificial
-brightness, and how many times brighter than natural the sky is.</td>
+(long-press on a phone) for its Bortle class, SQM, brightness and glow ratio.
+<b>Planets</b> then slides in the planets visible from that spot as live 3D
+globes; hover one for altitude, azimuth, magnitude and RA/Dec.</td>
+<td align="center"><b>Stargaze.</b> One tap scans your radius for the darkest
+land nearby and drops up to 12 well-spaced candidates. Each opens with its own
+reading, so you can compare before you drive.</td>
 </tr>
 <tr>
-<td width="50%"><img src="media/planets.jpg" alt="Visible planets panel with 3D planet globes"></td>
-<td width="50%"><img src="media/dark-spots.jpg" alt="Dark spot search results with a sky reading"></td>
+<td width="50%"><img src="media/gif-3d.gif" alt="Switching to 3D mode over Tel Aviv and sweeping the camera"></td>
+<td width="50%"><img src="media/gif-map-styles.gif" alt="Switching between dark, light and satellite base maps"></td>
 </tr>
 <tr>
-<td align="center"><b>What's up tonight.</b> The planets visible from the
-pinned spot, each a real 3D globe. Open one for altitude, azimuth, magnitude
-and RA/Dec.</td>
-<td align="center"><b>Stargaze.</b> One tap searches your radius for the
-darkest land nearby and returns up to 12 well-spaced spots, each with its own
-sky reading.</td>
+<td align="center"><b>3D mode.</b> MapLibre GL runs inside Leaflet with
+extruded buildings and a 58° tilt. Hold both mouse buttons and drag to change
+the angle.</td>
+<td align="center"><b>Three base maps.</b> Dark, light and satellite. The
+whole glass UI re-tints to match, turning warm gold over satellite imagery so
+it stays readable.</td>
 </tr>
 <tr>
 <td width="50%"><img src="media/recommended-spot.jpg" alt="Wadi Rum curated spot with its details panel"></td>
@@ -75,69 +85,118 @@ sky reading.</td>
 </tr>
 <tr>
 <td align="center"><b>Curated dark-sky sites.</b> Hand-picked locations from
-Wadi Rum to Mauna Kea, with a details panel, the best season to go, and
-directions through Google Maps or Waze.</td>
-<td align="center"><b>Star parties.</b> Published community events sit on the
-map with a meetup pin, a schedule, the sky quality at the venue and one-tap
-RSVP.</td>
-</tr>
-<tr>
-<td width="50%"><img src="media/map-3d.jpg" alt="3D map mode over Tel Aviv"></td>
-<td width="50%"><img src="media/map-satellite.jpg" alt="Satellite map over the Ramon Crater"></td>
-</tr>
-<tr>
-<td align="center"><b>3D mode.</b> MapLibre GL running inside Leaflet, tilted to
-58° with extruded buildings. Hold both mouse buttons and drag to change the
-angle.</td>
-<td align="center"><b>Satellite.</b> The default map. Over desert imagery the
-whole UI shifts to warm gold so it stays readable.</td>
+Wadi Rum to Mauna Kea, each with a details panel, the best season to go and
+one-tap directions through Google Maps or Waze.</td>
+<td align="center"><b>Star parties and special events.</b> Published events get
+their own markers (a party horn for star parties, a separate icon for special
+events) with a schedule, the sky at the venue and an RSVP count. Signed-in users
+can RSVP with one tap.</td>
 </tr>
 </table>
 
-<div align="center">
-<img src="media/lightmap-europe.jpg" alt="Light pollution overlay over Europe and the Mediterranean" width="900">
-<br>
-<i>The same layer over Europe and the Mediterranean. Each tile is rendered
-from the GeoTIFF when it's requested; nothing is pre-baked.</i>
-<br><br>
-<img src="media/sqm-scale.png" alt="Colour scale of the light map: SQM 22 (dark, green) to SQM 16 (bright, red), with Bortle class 1 to 8-9 marked" width="720">
-</div>
+Every popup also lets you **copy the coordinates** with a click, **share** the
+spot (it opens in Google Maps), and **set it as the target** for the Planets
+and Stargaze buttons. Search takes raw coordinates (`30.61, 34.80`), curated
+spot names or event titles. Leaving the map zooms it out before the next page
+loads, and small toasts confirm what just happened.
 
 ## Beyond the map
 
 <table>
 <tr>
-<td width="50%"><img src="media/moon-phase.jpg" alt="Moon Phase page"></td>
-<td width="50%"><img src="media/constellations.jpg" alt="Constellations star chart"></td>
+<td width="50%"><img src="media/gif-moon.gif" alt="Scrubbing the moon phase ruler from crescent to full and back to tonight"></td>
+<td width="50%"><img src="media/gif-constellations.gif" alt="Hovering constellations and selecting Orion and Vela"></td>
 </tr>
 <tr>
-<td align="center"><b>Moon Phase.</b> Tonight's phase on a 3D Moon, computed in
-the browser from orbital formulas with no astronomy library. It includes a
-scrubbable lunar-cycle ruler, a 0-100 stargazing score, the best moon-free
-window for where you are, and what to point a telescope at.</td>
+<td align="center"><b>Moon Phase.</b> Drag the ruler to preview any night of
+the lunar cycle. The ticks magnify around the handle, the 3D Moon relights,
+and the stargazing score, illumination, moon-free window and suggested targets
+all recompute. <b>Reset to Current</b> snaps back to tonight.</td>
 <td align="center"><b>Constellations.</b> An interactive chart of 18
-constellations, from Draco to Vela (the one the app is named after). Each has
-its named stars, the region of sky, the best months and what it's known
-for.</td>
+constellations. Hover to light one up; click for a panel with its region, best
+months, star and line counts, what it's known for, and its named stars. Vela,
+the sail of Argo, is the one the app is named after.</td>
 </tr>
 <tr>
-<td width="50%"><img src="media/solar-system.jpg" alt="3D solar system"></td>
-<td width="50%"><img src="media/discovery.jpg" alt="Discovery page"></td>
+<td width="50%"><img src="media/gif-solar.gif" alt="Opening the solar system panel and flying to Saturn and Earth"></td>
+<td width="50%"><img src="media/gif-discovery.gif" alt="Widening the discovery radius and scrolling through the sections"></td>
 </tr>
 <tr>
 <td align="center"><b>Solar System.</b> The Sun and eight planets orbiting in
-Three.js with real textures. Click a body to fly the camera to it, and change
-orbit speed or toggle orbit trails from the side panel.</td>
-<td align="center"><b>Discovery.</b> Everything around you on one page:
-curated spots, saved favorites and upcoming events within 100 to 1,000 km, plus
-your local sky class.</td>
+Three.js with real textures. Pick a body to fly the camera to it and read its
+distance, day, year, moons and temperature. Orbit pace and orbit trails are one
+slider and one toggle away.</td>
+<td align="center"><b>Discovery.</b> Everything near you in one place, within a
+radius of 100 to 1,000 km: curated spots, your favorites, star parties and
+special events, and <b>Tonight's Local Sky</b>, which spells out what your
+current sky is good for and lists darker escapes nearby.</td>
 </tr>
 </table>
 
+## Your account
+
+<table>
+<tr>
+<td width="50%"><img src="media/gif-register.gif" alt="Registering and watching the password checklist fill in"></td>
+<td width="50%"><img src="media/gif-favorite.gif" alt="Favoriting a pin and renaming it"></td>
+</tr>
+<tr>
+<td align="center"><b>Sign up.</b> The password checklist ticks off each rule
+as you type: 8+ characters, upper and lower case, a number and a symbol.</td>
+<td align="center"><b>Favorites.</b> Heart any pin or spot to save it, then
+rename it inline. Favorites follow you to Discovery, where VELA enriches them
+with curated-spot details when the coordinates match.</td>
+</tr>
+</table>
+
+A **profile** page holds your display name, avatar and bio, and **settings**
+cover directions provider, default map style, search radius, location accuracy
+and accessibility (see [Settings](#settings)).
+
+## Admin workspace
+
+<div align="center">
+<img src="media/gif-admin.gif" alt="Admin workspace: creating an event, switching type and status, picking a date and scrolling the time wheel" width="860">
+</div>
+
+Admins get a workspace with live counts (spots, events, RSVPs, accounts, admins)
+and three tabs:
+
+- **Locations.** Add or edit curated spots: name, country, region, type, best
+  season, coordinates, description, and photo and source links.
+- **Events.** Create star parties or special events with a sliding type switch,
+  a Draft / Published / Archived status, a custom calendar and a scroll-wheel
+  time picker. Advanced details hold the end time, meetup notes and a host
+  checklist. Existing events can be searched, edited, set back to draft or
+  removed. Only published events reach the map.
+- **Users.** Promote or demote admins.
+
 ## In your pocket
 
-Phones get their own layouts: bottom-sheet planet cards, stacked quick actions,
-long-press to pin, and a hamburger menu.
+<table>
+<tr>
+<td width="34%" align="center"><img src="media/gif-mobile-ar.gif" alt="On a phone: opening the planets sheet, swiping to Uranus, and using the AR finder to line it up" width="300"></td>
+<td width="66%">
+
+**AR planet finder.** Open the planets sheet, swipe to a planet, and tap **AR**.
+The camera opens with a guide on top. VELA reads your compass heading and tilt
+from the phone's orientation sensors, compares them with the planet's azimuth
+and altitude, and tells you how far to turn and tilt ("Turn right 16° and tilt
+up 9°"). Within 6° on both axes, the planet sits on the center marker.
+
+Camera access needs HTTPS, so test it through a tunnel (see
+[Testing on a phone](#testing-on-a-phone)).
+
+<sub>Recorded in a headless browser at Mauna Kea after midnight: the camera feed
+is a stand-in starfield and the phone's movement is simulated, so what you see
+is the real overlay reacting to those readings.</sub>
+
+</td>
+</tr>
+</table>
+
+Phones get their own layouts throughout: bottom-sheet planet cards, stacked
+quick actions, long-press to pin, and a hamburger menu.
 
 <table>
 <tr>
@@ -148,14 +207,6 @@ long-press to pin, and a hamburger menu.
 <td align="center"><img src="media/mobile-solar.jpg" alt="Mobile solar system" width="170"></td>
 </tr>
 </table>
-
-**AR planet finder.** Tap **AR** on any planet card and the camera opens with a
-guide on top. VELA reads your compass heading and tilt from the device's
-orientation sensors, compares them with the planet's azimuth and altitude, and
-tells you how many degrees to turn and tilt ("Turn right 14°"). Within 6° on
-both axes, the planet sits on the center marker. Camera access needs HTTPS, so
-test it through a tunnel
-(see [Testing on a phone](#testing-on-a-phone)).
 
 ## How it works
 
@@ -283,9 +334,33 @@ All of it lives in `src/pages/MoonPhase/`, with no astronomy library:
   **Deep-Sky Objects**. At least 35% moon-free, or at most 65% illumination,
   suggests **Clusters & Nebulae**. Otherwise it's **Planets & Stars**.
 
-In the screenshot above, the Moon is 94% lit and the sky is dark for 1 h 26 m
-of a 12 h 56 m night. That works out to 0.11 × 60 + 6 × 0.4 ≈ **9/100**, so
-the target is Planets & Stars.
+On the night these clips were recorded, the Moon was 94% lit and the sky was
+dark for 1 h 26 m of a 12 h 56 m night. That works out to 0.11 × 60 + 6 × 0.4 ≈
+**9/100**, so the target was Planets & Stars.
+
+</details>
+
+<details>
+<summary><b>Tonight's Local Sky (Discovery)</b></summary>
+<br>
+
+Discovery reads the sky at your position and turns it into advice:
+
+- **Your sky class** with a plain-language verdict (for example, Bortle 4-5 is
+  "Rural to suburban transition"), the glow ratio, and artificial and total
+  brightness.
+- **Best tonight for**, plus what will struggle. Darker classes suggest
+  galaxies, nebulae and wide-field Milky Way shots; brighter ones steer you to
+  the Moon, planets and bright star patterns.
+- **Nearest improvement.** The darkest spot the search found around you, with
+  its distance and how many Bortle classes darker it is ("Nearest darker
+  option: Bortle 2").
+- **Darker escapes nearby.** A list of those spots, each with its SQM,
+  distance and an **Open Map** button.
+
+Curated spots and events are ranked by distance within the chosen radius. If
+nothing falls inside it, the closest six are shown instead so the page is never
+empty.
 
 </details>
 
@@ -385,6 +460,8 @@ UPDATE Users SET IsAdmin = 1, Role = 'admin'
 WHERE Email = 'your-admin-email@example.com';
 ```
 
+After that, admins can promote others from the **Users** tab.
+
 ### Testing on a phone
 
 `vite.config.js` allows `*.trycloudflare.com` and ngrok hosts, so a quick
@@ -419,8 +496,11 @@ proxy, so set `VITE_API_BASE_URL` to the hosted API's base URL, including
 | Input | Action |
 | --- | --- |
 | Double-click (desktop), or long-press 0.75 s (touch) | Drop a pin and read its sky |
-| Click a marker | Popup with sky quality, directions, share and favorite |
-| Target button on a popup | Make that spot the target for Planets and Stargaze |
+| Click a marker | Popup with sky quality, directions and actions |
+| Click the coordinates in a popup | Copy them |
+| Heart / pencil (signed in) | Favorite the spot / rename the favorite |
+| Share button | Open the spot in Google Maps |
+| Target button | Make that spot the target for Planets and Stargaze |
 | **Planets** | Visible planets for the target (a pin, or your location) |
 | **Stargaze** | Dark-spot search within the radius |
 | **Light map** | Toggle the light-pollution layer |
@@ -455,7 +535,7 @@ Settings are saved automatically in the browser.
 | `/moon-phase` | Moon phase and observing plan |
 | `/constellations` | Interactive constellation chart |
 | `/solar-system` | 3D solar system |
-| `/auth` | Log in / register (passwords need 8+ characters with upper, lower, number and symbol) |
+| `/auth` | Log in / register |
 | `/profile` | Display name, avatar and bio |
 | `/settings` | Preferences |
 | `/admin` | Admin workspace: curated spots, events, users |
@@ -487,7 +567,7 @@ GET    /api/recommendations
 POST   /api/recommendations                       admin (upsert)
 DELETE /api/recommendations/{id}                  admin
 
-Star parties
+Star parties and special events
 GET    /api/star-party-events
 POST   /api/star-party-events                     admin
 PATCH  /api/star-party-events/{id}/status         admin (draft | published | archived)
@@ -536,8 +616,8 @@ The full walkthrough is in [`ARCHITECTURE.md`](ARCHITECTURE.md).
 | `src/pages/MoonPhase/` | Sun/Moon astronomy and the observing-plan scorer |
 | `src/pages/Constellations/` | Constellation data and the pan/zoom chart |
 | `src/pages/SolarSystem/` | Three.js scene, body data, controls panel |
-| `src/pages/Discovery/` | Nearby spots, favorites, events and insights |
-| `src/pages/Admin/` | Admin workspace: locations, events, users |
+| `src/pages/Discovery/` | Nearby spots, favorites, events and local-sky insights |
+| `src/pages/Admin/` | Admin workspace, calendar and time-wheel pickers |
 | `src/utils/apiEndpoints.js` | Every API and MapTiler URL in one place |
 | `public/sw.js` | Map tile service worker |
 | `backend/src/Vela.Api/Controllers/` | HTTP endpoints |
