@@ -1,4 +1,6 @@
-const API_BASE = "/api";
+// In dev this stays "/api" so Vite proxies to the local backend. Deployed builds set
+// VITE_API_BASE_URL to the public URL of a hosted API, since there is no proxy in production.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "/api").replace(/\/+$/, "");
 
 const joinResourceUrl = (base, resource) =>
   `${base.replace(/\/+$/, "")}/${String(resource || "").replace(/^\/+/, "")}`;
